@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="sv">
 <head>
@@ -987,9 +988,13 @@
     }
 
     async function createBooking(booking) {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}`, {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}?select=id`, {
         method: 'POST',
-        headers: getHeaders(),
+        // Ask PostgREST to return the inserted row so we can attach payment to the booking.
+        headers: {
+          ...getHeaders(),
+          Prefer: 'return=representation'
+        },
         body: JSON.stringify({
           customer_name: booking.name,
           email: booking.email,
@@ -1011,6 +1016,7 @@
       }
 
       addBookingToCache(booking.date, booking.time);
+      await res.json();
     }
 
     function formatDate(year, month, day) {
