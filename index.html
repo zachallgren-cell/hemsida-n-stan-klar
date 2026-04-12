@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Berga Båttvätt</title>
+  <meta name="description" content="Berga Båttvätt erbjuder utvändig båttvätt med enkel onlinebokning. Boka en tid som passar dig på vardagar eller helger." />
+  <style>
+    :root {
+      --primary: #0b6fa4;
+      --primary-dark: #084f74;
+      --accent: #e8f6fc;
+      --bg: #eef7fb;
+      --text: #173042;
+      --muted: #5f7280;
+      --white: #ffffff;
+      --border: #d9e7ef;
+      --success: #127c56;
+      --shadow: 0 14px 36px rgba(11, 111, 164, 0.12);
+      --radius: 22px;
+      --max-width: 1120px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      color: var(--text);
+      background: linear-gradient(to bottom, #f5fbff, var(--bg));
+      line-height: 1.5;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: min(92%, var(--max-width));
+      margin: 0 auto;
+    }
+
+    header {
+      background: linear-gradient(135deg, rgba(11, 111, 164, 0.9), rgba(8, 79, 116, 0.86)),
+        url('https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1400&q=80') center/cover;
+      color: var(--white);
+      padding: 22px 0 104px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.04), rgba(255,255,255,0));
+      pointer-events: none;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .brand img {
+      height: 50px;
+      width: auto;
+      display: block;
+    }
+
+    nav {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 8px;
+      border-radius: 999px;
+      backdrop-filter: blur(10px);
+    }
+
+    nav a {
+      font-weight: 700;
+      padding: 8px 14px;
+      border-radius: 999px;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    nav a:hover {
+      background: rgba(255,255,255,0.14);
+      transform: translateY(-1px);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 28px;
+      align-items: center;
+      margin-top: 56px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.2rem, 4vw, 3.8rem);
+      line-height: 1.04;
+      margin: 0 0 16px;
+    }
+
+    .hero p {
+      font-size: 1.08rem;
+      max-width: 620px;
+      color: rgba(255,255,255,0.92);
+      margin: 0 0 24px;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 14px 22px;
+      border-radius: 999px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: var(--white);
+      color: var(--primary-dark);
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.08);
+      color: var(--white);
+      border: 1px solid rgba(255,255,255,0.55);
+      backdrop-filter: blur(8px);
+    }
+
+    .hero-card,
+    .card,
+    .booking-card {
+      background: rgba(255,255,255,0.97);
+      border: 1px solid rgba(217, 231, 239, 0.9);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-card {
+      padding: 24px;
+      color: var(--text);
+    }
+
+    .hero-card h3 {
+      margin: 0 0 12px;
+    }
+
+    .hero-list {
+      list-style: none;
+      padding: 0;
+      margin: 16px 0 0;
+    }
+
+    .hero-list li {
+      padding: 11px 0;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+    }
+
+    .hero-list li:last-child {
+      border-bottom: none;
+    }
+
+    .hero-highlight {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.24);
+      font-size: 0.92rem;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    main {
+      margin-top: -48px;
+      padding-bottom: 46px;
+    }
+
+    .section {
+      margin-bottom: 24px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+    }
+
+    .card,
+    .booking-card {
+      padding: 28px;
+    }
+
+    .section-title {
+      font-size: 1.95rem;
+      margin: 0 0 8px;
+    }
+
+    .section-subtitle {
+      color: var(--muted);
+      margin: 0 0 24px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: linear-gradient(to right, #e8f6fc, #eefaff);
+      color: var(--primary-dark);
+      font-size: 0.85rem;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      border: 1px solid #d6edf8;
+    }
+
+    .price {
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin: 12px 0 16px;
+    }
+
+    .card ul {
+      padding-left: 18px;
+      color: var(--muted);
+    }
+
+    .feature-grid,
+    .faq-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+    }
+
+    .feature-box,
+    .faq-item,
+    .promise-box {
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 22px;
+      background: linear-gradient(to bottom, #fbfeff, #f5fbff);
+    }
+
+    .feature-box h3,
+    .faq-item h3,
+    .promise-box h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+
+    .feature-box p,
+    .faq-item p,
+    .promise-box p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .service-area {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    .service-list {
+      list-style: none;
+      padding: 0;
+      margin: 18px 0 0;
+      display: grid;
+      gap: 12px;
+    }
+
+    .service-list li {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 16px;
+      background: var(--white);
+      font-weight: 700;
+    }
+
+    .cta-panel {
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      color: var(--white);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .cta-panel p {
+      color: rgba(255,255,255,0.9);
+    }
+
+    .cta-panel .btn-secondary {
+      background: rgba(255,255,255,0.12);
+      color: var(--white);
+      border-color: rgba(255,255,255,0.35);
+    }
+
+    .steps {
+      counter-reset: step;
+    }
+
+    .step {
+      position: relative;
+      padding-left: 56px;
+      margin-bottom: 22px;
+    }
+
+    .step:last-child {
+      margin-bottom: 0;
+    }
+
+    .step::before {
+      counter-increment: step;
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(to right, var(--primary), #1183bf);
+      color: var(--white);
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      box-shadow: 0 10px 22px rgba(11, 111, 164, 0.22);
+    }
+
+    .booking-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .calendar-card {
+      background: linear-gradient(to bottom, #fbfeff, #f3fbff);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .calendar-nav {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    .calendar-nav:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .calendar-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      text-transform: capitalize;
+    }
+
+    .calendar-weekdays,
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+
+    .calendar-weekdays div {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-weight: 700;
+      padding-bottom: 6px;
+    }
+
+    .calendar-empty,
+    .calendar-day {
+      min-height: 50px;
+      border-radius: 14px;
+    }
+
+    .calendar-day {
+      border: 1px solid var(--border);
+      background: var(--white);
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--text);
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(11, 111, 164, 0.05);
+    }
+
+    .calendar-day:hover {
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    .calendar-day.selected {
+      background: linear-gradient(to right, var(--primary), #1183bf);
+      color: var(--white);
+      border-color: var(--primary);
+    }
+
+    .calendar-day.booked {
+      background: #fff9ef;
+      border-color: #edd59d;
+      color: #8a5a00;
+    }
+
+    .calendar-day.fully-booked {
+      background: #f7ecef;
+      border-color: #ddb0ba;
+      color: #8a2437;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .calendar-day.past {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .selected-date-box {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 14px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .time-picker {
+      margin-top: 16px;
+    }
+
+    .time-picker h4 {
+      margin: 0 0 10px;
+      font-size: 1rem;
+    }
+
+    .time-slots {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .time-slot {
+      border: 1px solid var(--border);
+      background: var(--white);
+      border-radius: 14px;
+      padding: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .time-slot:hover {
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    .time-slot.selected {
+      background: linear-gradient(to right, var(--primary), #1183bf);
+      border-color: var(--primary);
+      color: var(--white);
+    }
+
+    .time-slot.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .time-slot.booked {
+      background: #f6f7f9;
+      color: var(--muted);
+      text-decoration: line-through;
+      cursor: not-allowed;
+    }
+
+    form {
+      display: grid;
+      gap: 14px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    label {
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 13px 14px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      font-size: 1rem;
+      background: #fff;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: 2px solid rgba(11, 111, 164, 0.18);
+      border-color: var(--primary);
+    }
+
+    .submit-btn {
+      background: linear-gradient(to right, var(--primary), #1183bf);
+      color: var(--white);
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 14px;
+      padding: 16px;
+      cursor: pointer;
+      box-shadow: 0 14px 26px rgba(11, 111, 164, 0.2);
+    }
+
+    .submit-btn:hover {
+      background: linear-gradient(to right, var(--primary-dark), #0b6fa4);
+      transform: translateY(-1px);
+    }
+
+    .booking-note,
+    .contact-note {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin: 0;
+    }
+
+    .success-message {
+      display: none;
+      margin-top: 16px;
+      padding: 15px 16px;
+      border-radius: 14px;
+      background: #e8f8f1;
+      color: var(--success);
+      font-weight: 700;
+    }
+
+    footer {
+      background: linear-gradient(to bottom, #082c3d, #061f2c);
+      color: rgba(255,255,255,0.9);
+      padding: 38px 0;
+      margin-top: 32px;
+    }
+
+    footer p {
+      margin: 6px 0;
+    }
+
+    @media (max-width: 900px) {
+      .hero,
+      .grid-2,
+      .feature-grid,
+      .faq-grid,
+      .service-area,
+      .booking-layout,
+      .form-row,
+      .time-slots {
+        grid-template-columns: 1fr;
+      }
+
+      header {
+        padding-bottom: 78px;
+      }
+
+      .hero {
+        margin-top: 42px;
+      }
+
+      nav {
+        border-radius: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="topbar">
+        <div class="brand">
+          <img src="berga-logo.png" alt="Berga Båttvätt logga" onerror="this.style.display='none'">
+          <span>Berga Båttvätt</span>
+        </div>
+
+        <nav>
+          <a href="#tjanster">Tjänst</a>
+          <a href="#sa-funkar-det">Så funkar det</a>
+          <a href="#bokning">Boka</a>
+          <a href="#kontakt">Kontakt</a>
+        </nav>
+      </div>
+
+      <div class="hero">
+        <div>
+          <div class="hero-highlight">Båttvätt i Berga och Stockholm</div>
+          <h1>Ren båt. Enklare bokning. Smidigare båtliv.</h1>
+          <p>Vi hjälper båtägare att få en ren och välvårdad båt utan krångel. Boka din utvändiga båttvätt online på några minuter och välj själv om du vill betala direkt eller efter utfört arbete.</p>
+          <div class="hero-buttons">
+            <a href="#bokning" class="btn btn-primary">Boka tid</a>
+            <a href="#varfor-oss" class="btn btn-secondary">Varför välja oss</a>
+          </div>
+        </div>
+
+        <div class="hero-card">
+          <h3>Det här får du hos oss</h3>
+          <ul class="hero-list">
+            <li>Tydligt pris och enkel bokning direkt på hemsidan</li>
+            <li>Utvändig tvätt som passar inför säsong, visning eller försäljning</li>
+            <li>Tider på kvällar och helger för att passa fler båtägare</li>
+            <li>Smidig kontakt, snabb bekräftelse och Swish-betalning</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="varfor-oss" class="section">
+      <div class="card">
+        <h2 class="section-title">En hemsida som säljer tjänsten bättre</h2>
+        <p class="section-subtitle">Besökaren ska snabbt förstå vad du erbjuder, varför det är värt att boka och hur enkelt det är att komma igång.</p>
+
+        <div class="feature-grid">
+          <article class="feature-box">
+            <h3>Trygg första känsla</h3>
+            <p>Tydlig information om tjänst, pris, kontakt och område gör att kunden känner större förtroende direkt.</p>
+          </article>
+          <article class="feature-box">
+            <h3>Snabb bokning</h3>
+            <p>Besökaren kan gå från intresse till bokning utan att behöva ringa, vänta eller skriva fram och tillbaka.</p>
+          </article>
+          <article class="feature-box">
+            <h3>Färre frågor i efterhand</h3>
+            <p>Vanliga frågor om tider, plats, betalning och vad som ingår besvaras redan på sidan.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="tjanster" class="section">
+      <div class="card">
+        <h2 class="section-title">Vår tjänst</h2>
+        <p class="section-subtitle">Just nu erbjuder vi utvändig båttvätt för båtägare som vill ha ett rent intryck utan att lägga tid på jobbet själva.</p>
+
+        <div class="grid-2">
+          <article class="card">
+            <span class="badge">Utvändig tvätt</span>
+            <h3>En renare båt utan krångel</h3>
+            <p>Skonsam och noggrann rengöring av båtens utvändiga ytor för ett rent, fräscht och välskött intryck vid bryggan.</p>
+            <div class="price">699 kr</div>
+            <ul>
+              <li>Avspolning och rengöring</li>
+              <li>Tvätt av utvändiga ytor</li>
+              <li>Smidig bokning och snabb bekräftelse</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <span class="badge">Bokningstider</span>
+            <h3>Tider som passar vardag och helg</h3>
+            <p>Kalendern visar automatiskt de tider som går att boka beroende på vilken dag du väljer, så att det blir enkelt att planera.</p>
+            <ul>
+              <li>Vardagar: 17:00, 18:00 och 19:00</li>
+              <li>Lördagar, söndagar och röda dagar: 10:00–15:00</li>
+              <li>Bokade tider markeras automatiskt</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="service-area">
+        <div class="card">
+          <h2 class="section-title">Passar dig som vill</h2>
+          <p class="section-subtitle">Sidan riktar sig nu tydligare till vanliga behov hos båtägare.</p>
+          <ul class="service-list">
+            <li>Få båten ren inför sjösättning eller upptagning</li>
+            <li>Fräscha upp båten inför försäljning eller visning</li>
+            <li>Slippa lägga helgen på rengöring själv</li>
+            <li>Boka en tydlig tid och veta priset direkt</li>
+          </ul>
+        </div>
+
+        <div class="cta-panel">
+          <h2 class="section-title">Vill du att fler ska boka direkt?</h2>
+          <p>Med en tydlig första sida, bättre säljtext och en enkel bokningsväg blir hemsidan mer än bara information. Den blir ett verktyg som hjälper dig få in riktiga kunder.</p>
+          <div class="hero-buttons">
+            <a href="#bokning" class="btn btn-primary">Boka båttvätt</a>
+            <a href="#kontakt" class="btn btn-secondary">Kontakta oss</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sa-funkar-det" class="section grid-2">
+      <div class="card">
+        <h2 class="section-title">Så funkar det</h2>
+        <p class="section-subtitle">Tre enkla steg från bokning till ren båt.</p>
+        <div class="steps">
+          <div class="step">
+            <h3>Välj datum och tid</h3>
+            <p>Välj ett framtida datum i kalendern och klicka sedan på en ledig tid som passar dig.</p>
+          </div>
+          <div class="step">
+            <h3>Fyll i dina uppgifter</h3>
+            <p>Fyll i kontaktuppgifter, båtstorlek och plats/hamn så att bokningen blir tydlig och komplett.</p>
+          </div>
+          <div class="step">
+            <h3>Slutför bokningen</h3>
+            <p>Du skickas vidare till betalningssidan där du kan betala direkt med Swish eller välja att betala efter tvätt.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="kontakt">
+        <h2 class="section-title">Kontakt</h2>
+        <p class="section-subtitle">Har du frågor om bokning, tider eller utvändig tvätt?</p>
+        <p><strong>Telefon:</strong> 073-388 12 16</p>
+        <p><strong>E-post:</strong> info@bergabattvatt.se</p>
+        <p><strong>Plats:</strong> Berga / Stockholm</p>
+        <p class="contact-note">Byt gärna ut e-postadressen till din riktiga adress om du vill ta emot frågor där också.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="grid-2">
+        <div class="card promise-box">
+          <h3>Tydligt för kunden</h3>
+          <p>Vi har lyft fram pris, betalning, område och bokningsprocess så att kunden slipper tveka inför nästa steg.</p>
+        </div>
+        <div class="card promise-box">
+          <h3>Enkelt att bygga vidare</h3>
+          <p>När du vill kan vi också lägga till riktiga kundomdömen, bilder på båtar före och efter tvätt och ett kontaktformulär som känns ännu mer professionellt.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="card">
+        <h2 class="section-title">Vanliga frågor</h2>
+        <p class="section-subtitle">Bra att ha med för att minska osäkerhet och få fler att gå vidare till bokning.</p>
+
+        <div class="faq-grid">
+          <article class="faq-item">
+            <h3>Vad ingår i tvätten?</h3>
+            <p>En utvändig rengöring av båtens synliga ytor för att ge ett rent och välskött helhetsintryck.</p>
+          </article>
+          <article class="faq-item">
+            <h3>När kan jag boka?</h3>
+            <p>Lediga tider visas direkt i kalendern. Kvällstider finns på vardagar och dagtider på helger och röda dagar.</p>
+          </article>
+          <article class="faq-item">
+            <h3>Hur betalar jag?</h3>
+            <p>Du kan välja att betala direkt med Swish eller efter att arbetet är utfört, beroende på vad som passar dig bäst.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="bokning" class="section">
+      <div class="booking-card">
+        <h2 class="section-title">Boka tid</h2>
+        <p class="section-subtitle">Välj först ett datum i kalendern. Därefter visas bokningsbara tider automatiskt.</p>
+
+        <div class="booking-layout">
+          <div class="calendar-card">
+            <h3>Välj datum</h3>
+            <p class="booking-note">Kalendern visar framtida bokningsbara datum under 2026. Bekräftade tider markeras automatiskt.</p>
+
+            <div class="calendar-header">
+              <button type="button" class="calendar-nav" id="prevMonth">←</button>
+              <div class="calendar-title" id="calendarTitle">Januari 2026</div>
+              <button type="button" class="calendar-nav" id="nextMonth">→</button>
+            </div>
+
+            <div class="calendar-weekdays">
+              <div>Mån</div>
+              <div>Tis</div>
+              <div>Ons</div>
+              <div>Tors</div>
+              <div>Fre</div>
+              <div>Lör</div>
+              <div>Sön</div>
+            </div>
+
+            <div class="calendar-grid" id="calendarGrid"></div>
+            <div class="selected-date-box" id="selectedDateBox">Inget datum valt ännu</div>
+
+            <div class="time-picker">
+              <h4>Välj tid</h4>
+              <div class="time-slots" id="timeSlots">
+                <button type="button" class="time-slot disabled">Välj först ett datum</button>
+              </div>
+            </div>
+          </div>
+
+          <form id="bookingForm">
+            <input type="hidden" id="date" required>
+            <input type="hidden" id="time" required>
+
+            <div class="form-row">
+              <div>
+                <label for="name">Namn</label>
+                <input type="text" id="name" placeholder="Ditt namn" required>
+              </div>
+              <div>
+                <label for="email">E-post</label>
+                <input type="email" id="email" placeholder="dinmail@exempel.se" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div>
+                <label for="phone">Telefon</label>
+                <input type="tel" id="phone" placeholder="073-123 45 67" required>
+              </div>
+              <div>
+                <label for="boatSize">Båtstorlek</label>
+                <select id="boatSize" required>
+                  <option value="">Välj storlek</option>
+                  <option value="Liten båt">Liten båt</option>
+                  <option value="Mellan båt">Mellan båt</option>
+                  <option value="Stor båt">Stor båt</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div>
+                <label for="location">Plats / hamn</label>
+                <input type="text" id="location" placeholder="Till exempel Berga hamn" required>
+              </div>
+              <div>
+                <label for="boatType">Båttyp</label>
+                <input type="text" id="boatType" placeholder="Till exempel motorbåt eller segelbåt">
+              </div>
+            </div>
+
+            <div>
+              <label for="message">Övrig information</label>
+              <textarea id="message" rows="4" placeholder="Skriv gärna båtmodell, bryggplats eller annat som är bra för oss att veta"></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn">Gå vidare till betalning</button>
+            <p class="booking-note">Bokningen sparas som väntande först. På nästa sida kan kunden välja att betala direkt eller efter tvätt.</p>
+            <div class="success-message" id="successMessage">Bokningen har sparats.</div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p><strong>Berga Båttvätt</strong></p>
+      <p>Smidig och professionell båttvätt för dig som vill ha ett enklare båtliv.</p>
+      <p>© 2026 Berga Båttvätt. Alla rättigheter förbehållna.</p>
+    </div>
+  </footer>
+
+  <script>
+    const bookingForm = document.getElementById('bookingForm');
+    const dateInput = document.getElementById('date');
+    const timeInput = document.getElementById('time');
+    const successMessage = document.getElementById('successMessage');
+    const calendarGrid = document.getElementById('calendarGrid');
+    const calendarTitle = document.getElementById('calendarTitle');
+    const selectedDateBox = document.getElementById('selectedDateBox');
+    const timeSlots = document.getElementById('timeSlots');
+    const prevMonthButton = document.getElementById('prevMonth');
+    const nextMonthButton = document.getElementById('nextMonth');
+
+    const SUPABASE_URL = 'https://xeyippgcoqfskcmqzazx.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_MUKxAwv0vNXDrcgumq81fQ_Uvx4eOuq';
+    const SUPABASE_TABLE = 'bookings';
+
+    const bookingYear = 2026;
+    const todayString = '2026-04-12';
+    const todayDate = new Date(todayString + 'T12:00:00');
+    const monthNames = ['januari', 'februari', 'mars', 'april', 'maj', 'juni', 'juli', 'augusti', 'september', 'oktober', 'november', 'december'];
+
+    const redDays2026 = new Set([
+      '2026-01-01', '2026-01-06', '2026-04-03', '2026-04-05', '2026-04-06',
+      '2026-05-01', '2026-05-14', '2026-05-24', '2026-06-06', '2026-06-20',
+      '2026-11-01', '2026-12-25', '2026-12-26'
+    ]);
+
+    let currentMonth = todayDate.getMonth();
+    let selectedDate = '';
+    let bookingsCache = [];
+
+    function getHeaders() {
+      return {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json'
+      };
+    }
+
+    async function fetchBookings() {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}?select=booking_date,booking_time,status&status=in.(pending,confirmed)`, {
+          headers: getHeaders()
+        });
+
+        if (!res.ok) {
+          bookingsCache = [];
+          return;
+        }
+
+        const data = await res.json();
+        bookingsCache = data.map((b) => ({ date: b.booking_date, time: b.booking_time }));
+      } catch (error) {
+        console.error(error);
+        bookingsCache = [];
+      }
+    }
+
+    async function createBooking(booking) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({
+          customer_name: booking.name,
+          email: booking.email,
+          phone: booking.phone,
+          boat_size: booking.boatSize,
+          boat_type: booking.boatType || null,
+          booking_date: booking.date,
+          booking_time: booking.time,
+          service: 'Utvändig tvätt',
+          location: booking.location,
+          message: booking.message || null,
+          status: 'pending',
+          payment_status: 'unpaid'
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error('Kunde inte spara bokningen.');
+      }
+
+      addBookingToCache(booking.date, booking.time);
+    }
+
+    function formatDate(year, month, day) {
+      return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+
+    function formatDateForDisplay(dateString) {
+      const dateObject = new Date(dateString + 'T12:00:00');
+      return dateObject.toLocaleDateString('sv-SE', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+    }
+
+    function getBookedTimes(date) {
+      return bookingsCache.filter((b) => b.date === date).map((b) => b.time);
+    }
+
+    function addBookingToCache(date, time) {
+      const alreadyExists = bookingsCache.some((booking) => booking.date === date && booking.time === time);
+
+      if (!alreadyExists) {
+        bookingsCache.push({ date, time });
+      }
+    }
+
+    function isHoliday(date) {
+      const d = new Date(date + 'T12:00:00');
+      return d.getDay() === 0 || redDays2026.has(date);
+    }
+
+    function isDaytimeDay(date) {
+      const d = new Date(date + 'T12:00:00');
+      return isHoliday(date) || d.getDay() === 6;
+    }
+
+    function getTimes(date) {
+      return isDaytimeDay(date)
+        ? ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00']
+        : ['17:00', '18:00', '19:00'];
+    }
+
+    function isFullyBooked(date) {
+      const booked = getBookedTimes(date);
+      return getTimes(date).every((time) => booked.includes(time));
+    }
+
+    function renderTimes() {
+      timeSlots.innerHTML = '';
+
+      if (!selectedDate) {
+        timeSlots.innerHTML = '<button type="button" class="time-slot disabled">Välj först ett datum</button>';
+        return;
+      }
+
+      const booked = getBookedTimes(selectedDate);
+
+      getTimes(selectedDate).forEach((time) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'time-slot';
+        btn.textContent = time;
+
+        if (booked.includes(time)) {
+          btn.classList.add('booked');
+          btn.disabled = true;
+          btn.textContent = `${time} • bokad`;
+        } else {
+          btn.onclick = () => {
+            timeInput.value = time;
+            renderTimes();
+          };
+        }
+
+        if (timeInput.value === time) {
+          btn.classList.add('selected');
+        }
+
+        timeSlots.appendChild(btn);
+      });
+    }
+
+    function renderCalendar() {
+      calendarGrid.innerHTML = '';
+      calendarTitle.textContent = `${monthNames[currentMonth]} ${bookingYear}`;
+      prevMonthButton.disabled = currentMonth === todayDate.getMonth();
+      nextMonthButton.disabled = currentMonth === 11;
+
+      const first = new Date(bookingYear, currentMonth, 1);
+      const days = new Date(bookingYear, currentMonth + 1, 0).getDate();
+      const offset = (first.getDay() + 6) % 7;
+
+      for (let i = 0; i < offset; i++) {
+        const empty = document.createElement('div');
+        empty.className = 'calendar-empty';
+        calendarGrid.appendChild(empty);
+      }
+
+      for (let day = 1; day <= days; day++) {
+        const date = formatDate(bookingYear, currentMonth, day);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = day;
+        btn.className = 'calendar-day';
+
+        const bookedCount = getBookedTimes(date).length;
+        const past = date < todayString;
+        const full = isFullyBooked(date);
+
+        if (bookedCount > 0) {
+          btn.classList.add('booked');
+        }
+
+        if (selectedDate === date) {
+          btn.classList.add('selected');
+        }
+
+        if (past) {
+          btn.classList.add('past');
+          btn.disabled = true;
+        }
+
+        if (full) {
+          btn.classList.add('fully-booked');
+          btn.disabled = true;
+        }
+
+        if (!past && !full) {
+          btn.onclick = () => {
+            selectedDate = date;
+            dateInput.value = date;
+            timeInput.value = '';
+            selectedDateBox.textContent = `Valt datum: ${formatDateForDisplay(date)}`;
+            renderTimes();
+            renderCalendar();
+          };
+        }
+
+        calendarGrid.appendChild(btn);
+      }
+    }
+
+    prevMonthButton.addEventListener('click', () => {
+      if (currentMonth > todayDate.getMonth()) {
+        currentMonth -= 1;
+        renderCalendar();
+      }
+    });
+
+    nextMonthButton.addEventListener('click', () => {
+      if (currentMonth < 11) {
+        currentMonth += 1;
+        renderCalendar();
+      }
+    });
+
+    bookingForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      successMessage.style.display = 'none';
+
+      if (!dateInput.value || !timeInput.value) {
+        selectedDateBox.textContent = 'Välj datum och tid innan du bokar.';
+        return;
+      }
+
+      const booking = {
+        name: document.getElementById('name').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        boatSize: document.getElementById('boatSize').value,
+        boatType: document.getElementById('boatType').value.trim(),
+        date: dateInput.value,
+        time: timeInput.value,
+        location: document.getElementById('location').value.trim(),
+        message: document.getElementById('message').value.trim()
+      };
+
+      try {
+        await createBooking(booking);
+        renderCalendar();
+        renderTimes();
+
+      // Skicka email via Supabase Edge Function
+      try {
+        await fetch("https://xeyippgcoqfskcmqzazx.functions.supabase.co/send-booking-email", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(booking)
+        });
+      } catch (err) {
+        console.error("Kunde inte skicka email:", err);
+      }
+
+        const params = new URLSearchParams({
+          name: booking.name,
+          date: booking.date,
+          time: booking.time
+        });
+
+        window.location.href = `betalning.html?${params.toString()}`;
+      } catch (error) {
+        console.error('Bokningsfel:', error);
+        selectedDateBox.textContent = 'Kunde inte spara bokningen. Kontrollera Supabase eller försök igen.';
+      }
+    });
+
+    (async () => {
+      await fetchBookings();
+      renderCalendar();
+      renderTimes();
+    })();
+  </script>
+</body>
+</html>

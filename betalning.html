@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Berga Båttvätt | Betalning</title>
+  <meta name="description" content="Välj om du vill betala din bokning nu eller efter utförd tvätt." />
+  <style>
+    :root {
+      --primary: #0b6fa4;
+      --primary-dark: #084f74;
+      --accent: #e8f6fc;
+      --text: #173042;
+      --muted: #5f7280;
+      --white: #ffffff;
+      --border: #d9e7ef;
+      --success: #127c56;
+      --shadow: 0 14px 34px rgba(11, 111, 164, 0.12);
+      --radius: 20px;
+      --max-width: 980px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: var(--text);
+      background: linear-gradient(to bottom, #f4fbff, #eef7fb);
+      line-height: 1.5;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: min(92%, var(--max-width));
+      margin: 0 auto;
+    }
+
+    header {
+      background: linear-gradient(135deg, rgba(11, 111, 164, 0.9), rgba(8, 79, 116, 0.86));
+      color: var(--white);
+      padding: 24px 0 90px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .brand img {
+      height: 50px;
+      width: auto;
+      display: block;
+    }
+
+    .back-link {
+      font-weight: 700;
+      opacity: 0.95;
+    }
+
+    .hero {
+      margin-top: 42px;
+      max-width: 760px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 4vw, 3.1rem);
+      line-height: 1.05;
+      margin: 0 0 14px;
+    }
+
+    .hero p {
+      margin: 0;
+      font-size: 1.06rem;
+      color: rgba(255,255,255,0.92);
+    }
+
+    main {
+      margin-top: -46px;
+      padding-bottom: 42px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.97);
+      border: 1px solid rgba(217, 231, 239, 0.9);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px;
+    }
+
+    .section-title {
+      font-size: 1.75rem;
+      margin: 0 0 10px;
+    }
+
+    .section-subtitle {
+      color: var(--muted);
+      margin: 0 0 22px;
+    }
+
+    .summary-box,
+    .option-card,
+    .qr-box {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      background: linear-gradient(to bottom, #fbfeff, #f8fcff);
+    }
+
+    .summary-box p,
+    .option-card p {
+      margin: 8px 0;
+    }
+
+    .price {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin: 14px 0 0;
+    }
+
+    .option-stack {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .option-card h3 {
+      margin: 0 0 8px;
+    }
+
+    .option-card.primary {
+      border: 2px solid rgba(11, 111, 164, 0.25);
+      box-shadow: 0 12px 28px rgba(11, 111, 164, 0.08);
+    }
+
+    .swish-number {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      margin: 8px 0;
+    }
+
+    .info-note {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin: 0;
+    }
+
+    .btn {
+      display: inline-block;
+      width: 100%;
+      border: none;
+      border-radius: 14px;
+      padding: 15px 16px;
+      font-size: 1rem;
+      font-weight: 700;
+      text-align: center;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(to right, var(--primary), #1183bf);
+      color: var(--white);
+      box-shadow: 0 14px 26px rgba(11, 111, 164, 0.2);
+    }
+
+    .btn-secondary {
+      background: #eef3f7;
+      color: var(--text);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--primary-dark);
+      border: 1px solid var(--border);
+    }
+
+    .qr-box {
+      text-align: center;
+      margin-top: 16px;
+    }
+
+    .qr-box img {
+      width: 100%;
+      max-width: 240px;
+      margin: 0 auto 12px;
+      border-radius: 12px;
+      display: block;
+    }
+
+    .status-box {
+      display: none;
+      margin-top: 18px;
+      padding: 22px;
+      border-radius: 16px;
+      background: #e8f8f1;
+      color: var(--success);
+      font-weight: 700;
+      text-align: center;
+      font-size: 1.05rem;
+    }
+
+    .status-box strong {
+      display: block;
+      font-size: 1.6rem;
+      margin-bottom: 8px;
+    }
+
+    footer {
+      background: linear-gradient(to bottom, #082c3d, #061f2c);
+      color: rgba(255,255,255,0.9);
+      padding: 34px 0;
+      margin-top: 24px;
+    }
+
+    footer p { margin: 6px 0; }
+
+    @media (max-width: 900px) {
+      .option-stack {
+        grid-template-columns: 1fr;
+      }
+
+      header {
+        padding-bottom: 66px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="topbar">
+        <div class="brand">
+          <img src="berga-logo.png" alt="Berga Båttvätt logga" onerror="this.style.display='none'">
+          <span>Berga Båttvätt</span>
+        </div>
+        <a href="index.html" class="back-link">← Tillbaka till bokningen</a>
+      </div>
+
+      <div class="hero">
+        <h1>Slutför din bokning</h1>
+        <p>Din bokning är registrerad. Du kan betala direkt med Swish nu, eller vänta och betala efter att vi har tvättat båten.</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="grid">
+      <section class="card">
+        <h2 class="section-title">Din bokning</h2>
+        <p class="section-subtitle">Kontrollera uppgifterna innan du väljer betalningssätt.</p>
+
+        <div class="summary-box">
+          <p><strong>Namn:</strong> <span id="bookingName">Ej angivet</span></p>
+          <p><strong>Datum:</strong> <span id="bookingDate">Ej valt</span></p>
+          <p><strong>Tid:</strong> <span id="bookingTime">Ej vald</span></p>
+          <p><strong>Tjänst:</strong> Utvändig tvätt</p>
+          <div class="price">699 kr</div>
+        </div>
+
+        <div class="status-box" id="statusBox">
+          <strong>✅ Bokning mottagen!</strong>
+          <span id="statusText">Klart.</span>
+          <div style="margin-top:14px;">
+            <a href="index.html" class="btn btn-secondary" style="max-width:260px; margin: 0 auto; display:inline-block;">Tillbaka till startsidan</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="section-title">Betalningsval</h2>
+        <p class="section-subtitle">Välj det alternativ som passar dig bäst.</p>
+
+        <div class="option-stack">
+          <div class="option-card primary">
+            <h3>Betala nu med Swish</h3>
+            <p>✔ Snabbt och enkelt</p>
+            <p>✔ Samma meddelande gör betalningen lätt att matcha</p>
+            <p class="info-note">Swish-nummer</p>
+            <div class="swish-number" id="swishDisplayNumber">073-388 12 16</div>
+            <p><strong>Meddelande:</strong> <span id="swishMessage">Berga Båttvätt</span></p>
+            <a id="openSwishButton" href="#" class="btn btn-primary">Öppna Swish</a>
+            <button type="button" id="copyMessageButton" class="btn btn-secondary">Kopiera betalningsmeddelande</button>
+          </div>
+
+          <div class="option-card">
+            <h3>Betala efter tvätt</h3>
+            <button type="button" id="payLaterButton" class="btn btn-ghost">Jag betalar efter tvätt</button>
+          </div>
+        </div>
+
+        <div class="qr-box">
+          <img id="qrImage" src="" alt="Swish QR-kod">
+          <p class="info-note">Sitter du vid datorn kan du skanna QR-koden med mobilen.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p><strong>Berga Båttvätt</strong></p>
+      <p>Smidig och professionell båttvätt för dig som vill ha ett enklare båtliv.</p>
+      <p>© 2026 Berga Båttvätt. Alla rättigheter förbehållna.</p>
+    </div>
+  </footer>
+
+  <script>
+    const SWISH_NUMBER = '46733881216';
+    const SWISH_DISPLAY_NUMBER = '073-388 12 16';
+    const BASE_PRICE = 699;
+
+    const bookingName = document.getElementById('bookingName');
+    const bookingDate = document.getElementById('bookingDate');
+    const bookingTime = document.getElementById('bookingTime');
+    const swishDisplayNumber = document.getElementById('swishDisplayNumber');
+    const swishMessage = document.getElementById('swishMessage');
+    const openSwishButton = document.getElementById('openSwishButton');
+    const copyMessageButton = document.getElementById('copyMessageButton');
+    const payLaterButton = document.getElementById('payLaterButton');
+    const statusBox = document.getElementById('statusBox');
+    const statusText = document.getElementById('statusText');
+    const qrImage = document.getElementById('qrImage');
+
+    const params = new URLSearchParams(window.location.search);
+    const name = params.get('name') || 'Ej angivet';
+    const date = params.get('date') || 'Ej valt';
+    const time = params.get('time') || 'Ej vald';
+
+    function formatDateForDisplay(dateString) {
+      if (!dateString || dateString === 'Ej valt') return dateString;
+      const dateObject = new Date(dateString + 'T12:00:00');
+      return dateObject.toLocaleDateString('sv-SE', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+    }
+
+    function buildSwishMessage(nameValue, dateValue, timeValue) {
+      const compactDate = dateValue && dateValue !== 'Ej valt' ? dateValue.replaceAll('-', '') : 'datum';
+      const compactTime = timeValue && timeValue !== 'Ej vald' ? timeValue.replace(':', '') : 'tid';
+      return `${nameValue} ${compactDate} ${compactTime}`.slice(0, 50);
+    }
+
+    const paymentMessage = buildSwishMessage(name, date, time);
+    const swishLink = `swish://payment?phone=${SWISH_NUMBER}&amount=${BASE_PRICE}&message=${encodeURIComponent(paymentMessage)}`;
+    const qrPayload = `SWISH|${SWISH_NUMBER}|${BASE_PRICE}|SEK|${paymentMessage}`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(qrPayload)}`;
+
+    bookingName.textContent = name;
+    bookingDate.textContent = formatDateForDisplay(date);
+    bookingTime.textContent = time;
+    swishDisplayNumber.textContent = SWISH_DISPLAY_NUMBER;
+    swishMessage.textContent = paymentMessage;
+    openSwishButton.href = swishLink;
+    qrImage.src = qrUrl;
+
+    copyMessageButton.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(paymentMessage);
+        statusBox.style.display = 'block';
+        statusText.textContent = 'Betalningsmeddelandet är kopierat.';
+      } catch (error) {
+        statusBox.style.display = 'block';
+        statusText.textContent = 'Kunde inte kopiera automatiskt. Kopiera meddelandet manuellt.';
+      }
+    });
+
+    payLaterButton.addEventListener('click', () => {
+      statusBox.style.display = 'block';
+      statusText.textContent = 'Du kan betala efter att tvätten är genomförd.';
+    });
+  </script>
+</body>
+</html>
