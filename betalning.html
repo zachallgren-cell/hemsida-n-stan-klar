@@ -170,6 +170,22 @@
       margin: 0;
     }
 
+    .payment-note,
+    .instruction-list {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: #f3f9fd;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .instruction-list {
+      margin-bottom: 0;
+      padding-left: 34px;
+    }
+
     .btn {
       display: inline-block;
       width: 100%;
@@ -311,6 +327,7 @@
             <p><strong>Meddelande:</strong> <span id="swishMessage">Berga Båttvätt</span></p>
             <a id="openSwishButton" href="#" class="btn btn-primary">Öppna Swish</a>
             <button type="button" id="copyMessageButton" class="btn btn-secondary">Kopiera betalningsmeddelande</button>
+            <p class="payment-note" id="paymentNote">På mobil kan du öppna Swish direkt. På dator kan du skanna QR-koden med mobilen och betala manuellt.</p>
           </div>
 
           <div class="option-card">
@@ -322,6 +339,11 @@
         <div class="qr-box">
           <img id="qrImage" src="" alt="Swish QR-kod">
           <p class="info-note">Sitter du vid datorn kan du skanna QR-koden med mobilen.</p>
+          <ol class="instruction-list">
+            <li>Öppna Swish i mobilen eller skanna QR-koden.</li>
+            <li>Kontrollera att beloppet är 699 kr.</li>
+            <li>Klistra in betalningsmeddelandet så att vi kan matcha bokningen.</li>
+          </ol>
         </div>
       </section>
     </div>
@@ -351,11 +373,13 @@
     const statusBox = document.getElementById('statusBox');
     const statusText = document.getElementById('statusText');
     const qrImage = document.getElementById('qrImage');
+    const paymentNote = document.getElementById('paymentNote');
 
     const params = new URLSearchParams(window.location.search);
     const name = params.get('name') || 'Ej angivet';
     const date = params.get('date') || 'Ej valt';
     const time = params.get('time') || 'Ej vald';
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
     function formatDateForDisplay(dateString) {
       if (!dateString || dateString === 'Ej valt') return dateString;
@@ -374,6 +398,12 @@
       return `${nameValue} ${compactDate} ${compactTime}`.slice(0, 50);
     }
 
+    function setStatus(message, title = 'Betalning') {
+      statusBox.style.display = 'block';
+      statusBox.querySelector('strong').textContent = title;
+      statusText.textContent = message;
+    }
+
     const paymentMessage = buildSwishMessage(name, date, time);
     const swishLink = `swish://payment?phone=${SWISH_NUMBER}&amount=${BASE_PRICE}&message=${encodeURIComponent(paymentMessage)}`;
     const qrPayload = `SWISH|${SWISH_NUMBER}|${BASE_PRICE}|SEK|${paymentMessage}`;
@@ -387,21 +417,23 @@
     openSwishButton.href = swishLink;
     qrImage.src = qrUrl;
 
+    if (!isMobile) {
+      paymentNote.textContent = 'Du verkar vara på dator. Skanna QR-koden med mobilen eller kopiera betalningsuppgifterna manuellt i Swish.';
+    }
+
     copyMessageButton.addEventListener('click', async () => {
       try {
         await navigator.clipboard.writeText(paymentMessage);
-        statusBox.style.display = 'block';
-        statusText.textContent = 'Betalningsmeddelandet är kopierat.';
+        setStatus('Betalningsmeddelandet är kopierat.', 'Kopierat');
       } catch (error) {
-        statusBox.style.display = 'block';
-        statusText.textContent = 'Kunde inte kopiera automatiskt. Kopiera meddelandet manuellt.';
+        setStatus('Kunde inte kopiera automatiskt. Kopiera meddelandet manuellt.', 'Kopiering misslyckades');
       }
     });
 
     payLaterButton.addEventListener('click', () => {
-      statusBox.style.display = 'block';
-      statusText.textContent = 'Du kan betala efter att tvätten är genomförd.';
+      setStatus('Du kan betala efter att tvätten är genomförd.', 'Bokning mottagen');
     });
   </script>
 </body>
 </html>
+
