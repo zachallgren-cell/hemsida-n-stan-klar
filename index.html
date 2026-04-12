@@ -1454,6 +1454,7 @@
 
       await res.json();
       addBookingToCache(booking.date, booking.time);
+      await res.json();
     }
 
     function formatDate(year, month, day) {

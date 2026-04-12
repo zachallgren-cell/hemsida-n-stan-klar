@@ -216,7 +216,6 @@
       padding-left: 34px;
       margin-bottom: 0;
     }
-
     .btn {
       display: inline-block;
       width: 100%;
@@ -516,6 +515,10 @@
     swishMessage.textContent = paymentMessage;
     paymentDisplayPrice.textContent = price;
     paymentStepsPrice.textContent = price;
+
+    if (!isMobile) {
+      paymentNote.textContent = 'Du verkar vara på dator. Skanna QR-koden med mobilen eller kopiera betalningsuppgifterna manuellt i Swish.';
+    }
 
     copyMessageButton.addEventListener('click', async () => {
       try {
