@@ -1,15 +1,16 @@
-
 <!DOCTYPE html>
 <html lang="sv">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Berga Båttvätt</title>
-  <meta name="description" content="Berga Båttvätt erbjuder utvändig båttvätt med enkel onlinebokning. Boka en tid som passar dig på vardagar eller helger." />
+  <meta name="description" content="Berga Båttvätt erbjuder personlig och lokal båtrengöring på plats med tydliga priser och enkel onlinebokning." />
   <style>
     :root {
       --primary: #0b6fa4;
       --primary-dark: #084f74;
+      --cta: #ffb347;
+      --cta-dark: #f1992d;
       --accent: #e8f6fc;
       --bg: #eef7fb;
       --text: #173042;
@@ -78,15 +79,40 @@
     .brand {
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-size: 1.2rem;
-      font-weight: 700;
+      gap: 14px;
+      padding: 10px 16px 10px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.18);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 16px 34px rgba(4, 25, 36, 0.12);
     }
 
     .brand img {
-      height: 50px;
+      height: 82px;
       width: auto;
       display: block;
+      border-radius: 22px;
+      filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.14));
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .brand-tagline {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.88);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
     }
 
     nav {
@@ -147,7 +173,7 @@
       border-radius: 999px;
       border: none;
       font-size: 1rem;
-      font-weight: 700;
+      font-weight: 800;
       cursor: pointer;
       transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
     }
@@ -157,9 +183,19 @@
     }
 
     .btn-primary {
-      background: var(--white);
-      color: var(--primary-dark);
-      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
+      background: linear-gradient(to right, var(--cta), var(--cta-dark));
+      color: #173042;
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.16);
+      position: relative;
+    }
+
+    .hero .btn-primary {
+      padding: 16px 28px;
+      font-size: 1.08rem;
+      font-weight: 900;
+      letter-spacing: 0.01em;
+      box-shadow: 0 20px 36px rgba(241, 153, 45, 0.32);
+      border: 2px solid rgba(255,255,255,0.28);
     }
 
     .btn-secondary {
@@ -214,6 +250,33 @@
       font-size: 0.92rem;
       font-weight: 700;
       margin-bottom: 18px;
+    }
+
+    .hero-facts {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 26px;
+      max-width: 720px;
+    }
+
+    .hero-fact {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.18);
+      backdrop-filter: blur(8px);
+    }
+
+    .hero-fact strong {
+      display: block;
+      font-size: 1.15rem;
+      margin-bottom: 4px;
+    }
+
+    .hero-fact span {
+      color: rgba(255,255,255,0.9);
+      font-size: 0.94rem;
     }
 
     main {
@@ -339,6 +402,142 @@
       background: rgba(255,255,255,0.12);
       color: var(--white);
       border-color: rgba(255,255,255,0.35);
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .gallery-card {
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      overflow: hidden;
+      background: linear-gradient(to bottom, #fbfeff, #f4fbff);
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    .gallery-card img {
+      width: 100%;
+      height: 320px;
+      object-fit: cover;
+      display: block;
+      background: #dfeef6;
+    }
+
+    .gallery-card img.after-shot {
+      object-fit: contain;
+      padding: 12px;
+      background: #eef7fb;
+    }
+
+    .gallery-label {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--white);
+      backdrop-filter: blur(8px);
+    }
+
+    .gallery-label.before {
+      background: rgba(122, 91, 34, 0.86);
+    }
+
+    .gallery-label.after {
+      background: rgba(18, 124, 86, 0.88);
+    }
+
+    .gallery-copy {
+      padding: 18px 20px 20px;
+    }
+
+    .gallery-copy h3 {
+      margin: 0 0 8px;
+    }
+
+    .gallery-copy p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .gallery-result {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: #eef8f3;
+      border: 1px solid #cfe8d8;
+      color: #0d6b4a;
+      font-weight: 700;
+      font-size: 0.94rem;
+    }
+
+    .requirements-box {
+      border: 1px solid #cfe4ee;
+      border-left: 6px solid var(--primary);
+      border-radius: 20px;
+      padding: 22px;
+      background: linear-gradient(to bottom, #fafdff, #f1f9fd);
+    }
+
+    .requirements-box h3 {
+      margin: 0 0 10px;
+    }
+
+    .requirements-box ul {
+      margin: 12px 0 0;
+      padding-left: 20px;
+    }
+
+    .area-box {
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 26px;
+      background: linear-gradient(135deg, #fafdff, #eef8fc);
+      box-shadow: var(--shadow);
+    }
+
+    .area-box h2 {
+      margin: 0 0 10px;
+      font-size: 1.95rem;
+    }
+
+    .area-box p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 760px;
+    }
+
+    .trust-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .trust-item {
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: linear-gradient(to bottom, #fbfeff, #f4fbff);
+      text-align: center;
+    }
+
+    .trust-item strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--primary-dark);
     }
 
     .steps {
@@ -596,6 +795,88 @@
       margin: 0;
     }
 
+    .booking-requirements {
+      margin-bottom: 18px;
+      padding: 18px 20px;
+      border-radius: 18px;
+      border: 1px solid #cfe4ee;
+      border-left: 6px solid var(--primary);
+      background: linear-gradient(to bottom, #fafdff, #f1f9fd);
+    }
+
+    .booking-requirements h3 {
+      margin: 0 0 10px;
+      font-size: 1.05rem;
+    }
+
+    .booking-requirements ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+    }
+
+    .booking-requirements li + li {
+      margin-top: 8px;
+    }
+
+    .social-links {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      vertical-align: middle;
+    }
+
+    .social-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #eef7fb;
+      border: 1px solid var(--border);
+      color: var(--primary-dark);
+      font-weight: 700;
+      font-size: 0.92rem;
+      transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .social-link:hover {
+      transform: translateY(-1px);
+      background: #e6f4fb;
+      border-color: #bddae8;
+    }
+
+    .social-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--white);
+      flex-shrink: 0;
+    }
+
+    .social-icon.instagram { background: linear-gradient(135deg, #fd5949, #d6249f, #285AEB); }
+    .social-icon.tiktok { background: #111111; }
+    .social-icon.facebook { background: #1877f2; }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin: 16px 0 0;
+    }
+
+    .footer-links a {
+      font-weight: 700;
+      color: rgba(255,255,255,0.92);
+      border-bottom: 1px solid rgba(255,255,255,0.18);
+      padding-bottom: 2px;
+    }
+
     .success-message {
       display: none;
       margin-top: 16px;
@@ -622,7 +903,10 @@
       .grid-2,
       .feature-grid,
       .faq-grid,
+      .gallery-grid,
+      .hero-facts,
       .service-area,
+      .trust-strip,
       .booking-layout,
       .form-row,
       .time-slots {
@@ -648,12 +932,16 @@
     <div class="container">
       <div class="topbar">
         <div class="brand">
-          <img src="berga-logo.png" alt="Berga Båttvätt logga" onerror="this.style.display='none'">
-          <span>Berga Båttvätt</span>
+          <img src="logga.png" alt="Berga Båttvätt logga" onerror="this.style.display='none'">
+          <div class="brand-text">
+            <span class="brand-title">Berga Båttvätt</span>
+            <span class="brand-tagline">Personlig och lokal service</span>
+          </div>
         </div>
 
         <nav>
           <a href="#tjanster">Tjänst</a>
+          <a href="om-oss.html">Om oss</a>
           <a href="#sa-funkar-det">Så funkar det</a>
           <a href="#bokning">Boka</a>
           <a href="#kontakt">Kontakt</a>
@@ -664,20 +952,34 @@
         <div>
           <div class="hero-highlight">Båttvätt i Berga och Stockholm</div>
           <h1>Ren båt. Enklare bokning. Smidigare båtliv.</h1>
-          <p>Vi hjälper båtägare att få en ren och välvårdad båt utan krångel. Boka din utvändiga båttvätt online på några minuter och välj själv om du vill betala direkt eller efter utfört arbete.</p>
+          <p>Vi erbjuder personlig och lokal båtrengöring på plats. Vi kommer till båtarna, arbetar noggrant och håller det enkelt med tydliga priser, smidig bokning och trygg kontakt.</p>
           <div class="hero-buttons">
-            <a href="#bokning" class="btn btn-primary">Boka tid</a>
+            <a href="#bokning" class="btn btn-primary">Tryck här för att boka tid</a>
             <a href="#varfor-oss" class="btn btn-secondary">Varför välja oss</a>
+          </div>
+          <div class="hero-facts">
+            <div class="hero-fact">
+              <strong>Från 599 kr</strong>
+              <span>Tydliga priser beroende på båtstorlek</span>
+            </div>
+            <div class="hero-fact">
+              <strong>Vi kommer till båtarna</strong>
+              <span>Flexibel service på plats hos dig</span>
+            </div>
+            <div class="hero-fact">
+              <strong>Berga / Stockholm</strong>
+              <span>Personlig och lokal hjälp för båtägare</span>
+            </div>
           </div>
         </div>
 
         <div class="hero-card">
           <h3>Det här får du hos oss</h3>
           <ul class="hero-list">
-            <li>Tydligt pris och enkel bokning direkt på hemsidan</li>
-            <li>Utvändig tvätt som passar inför säsong, visning eller försäljning</li>
-            <li>Tider på kvällar och helger för att passa fler båtägare</li>
-            <li>Smidig kontakt, snabb bekräftelse och Swish-betalning</li>
+            <li>Utvändig båttvätt med bra pris och tydliga nivåer</li>
+            <li>Snäckborttagning, syratvätt, alkalisk avfettning och shampoo</li>
+            <li>Flexibla tider på kvällar och helger</li>
+            <li>Trygg kontakt via mejl, telefon och sociala medier</li>
           </ul>
         </div>
       </div>
@@ -685,24 +987,23 @@
   </header>
 
   <main class="container">
-    <section id="varfor-oss" class="section">
-      <div class="card">
-        <h2 class="section-title">En hemsida som säljer tjänsten bättre</h2>
-        <p class="section-subtitle">Besökaren ska snabbt förstå vad du erbjuder, varför det är värt att boka och hur enkelt det är att komma igång.</p>
-
-        <div class="feature-grid">
-          <article class="feature-box">
-            <h3>Trygg första känsla</h3>
-            <p>Tydlig information om tjänst, pris, kontakt och område gör att kunden känner större förtroende direkt.</p>
-          </article>
-          <article class="feature-box">
-            <h3>Snabb bokning</h3>
-            <p>Besökaren kan gå från intresse till bokning utan att behöva ringa, vänta eller skriva fram och tillbaka.</p>
-          </article>
-          <article class="feature-box">
-            <h3>Färre frågor i efterhand</h3>
-            <p>Vanliga frågor om tider, plats, betalning och vad som ingår besvaras redan på sidan.</p>
-          </article>
+    <section class="section">
+      <div class="trust-strip">
+        <div class="trust-item">
+          <strong>Vi kommer till båtarna</strong>
+          <span>Flexibel rengöring på plats</span>
+        </div>
+        <div class="trust-item">
+          <strong>Kvällar och helger</strong>
+          <span>Tider som passar fler båtägare</span>
+        </div>
+        <div class="trust-item">
+          <strong>Bra pris</strong>
+          <span>Tre tydliga prisnivåer beroende på storlek</span>
+        </div>
+        <div class="trust-item">
+          <strong>Lokal service</strong>
+          <span>Personlig hjälp i Berga och Stockholm</span>
         </div>
       </div>
     </section>
@@ -710,29 +1011,30 @@
     <section id="tjanster" class="section">
       <div class="card">
         <h2 class="section-title">Vår tjänst</h2>
-        <p class="section-subtitle">Just nu erbjuder vi utvändig båttvätt för båtägare som vill ha ett rent intryck utan att lägga tid på jobbet själva.</p>
+        <p class="section-subtitle">Just nu erbjuder vi utvändig båttvätt. Fler tjänster kan komma framöver, men just nu fokuserar vi på att göra en sak riktigt bra.</p>
 
         <div class="grid-2">
           <article class="card">
             <span class="badge">Utvändig tvätt</span>
             <h3>En renare båt utan krångel</h3>
             <p>Skonsam och noggrann rengöring av båtens utvändiga ytor för ett rent, fräscht och välskött intryck vid bryggan.</p>
-            <div class="price">699 kr</div>
+            <div class="price">Från 599 kr</div>
             <ul>
-              <li>Avspolning och rengöring</li>
-              <li>Tvätt av utvändiga ytor</li>
-              <li>Smidig bokning och snabb bekräftelse</li>
+              <li>Snäckborttagning</li>
+              <li>Syratvätt mot gul vattenlinje</li>
+              <li>Alkalisk avfettning mot organisk smuts</li>
+              <li>Shampoo för extra glans</li>
             </ul>
           </article>
 
           <article class="card">
-            <span class="badge">Bokningstider</span>
-            <h3>Tider som passar vardag och helg</h3>
-            <p>Kalendern visar automatiskt de tider som går att boka beroende på vilken dag du väljer, så att det blir enkelt att planera.</p>
+            <span class="badge">Flexibel service</span>
+            <h3>Vi kommer till båtarna</h3>
+            <p>Vi fokuserar på att göra det enkelt för dig. När förutsättningarna finns på plats kommer vi ut till båten och utför tvätten där den står.</p>
             <ul>
-              <li>Vardagar: 17:00, 18:00 och 19:00</li>
-              <li>Lördagar, söndagar och röda dagar: 10:00–15:00</li>
-              <li>Bokade tider markeras automatiskt</li>
+              <li>Vi arbetar lokalt i Berga och Stockholm</li>
+              <li>Flexibla tider på kvällar och helger</li>
+              <li>Smidig kontakt via mejl, telefon och sociala medier</li>
             </ul>
           </article>
         </div>
@@ -740,25 +1042,106 @@
     </section>
 
     <section class="section">
-      <div class="service-area">
-        <div class="card">
-          <h2 class="section-title">Passar dig som vill</h2>
-          <p class="section-subtitle">Sidan riktar sig nu tydligare till vanliga behov hos båtägare.</p>
-          <ul class="service-list">
-            <li>Få båten ren inför sjösättning eller upptagning</li>
-            <li>Fräscha upp båten inför försäljning eller visning</li>
-            <li>Slippa lägga helgen på rengöring själv</li>
-            <li>Boka en tydlig tid och veta priset direkt</li>
-          </ul>
+      <div class="card">
+        <h2 class="section-title">Priser</h2>
+        <p class="section-subtitle">Tydliga priser beroende på båtens storlek.</p>
+
+        <div class="grid-2">
+          <article class="card">
+            <span class="badge">Prisnivå 1</span>
+            <h3>Upp till 20 fot</h3>
+            <div class="price">599 kr</div>
+            <p>Passar mindre båtar där du vill få ett rent och fräscht resultat till ett bra pris.</p>
+          </article>
+          <article class="card">
+            <span class="badge">Prisnivå 2</span>
+            <h3>21 till 35 fot</h3>
+            <div class="price">799 kr</div>
+            <p>För mellanstora båtar där rengöringen kräver mer tid men fortfarande ska vara enkel att boka.</p>
+          </article>
         </div>
 
-        <div class="cta-panel">
-          <h2 class="section-title">Vill du att fler ska boka direkt?</h2>
-          <p>Med en tydlig första sida, bättre säljtext och en enkel bokningsväg blir hemsidan mer än bara information. Den blir ett verktyg som hjälper dig få in riktiga kunder.</p>
-          <div class="hero-buttons">
-            <a href="#bokning" class="btn btn-primary">Boka båttvätt</a>
-            <a href="#kontakt" class="btn btn-secondary">Kontakta oss</a>
-          </div>
+        <div class="grid-2" style="margin-top:22px;">
+          <article class="card">
+            <span class="badge">Prisnivå 3</span>
+            <h3>35 till 50 fot</h3>
+            <div class="price">999 kr</div>
+            <p>För större båtar där du vill ha en tydlig och trygg prisnivå redan innan bokning.</p>
+          </article>
+          <article class="card">
+            <span class="badge">Bra att veta</span>
+            <h3>Tydligt och enkelt</h3>
+            <p>Du väljer storlek direkt i bokningen och rätt pris visas automatiskt på nästa sida.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="area-box">
+        <h2>Vi kommer till din båt</h2>
+        <p>Vi arbetar i Åkersberga och kommer till din marina eller dit din båt står, så länge båten står på land och det finns tillgång till vatten i närheten. Är du osäker på om vi kan komma till just din plats får du gärna höra av dig innan du bokar.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="requirements-box">
+        <h3>Viktigt inför bokning</h3>
+        <p>För att vi ska kunna utföra tvätten på plats behöver några grundförutsättningar vara uppfyllda.</p>
+        <ul>
+          <li>Båten behöver stå på land vid tvättillfället.</li>
+          <li>Det behöver finnas tillgång till vatten i närheten.</li>
+          <li>Platsen runt båten behöver vara åtkomlig så att arbetet kan utföras på ett säkert sätt.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="card">
+        <h2 class="section-title">Före och efter</h2>
+        <p class="section-subtitle">Ett exempel på hur resultatet kan se ut före och efter en utvändig tvätt.</p>
+
+        <div class="gallery-grid">
+          <article class="gallery-card">
+            <div class="gallery-label before">Före</div>
+            <img src="fore.jpeg" alt="Båt före tvätt">
+            <div class="gallery-copy">
+              <h3>Före tvätt</h3>
+              <p>Missfärgningar, smuts och en tydlig gul vattenlinje gör att båten ser matt och trött ut.</p>
+            </div>
+          </article>
+
+          <article class="gallery-card">
+            <div class="gallery-label after">Efter</div>
+            <img src="efter.jpeg" alt="Båt efter tvätt" class="after-shot">
+            <div class="gallery-copy">
+              <h3>Efter tvätt</h3>
+              <p>Efter rengöring blir ytan betydligt fräschare, renare och får ett tydligare lyft i helhetsintrycket.</p>
+              <div class="gallery-result">Tydligare glans, renare vattenlinje och ett fräschare helhetsintryck.</div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="varfor-oss" class="section">
+      <div class="card">
+        <h2 class="section-title">Varför välja Berga Båttvätt</h2>
+        <p class="section-subtitle">Vi gör det enkelt för dig att boka en utvändig båttvätt med tydlig information, smidiga tider och enkel kontakt.</p>
+
+        <div class="feature-grid">
+          <article class="feature-box">
+            <h3>Tydligt från början</h3>
+            <p>Du ser direkt vad som ingår, vad det kostar och vad som krävs för att vi ska kunna utföra jobbet.</p>
+          </article>
+          <article class="feature-box">
+            <h3>Enkel bokning online</h3>
+            <p>Välj datum, välj tid och fyll i dina uppgifter snabbt utan att behöva ringa först.</p>
+          </article>
+          <article class="feature-box">
+            <h3>Smidigt efteråt</h3>
+            <p>Vi håller kontakten tydligt före och efter tvätten så att du vet vad som händer och hur betalningen går till.</p>
+          </article>
         </div>
       </div>
     </section>
@@ -774,7 +1157,7 @@
           </div>
           <div class="step">
             <h3>Fyll i dina uppgifter</h3>
-            <p>Fyll i kontaktuppgifter, båtstorlek och plats/hamn så att bokningen blir tydlig och komplett.</p>
+            <p>Fyll i kontaktuppgifter, båtstorlek, plats/hamn och klistra gärna in en Google Maps-pin på exakt var båten ligger.</p>
           </div>
           <div class="step">
             <h3>Slutför bokningen</h3>
@@ -783,47 +1166,50 @@
         </div>
       </div>
 
-      <div class="card" id="kontakt">
-        <h2 class="section-title">Kontakt</h2>
-        <p class="section-subtitle">Har du frågor om bokning, tider eller utvändig tvätt?</p>
-        <p><strong>Telefon:</strong> 073-388 12 16</p>
-        <p><strong>E-post:</strong> info@bergabattvatt.se</p>
-        <p><strong>Plats:</strong> Berga / Stockholm</p>
-        <p class="contact-note">Byt gärna ut e-postadressen till din riktiga adress om du vill ta emot frågor där också.</p>
+        <div class="card" id="kontakt">
+          <h2 class="section-title">Kontakt</h2>
+          <p class="section-subtitle">Har du frågor om bokning, tider eller utvändig tvätt?</p>
+          <p><strong>E-post:</strong> bergabattvatt@gmail.com</p>
+          <p><strong>Telefon:</strong> 073-388 12 16</p>
+          <p><strong>Sociala medier:</strong> <span class="social-links"><a class="social-link" href="https://www.instagram.com/bergabattvatt" target="_blank" rel="noopener noreferrer"><span class="social-icon instagram">IG</span>Instagram</a><a class="social-link" href="https://www.tiktok.com/@bergabttvtt2" target="_blank" rel="noopener noreferrer"><span class="social-icon tiktok">TT</span>TikTok</a><a class="social-link" href="https://www.facebook.com/bergab%C3%A5ttv%C3%A4tt" target="_blank" rel="noopener noreferrer"><span class="social-icon facebook">f</span>Facebook</a></span></p>
+          <p><strong>Plats:</strong> Berga / Stockholm</p>
+          <p class="contact-note">Vi svarar gärna på frågor om bokning, pris, plats, båtstorlek och hur tvätten går till.</p>
+        </div>
+    </section>
+
+    <section class="section">
+      <div class="service-area">
+        <div class="card">
+          <h2 class="section-title">Passar dig som vill</h2>
+          <p class="section-subtitle">Tjänsten passar dig som vill hålla båten ren utan att lägga tid på jobbet själv.</p>
+          <ul class="service-list">
+            <li>Få båten ren inför sjösättning eller upptagning</li>
+            <li>Fräscha upp båten inför försäljning eller visning</li>
+            <li>Slippa lägga helgen på rengöring själv</li>
+            <li>Få hjälp på plats när båten står på land</li>
+          </ul>
+        </div>
+
+        <div class="cta-panel">
+          <h2 class="section-title">Redo att boka båttvätt?</h2>
+          <p>Välj en tid som passar dig och fyll i bokningen direkt på sidan. Vi fokuserar på bra pris, flexibilitet och personlig service där vi kommer till båtarna.</p>
+          <div class="hero-buttons">
+            <a href="#bokning" class="btn btn-primary">Boka båttvätt</a>
+            <a href="om-oss.html" class="btn btn-secondary">Lär känna oss</a>
+          </div>
+        </div>
       </div>
     </section>
 
     <section class="section">
       <div class="grid-2">
         <div class="card promise-box">
-          <h3>Tydligt för kunden</h3>
-          <p>Vi har lyft fram pris, betalning, område och bokningsprocess så att kunden slipper tveka inför nästa steg.</p>
+          <h3>Tydlig bokning</h3>
+          <p>Du ser direkt vilka tider som finns, vad tjänsten kostar och vad du behöver fylla i för att boka.</p>
         </div>
         <div class="card promise-box">
-          <h3>Enkelt att bygga vidare</h3>
-          <p>När du vill kan vi också lägga till riktiga kundomdömen, bilder på båtar före och efter tvätt och ett kontaktformulär som känns ännu mer professionellt.</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="card">
-        <h2 class="section-title">Vanliga frågor</h2>
-        <p class="section-subtitle">Bra att ha med för att minska osäkerhet och få fler att gå vidare till bokning.</p>
-
-        <div class="faq-grid">
-          <article class="faq-item">
-            <h3>Vad ingår i tvätten?</h3>
-            <p>En utvändig rengöring av båtens synliga ytor för att ge ett rent och välskött helhetsintryck.</p>
-          </article>
-          <article class="faq-item">
-            <h3>När kan jag boka?</h3>
-            <p>Lediga tider visas direkt i kalendern. Kvällstider finns på vardagar och dagtider på helger och röda dagar.</p>
-          </article>
-          <article class="faq-item">
-            <h3>Hur betalar jag?</h3>
-            <p>Du kan välja att betala direkt med Swish eller efter att arbetet är utfört, beroende på vad som passar dig bäst.</p>
-          </article>
+          <h3>Trygg kontakt</h3>
+          <p>Om du har frågor före eller efter bokningen kan du enkelt höra av dig så hjälper vi dig vidare.</p>
         </div>
       </div>
     </section>
@@ -833,10 +1219,19 @@
         <h2 class="section-title">Boka tid</h2>
         <p class="section-subtitle">Välj först ett datum i kalendern. Därefter visas bokningsbara tider automatiskt.</p>
 
+        <div class="booking-requirements">
+          <h3>Det här krävs för att boka</h3>
+          <ul>
+            <li>Båten måste stå på land vid tvättillfället.</li>
+            <li>Det måste finnas tillgång till vatten nära båten.</li>
+            <li>Du behöver fylla i plats eller hamn, och gärna klistra in en Google Maps-pin på exakt var båten ligger.</li>
+          </ul>
+        </div>
+
         <div class="booking-layout">
           <div class="calendar-card">
             <h3>Välj datum</h3>
-            <p class="booking-note">Kalendern visar framtida bokningsbara datum under 2026. Bekräftade tider markeras automatiskt.</p>
+            <p class="booking-note">Kalendern visar framtida bokningsbara datum under 2026. Bokade tider markeras automatiskt.</p>
 
             <div class="calendar-header">
               <button type="button" class="calendar-nav" id="prevMonth">←</button>
@@ -889,9 +1284,9 @@
                 <label for="boatSize">Båtstorlek</label>
                 <select id="boatSize" required>
                   <option value="">Välj storlek</option>
-                  <option value="Liten båt">Liten båt</option>
-                  <option value="Mellan båt">Mellan båt</option>
-                  <option value="Stor båt">Stor båt</option>
+                  <option value="Upp till 20 fot">Upp till 20 fot - 599 kr</option>
+                  <option value="21 till 35 fot">21 till 35 fot - 799 kr</option>
+                  <option value="35 till 50 fot">35 till 50 fot - 999 kr</option>
                 </select>
               </div>
             </div>
@@ -908,14 +1303,43 @@
             </div>
 
             <div>
+              <label for="mapLink">Google Maps-länk</label>
+              <input type="url" id="mapLink" placeholder="Klistra gärna in en Google Maps-pin på exakt var båten ligger">
+              <p class="booking-note">Det här är inte ett måste, men det gör det mycket enklare för oss att hitta exakt rätt plats.</p>
+            </div>
+
+            <div>
               <label for="message">Övrig information</label>
               <textarea id="message" rows="4" placeholder="Skriv gärna båtmodell, bryggplats eller annat som är bra för oss att veta"></textarea>
             </div>
 
             <button type="submit" class="submit-btn">Gå vidare till betalning</button>
             <p class="booking-note">Bokningen sparas som väntande först. På nästa sida kan kunden välja att betala direkt eller efter tvätt.</p>
+            <p class="booking-note">Vi bekräftar sedan bokningen manuellt via mejl eller telefon om något behöver stämmas av.</p>
             <div class="success-message" id="successMessage">Bokningen har sparats.</div>
           </form>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="card">
+        <h2 class="section-title">Vanliga frågor</h2>
+        <p class="section-subtitle">Bra att ha med för att minska osäkerhet och få fler att gå vidare till bokning.</p>
+
+        <div class="faq-grid">
+          <article class="faq-item">
+            <h3>Vad ingår i tvätten?</h3>
+            <p>Snäckborttagning, syratvätt mot gul vattenlinje, alkalisk avfettning mot organisk smuts och shampoo för extra glans.</p>
+          </article>
+          <article class="faq-item">
+            <h3>Vad krävs för att boka?</h3>
+            <p>Båten behöver stå på land och det behöver finnas vatten i närheten så att vi kan utföra tvätten på plats.</p>
+          </article>
+          <article class="faq-item">
+            <h3>Hur betalar jag?</h3>
+            <p>Du kan betala manuellt med Swish eller välja att få betalningsinformation efter att arbetet är slutfört.</p>
+          </article>
         </div>
       </div>
     </section>
@@ -924,7 +1348,16 @@
   <footer>
     <div class="container">
       <p><strong>Berga Båttvätt</strong></p>
-      <p>Smidig och professionell båttvätt för dig som vill ha ett enklare båtliv.</p>
+      <p>Personlig och lokal båtrengöring med fokus på bra pris, flexibilitet och trygg kontakt.</p>
+      <p>E-post: bergabattvatt@gmail.com</p>
+      <p>Telefon: 073-388 12 16</p>
+      <p>Sociala medier: <span class="social-links"><a class="social-link" href="https://www.instagram.com/bergabattvatt" target="_blank" rel="noopener noreferrer"><span class="social-icon instagram">IG</span>Instagram</a><a class="social-link" href="https://www.tiktok.com/@bergabttvtt2" target="_blank" rel="noopener noreferrer"><span class="social-icon tiktok">TT</span>TikTok</a><a class="social-link" href="https://www.facebook.com/bergab%C3%A5ttv%C3%A4tt" target="_blank" rel="noopener noreferrer"><span class="social-icon facebook">f</span>Facebook</a></span></p>
+      <div class="footer-links">
+        <a href="#tjanster">Tjänst</a>
+        <a href="om-oss.html">Om oss</a>
+        <a href="#bokning">Boka tid</a>
+        <a href="#kontakt">Kontakt</a>
+      </div>
       <p>© 2026 Berga Båttvätt. Alla rättigheter förbehållna.</p>
     </div>
   </footer>
@@ -940,10 +1373,16 @@
     const timeSlots = document.getElementById('timeSlots');
     const prevMonthButton = document.getElementById('prevMonth');
     const nextMonthButton = document.getElementById('nextMonth');
+    const boatSizeInput = document.getElementById('boatSize');
 
     const SUPABASE_URL = 'https://xeyippgcoqfskcmqzazx.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_MUKxAwv0vNXDrcgumq81fQ_Uvx4eOuq';
     const SUPABASE_TABLE = 'bookings';
+    const PRICE_BY_BOAT_SIZE = {
+      'Upp till 20 fot': 599,
+      '21 till 35 fot': 799,
+      '35 till 50 fot': 999
+    };
 
     const bookingYear = 2026;
     const todayString = '2026-04-12';
@@ -988,26 +1427,24 @@
     }
 
     async function createBooking(booking) {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}?select=id`, {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/create-booking`, {
         method: 'POST',
-        // Ask PostgREST to return the inserted row so we can attach payment to the booking.
         headers: {
-          ...getHeaders(),
-          Prefer: 'return=representation'
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          customer_name: booking.name,
+          name: booking.name,
           email: booking.email,
           phone: booking.phone,
-          boat_size: booking.boatSize,
-          boat_type: booking.boatType || null,
-          booking_date: booking.date,
-          booking_time: booking.time,
-          service: 'Utvändig tvätt',
+          boatSize: booking.boatSize,
+          boatType: booking.boatType || '',
+          date: booking.date,
+          time: booking.time,
           location: booking.location,
-          message: booking.message || null,
-          status: 'pending',
-          payment_status: 'unpaid'
+          message: booking.fullMessage || '',
+          price: booking.price
         })
       });
 
@@ -1015,8 +1452,8 @@
         throw new Error('Kunde inte spara bokningen.');
       }
 
-      addBookingToCache(booking.date, booking.time);
       await res.json();
+      addBookingToCache(booking.date, booking.time);
     }
 
     function formatDate(year, month, day) {
@@ -1031,6 +1468,10 @@
         month: 'long',
         year: 'numeric'
       });
+    }
+
+    function getPriceForBoatSize(boatSize) {
+      return PRICE_BY_BOAT_SIZE[boatSize] || 599;
     }
 
     function getBookedTimes(date) {
@@ -1188,13 +1629,21 @@
         name: document.getElementById('name').value.trim(),
         email: document.getElementById('email').value.trim(),
         phone: document.getElementById('phone').value.trim(),
-        boatSize: document.getElementById('boatSize').value,
+        boatSize: boatSizeInput.value,
         boatType: document.getElementById('boatType').value.trim(),
         date: dateInput.value,
         time: timeInput.value,
         location: document.getElementById('location').value.trim(),
-        message: document.getElementById('message').value.trim()
+        mapLink: document.getElementById('mapLink').value.trim(),
+        message: document.getElementById('message').value.trim(),
+        price: getPriceForBoatSize(boatSizeInput.value)
       };
+
+      const messageParts = [booking.message];
+      if (booking.mapLink) {
+        messageParts.push(`Google Maps: ${booking.mapLink}`);
+      }
+      booking.fullMessage = messageParts.filter(Boolean).join('\n\n');
 
       try {
         await createBooking(booking);
@@ -1217,7 +1666,9 @@
         const params = new URLSearchParams({
           name: booking.name,
           date: booking.date,
-          time: booking.time
+          time: booking.time,
+          boatSize: booking.boatSize,
+          price: String(booking.price)
         });
 
         window.location.href = `betalning.html?${params.toString()}`;
