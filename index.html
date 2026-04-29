@@ -1,0 +1,3100 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Berga Fönsterputs</title>
+  <meta name="description" content="Berga Fönsterputs erbjuder personlig och lokal fönsterputs på plats med tydliga priser och enkel onlinebokning." />
+  <style>
+    :root {
+      --primary: #0b6fa4;
+      --primary-dark: #084f74;
+      --cta: #ffb347;
+      --cta-dark: #f1992d;
+      --accent: #dff2fb;
+      --bg: #cfe8f5;
+      --surface: rgba(255,255,255,0.97);
+      --text: #173042;
+      --muted: #5f7280;
+      --white: #ffffff;
+      --border: #c6dfec;
+      --success: #127c56;
+      --shadow: 0 16px 38px rgba(11, 111, 164, 0.14);
+      --radius: 22px;
+      --max-width: 1120px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      margin: 0;
+      color: var(--text);
+      background: linear-gradient(to bottom, #e2f2fb, var(--bg));
+      line-height: 1.5;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: min(92%, var(--max-width));
+      margin: 0 auto;
+    }
+
+    header {
+      background:
+        linear-gradient(135deg, rgba(8, 82, 120, 0.76), rgba(6, 58, 88, 0.72)),
+        linear-gradient(90deg, rgba(255,255,255,0.52) 0 1.3%, rgba(195,236,252,0.18) 1.3% 2.6%, transparent 2.6% 47.4%, rgba(255,255,255,0.52) 47.4% 48.8%, rgba(195,236,252,0.18) 48.8% 51.2%, rgba(255,255,255,0.52) 51.2% 52.6%, transparent 52.6% 97.4%, rgba(255,255,255,0.52) 97.4% 98.7%, rgba(195,236,252,0.18) 98.7% 100%),
+        linear-gradient(180deg, rgba(255,255,255,0.56) 0 1.8%, rgba(195,236,252,0.18) 1.8% 3.2%, transparent 3.2% 46.8%, rgba(255,255,255,0.56) 46.8% 48.2%, rgba(195,236,252,0.18) 48.2% 51.8%, rgba(255,255,255,0.56) 51.8% 53.2%, transparent 53.2% 96.8%, rgba(255,255,255,0.56) 96.8% 98.2%, rgba(195,236,252,0.18) 98.2% 100%),
+        linear-gradient(118deg, rgba(255,255,255,0.40) 10%, rgba(255,255,255,0.08) 26%, transparent 42%),
+        radial-gradient(circle at 21% 24%, rgba(255,255,255,0.55), transparent 14%),
+        radial-gradient(circle at 72% 26%, rgba(255,255,255,0.42), transparent 16%),
+        radial-gradient(circle at 62% 62%, rgba(255,255,255,0.18), transparent 24%),
+        linear-gradient(180deg, #effbff 0%, #c9efff 26%, #8fd8f4 58%, #5eb9df 82%, #2f7ba7 100%);
+      color: var(--white);
+      padding: 22px 0 310px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(128deg, transparent 16%, rgba(255,255,255,0.14) 24%, rgba(255,255,255,0.46) 31%, rgba(255,255,255,0.12) 38%, transparent 48%),
+        linear-gradient(38deg, transparent 58%, rgba(255,255,255,0.16) 66%, rgba(255,255,255,0.06) 72%, transparent 78%),
+        linear-gradient(to bottom, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 60%, rgba(11,111,164,0.14) 80%, rgba(11,111,164,0.09) 91%, rgba(125,185,214,0.14) 97%, #cfe8f5 100%);
+      pointer-events: none;
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      right: -120px;
+      bottom: -120px;
+      width: 340px;
+      height: 340px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      pointer-events: none;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      position: fixed;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(92%, var(--max-width));
+      padding: 12px 16px;
+      border-radius: 28px;
+      background: rgba(8, 56, 82, 0.34);
+      border: 1px solid rgba(255,255,255,0.16);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 18px 34px rgba(4, 25, 36, 0.16);
+      z-index: 20;
+      opacity: 1;
+      transition: padding 0.28s ease, border-radius 0.28s ease, gap 0.28s ease, background 0.28s ease, box-shadow 0.28s ease, opacity 0.38s ease, transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), filter 0.38s ease;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      width: min(146px, 31vw);
+      height: min(146px, 31vw);
+      border-radius: 26px;
+      background: #ffffff;
+      border: 1px solid rgba(255,255,255,0.98);
+      backdrop-filter: blur(10px);
+      box-shadow:
+        0 15px 28px rgba(4, 25, 36, 0.17),
+        0 5px 12px rgba(255,255,255,0.28) inset;
+      overflow: hidden;
+      flex-shrink: 0;
+      transition: width 0.28s ease, height 0.28s ease, padding 0.28s ease, border-radius 0.28s ease, box-shadow 0.28s ease;
+    }
+
+    .topbar .brand {
+      text-decoration: none;
+    }
+
+    .brand img {
+      width: 114%;
+      height: 114%;
+      object-fit: contain;
+      object-position: center;
+      display: block;
+      border-radius: 22px;
+      filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.12));
+      transition: border-radius 0.28s ease;
+    }
+
+    .brand-text {
+      display: none;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .brand-tagline {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.88);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+
+    nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 6px;
+      border-radius: 999px;
+      backdrop-filter: blur(10px);
+      align-items: center;
+      transition: gap 0.28s ease, padding 0.28s ease, background 0.28s ease;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+    }
+
+    nav a {
+      font-weight: 700;
+      padding: 9px 13px;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      line-height: 1;
+      color: rgba(255,255,255,0.94);
+      background: rgba(255,255,255,0.03);
+      border: 1px solid transparent;
+      transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+
+    nav a.is-active {
+      background: rgba(255,255,255,0.18);
+      border-color: rgba(255,255,255,0.22);
+      color: #ffffff;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    body.topbar-compact .topbar {
+      gap: 12px;
+      padding: 8px 12px;
+      border-radius: 24px;
+      background: rgba(8, 56, 82, 0.42);
+      box-shadow: 0 16px 28px rgba(4, 25, 36, 0.2);
+    }
+
+    body.topbar-compact .brand {
+      padding: 6px;
+      width: min(112px, 24vw);
+      height: min(112px, 24vw);
+      border-radius: 22px;
+      box-shadow:
+        0 12px 24px rgba(4, 25, 36, 0.16),
+        0 4px 10px rgba(255,255,255,0.28) inset;
+    }
+
+    body.topbar-compact .brand img {
+      border-radius: 18px;
+    }
+
+    body.topbar-compact nav {
+      gap: 6px;
+      padding: 6px;
+    }
+
+    body.topbar-compact nav a {
+      padding: 7px 12px;
+      font-size: 0.93rem;
+    }
+
+    body.topbar-hidden .topbar {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-26px) scale(0.92);
+      filter: blur(6px);
+      pointer-events: none;
+    }
+
+    body.topbar-manual-hidden .topbar {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-26px) scale(0.92);
+      filter: blur(6px);
+      pointer-events: none;
+    }
+
+    body.topbar-hidden .topbar-show-button,
+    body.topbar-manual-hidden .topbar-show-button {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    body.topbar-hidden .topbar-show-button {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-10px);
+    }
+
+    nav a:hover {
+      background: rgba(255,255,255,0.14);
+      border-color: rgba(255,255,255,0.14);
+      transform: translateY(-1px);
+    }
+
+    nav a:focus-visible {
+      outline: none;
+      border-color: rgba(255,255,255,0.38);
+      background: rgba(255,255,255,0.16);
+    }
+
+    .topbar-toggle,
+    .topbar-show-button {
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(255,255,255,0.10);
+      color: rgba(255,255,255,0.96);
+      border-radius: 999px;
+      font-weight: 800;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, opacity 0.28s ease;
+    }
+
+    .topbar-toggle {
+      padding: 9px 14px;
+      font-size: 0.92rem;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .topbar-show-button {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      z-index: 24;
+      padding: 12px 18px;
+      background: linear-gradient(135deg, rgba(11,111,164,0.94), rgba(8,79,116,0.96));
+      border: 1px solid rgba(255,255,255,0.28);
+      color: #ffffff;
+      box-shadow: 0 18px 34px rgba(4, 25, 36, 0.22);
+      font-size: 0.95rem;
+      letter-spacing: 0.01em;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-10px);
+    }
+
+    .topbar-toggle:hover,
+    .topbar-show-button:hover {
+      transform: translateY(-1px);
+      background: linear-gradient(135deg, rgba(14,126,185,0.98), rgba(8,92,135,0.98));
+      border-color: rgba(255,255,255,0.36);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 28px;
+      align-items: center;
+      margin-top: 214px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.2rem, 4vw, 3.8rem);
+      line-height: 1.01;
+      margin: 0 0 14px;
+      max-width: 760px;
+    }
+
+    .hero p {
+      font-size: 1.04rem;
+      max-width: 580px;
+      color: rgba(255,255,255,0.92);
+      margin: 0 0 18px;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 14px 22px;
+      border-radius: 999px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(to right, var(--cta), var(--cta-dark));
+      color: #173042;
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.16);
+      position: relative;
+    }
+
+    .hero .btn-primary {
+      padding: 16px 28px;
+      font-size: 1.08rem;
+      font-weight: 900;
+      letter-spacing: 0.01em;
+      box-shadow: 0 20px 36px rgba(241, 153, 45, 0.32);
+      border: 2px solid rgba(255,255,255,0.28);
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.10);
+      color: var(--white);
+      border: 1px solid rgba(255,255,255,0.42);
+      backdrop-filter: blur(8px);
+    }
+
+    .hero-card,
+    .card,
+    .booking-card {
+      background: var(--surface);
+      border: 1px solid rgba(214, 225, 222, 0.9);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-card {
+      padding: 28px;
+      color: var(--text);
+      position: relative;
+      overflow: hidden;
+      border-top: none;
+    }
+
+    .hero-card::after {
+      content: '';
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 10px;
+      background: rgba(123, 183, 201, 0.12);
+      border-radius: 50%;
+      width: 180px;
+      height: 180px;
+      inset: auto -60px -80px auto;
+    }
+
+    .hero-card h3 {
+      margin: 0 0 12px;
+    }
+
+    .hero-list {
+      list-style: none;
+      padding: 0;
+      margin: 16px 0 0;
+    }
+
+    .hero-list li {
+      padding: 13px 0;
+      border-bottom: 1px solid var(--border);
+      font-weight: 700;
+    }
+
+    .hero-list li:last-child {
+      border-bottom: none;
+    }
+
+    .hero-highlight {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.18);
+      font-size: 0.92rem;
+      font-weight: 700;
+      margin-bottom: 18px;
+      border-radius: 10px;
+    }
+
+    .hero-lead-points {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 0 0 24px;
+      padding: 0;
+      list-style: none;
+      max-width: 700px;
+    }
+
+    .hero-lead-points li {
+      padding: 9px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.18);
+      color: rgba(255,255,255,0.95);
+      font-weight: 700;
+      font-size: 0.93rem;
+    }
+
+    .hero-facts {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 26px;
+      max-width: 720px;
+    }
+
+    .hero-fact {
+      padding: 16px 18px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    .hero-fact strong {
+      display: block;
+      font-size: 1.15rem;
+      margin-bottom: 4px;
+    }
+
+    .hero-fact span {
+      color: rgba(255,255,255,0.9);
+      font-size: 0.94rem;
+    }
+
+    main {
+      margin-top: -238px;
+      padding-bottom: 58px;
+    }
+
+    .section {
+      position: relative;
+      margin-bottom: 28px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+    }
+
+    .card,
+    .booking-card {
+      padding: 28px;
+      transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+    }
+
+    .card h3,
+    .booking-card h3,
+    .calendar-card h3 {
+      color: #12384c;
+    }
+
+    .section-title {
+      font-size: 1.95rem;
+      margin: 0 0 8px;
+    }
+
+    .section-subtitle {
+      color: var(--muted);
+      margin: 0 0 24px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: linear-gradient(to right, #e0f3fb, #edf8fd);
+      color: var(--primary-dark);
+      font-size: 0.85rem;
+      padding: 7px 11px;
+      border-radius: 999px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      border: 1px solid #d6edf8;
+    }
+
+    .price {
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin: 12px 0 16px;
+      transition: transform 0.24s ease, color 0.24s ease;
+    }
+
+    .card ul {
+      padding-left: 18px;
+      color: var(--muted);
+    }
+
+    .feature-grid,
+    .faq-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .feature-box,
+    .faq-item,
+    .promise-box {
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 22px;
+      background: linear-gradient(to bottom, #fbfeff, #f5fbff);
+    }
+
+    .hero-card:hover,
+    .card:hover,
+    .booking-card:hover,
+    .feature-box:hover,
+    .promise-box:hover,
+    .trust-item:hover,
+    .gallery-card:hover,
+    .booking-intro-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 42px rgba(11, 111, 164, 0.16);
+      border-color: #b8d9e8;
+    }
+
+    .card:hover .price {
+      transform: scale(1.03);
+      color: #0a547c;
+    }
+
+    .feature-box h3,
+    .faq-item h3,
+    .promise-box h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+
+    .feature-box p,
+    .faq-item p,
+    .promise-box p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .service-area {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    .service-list {
+      list-style: none;
+      padding: 0;
+      margin: 18px 0 0;
+      display: grid;
+      gap: 12px;
+    }
+
+    .service-list li {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.92);
+      font-weight: 700;
+    }
+
+    .cta-panel {
+      background:
+        linear-gradient(135deg, var(--primary-dark), var(--primary));
+      color: var(--white);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: var(--shadow);
+    }
+
+    .cta-panel p {
+      color: rgba(255,255,255,0.9);
+    }
+
+    .cta-panel .btn-secondary {
+      background: rgba(255,255,255,0.12);
+      color: var(--white);
+      border-color: rgba(255,255,255,0.35);
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .gallery-card {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      background: linear-gradient(to bottom, #fbfeff, #f4fbff);
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    .gallery-card img {
+      width: 100%;
+      height: 360px;
+      object-fit: cover;
+      display: block;
+      background: #dfeef6;
+    }
+
+    .gallery-card img.after-shot {
+      object-fit: contain;
+      padding: 12px;
+      background: #eef7fb;
+    }
+
+    .gallery-label {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--white);
+      backdrop-filter: blur(8px);
+    }
+
+    .gallery-label.before {
+      background: rgba(122, 91, 34, 0.86);
+    }
+
+    .gallery-label.after {
+      background: rgba(18, 124, 86, 0.88);
+    }
+
+    .gallery-copy {
+      padding: 18px 20px 20px;
+    }
+
+    .gallery-copy h3 {
+      margin: 0 0 8px;
+    }
+
+    .gallery-copy p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .compare-card {
+      overflow: hidden;
+      --compare-position: 50%;
+      --compare-before-center: 25%;
+      --compare-after-center: 75%;
+      --compare-before-opacity: 1;
+      --compare-after-opacity: 1;
+      content-visibility: auto;
+      contain-intrinsic-size: 560px;
+      isolation: isolate;
+    }
+
+    .compare-stage {
+      position: relative;
+      height: 420px;
+      background:
+        radial-gradient(circle at 20% 18%, rgba(255,255,255,0.24), transparent 18%),
+        linear-gradient(180deg, #eaf6fc 0%, #d7ecf7 100%);
+      cursor: ew-resize;
+      overflow: hidden;
+      user-select: none;
+      touch-action: none;
+      contain: layout paint style;
+      transform: translateZ(0);
+    }
+
+    .compare-stage::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent 12%, rgba(255,255,255,0.14) 28%, rgba(255,255,255,0.32) 34%, rgba(255,255,255,0.08) 42%, transparent 54%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .compare-stage img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      backface-visibility: hidden;
+    }
+
+    .compare-after {
+      clip-path: inset(0 0 0 var(--compare-position));
+      transition: none;
+      z-index: 2;
+      will-change: auto;
+    }
+
+    .compare-card.is-sliding .compare-after {
+      will-change: clip-path;
+    }
+
+    .compare-divider {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: var(--compare-position);
+      width: 0;
+      pointer-events: none;
+      z-index: 3;
+      will-change: auto;
+    }
+
+    .compare-card.is-sliding .compare-divider {
+      will-change: left;
+    }
+
+    .compare-divider::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: -2px;
+      width: 4px;
+      background: rgba(255,255,255,0.96);
+      box-shadow: 0 0 0 1px rgba(17,57,74,0.08), 0 0 24px rgba(255,255,255,0.28);
+    }
+
+    .compare-handle {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      transform: translate(-50%, -50%);
+      width: 66px;
+      height: 66px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(239,248,253,0.96));
+      border: 2px solid rgba(11,111,164,0.2);
+      box-shadow: 0 12px 22px rgba(11,111,164,0.16);
+      display: grid;
+      place-items: center;
+      color: var(--primary-dark);
+      font-weight: 900;
+      font-size: 1.05rem;
+      will-change: transform;
+      cursor: grab;
+      pointer-events: auto;
+    }
+
+    .compare-handle:active {
+      cursor: grabbing;
+    }
+
+    .compare-handle::after {
+      content: 'dra';
+      position: absolute;
+      bottom: -28px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(8, 56, 82, 0.82);
+      color: rgba(255,255,255,0.96);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .compare-side-label {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      padding: 12px 18px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.92);
+      border: 1px solid rgba(255,255,255,0.98);
+      box-shadow: 0 16px 30px rgba(4, 25, 36, 0.14);
+      color: var(--primary-dark);
+      font-size: 0.85rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 4;
+      transition: opacity 0.18s ease, transform 0.18s ease, left 0.05s linear;
+    }
+
+    .compare-side-label.before {
+      left: var(--compare-before-center);
+      opacity: var(--compare-before-opacity);
+    }
+
+    .compare-side-label.after {
+      left: var(--compare-after-center);
+      opacity: var(--compare-after-opacity);
+    }
+
+    .compare-range {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      opacity: 0;
+      cursor: ew-resize;
+    }
+
+    .compare-card:hover .compare-handle {
+      transform: translate(-50%, -50%) scale(1.02);
+      box-shadow: 0 14px 24px rgba(11,111,164,0.18);
+    }
+
+    .gallery-result {
+      margin-top: 4px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: #eef8f3;
+      border: 1px solid #cfe8d8;
+      color: #0d6b4a;
+      font-weight: 700;
+      font-size: 0.94rem;
+    }
+
+    .requirements-box {
+      border: 1px solid #cfe4ee;
+      border-left: 6px solid var(--cta-dark);
+      border-radius: 14px;
+      padding: 24px;
+      background: linear-gradient(to bottom, #fff6ed, #fffaf3);
+    }
+
+    .requirements-box h3 {
+      margin: 0 0 10px;
+    }
+
+    .requirements-box ul {
+      margin: 12px 0 0;
+      padding-left: 20px;
+    }
+
+    .area-box {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 30px;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.98), #f8fcfa);
+      box-shadow: var(--shadow);
+    }
+
+    .area-box h2 {
+      margin: 0 0 10px;
+      font-size: 1.95rem;
+    }
+
+    .area-box p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 760px;
+    }
+
+    .trust-strip {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .trust-item {
+      padding: 20px 18px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: linear-gradient(to bottom, #fbfeff, #f4fbff);
+      text-align: center;
+    }
+
+    .trust-item strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--primary-dark);
+    }
+
+    .steps {
+      counter-reset: step;
+    }
+
+    .step {
+      position: relative;
+      padding-left: 56px;
+      margin-bottom: 22px;
+    }
+
+    .step:last-child {
+      margin-bottom: 0;
+    }
+
+    .step::before {
+      counter-increment: step;
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(to right, var(--primary), #1183bf);
+      color: var(--white);
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      box-shadow: 0 10px 22px rgba(11, 111, 164, 0.22);
+    }
+
+    .booking-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .calendar-card {
+      background: linear-gradient(to bottom, #fcfeff, #f1f8fc);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 10px 24px rgba(11, 111, 164, 0.08);
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .calendar-nav {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    .calendar-nav:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .calendar-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      text-transform: capitalize;
+    }
+
+    .calendar-weekdays,
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+
+    .calendar-weekdays div {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-weight: 700;
+      padding-bottom: 6px;
+    }
+
+    .calendar-empty,
+    .calendar-day {
+      min-height: 50px;
+      border-radius: 14px;
+    }
+
+    .calendar-day {
+      border: 1px solid var(--border);
+      background: var(--white);
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--text);
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(11, 111, 164, 0.05);
+    }
+
+    .calendar-day:hover {
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    .calendar-day.selected {
+      background: linear-gradient(to right, var(--primary), #1183bf);
+      color: var(--white);
+      border-color: var(--primary);
+    }
+
+    .calendar-day.booked {
+      background: #fff9ef;
+      border-color: #edd59d;
+      color: #8a5a00;
+    }
+
+    .calendar-day.fully-booked {
+      background: #f7ecef;
+      border-color: #ddb0ba;
+      color: #8a2437;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .calendar-day.past {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .selected-date-box {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 14px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .time-picker {
+      margin-top: 16px;
+    }
+
+    .time-picker h4 {
+      margin: 0 0 10px;
+      font-size: 1rem;
+    }
+
+    .time-slots {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .time-slot {
+      border: 1px solid var(--border);
+      background: var(--white);
+      border-radius: 14px;
+      padding: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .time-slot:hover {
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    .time-slot.selected {
+      background: linear-gradient(to right, var(--primary), #1183bf);
+      border-color: var(--primary);
+      color: var(--white);
+    }
+
+    .time-slot.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .time-slot.booked {
+      background: #f6f7f9;
+      color: var(--muted);
+      text-decoration: line-through;
+      cursor: not-allowed;
+    }
+
+    form {
+      display: grid;
+      gap: 16px;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.88), rgba(248,252,255,0.92));
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.72);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .form-stack {
+      display: grid;
+      gap: 8px;
+    }
+
+    label {
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 13px 14px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      font-size: 1rem;
+      background: #fff;
+      box-shadow: inset 0 1px 2px rgba(17, 57, 74, 0.03);
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: 2px solid rgba(11, 111, 164, 0.18);
+      border-color: var(--primary);
+    }
+
+    .submit-btn {
+      background: linear-gradient(to right, var(--primary), var(--primary-dark));
+      color: var(--white);
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      padding: 17px;
+      cursor: pointer;
+      box-shadow: 0 16px 28px rgba(17, 57, 74, 0.2);
+    }
+
+    .submit-btn:hover {
+      background: linear-gradient(to right, #0f3340, #1c5a72);
+      transform: translateY(-1px);
+    }
+
+    .booking-note,
+    .contact-note {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin: 0;
+    }
+
+    .field-note {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin: 2px 0 0;
+      line-height: 1.45;
+    }
+
+    .rut-notice {
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px solid #ffd08b;
+      background: linear-gradient(to bottom, #fff8ec, #fff3dd);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+    }
+
+    .rut-notice strong {
+      color: #8a5a00;
+      font-size: 0.95rem;
+    }
+
+    .rut-help-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .field-help {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      width: fit-content;
+    }
+
+    .field-help-trigger {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid #c9e2ee;
+      background: #f3fbff;
+      color: var(--primary-dark);
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: help;
+    }
+
+    .field-help-tooltip {
+      position: absolute;
+      left: 0;
+      top: calc(100% + 10px);
+      width: min(320px, 78vw);
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: #12384c;
+      color: #ffffff;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      box-shadow: 0 18px 34px rgba(17, 57, 74, 0.24);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-4px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 3;
+    }
+
+    .field-help:hover .field-help-tooltip,
+    .field-help:focus-within .field-help-tooltip {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .consent-box {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 15px 16px;
+      border: 1px solid #cfe4ee;
+      border-radius: 14px;
+      background: linear-gradient(to bottom, #fbfeff, #f3fbff);
+    }
+
+    .consent-box input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+      flex-shrink: 0;
+      accent-color: var(--primary);
+      box-shadow: none;
+    }
+
+    .consent-box label {
+      margin: 0;
+      font-weight: 700;
+      line-height: 1.5;
+    }
+
+    .booking-intro {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .booking-intro-card {
+      padding: 15px 16px;
+      border-radius: 14px;
+      background: linear-gradient(to bottom, #fafdff, #eef8fd);
+      border: 1px solid #c9e2ee;
+    }
+
+    .booking-intro-card strong {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--primary-dark);
+      font-size: 0.95rem;
+    }
+
+    .booking-intro-card span {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .live-price-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 18px;
+      border-radius: 16px;
+      background: linear-gradient(to right, #eff9fd, #dff1fa);
+      border: 1px solid #bfddeb;
+      margin-bottom: 16px;
+    }
+
+    .live-price-copy strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--primary-dark);
+    }
+
+    .live-price-copy span {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .live-price-value {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+      text-align: right;
+    }
+
+    .live-price-value strong {
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--primary-dark);
+      white-space: nowrap;
+    }
+
+    .live-price-value span {
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    .booking-packages {
+      margin-bottom: 18px;
+      border-radius: 16px;
+      border: 1px solid #cfe4ee;
+      background: linear-gradient(to bottom, #fcfeff, #eef8fd);
+      overflow: hidden;
+    }
+
+    .booking-packages-header {
+      width: 100%;
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 20px 22px;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .booking-packages-header h3 {
+      margin: 0;
+      font-size: 1.08rem;
+      color: var(--primary-dark);
+    }
+
+    .booking-packages-header span {
+      color: var(--muted);
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    .booking-packages-header::after {
+      content: 'Visa';
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 72px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 1px solid #c9e2ee;
+      color: var(--primary-dark);
+      font-size: 0.88rem;
+      font-weight: 800;
+    }
+
+    .booking-packages.is-open .booking-packages-header::after {
+      content: 'Dölj';
+    }
+
+    .booking-packages-content {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.32s ease;
+    }
+
+    .booking-packages.is-open .booking-packages-content {
+      grid-template-rows: 1fr;
+    }
+
+    .booking-packages-inner {
+      overflow: hidden;
+      min-height: 0;
+      padding: 0 22px 0;
+    }
+
+    .booking-packages.is-open .booking-packages-inner {
+      padding-bottom: 20px;
+    }
+
+    .booking-package-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 14px;
+    }
+
+    .booking-package-card {
+      padding: 16px;
+      border-radius: 14px;
+      background: #ffffff;
+      border: 1px solid #c9e2ee;
+    }
+
+    .booking-package-card strong {
+      display: block;
+      color: var(--primary-dark);
+      margin-bottom: 6px;
+    }
+
+    .booking-package-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .price-list {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 0.94rem;
+    }
+
+    .price-list th,
+    .price-list td {
+      text-align: left;
+      padding: 10px 0;
+      border-bottom: 1px solid #dbeaf2;
+    }
+
+    .price-list th {
+      color: var(--muted);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .price-list tr:last-child td {
+      border-bottom: none;
+    }
+
+    .price-list td:last-child {
+      font-weight: 900;
+      color: var(--primary-dark);
+      white-space: nowrap;
+    }
+
+    .package-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .package-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #e9f6fc;
+      border: 1px solid #c4e0ec;
+      color: var(--primary-dark);
+      font-size: 0.88rem;
+      font-weight: 800;
+    }
+
+    .stepper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .stepper-btn {
+      width: 46px;
+      height: 46px;
+      border: 1px solid #c9e2ee;
+      border-radius: 14px;
+      background: linear-gradient(to bottom, #ffffff, #eef8fd);
+      color: var(--primary-dark);
+      font-size: 1.4rem;
+      font-weight: 900;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .stepper-btn:hover {
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    .stepper input[readonly] {
+      text-align: center;
+      font-weight: 800;
+      cursor: default;
+    }
+
+    .addon-options {
+      display: grid;
+      gap: 10px;
+    }
+
+    .addon-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      border: 1px solid #cfe4ee;
+      border-radius: 14px;
+      background: linear-gradient(to bottom, #fbfeff, #f3fbff);
+    }
+
+    .addon-option input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+      accent-color: var(--primary);
+      box-shadow: none;
+      flex-shrink: 0;
+    }
+
+    .addon-option strong {
+      display: block;
+      color: var(--primary-dark);
+      margin-bottom: 3px;
+    }
+
+    .addon-option span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    .booking-requirements {
+      margin-bottom: 18px;
+      padding: 20px 22px;
+      border-radius: 14px;
+      border: 1px solid #cfe4ee;
+      border-left: 6px solid var(--primary);
+      background: linear-gradient(to bottom, #fcfeff, #edf7fc);
+    }
+
+    .booking-requirements h3 {
+      margin: 0 0 10px;
+      font-size: 1.05rem;
+    }
+
+    .booking-requirements ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+    }
+
+    .booking-requirements li + li {
+      margin-top: 8px;
+    }
+
+    .faq-item {
+      padding: 0;
+      overflow: hidden;
+      height: fit-content;
+      align-self: start;
+    }
+
+    .faq-question {
+      cursor: pointer;
+      width: 100%;
+      border: 0;
+      background: transparent;
+      text-align: left;
+      padding: 22px;
+      font-weight: 800;
+      font-size: 1rem;
+      color: #12384c;
+      position: relative;
+    }
+
+    .faq-question::after {
+      content: '+';
+      position: absolute;
+      right: 22px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.3rem;
+      color: var(--primary);
+      transition: transform 0.22s ease;
+    }
+
+    .faq-item.is-open .faq-question::after {
+      transform: translateY(-50%) rotate(45deg);
+    }
+
+    .faq-answer {
+      max-height: 0;
+      opacity: 0;
+      padding: 0 22px;
+      color: var(--muted);
+      overflow: hidden;
+      transition: max-height 0.48s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.28s ease, padding 0.32s ease;
+    }
+
+    .faq-item.is-open .faq-answer {
+      opacity: 1;
+      padding: 0 22px 22px;
+    }
+
+    .faq-answer-inner {
+      overflow: hidden;
+      padding-top: 8px;
+      transform: translateY(-12px);
+      transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .faq-item[open] .faq-answer-inner {
+      transform: translateY(0);
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.55s ease, transform 0.55s ease;
+    }
+
+    .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .social-links {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      vertical-align: middle;
+    }
+
+    .social-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.86);
+      border: 1px solid var(--border);
+      color: var(--primary-dark);
+      font-weight: 700;
+      font-size: 0.92rem;
+      transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .social-link:hover {
+      transform: translateY(-1px);
+      background: #f9fcf8;
+      border-color: #c8d9d2;
+    }
+
+    .social-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--white);
+      flex-shrink: 0;
+    }
+
+    .social-icon svg {
+      width: 13px;
+      height: 13px;
+      display: block;
+      fill: currentColor;
+    }
+
+    .social-icon.instagram { background: linear-gradient(135deg, #fd5949, #d6249f, #285AEB); }
+    .social-icon.tiktok { background: #111111; }
+    .social-icon.facebook { background: #1877f2; }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin: 16px 0 0;
+    }
+
+    .footer-links a {
+      font-weight: 700;
+      color: rgba(255,255,255,0.92);
+      border-bottom: 1px solid rgba(255,255,255,0.24);
+      padding-bottom: 2px;
+    }
+
+    .success-message {
+      display: none;
+      margin-top: 16px;
+      padding: 15px 16px;
+      border-radius: 14px;
+      background: #e8f8f1;
+      color: var(--success);
+      font-weight: 700;
+    }
+
+    footer {
+      background: linear-gradient(to bottom, #0f3340, #0b2430);
+      color: rgba(255,255,255,0.9);
+      padding: 48px 0;
+      margin-top: 44px;
+    }
+
+    footer p {
+      margin: 6px 0;
+    }
+
+    @media (max-width: 900px) {
+      .topbar {
+        top: 10px;
+        padding: 10px 12px;
+      }
+
+      .brand {
+        width: min(108px, 28vw);
+        height: min(108px, 28vw);
+        border-radius: 20px;
+      }
+
+      .booking-intro,
+      .hero,
+      .grid-2,
+      .feature-grid,
+      .faq-grid,
+      .gallery-grid,
+      .hero-facts,
+      .service-area,
+      .trust-strip,
+      .booking-layout,
+      .form-row,
+      .time-slots {
+        grid-template-columns: 1fr;
+      }
+
+      header {
+        padding-bottom: 78px;
+      }
+
+      .hero {
+        margin-top: 208px;
+      }
+
+      nav {
+        border-radius: 20px;
+        gap: 5px;
+        padding: 6px;
+      }
+
+      .topbar-actions {
+        width: 100%;
+        justify-content: flex-end;
+      }
+
+      nav a {
+        padding: 8px 11px;
+        font-size: 0.89rem;
+      }
+
+      .topbar-toggle {
+        padding: 8px 12px;
+        font-size: 0.88rem;
+      }
+
+      .topbar-show-button {
+        top: 14px;
+        right: 14px;
+        padding: 10px 15px;
+        font-size: 0.9rem;
+      }
+
+      body.topbar-compact .brand {
+        width: min(92px, 26vw);
+        height: min(92px, 26vw);
+        border-radius: 18px;
+      }
+
+      body.topbar-compact .topbar {
+        padding: 8px 10px;
+      }
+
+      body.topbar-compact .hero {
+        margin-top: 180px;
+      }
+
+      body.topbar-compact nav {
+        gap: 4px;
+        padding: 5px;
+      }
+
+      body.topbar-compact nav a {
+        padding: 7px 10px;
+        font-size: 0.88rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header id="top">
+    <div class="container">
+      <div class="topbar">
+        <a class="brand" href="#top" aria-label="Till toppen">
+          <img src="logga-fonsterputs.png" alt="Berga Fönsterputs logga" onerror="this.style.display='none'">
+          <div class="brand-text">
+            <span class="brand-title">Berga Fönsterputs</span>
+            <span class="brand-tagline">Personlig och lokal service</span>
+          </div>
+        </a>
+
+        <div class="topbar-actions">
+          <nav>
+            <a href="var-tjanst.html">Vår tjänst</a>
+            <a href="om-oss.html">Om oss</a>
+            <a href="#sa-funkar-det">Så funkar det</a>
+            <a href="#bokning">Boka</a>
+            <a href="#kontakt">Kontakt</a>
+          </nav>
+          <button type="button" class="topbar-toggle" id="topbarToggleButton">Dölj</button>
+        </div>
+      </div>
+
+      <div class="hero">
+        <div>
+          <div class="hero-highlight">Fönsterputs i Åkersberga och Stockholm</div>
+          <h1>Skinande rena fönster utan krångel.</h1>
+          <p>Vi kommer hem till dig, putsar noggrant och ser till att du är nöjd. Bokningen är enkel från första klick till färdig puts.</p>
+          <div class="hero-buttons">
+            <a href="#bokning" class="btn btn-primary">Boka fönsterputs nu</a>
+            <a href="#varfor-oss" class="btn btn-secondary">Varför välja oss</a>
+          </div>
+          <div class="hero-facts">
+            <div class="hero-fact">
+              <strong>Från 699 kr</strong>
+              <span>Tydliga priser beroende på bostad och omfattning</span>
+            </div>
+            <div class="hero-fact">
+              <strong>Åkersberga / Stockholm</strong>
+              <span>Personlig och lokal hjälp med fönsterputs</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-card">
+          <h3>Det här får du hos oss</h3>
+          <ul class="hero-list">
+            <li>Du får ett tydligt pris direkt på hemsidan innan du bokar</li>
+            <li>Puts av glas, karmar och lättare smuts runt fönster</li>
+            <li>Flexibla tider på kvällar och helger</li>
+            <li>Trygg kontakt via mejl, telefon och sociala medier</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <button type="button" class="topbar-show-button" id="topbarShowButton">Visa meny</button>
+
+  <main class="container">
+    <section class="section reveal">
+      <div class="trust-strip">
+        <div class="trust-item">
+          <strong>Kvällar och helger</strong>
+          <span>Tider som passar din vardag</span>
+        </div>
+        <div class="trust-item">
+          <strong>Lokal service</strong>
+          <span>Personlig hjälp i Åkersberga och Stockholm</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section reveal">
+      <div class="area-box">
+        <h2>Vi kommer hem till dig</h2>
+        <p>Vi arbetar främst i Österåker, Vaxholm och Täby. Du får ändå gärna höra av dig även om du bor utanför de områdena, så ser vi om vi kan hjälpa dig.</p>
+      </div>
+    </section>
+
+    <section class="section reveal">
+      <div class="requirements-box">
+        <h3>Viktigt inför bokning</h3>
+        <p>För att vi ska kunna utföra fönsterputsen på plats behöver några grundförutsättningar vara uppfyllda.</p>
+        <ul>
+          <li>Fönstren behöver vara åtkomliga på ett säkert sätt.</li>
+          <li>Det behöver finnas möjlighet att komma nära fönstren där arbetet ska göras.</li>
+          <li>Berätta gärna om höga fönster, många våningar eller särskilda förutsättningar i bokningen.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section reveal">
+      <div class="card">
+        <h2 class="section-title">Före och efter</h2>
+        <p class="section-subtitle">Dra i reglaget för att jämföra före och efter. Det här gör skillnaden tydligare direkt.</p>
+
+        <div class="gallery-grid">
+          <article class="gallery-card compare-card">
+            <div class="compare-stage" id="compareStage">
+              <img src="fore-optimized.jpeg" alt="Exempelbild före fönsterputs" width="2000" height="1500" loading="lazy" decoding="async">
+              <img src="efter-optimized.jpeg" alt="Exempelbild efter fönsterputs" class="compare-after" id="compareAfter" width="2000" height="1500" loading="lazy" decoding="async">
+              <div class="compare-side-label before">Före puts</div>
+              <div class="compare-side-label after">Efter puts</div>
+              <div class="compare-divider" id="compareDivider">
+                <div class="compare-handle">↔</div>
+              </div>
+              <input type="range" min="0" max="100" step="0.1" value="50" class="compare-range" id="compareRange" aria-label="Jämför före och efter">
+            </div>
+            <div class="gallery-copy">
+              <h3>Skillnaden syns direkt</h3>
+              <p>Dra i reglaget för att visa hur mycket klarare, renare och fräschare ytan ser ut efter putsning.</p>
+              <div class="gallery-result">Klarare utsikt, renare glas och ett fräschare intryck.</div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="varfor-oss" class="section reveal">
+      <div class="card">
+        <h2 class="section-title">Varför välja Berga Fönsterputs</h2>
+        <p class="section-subtitle">Vi gör det enkelt för dig att boka fönsterputs med tydlig information, smidiga tider och enkel kontakt.</p>
+
+        <div class="feature-grid">
+          <article class="feature-box">
+            <h3>Tydligt från början</h3>
+            <p>Du ser direkt vad som ingår, vad det kostar och vad som är bra för oss att veta inför jobbet.</p>
+          </article>
+          <article class="feature-box">
+            <h3>Enkel bokning online</h3>
+            <p>Välj datum, välj tid och fyll i dina uppgifter snabbt utan att behöva ringa först.</p>
+          </article>
+          <article class="feature-box">
+            <h3>Smidigt efteråt</h3>
+            <p>Vi håller kontakten tydligt före och efter putsningen så att du vet vad som händer och hur betalningen går till.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="sa-funkar-det" class="section grid-2 reveal">
+      <div class="card">
+        <h2 class="section-title">Så funkar det</h2>
+        <p class="section-subtitle">Tre enkla steg från bokning till rena fönster.</p>
+        <div class="steps">
+          <div class="step">
+            <h3>Välj datum och tid</h3>
+            <p>Välj ett framtida datum i kalendern och klicka sedan på en ledig tid som passar dig.</p>
+          </div>
+          <div class="step">
+            <h3>Fyll i dina uppgifter</h3>
+            <p>Fyll i kontaktuppgifter, bostadstyp, adress och klistra gärna in en Google Maps-pin på exakt var vi ska komma.</p>
+          </div>
+          <div class="step">
+            <h3>Slutför bokningen</h3>
+            <p>Du skickas vidare till betalningssidan där du kan betala direkt med Swish eller välja att betala efter putsningen.</p>
+          </div>
+        </div>
+      </div>
+
+        <div class="card" id="kontakt">
+          <h2 class="section-title">Kontakt</h2>
+          <p class="section-subtitle">Har du frågor om bokning, tider eller fönsterputs?</p>
+          <p><strong>E-post:</strong> bergabattvatt@gmail.com</p>
+          <p><strong>Telefon:</strong> 073-388 12 16</p>
+          <p><strong>Sociala medier:</strong> <span class="social-links"><a class="social-link" href="https://www.instagram.com/bergabattvatt" target="_blank" rel="noopener noreferrer"><span class="social-icon instagram" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2Zm-.2 2A3.6 3.6 0 0 0 4 7.6v8.8A3.6 3.6 0 0 0 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6A3.6 3.6 0 0 0 16.4 4H7.6Zm9.65 1.5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2.1a2.9 2.9 0 1 0 0 5.8 2.9 2.9 0 0 0 0-5.8Z"/></svg></span>Instagram</a><a class="social-link" href="https://www.tiktok.com/@bergabttvtt2" target="_blank" rel="noopener noreferrer"><span class="social-icon tiktok" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14.9 2c.45 2.58 1.98 4.12 4.52 4.32v3.12c-1.48.14-2.8-.35-4.02-1.08v6.04c0 4.58-4.98 7.44-8.95 5.44-3.83-1.94-4.07-7.63-.45-9.93 1.04-.66 2.15-.98 3.72-.86v3.28c-.69-.22-1.47-.17-2.1.15-1.51.76-1.92 2.78-.82 4.01 1.55 1.73 4.53.64 4.53-1.74V2h3.57Z"/></svg></span>TikTok</a><a class="social-link" href="https://www.facebook.com/bergab%C3%A5ttv%C3%A4tt" target="_blank" rel="noopener noreferrer"><span class="social-icon facebook" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13.4 22v-8.1h2.73l.41-3.17H13.4V8.7c0-.92.25-1.54 1.57-1.54h1.68V4.32c-.82-.09-1.64-.14-2.46-.13-2.44 0-4.11 1.49-4.11 4.24v2.29H7.3v3.17h2.78V22h3.32Z"/></svg></span>Facebook</a></span></p>
+          <p><strong>Plats:</strong> Åkersberga / Stockholm</p>
+          <p class="contact-note">Vi svarar gärna på frågor om bokning, pris, adress, omfattning och hur fönsterputsen går till.</p>
+        </div>
+    </section>
+
+    <section class="section reveal">
+      <div class="service-area">
+        <div class="card">
+          <h2 class="section-title">Passar dig som vill</h2>
+          <p class="section-subtitle">Tjänsten passar dig som vill få rena fönster utan att lägga tid på jobbet själv.</p>
+          <ul class="service-list">
+            <li>Få renare fönster inför vår, sommar eller visning</li>
+            <li>Fräscha upp hemmet inför försäljning eller besök</li>
+            <li>Slippa lägga helgen på fönsterputs själv</li>
+            <li>Få hjälp på plats där fönstren finns</li>
+          </ul>
+        </div>
+
+        <div class="cta-panel">
+          <h2 class="section-title">Redo att boka fönsterputs?</h2>
+          <p>Välj en tid som passar dig och fyll i bokningen direkt på sidan. Vi fokuserar på bra pris, flexibilitet och personlig service där vi kommer hem till dig.</p>
+          <div class="hero-buttons">
+            <a href="#bokning" class="btn btn-primary">Boka fönsterputs</a>
+            <a href="om-oss.html" class="btn btn-secondary">Lär känna oss</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="bokning" class="section reveal">
+      <div class="booking-card">
+        <h2 class="section-title">Boka tid</h2>
+        <p class="section-subtitle">Välj först ett datum. Fyll sedan i några enkla uppgifter så är bokningen klar på bara någon minut.</p>
+
+        <div class="booking-intro">
+          <div class="booking-intro-card">
+            <strong>1. Välj tid</strong>
+            <span>Lediga tider visas direkt i kalendern.</span>
+          </div>
+          <div class="booking-intro-card">
+            <strong>2. Fyll i uppgifter</strong>
+            <span>Kontakt, RUT-uppgifter och omfattning fylls i direkt i formuläret.</span>
+          </div>
+          <div class="booking-intro-card">
+            <strong>3. Klart</strong>
+            <span>Du går vidare till betalning eller väljer att betala senare.</span>
+          </div>
+        </div>
+
+        <div class="live-price-box">
+          <div class="live-price-copy">
+            <strong>Pris just nu</strong>
+            <span id="livePriceText">Välj hustyp, antal fönster och putsning så uppdateras priset direkt.</span>
+          </div>
+          <div class="live-price-value">
+            <strong id="livePriceValue">699 kr</strong>
+            <span>efter RUT-avdrag</span>
+          </div>
+        </div>
+
+        <div class="booking-packages" id="bookingPackages">
+          <button type="button" class="booking-packages-header" id="bookingPackagesToggle" aria-expanded="false" aria-controls="bookingPackagesContent">
+            <h3>Våra paket</h3>
+            <span>Klicka för att se hela prislistan</span>
+          </button>
+          <div class="booking-packages-content" id="bookingPackagesContent">
+            <div class="booking-packages-inner">
+              <div class="booking-package-grid">
+                <div class="booking-package-card">
+                  <strong>Utvändig puts efter RUT</strong>
+                  <table class="price-list" aria-label="Prislista för fönsterputs">
+                    <thead>
+                      <tr>
+                        <th>Typ</th>
+                        <th>Antal fönster</th>
+                        <th>Pris före RUT</th>
+                        <th>Detta betalar du</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Enplansvilla</td>
+                        <td>upp till 15</td>
+                        <td>1198 kr</td>
+                        <td>699 kr</td>
+                      </tr>
+                      <tr>
+                        <td>Enplansvilla</td>
+                        <td>15+</td>
+                        <td>1398 kr</td>
+                        <td>799 kr</td>
+                      </tr>
+                      <tr>
+                        <td>Tvåplansvilla</td>
+                        <td>upp till 17</td>
+                        <td>1598 kr</td>
+                        <td>899 kr</td>
+                      </tr>
+                      <tr>
+                        <td>Tvåplansvilla</td>
+                        <td>17+</td>
+                        <td>1798 kr</td>
+                        <td>999 kr</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="booking-package-card">
+                  <strong>Populära tillval</strong>
+                  <table class="price-list" aria-label="Prislista för invändig puts">
+                    <thead>
+                      <tr>
+                        <th>Hustyp</th>
+                        <th>Invändig tillägg</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Enplans ≤15</td>
+                        <td>+349 kr</td>
+                      </tr>
+                      <tr>
+                        <td>Enplans 15+</td>
+                        <td>+399 kr</td>
+                      </tr>
+                      <tr>
+                        <td>Tvåplan ≤17</td>
+                        <td>+449 kr</td>
+                      </tr>
+                      <tr>
+                        <td>Tvåplan 17+</td>
+                        <td>+499 kr</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <table class="price-list" aria-label="Prislista för övriga tillägg">
+                    <thead>
+                      <tr>
+                        <th>Tillägg</th>
+                        <th>Pris</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Uterum</td>
+                        <td>från +299 kr</td>
+                      </tr>
+                      <tr>
+                        <td>Spröjsade fönster</td>
+                        <td>från +149 kr</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div class="package-tags">
+                    <span class="package-tag">Invändig puts</span>
+                    <span class="package-tag">Uterum</span>
+                    <span class="package-tag">Spröjsade glas</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="booking-requirements">
+          <h3>Det här krävs för att boka</h3>
+          <ul>
+            <li>Fönstren behöver vara åtkomliga på ett säkert sätt.</li>
+            <li>Du behöver fylla i adress, typ av bostad och ungefär hur många fönster eller glaspartier det gäller.</li>
+            <li>Personnummer används bara om vi ska kunna registrera 50% RUT-avdrag hos Skatteverket.</li>
+          </ul>
+        </div>
+
+        <div class="booking-layout">
+          <div class="calendar-card">
+            <h3>Välj datum</h3>
+            <p class="booking-note">Kalendern visar framtida bokningsbara datum från och med idag. Bokade tider markeras automatiskt.</p>
+
+            <div class="calendar-header">
+              <button type="button" class="calendar-nav" id="prevMonth">←</button>
+              <div class="calendar-title" id="calendarTitle">Laddar kalender...</div>
+              <button type="button" class="calendar-nav" id="nextMonth">→</button>
+            </div>
+
+            <div class="calendar-weekdays">
+              <div>Mån</div>
+              <div>Tis</div>
+              <div>Ons</div>
+              <div>Tors</div>
+              <div>Fre</div>
+              <div>Lör</div>
+              <div>Sön</div>
+            </div>
+
+            <div class="calendar-grid" id="calendarGrid"></div>
+            <div class="selected-date-box" id="selectedDateBox">Inget datum valt ännu</div>
+
+            <div class="time-picker">
+              <h4>Välj tid</h4>
+              <div class="time-slots" id="timeSlots">
+                <button type="button" class="time-slot disabled">Välj först ett datum</button>
+              </div>
+            </div>
+          </div>
+
+          <form id="bookingForm">
+            <input type="hidden" id="date" required>
+            <input type="hidden" id="time" required>
+
+            <div class="form-row">
+              <div>
+                <label for="name">Namn</label>
+                <input type="text" id="name" placeholder="Ditt namn" required>
+              </div>
+              <div>
+                <label for="phone">Telefonnummer</label>
+                <input type="tel" id="phone" placeholder="073-123 45 67" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div>
+                <label for="email">E-postadress</label>
+                <input type="email" id="email" placeholder="dinmail@exempel.se" required>
+              </div>
+              <div>
+                <label for="location">Adress där jobbet ska utföras</label>
+                <input type="text" id="location" placeholder="Till exempel din adress i Åkersberga" required>
+              </div>
+            </div>
+
+            <div class="form-stack">
+              <div>
+                <label for="personalNumber">Fullständigt personnummer</label>
+                <input type="text" id="personalNumber" inputmode="numeric" placeholder="ÅÅÅÅMMDD-XXXX" required>
+              </div>
+              <div class="rut-notice">
+                <strong>Viktigt: läs RUT-informationen innan du bokar.</strong>
+                <div class="rut-help-row">
+                  <div class="field-help">
+                    <span class="field-help-trigger" tabindex="0">Vad är RUT-avdrag?</span>
+                    <div class="field-help-tooltip">RUT-avdrag gör att du som privatperson kan få 50% avdrag på arbetskostnaden för fönsterputs. Vi använder personnumret bara för att kunna registrera det hos Skatteverket.</div>
+                  </div>
+                  <div class="field-help">
+                    <span class="field-help-trigger" tabindex="0">Vad händer utan RUT?</span>
+                    <div class="field-help-tooltip">Om du redan har använt mer än 75 000 kr i RUT-avdrag, eller av någon annan anledning inte blir godkänd av Skatteverket, tillkommer de resterande 50% som inte ingår i priset på hemsidan.</div>
+                  </div>
+                </div>
+              </div>
+              <p class="field-note">Personnummer används endast för att kunna registrera 50% RUT-avdrag hos Skatteverket.</p>
+            </div>
+
+            <div class="form-row">
+              <div>
+                <label for="boatSize">Typ av bostad</label>
+                <select id="boatSize" required>
+                  <option value="">Välj bostad</option>
+                  <option value="Villa / normalstor bostad" data-label="Enplansvilla">Enplansvilla</option>
+                  <option value="Större villa / fler fönster" data-label="Tvåplansvilla">Tvåplansvilla</option>
+                </select>
+              </div>
+              <div>
+                <label for="windowCount">Ungefär antal fönster / glaspartier</label>
+                <div class="stepper">
+                  <button type="button" class="stepper-btn" id="windowCountDecrease" aria-label="Minska antal fönster">−</button>
+                  <input type="text" id="windowCount" value="0 fönster" readonly required aria-live="polite">
+                  <button type="button" class="stepper-btn" id="windowCountIncrease" aria-label="Öka antal fönster">+</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div>
+                <label for="serviceScope">Invändig + utvändig eller endast utvändig</label>
+                <select id="serviceScope" required>
+                  <option value="">Välj putsning</option>
+                  <option value="Invändig + utvändig">Invändig + utvändig</option>
+                  <option value="Endast utvändig">Endast utvändig</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div>
+                <label for="paymentMethod">Betalningsmetod</label>
+                <select id="paymentMethod" required>
+                  <option value="">Välj betalningsmetod</option>
+                  <option value="Swish">Swish</option>
+                  <option value="Faktura via e-post">Faktura via e-post</option>
+                </select>
+              </div>
+              <div>
+                <label for="mapLink">Google Maps-länk</label>
+                <input type="url" id="mapLink" placeholder="Klistra gärna in en Google Maps-pin på exakt var vi ska komma">
+                <p class="booking-note">Det här är inte ett måste, men det gör det mycket enklare för oss att hitta exakt rätt plats.</p>
+              </div>
+            </div>
+
+            <div class="form-stack">
+              <label>Välj tillval</label>
+              <div class="addon-options">
+                <label class="addon-option" for="addonSunroom">
+                  <input type="checkbox" id="addonSunroom">
+                  <span>
+                    <strong>Inglasad altan / uterum</strong>
+                    <span>Lägg till från 299 kr. Räknas direkt in i priset.</span>
+                  </span>
+                </label>
+                <label class="addon-option" for="addonMuntins">
+                  <input type="checkbox" id="addonMuntins">
+                  <span>
+                    <strong>Spröjsade fönster</strong>
+                    <span>Lägg till från 149 kr. Räknas direkt in i priset.</span>
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label for="message">Övrig information</label>
+              <textarea id="message" rows="4" placeholder="Skriv gärna extra detaljer om bostaden, parkering, portkod eller annat som är bra för oss att veta"></textarea>
+            </div>
+
+            <div class="consent-box">
+              <input type="checkbox" id="consent" required>
+              <label for="consent">Jag godkänner att mina personuppgifter används för bokning och RUT-hantering.</label>
+            </div>
+
+            <button type="submit" class="submit-btn">Gå vidare till betalning</button>
+            <p class="booking-note">Bokningen sparas som väntande först. På nästa sida kan kunden välja att betala direkt eller efter putsningen.</p>
+            <p class="booking-note">Vi bekräftar sedan bokningen manuellt via mejl eller telefon om något behöver stämmas av.</p>
+            <div class="success-message" id="successMessage">Bokningen har sparats.</div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section class="section reveal">
+      <div class="card">
+        <h2 class="section-title">Vanliga frågor</h2>
+        <p class="section-subtitle">Bra att ha med för att minska osäkerhet och få fler att gå vidare till bokning.</p>
+
+        <div class="faq-grid">
+          <div class="faq-item">
+            <button type="button" class="faq-question">Vad ingår i fönsterputsen?</button>
+            <div class="faq-answer"><div class="faq-answer-inner">Vi putsar fönstren noggrant enligt bokningen och stämmer av om det finns svåråtkomliga fönster, många rutor eller särskilda önskemål.</div></div>
+          </div>
+          <div class="faq-item">
+            <button type="button" class="faq-question">Vad krävs för att boka?</button>
+            <div class="faq-answer"><div class="faq-answer-inner">Fönstren behöver gå att komma åt på ett säkert sätt. Skriv gärna adress, ungefärligt antal fönster och om det finns höga eller svåråtkomliga rutor.</div></div>
+          </div>
+          <div class="faq-item">
+            <button type="button" class="faq-question">Hur betalar jag?</button>
+            <div class="faq-answer"><div class="faq-answer-inner">Du kan betala manuellt med Swish eller välja att få betalningsinformation efter att arbetet är slutfört.</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p><strong>Berga Fönsterputs</strong></p>
+      <p>Personlig och lokal fönsterputs med fokus på bra pris, flexibilitet och trygg kontakt.</p>
+      <p>E-post: bergabattvatt@gmail.com</p>
+      <p>Telefon: 073-388 12 16</p>
+      <p>Sociala medier: <span class="social-links"><a class="social-link" href="https://www.instagram.com/bergabattvatt" target="_blank" rel="noopener noreferrer"><span class="social-icon instagram" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2Zm-.2 2A3.6 3.6 0 0 0 4 7.6v8.8A3.6 3.6 0 0 0 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6A3.6 3.6 0 0 0 16.4 4H7.6Zm9.65 1.5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2.1a2.9 2.9 0 1 0 0 5.8 2.9 2.9 0 0 0 0-5.8Z"/></svg></span>Instagram</a><a class="social-link" href="https://www.tiktok.com/@bergabttvtt2" target="_blank" rel="noopener noreferrer"><span class="social-icon tiktok" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14.9 2c.45 2.58 1.98 4.12 4.52 4.32v3.12c-1.48.14-2.8-.35-4.02-1.08v6.04c0 4.58-4.98 7.44-8.95 5.44-3.83-1.94-4.07-7.63-.45-9.93 1.04-.66 2.15-.98 3.72-.86v3.28c-.69-.22-1.47-.17-2.1.15-1.51.76-1.92 2.78-.82 4.01 1.55 1.73 4.53.64 4.53-1.74V2h3.57Z"/></svg></span>TikTok</a><a class="social-link" href="https://www.facebook.com/bergab%C3%A5ttv%C3%A4tt" target="_blank" rel="noopener noreferrer"><span class="social-icon facebook" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13.4 22v-8.1h2.73l.41-3.17H13.4V8.7c0-.92.25-1.54 1.57-1.54h1.68V4.32c-.82-.09-1.64-.14-2.46-.13-2.44 0-4.11 1.49-4.11 4.24v2.29H7.3v3.17h2.78V22h3.32Z"/></svg></span>Facebook</a></span></p>
+      <div class="footer-links">
+        <a href="var-tjanst.html">Vår tjänst</a>
+        <a href="om-oss.html">Om oss</a>
+        <a href="#bokning">Boka tid</a>
+        <a href="#kontakt">Kontakt</a>
+      </div>
+      <p>© 2026 Berga Fönsterputs. Alla rättigheter förbehållna.</p>
+    </div>
+  </footer>
+
+  <script>
+    const bookingForm = document.getElementById('bookingForm');
+    const dateInput = document.getElementById('date');
+    const timeInput = document.getElementById('time');
+    const successMessage = document.getElementById('successMessage');
+    const calendarGrid = document.getElementById('calendarGrid');
+    const calendarTitle = document.getElementById('calendarTitle');
+    const selectedDateBox = document.getElementById('selectedDateBox');
+    const timeSlots = document.getElementById('timeSlots');
+    const prevMonthButton = document.getElementById('prevMonth');
+    const nextMonthButton = document.getElementById('nextMonth');
+    const housingTypeInput = document.getElementById('boatSize');
+    const windowCountInput = document.getElementById('windowCount');
+    const windowCountDecreaseButton = document.getElementById('windowCountDecrease');
+    const windowCountIncreaseButton = document.getElementById('windowCountIncrease');
+    const bookingPackages = document.getElementById('bookingPackages');
+    const bookingPackagesToggle = document.getElementById('bookingPackagesToggle');
+    const addonSunroomInput = document.getElementById('addonSunroom');
+    const addonMuntinsInput = document.getElementById('addonMuntins');
+    const pageHeader = document.querySelector('header');
+    const bookingSection = document.getElementById('bokning');
+    const topbarToggleButton = document.getElementById('topbarToggleButton');
+    const topbarShowButton = document.getElementById('topbarShowButton');
+    const livePriceValue = document.getElementById('livePriceValue');
+    const livePriceText = document.getElementById('livePriceText');
+    const compareStage = document.getElementById('compareStage');
+    const compareCard = document.querySelector('.compare-card');
+    const compareRange = document.getElementById('compareRange');
+    const compareAfter = document.getElementById('compareAfter');
+    const compareDivider = document.getElementById('compareDivider');
+    const compareHandle = document.querySelector('.compare-handle');
+    const revealItems = document.querySelectorAll('.reveal');
+    const navLinks = Array.from(document.querySelectorAll('.topbar nav a[href^="#"]'));
+    const faqItems = Array.from(document.querySelectorAll('.faq-item'));
+
+    const SUPABASE_URL = 'https://xeyippgcoqfskcmqzazx.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_MUKxAwv0vNXDrcgumq81fQ_Uvx4eOuq';
+    const SUPABASE_TABLE = 'bookings';
+    const todayDate = new Date();
+    todayDate.setHours(12, 0, 0, 0);
+    const bookingYear = todayDate.getFullYear();
+    const todayString = formatDate(bookingYear, todayDate.getMonth(), todayDate.getDate());
+    const monthNames = ['januari', 'februari', 'mars', 'april', 'maj', 'juni', 'juli', 'augusti', 'september', 'oktober', 'november', 'december'];
+    const redDays = bookingYear === 2026
+      ? new Set([
+          '2026-01-01', '2026-01-06', '2026-04-03', '2026-04-05', '2026-04-06',
+          '2026-05-01', '2026-05-14', '2026-05-24', '2026-06-06', '2026-06-20',
+          '2026-11-01', '2026-12-25', '2026-12-26'
+        ])
+      : new Set();
+
+    let currentMonth = todayDate.getMonth();
+    let selectedDate = '';
+    let bookingsCache = [];
+
+    function getHeaders() {
+      return {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json'
+      };
+    }
+
+    async function fetchBookings() {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}?select=booking_date,booking_time,status&status=in.(pending,confirmed)`, {
+          headers: getHeaders()
+        });
+
+        if (!res.ok) {
+          bookingsCache = [];
+          return;
+        }
+
+        const data = await res.json();
+        bookingsCache = data.map((b) => ({ date: b.booking_date, time: b.booking_time }));
+      } catch (error) {
+        console.error(error);
+        bookingsCache = [];
+      }
+    }
+
+    function getMissingColumnName(errorText) {
+      const match = errorText.match(/Could not find the '([^']+)' column/);
+      return match ? match[1] : '';
+    }
+
+    async function createBooking(booking) {
+      const payload = {
+        customer_name: booking.name,
+        email: booking.email,
+        phone: booking.phone,
+        house_size: booking.housingType,
+        housing_type: booking.housingType,
+        personal_number: booking.personalNumber,
+        window_count: booking.windowCount,
+        service_scope: booking.serviceScope,
+        payment_method: booking.paymentMethod,
+        addons: booking.addons || null,
+        booking_date: booking.date,
+        booking_time: booking.time,
+        service: 'Fönsterputs',
+        address: booking.location,
+        location: booking.location,
+        map_link: booking.mapLink || null,
+        consent_accepted: booking.consentAccepted,
+        message: booking.fullMessage || null,
+        status: 'pending',
+        payment_status: 'unpaid'
+      };
+
+      for (let attempt = 0; attempt < 6; attempt += 1) {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}?select=id`, {
+          method: 'POST',
+          headers: {
+            ...getHeaders(),
+            Prefer: 'return=representation'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          await res.json();
+          addBookingToCache(booking.date, booking.time);
+          return;
+        }
+
+        const errorText = await res.text();
+        const missingColumn = getMissingColumnName(errorText);
+
+        if (missingColumn && Object.prototype.hasOwnProperty.call(payload, missingColumn)) {
+          delete payload[missingColumn];
+          continue;
+        }
+
+        throw new Error(`Kunde inte spara bokningen. ${errorText}`);
+      }
+
+      throw new Error('Kunde inte spara bokningen eftersom tabellens kolumner inte matchar formuläret.');
+    }
+
+    function formatDate(year, month, day) {
+      return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+
+    function formatDateForDisplay(dateString) {
+      const dateObject = new Date(dateString + 'T12:00:00');
+      return dateObject.toLocaleDateString('sv-SE', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+    }
+
+    function getWindowCountValue() {
+      const rawValue = windowCountInput?.value || '';
+      const match = rawValue.match(/\d+/);
+      return match ? Number(match[0]) : 0;
+    }
+
+    function setWindowCountValue(nextValue) {
+      if (!windowCountInput) return;
+      const safeValue = Math.max(0, Math.min(60, nextValue));
+      windowCountInput.value = `${safeValue} fönster`;
+      updateLivePrice();
+    }
+
+    function getSelectedAddons() {
+      const addons = [];
+
+      if (addonSunroomInput?.checked) {
+        addons.push({ label: 'Inglasad altan / uterum', price: 299 });
+      }
+
+      if (addonMuntinsInput?.checked) {
+        addons.push({ label: 'Spröjsade fönster', price: 149 });
+      }
+
+      return addons;
+    }
+
+    function getBasePrice(housingTypeLabel, windowCount) {
+      if (housingTypeLabel === 'Enplansvilla') {
+        return windowCount > 15 ? 799 : 699;
+      }
+
+      if (housingTypeLabel === 'Tvåplansvilla') {
+        return windowCount > 17 ? 999 : 899;
+      }
+
+      return 699;
+    }
+
+    function getInteriorAddon(housingTypeLabel, windowCount) {
+      if (housingTypeLabel === 'Enplansvilla') {
+        return windowCount > 15 ? 399 : 349;
+      }
+
+      if (housingTypeLabel === 'Tvåplansvilla') {
+        return windowCount > 17 ? 499 : 449;
+      }
+
+      return 0;
+    }
+
+    function calculateEstimatedPrice() {
+      const housingTypeLabel = getHousingTypeLabel();
+      const windowCount = getWindowCountValue();
+      const serviceScopeValue = document.getElementById('serviceScope')?.value || '';
+      const basePrice = getBasePrice(housingTypeLabel, windowCount);
+      const interiorAddon = serviceScopeValue === 'Invändig + utvändig'
+        ? getInteriorAddon(housingTypeLabel, windowCount)
+        : 0;
+      const addons = getSelectedAddons();
+      const addonsPrice = addons.reduce((sum, addon) => sum + addon.price, 0);
+
+      return {
+        total: basePrice + interiorAddon + addonsPrice,
+        basePrice,
+        interiorAddon,
+        addons,
+        addonsPrice,
+        housingTypeLabel,
+        windowCount,
+        serviceScopeValue
+      };
+    }
+
+    function getHousingTypeLabel() {
+      const selectedOption = housingTypeInput.options[housingTypeInput.selectedIndex];
+      return selectedOption?.dataset.label || selectedOption?.textContent || housingTypeInput.value;
+    }
+
+    function getBookedTimes(date) {
+      return bookingsCache.filter((b) => b.date === date).map((b) => b.time);
+    }
+
+    function updateLivePrice() {
+      if (!livePriceValue) return;
+      const estimate = calculateEstimatedPrice();
+      livePriceValue.textContent = `${estimate.total} kr`;
+
+      if (!livePriceText) return;
+
+      if (!estimate.housingTypeLabel) {
+        livePriceText.textContent = 'Välj hustyp, antal fönster och putsning så uppdateras priset direkt.';
+        return;
+      }
+
+      if (!estimate.windowCount) {
+        livePriceText.textContent = 'Fyll i ungefär antal fönster för att få rätt prisnivå.';
+        return;
+      }
+
+      const parts = [`Utvändig puts ${estimate.basePrice} kr efter RUT`];
+
+      if (estimate.interiorAddon > 0) {
+        parts.push(`invändig tillägg ${estimate.interiorAddon} kr`);
+      }
+
+      estimate.addons.forEach((addon) => {
+        parts.push(`${addon.label.toLowerCase()} ${addon.price} kr`);
+      });
+
+      livePriceText.textContent = parts.join(' + ') + '.';
+    }
+
+    function updateCompareSlider() {
+      if (!compareRange || !compareCard) return;
+      const value = Number(compareRange.value);
+      const beforeCenter = value / 2;
+      const afterCenter = 50 + value / 2;
+      const beforeOpacity = value <= 8 ? 0 : 1;
+      const afterOpacity = value >= 92 ? 0 : 1;
+
+      compareCard.style.setProperty('--compare-position', `${value}%`);
+      compareCard.style.setProperty('--compare-before-center', `${beforeCenter}%`);
+      compareCard.style.setProperty('--compare-after-center', `${afterCenter}%`);
+      compareCard.style.setProperty('--compare-before-opacity', String(beforeOpacity));
+      compareCard.style.setProperty('--compare-after-opacity', String(afterOpacity));
+    }
+
+    function setCompareFromPointer(clientX) {
+      if (!compareStage || !compareRange) return;
+      const rect = compareStage.getBoundingClientRect();
+      const percent = ((clientX - rect.left) / rect.width) * 100;
+      const clamped = Math.max(0, Math.min(100, percent));
+      compareRange.value = String(clamped);
+      updateCompareSlider();
+    }
+
+    function updateActiveNav() {
+      if (!navLinks.length) return;
+
+      let activeId = '';
+      navLinks.forEach((link) => {
+        const target = document.querySelector(link.getAttribute('href'));
+        if (!target) return;
+        const rect = target.getBoundingClientRect();
+        if (rect.top <= 180 && rect.bottom >= 180) {
+          activeId = link.getAttribute('href');
+        }
+      });
+
+      navLinks.forEach((link) => {
+        link.classList.toggle('is-active', link.getAttribute('href') === activeId);
+      });
+    }
+
+    function updateTopbarState() {
+      if (!pageHeader) return;
+
+      const compactThreshold = Math.max(140, pageHeader.offsetHeight - window.innerHeight + 110);
+      document.body.classList.toggle('topbar-compact', window.scrollY > compactThreshold);
+
+      if (bookingSection) {
+        const bookingTrigger = bookingSection.getBoundingClientRect().top <= 150;
+        document.body.classList.toggle('topbar-hidden', bookingTrigger);
+      }
+
+      updateActiveNav();
+      updateTopbarToggleLabels();
+    }
+
+    function updateTopbarToggleLabels() {
+      const isHidden = document.body.classList.contains('topbar-manual-hidden');
+      if (topbarToggleButton) {
+        topbarToggleButton.textContent = isHidden ? 'Visa' : 'Dölj';
+      }
+    }
+
+    function addBookingToCache(date, time) {
+      const alreadyExists = bookingsCache.some((booking) => booking.date === date && booking.time === time);
+
+      if (!alreadyExists) {
+        bookingsCache.push({ date, time });
+      }
+    }
+
+    function isHoliday(date) {
+      const d = new Date(date + 'T12:00:00');
+      return d.getDay() === 0 || redDays.has(date);
+    }
+
+    function isDaytimeDay(date) {
+      const d = new Date(date + 'T12:00:00');
+      return isHoliday(date) || d.getDay() === 6;
+    }
+
+    function getTimes(date) {
+      return isDaytimeDay(date)
+        ? ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00']
+        : ['17:00', '18:00', '19:00'];
+    }
+
+    function isFullyBooked(date) {
+      const booked = getBookedTimes(date);
+      return getTimes(date).every((time) => booked.includes(time));
+    }
+
+    function renderTimes() {
+      timeSlots.innerHTML = '';
+
+      if (!selectedDate) {
+        timeSlots.innerHTML = '<button type="button" class="time-slot disabled">Välj först ett datum</button>';
+        return;
+      }
+
+      const booked = getBookedTimes(selectedDate);
+
+      getTimes(selectedDate).forEach((time) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'time-slot';
+        btn.textContent = time;
+
+        if (booked.includes(time)) {
+          btn.classList.add('booked');
+          btn.disabled = true;
+          btn.textContent = `${time} • bokad`;
+        } else {
+          btn.onclick = () => {
+            timeInput.value = time;
+            renderTimes();
+          };
+        }
+
+        if (timeInput.value === time) {
+          btn.classList.add('selected');
+        }
+
+        timeSlots.appendChild(btn);
+      });
+    }
+
+    function renderCalendar() {
+      calendarGrid.innerHTML = '';
+      calendarTitle.textContent = `${monthNames[currentMonth]} ${bookingYear}`;
+      prevMonthButton.disabled = currentMonth === todayDate.getMonth();
+      nextMonthButton.disabled = currentMonth === 11;
+
+      const first = new Date(bookingYear, currentMonth, 1);
+      const days = new Date(bookingYear, currentMonth + 1, 0).getDate();
+      const offset = (first.getDay() + 6) % 7;
+
+      for (let i = 0; i < offset; i++) {
+        const empty = document.createElement('div');
+        empty.className = 'calendar-empty';
+        calendarGrid.appendChild(empty);
+      }
+
+      for (let day = 1; day <= days; day++) {
+        const date = formatDate(bookingYear, currentMonth, day);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = day;
+        btn.className = 'calendar-day';
+
+        const bookedCount = getBookedTimes(date).length;
+        const past = date < todayString;
+        const full = isFullyBooked(date);
+
+        if (bookedCount > 0) {
+          btn.classList.add('booked');
+        }
+
+        if (selectedDate === date) {
+          btn.classList.add('selected');
+        }
+
+        if (past) {
+          btn.classList.add('past');
+          btn.disabled = true;
+        }
+
+        if (full) {
+          btn.classList.add('fully-booked');
+          btn.disabled = true;
+        }
+
+        if (!past && !full) {
+          btn.onclick = () => {
+            selectedDate = date;
+            dateInput.value = date;
+            timeInput.value = '';
+            selectedDateBox.textContent = `Valt datum: ${formatDateForDisplay(date)}`;
+            renderTimes();
+            renderCalendar();
+          };
+        }
+
+        calendarGrid.appendChild(btn);
+      }
+    }
+
+    prevMonthButton.addEventListener('click', () => {
+      if (currentMonth > todayDate.getMonth()) {
+        currentMonth -= 1;
+        renderCalendar();
+      }
+    });
+
+    nextMonthButton.addEventListener('click', () => {
+      if (currentMonth < 11) {
+        currentMonth += 1;
+        renderCalendar();
+      }
+    });
+
+    window.addEventListener('scroll', updateTopbarState, { passive: true });
+    window.addEventListener('resize', updateTopbarState);
+    housingTypeInput.addEventListener('change', updateLivePrice);
+    document.getElementById('serviceScope')?.addEventListener('change', updateLivePrice);
+    addonSunroomInput?.addEventListener('change', updateLivePrice);
+    addonMuntinsInput?.addEventListener('change', updateLivePrice);
+
+    bookingPackagesToggle?.addEventListener('click', () => {
+      const isOpen = bookingPackages?.classList.toggle('is-open');
+      bookingPackagesToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    windowCountDecreaseButton?.addEventListener('click', () => {
+      setWindowCountValue(getWindowCountValue() - 1);
+    });
+
+    windowCountIncreaseButton?.addEventListener('click', () => {
+      setWindowCountValue(getWindowCountValue() + 1);
+    });
+
+    topbarToggleButton?.addEventListener('click', () => {
+      document.body.classList.toggle('topbar-manual-hidden');
+      updateTopbarToggleLabels();
+    });
+
+    topbarShowButton?.addEventListener('click', () => {
+      document.body.classList.remove('topbar-manual-hidden');
+      updateTopbarToggleLabels();
+    });
+
+    if (compareRange) {
+      compareRange.addEventListener('input', updateCompareSlider);
+      compareRange.addEventListener('change', updateCompareSlider);
+    }
+
+    if (compareStage) {
+      let isDraggingCompare = false;
+
+      compareHandle?.addEventListener('pointerdown', (event) => {
+        isDraggingCompare = true;
+        compareCard?.classList.add('is-sliding');
+        compareStage.setPointerCapture(event.pointerId);
+        setCompareFromPointer(event.clientX);
+        event.preventDefault();
+      });
+
+      compareStage.addEventListener('pointermove', (event) => {
+        if (!isDraggingCompare) return;
+        setCompareFromPointer(event.clientX);
+      });
+
+      window.addEventListener('pointerup', () => {
+        isDraggingCompare = false;
+        compareCard?.classList.remove('is-sliding');
+      });
+
+      window.addEventListener('pointercancel', () => {
+        isDraggingCompare = false;
+        compareCard?.classList.remove('is-sliding');
+      });
+    }
+
+    if (revealItems.length) {
+      const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+          } else {
+            entry.target.classList.remove('is-visible');
+          }
+        });
+      }, { threshold: 0.14 });
+
+      revealItems.forEach((item) => revealObserver.observe(item));
+    }
+
+    if (faqItems.length) {
+      faqItems.forEach((item) => {
+        const question = item.querySelector('.faq-question');
+        const answer = item.querySelector('.faq-answer');
+
+        if (!question || !answer) return;
+
+        question.addEventListener('click', () => {
+          const isOpen = item.classList.contains('is-open');
+          const answerInner = answer.querySelector('.faq-answer-inner');
+
+          faqItems.forEach((otherItem) => {
+            const otherAnswer = otherItem.querySelector('.faq-answer');
+            otherItem.classList.remove('is-open');
+            if (otherAnswer) {
+              otherAnswer.style.maxHeight = '0px';
+            }
+          });
+
+          if (!isOpen) {
+            item.classList.add('is-open');
+            const contentHeight = answerInner ? answerInner.scrollHeight : answer.scrollHeight;
+            answer.style.maxHeight = `${contentHeight + 40}px`;
+          }
+        });
+      });
+    }
+
+    window.addEventListener('resize', () => {
+      faqItems.forEach((item) => {
+        if (!item.classList.contains('is-open')) return;
+        const answer = item.querySelector('.faq-answer');
+        const answerInner = item.querySelector('.faq-answer-inner');
+        if (!answer) return;
+        const contentHeight = answerInner ? answerInner.scrollHeight : answer.scrollHeight;
+        answer.style.maxHeight = `${contentHeight + 40}px`;
+      });
+    });
+
+    bookingForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      successMessage.style.display = 'none';
+
+      if (!dateInput.value || !timeInput.value) {
+        selectedDateBox.textContent = 'Välj datum och tid innan du bokar.';
+        return;
+      }
+
+      if (!getWindowCountValue()) {
+        selectedDateBox.textContent = 'Välj ungefär hur många fönster det gäller innan du bokar.';
+        return;
+      }
+
+      const booking = {
+        name: document.getElementById('name').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        housingTypeLegacyValue: housingTypeInput.value,
+        housingType: getHousingTypeLabel(),
+        personalNumber: document.getElementById('personalNumber').value.trim(),
+        windowCount: windowCountInput.value.trim(),
+        serviceScope: document.getElementById('serviceScope').value,
+        paymentMethod: document.getElementById('paymentMethod').value,
+        addons: getSelectedAddons().map((addon) => addon.label).join(', '),
+        date: dateInput.value,
+        time: timeInput.value,
+        location: document.getElementById('location').value.trim(),
+        mapLink: document.getElementById('mapLink').value.trim(),
+        message: document.getElementById('message').value.trim(),
+        price: calculateEstimatedPrice().total,
+        consentAccepted: document.getElementById('consent').checked
+      };
+
+      const messageParts = [
+        `Personnummer: ${booking.personalNumber}`,
+        `Typ av bostad: ${booking.housingType}`,
+        `Antal fönster / glaspartier: ${booking.windowCount}`,
+        `Putsning: ${booking.serviceScope}`,
+        `Önskat datum / helg: ${isHoliday(booking.date) ? `${formatDateForDisplay(booking.date)} (helg/röd dag)` : formatDateForDisplay(booking.date)}`,
+        `Betalningsmetod: ${booking.paymentMethod}`
+      ];
+      if (booking.addons) {
+        messageParts.push(`Tillägg: ${booking.addons}`);
+      }
+      if (booking.mapLink) {
+        messageParts.push(`Google Maps: ${booking.mapLink}`);
+      }
+      if (booking.message) {
+        messageParts.push(`Övrig information: ${booking.message}`);
+      }
+      booking.fullMessage = messageParts.filter(Boolean).join('\n\n');
+
+      try {
+        await createBooking(booking);
+        renderCalendar();
+        renderTimes();
+
+        const params = new URLSearchParams({
+          name: booking.name,
+          date: booking.date,
+          time: booking.time,
+          housingType: booking.housingType,
+          windowCount: booking.windowCount,
+          serviceScope: booking.serviceScope,
+          addons: booking.addons,
+          price: String(booking.price),
+          paymentMethod: booking.paymentMethod
+        });
+
+        window.location.href = `betalning.html?${params.toString()}`;
+      } catch (error) {
+        console.error('Bokningsfel:', error);
+        selectedDateBox.textContent = 'Kunde inte spara bokningen. Kontrollera Supabase eller försök igen.';
+      }
+    });
+
+    (async () => {
+      await fetchBookings();
+      renderCalendar();
+      renderTimes();
+      setWindowCountValue(0);
+      updateLivePrice();
+      updateCompareSlider();
+      updateTopbarToggleLabels();
+      updateTopbarState();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Berga Fönsterputs | Betalning</title>
+  <meta name="description" content="Välj om du vill betala din bokning nu eller efter utförd fönsterputs." />
+  <style>
+    :root {
+      --primary: #0b6fa4;
+      --primary-dark: #084f74;
+      --cta: #ffb347;
+      --cta-dark: #f1992d;
+      --accent: #dff2fb;
+      --bg: #cfe8f5;
+      --surface: rgba(255,255,255,0.97);
+      --text: #173042;
+      --muted: #5f7280;
+      --white: #ffffff;
+      --border: #c6dfec;
+      --success: #127c56;
+      --shadow: 0 16px 38px rgba(11, 111, 164, 0.14);
+      --radius: 22px;
+      --max-width: 1120px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      color: var(--text);
+      background: linear-gradient(to bottom, #e2f2fb, var(--bg));
+      line-height: 1.5;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: min(92%, var(--max-width));
+      margin: 0 auto;
+    }
+
+    header {
+      background:
+        linear-gradient(135deg, rgba(8, 82, 120, 0.76), rgba(6, 58, 88, 0.72)),
+        linear-gradient(90deg, rgba(255,255,255,0.52) 0 1.3%, rgba(195,236,252,0.18) 1.3% 2.6%, transparent 2.6% 47.4%, rgba(255,255,255,0.52) 47.4% 48.8%, rgba(195,236,252,0.18) 48.8% 51.2%, rgba(255,255,255,0.52) 51.2% 52.6%, transparent 52.6% 97.4%, rgba(255,255,255,0.52) 97.4% 98.7%, rgba(195,236,252,0.18) 98.7% 100%),
+        linear-gradient(180deg, rgba(255,255,255,0.56) 0 1.8%, rgba(195,236,252,0.18) 1.8% 3.2%, transparent 3.2% 46.8%, rgba(255,255,255,0.56) 46.8% 48.2%, rgba(195,236,252,0.18) 48.2% 51.8%, rgba(255,255,255,0.56) 51.8% 53.2%, transparent 53.2% 96.8%, rgba(255,255,255,0.56) 96.8% 98.2%, rgba(195,236,252,0.18) 98.2% 100%),
+        linear-gradient(118deg, rgba(255,255,255,0.40) 10%, rgba(255,255,255,0.08) 26%, transparent 42%),
+        radial-gradient(circle at 21% 24%, rgba(255,255,255,0.55), transparent 14%),
+        radial-gradient(circle at 72% 26%, rgba(255,255,255,0.42), transparent 16%),
+        radial-gradient(circle at 62% 62%, rgba(255,255,255,0.18), transparent 24%),
+        linear-gradient(180deg, #effbff 0%, #c9efff 26%, #8fd8f4 58%, #5eb9df 82%, #2f7ba7 100%);
+      color: var(--white);
+      padding: 22px 0 190px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(128deg, transparent 16%, rgba(255,255,255,0.14) 24%, rgba(255,255,255,0.46) 31%, rgba(255,255,255,0.12) 38%, transparent 48%),
+        linear-gradient(38deg, transparent 58%, rgba(255,255,255,0.16) 66%, rgba(255,255,255,0.06) 72%, transparent 78%),
+        linear-gradient(to bottom, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 58%, rgba(11,111,164,0.12) 78%, rgba(125,185,214,0.12) 94%, #cfe8f5 100%);
+      pointer-events: none;
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      right: -120px;
+      bottom: -120px;
+      width: 340px;
+      height: 340px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      pointer-events: none;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      position: fixed;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(92%, var(--max-width));
+      padding: 8px 12px;
+      border-radius: 24px;
+      background: rgba(8, 56, 82, 0.42);
+      border: 1px solid rgba(255,255,255,0.16);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 16px 28px rgba(4, 25, 36, 0.2);
+      z-index: 20;
+      opacity: 1;
+      transition: opacity 0.38s ease, transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), filter 0.38s ease, background 0.28s ease, box-shadow 0.28s ease;
+    }
+
+    body.topbar-manual-hidden .topbar {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-26px) scale(0.92);
+      filter: blur(6px);
+      pointer-events: none;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px;
+      width: min(112px, 24vw);
+      height: min(112px, 24vw);
+      border-radius: 22px;
+      background: #ffffff;
+      border: 1px solid rgba(255,255,255,0.98);
+      backdrop-filter: blur(10px);
+      box-shadow:
+        0 12px 24px rgba(4, 25, 36, 0.16),
+        0 4px 10px rgba(255,255,255,0.28) inset;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .brand img {
+      width: 114%;
+      height: 114%;
+      object-fit: contain;
+      object-position: center;
+      display: block;
+      border-radius: 18px;
+      filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.12));
+    }
+
+    .brand-text {
+      display: none;
+    }
+
+    .brand-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .brand-tagline {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.88);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.09);
+      border: 1px solid rgba(255,255,255,0.14);
+      font-weight: 700;
+      opacity: 0.95;
+      transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .back-link:hover {
+      background: rgba(255,255,255,0.16);
+      border-color: rgba(255,255,255,0.2);
+      transform: translateY(-1px);
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .topbar-toggle,
+    .topbar-show-button {
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(255,255,255,0.10);
+      color: rgba(255,255,255,0.96);
+      border-radius: 999px;
+      font-weight: 800;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, opacity 0.28s ease;
+    }
+
+    .topbar-toggle {
+      padding: 10px 14px;
+      font-size: 0.92rem;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .topbar-show-button {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      z-index: 24;
+      padding: 12px 18px;
+      background: linear-gradient(135deg, rgba(11,111,164,0.94), rgba(8,79,116,0.96));
+      border: 1px solid rgba(255,255,255,0.28);
+      color: #ffffff;
+      box-shadow: 0 18px 34px rgba(4, 25, 36, 0.22);
+      font-size: 0.95rem;
+      letter-spacing: 0.01em;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-10px);
+    }
+
+    body.topbar-manual-hidden .topbar-show-button {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .topbar-toggle:hover,
+    .topbar-show-button:hover {
+      transform: translateY(-1px);
+      background: linear-gradient(135deg, rgba(14,126,185,0.98), rgba(8,92,135,0.98));
+      border-color: rgba(255,255,255,0.36);
+    }
+
+    .hero {
+      margin-top: 154px;
+      max-width: 760px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 4vw, 3.1rem);
+      line-height: 1.05;
+      margin: 0 0 14px;
+    }
+
+    .hero p {
+      margin: 0;
+      font-size: 1.06rem;
+      color: rgba(255,255,255,0.92);
+    }
+
+    main {
+      margin-top: -118px;
+      padding-bottom: 48px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid rgba(217, 231, 239, 0.9);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px;
+      transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+    }
+
+    .card:hover,
+    .option-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 20px 42px rgba(11, 111, 164, 0.16);
+      border-color: #b8d9e8;
+    }
+
+    .section-title {
+      font-size: 1.75rem;
+      margin: 0 0 10px;
+    }
+
+    .section-subtitle {
+      color: var(--muted);
+      margin: 0 0 22px;
+    }
+
+    .payment-trust-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: -4px 0 22px;
+    }
+
+    .trust-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: #e8f6fc;
+      border: 1px solid var(--border);
+      color: var(--primary-dark);
+      font-weight: 800;
+      font-size: 0.9rem;
+    }
+
+    .summary-box,
+    .option-card {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 20px;
+      background: linear-gradient(to bottom, #fbfeff, #f8fcff);
+      transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+    }
+
+    .summary-box p,
+    .option-card p {
+      margin: 8px 0;
+    }
+
+    .price {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin: 14px 0 0;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .summary-item {
+      border-radius: 16px;
+      padding: 14px 16px;
+      background: var(--white);
+      border: 1px solid var(--border);
+    }
+
+    .summary-item strong {
+      display: block;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .summary-item span {
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .summary-package {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: var(--white);
+      border: 1px solid var(--border);
+    }
+
+    .summary-package strong {
+      display: block;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .summary-package span {
+      display: block;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    .option-stack {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .option-card h3 {
+      margin: 0 0 8px;
+    }
+
+    .option-card.primary {
+      border: 2px solid rgba(11, 111, 164, 0.32);
+      box-shadow: 0 14px 30px rgba(11, 111, 164, 0.1);
+    }
+
+    .option-card.recommended {
+      position: relative;
+      border: 2px solid rgba(18, 124, 86, 0.3);
+      background: linear-gradient(to bottom, #fcfffd, #f1fbf6);
+      box-shadow: 0 18px 36px rgba(18, 124, 86, 0.12);
+    }
+
+    .option-card.recommended::before {
+      content: 'Rekommenderat';
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #127c56, #1b9a6d);
+      color: var(--white);
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      margin-bottom: 14px;
+    }
+
+    .swish-number {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      margin: 8px 0;
+    }
+
+    .info-note {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin: 0;
+    }
+
+    .payment-note,
+    .instruction-list,
+    .payment-steps {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: #f3f9fd;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .instruction-list {
+      margin-bottom: 0;
+      padding-left: 34px;
+    }
+
+    .payment-steps {
+      padding-left: 34px;
+      margin-bottom: 0;
+    }
+
+    .btn {
+      display: inline-block;
+      width: 100%;
+      border: none;
+      border-radius: 12px;
+      padding: 15px 16px;
+      font-size: 1rem;
+      font-weight: 700;
+      text-align: center;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(to right, var(--cta), var(--cta-dark));
+      color: #173042;
+      box-shadow: 0 18px 32px rgba(241, 153, 45, 0.24);
+    }
+
+    .btn-secondary {
+      background: #fff6e8;
+      color: var(--text);
+      border: 1px solid rgba(241, 153, 45, 0.24);
+    }
+
+    .btn-ghost {
+      background: #ffffff;
+      color: var(--primary-dark);
+      border: 1px solid var(--border);
+    }
+
+    .status-box {
+      display: none;
+      margin-top: 22px;
+      padding: 24px;
+      border-radius: 16px;
+      background: linear-gradient(to bottom, #ecfbf3, #dff7ea);
+      border: 2px solid #9fd9bc;
+      color: #0d6b4a;
+      font-weight: 700;
+      text-align: center;
+      font-size: 1.08rem;
+      box-shadow: 0 18px 34px rgba(18, 124, 86, 0.16);
+    }
+
+    .status-box strong {
+      display: block;
+      font-size: 1.7rem;
+      margin-bottom: 10px;
+    }
+
+    .status-box span {
+      display: block;
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .next-step-box {
+      margin-top: 16px;
+      padding: 20px;
+      border-radius: 16px;
+      background: linear-gradient(to bottom, #f7fbff, #eef8fd);
+      border: 1px solid var(--border);
+    }
+
+    .next-step-box h3 {
+      margin: 0 0 10px;
+      font-size: 1.02rem;
+    }
+
+    .next-step-box ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+    }
+
+    .next-step-box li + li {
+      margin-top: 8px;
+    }
+
+    .social-links {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      vertical-align: middle;
+    }
+
+    .social-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      background: #eef7fb;
+      border: 1px solid var(--border);
+      color: var(--primary-dark);
+      font-weight: 700;
+      font-size: 0.92rem;
+      transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .social-link:hover {
+      transform: translateY(-1px);
+      background: #e6f4fb;
+      border-color: #bddae8;
+    }
+
+    .social-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--white);
+      flex-shrink: 0;
+    }
+
+    .social-icon svg {
+      width: 13px;
+      height: 13px;
+      display: block;
+      fill: currentColor;
+    }
+
+    .social-icon.instagram { background: linear-gradient(135deg, #fd5949, #d6249f, #285AEB); }
+    .social-icon.tiktok { background: #111111; }
+    .social-icon.facebook { background: #1877f2; }
+
+    footer {
+      background: linear-gradient(to bottom, #082c3d, #061f2c);
+      color: rgba(255,255,255,0.9);
+      padding: 34px 0;
+      margin-top: 24px;
+    }
+
+    footer p { margin: 6px 0; }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .footer-links a {
+      font-weight: 700;
+      color: rgba(255,255,255,0.92);
+      border-bottom: 1px solid rgba(255,255,255,0.18);
+      padding-bottom: 2px;
+    }
+
+    @media (max-width: 900px) {
+      .option-stack {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      header {
+        padding-bottom: 160px;
+      }
+
+      .topbar {
+        top: 10px;
+        padding: 8px 10px;
+        gap: 10px;
+      }
+
+      .brand {
+        width: min(96px, 26vw);
+        height: min(96px, 26vw);
+        border-radius: 20px;
+      }
+
+      .back-link {
+        font-size: 0.9rem;
+        padding: 9px 11px;
+      }
+
+      .topbar-actions {
+        gap: 8px;
+      }
+
+      .topbar-toggle {
+        padding: 9px 12px;
+        font-size: 0.88rem;
+      }
+
+      .topbar-show-button {
+        top: 14px;
+        right: 14px;
+        padding: 11px 15px;
+      }
+
+      .hero {
+        margin-top: 138px;
+      }
+
+      main {
+        margin-top: -108px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="topbar">
+        <a class="brand" href="index.html#top" aria-label="Till startsidan">
+          <img src="logga-fonsterputs.png" alt="Berga Fönsterputs logga" onerror="this.style.display='none'">
+          <div class="brand-text">
+            <span class="brand-title">Berga Fönsterputs</span>
+            <span class="brand-tagline">Personlig och lokal service</span>
+          </div>
+        </a>
+        <div class="topbar-actions">
+          <a href="index.html" class="back-link">← Tillbaka till bokningen</a>
+          <button type="button" class="topbar-toggle" id="topbarToggleButton">Dölj</button>
+        </div>
+      </div>
+
+      <div class="hero">
+        <h1>Slutför din bokning</h1>
+        <p id="heroIntroText">Din bokning är registrerad. Du kan betala direkt med Swish nu, eller vänta och betala efter att vi har putsat fönstren.</p>
+      </div>
+    </div>
+  </header>
+  <button type="button" class="topbar-show-button" id="topbarShowButton">Visa meny</button>
+
+  <main class="container">
+    <div class="grid">
+      <section class="card">
+        <h2 class="section-title">Din bokning</h2>
+        <p class="section-subtitle" id="bookingIntroSubtitle">Kontrollera uppgifterna innan du väljer betalningssätt.</p>
+
+        <div class="summary-box">
+          <p><strong>Bokningen är mottagen</strong></p>
+          <p id="bookingSummaryText">Din tid är nu reserverad som väntande medan du väljer betalningssätt.</p>
+          <div class="summary-grid">
+            <div class="summary-item">
+              <strong>Namn</strong>
+              <span id="bookingName">Ej angivet</span>
+            </div>
+            <div class="summary-item">
+              <strong>Datum</strong>
+              <span id="bookingDate">Ej valt</span>
+            </div>
+            <div class="summary-item">
+              <strong>Tid</strong>
+              <span id="bookingTime">Ej vald</span>
+            </div>
+            <div class="summary-item">
+              <strong>Bostad / omfattning</strong>
+              <span id="bookingBoatSize">Ej vald</span>
+            </div>
+          </div>
+          <p style="margin-top:16px;"><strong>Tjänst:</strong> Fönsterputs</p>
+          <div class="summary-package">
+            <strong>Valt paket</strong>
+            <span id="bookingPackage">Ej valt ännu</span>
+          </div>
+          <div class="price"><span id="bookingPrice">599</span> kr</div>
+        </div>
+
+        <div class="next-step-box">
+          <h3>Det här händer nu</h3>
+          <ul>
+            <li id="nextStepChoiceText">Du väljer om du vill betala nu eller efter att fönsterputsen är slutförd.</li>
+            <li>Vi får in bokningen direkt och hör av oss om något behöver stämmas av.</li>
+            <li id="nextStepInvoiceText">Om du väljer att betala senare kontaktar vi dig med betalningsinformation när fönsterputsen är klar.</li>
+          </ul>
+        </div>
+
+      </section>
+
+      <section class="card">
+        <h2 class="section-title">Betalningsval</h2>
+        <p class="section-subtitle">Välj det alternativ som passar dig bäst.</p>
+        <div class="payment-trust-row">
+          <span class="trust-pill">Bokningen är mottagen</span>
+          <span class="trust-pill">Betala efter putsning är enklast</span>
+          <span class="trust-pill">Swish passar om du inte är hemma</span>
+        </div>
+
+        <div class="option-stack">
+          <div class="option-card">
+            <h3>Betala nu med Swish</h3>
+            <p>✔ Bra om du inte är hemma när vi är klara</p>
+            <p>✔ Samma meddelande gör betalningen lätt att matcha</p>
+            <p class="info-note">Swish-nummer</p>
+            <div class="swish-number" id="swishDisplayNumber">073-388 12 16</div>
+            <p><strong>Belopp:</strong> <span id="paymentDisplayPrice">599</span> kr</p>
+            <p><strong>Meddelande:</strong> <span id="swishMessage">Berga Fönsterputs</span></p>
+            <button type="button" id="copyMessageButton" class="btn btn-secondary">Kopiera betalningsmeddelande</button>
+            <p class="payment-note" id="paymentNote">Öppna Swish manuellt i mobilen och skicka betalningen till numret ovan.</p>
+            <ol class="payment-steps">
+              <li>Öppna Swish i mobilen.</li>
+              <li>Skriv in numret <strong>073-388 12 16</strong>.</li>
+              <li>Skriv beloppet <strong><span id="paymentStepsPrice">599</span> kr</strong>.</li>
+              <li>Klistra in betalningsmeddelandet så att vi kan matcha bokningen.</li>
+            </ol>
+          </div>
+
+          <div class="option-card primary recommended">
+            <h3>Betala efter putsning</h3>
+            <p>Det här är det enklaste valet för de flesta. Vi putsar först och hör sedan av oss med betalningsinformation när jobbet är klart.</p>
+            <button type="button" id="payLaterButton" class="btn btn-ghost">Jag betalar efter putsning</button>
+          </div>
+        </div>
+
+        <div class="status-box" id="statusBox">
+          <strong>✅ Bokning mottagen!</strong>
+          <span id="statusText">Klart.</span>
+          <div style="margin-top:14px;">
+            <a href="index.html" class="btn btn-secondary" style="max-width:260px; margin: 0 auto; display:inline-block;">Tillbaka till startsidan</a>
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p><strong>Berga Fönsterputs</strong></p>
+      <p>E-post: bergabattvatt@gmail.com</p>
+      <p>Telefon: 073-388 12 16</p>
+      <p>Sociala medier: <span class="social-links"><a class="social-link" href="https://www.instagram.com/bergabattvatt" target="_blank" rel="noopener noreferrer"><span class="social-icon instagram" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2Zm-.2 2A3.6 3.6 0 0 0 4 7.6v8.8A3.6 3.6 0 0 0 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6A3.6 3.6 0 0 0 16.4 4H7.6Zm9.65 1.5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2.1a2.9 2.9 0 1 0 0 5.8 2.9 2.9 0 0 0 0-5.8Z"/></svg></span>Instagram</a><a class="social-link" href="https://www.tiktok.com/@bergabttvtt2" target="_blank" rel="noopener noreferrer"><span class="social-icon tiktok" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14.9 2c.45 2.58 1.98 4.12 4.52 4.32v3.12c-1.48.14-2.8-.35-4.02-1.08v6.04c0 4.58-4.98 7.44-8.95 5.44-3.83-1.94-4.07-7.63-.45-9.93 1.04-.66 2.15-.98 3.72-.86v3.28c-.69-.22-1.47-.17-2.1.15-1.51.76-1.92 2.78-.82 4.01 1.55 1.73 4.53.64 4.53-1.74V2h3.57Z"/></svg></span>TikTok</a><a class="social-link" href="https://www.facebook.com/bergab%C3%A5ttv%C3%A4tt" target="_blank" rel="noopener noreferrer"><span class="social-icon facebook" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13.4 22v-8.1h2.73l.41-3.17H13.4V8.7c0-.92.25-1.54 1.57-1.54h1.68V4.32c-.82-.09-1.64-.14-2.46-.13-2.44 0-4.11 1.49-4.11 4.24v2.29H7.3v3.17h2.78V22h3.32Z"/></svg></span>Facebook</a></span></p>
+      <div class="footer-links">
+        <a href="index.html">Startsida</a>
+        <a href="var-tjanst.html">Vår tjänst</a>
+        <a href="index.html#bokning">Boka tid</a>
+        <a href="om-oss.html">Om oss</a>
+      </div>
+      <p>© 2026 Berga Fönsterputs. Alla rättigheter förbehållna.</p>
+    </div>
+  </footer>
+
+  <script>
+    const SWISH_NUMBER = '46733881216';
+    const SWISH_DISPLAY_NUMBER = '073-388 12 16';
+
+    const bookingName = document.getElementById('bookingName');
+    const bookingDate = document.getElementById('bookingDate');
+    const bookingTime = document.getElementById('bookingTime');
+    const bookingBoatSize = document.getElementById('bookingBoatSize');
+    const bookingPackage = document.getElementById('bookingPackage');
+    const bookingPrice = document.getElementById('bookingPrice');
+    const swishDisplayNumber = document.getElementById('swishDisplayNumber');
+    const swishMessage = document.getElementById('swishMessage');
+    const copyMessageButton = document.getElementById('copyMessageButton');
+    const payLaterButton = document.getElementById('payLaterButton');
+    const statusBox = document.getElementById('statusBox');
+    const statusText = document.getElementById('statusText');
+    const paymentNote = document.getElementById('paymentNote');
+    const paymentDisplayPrice = document.getElementById('paymentDisplayPrice');
+    const paymentStepsPrice = document.getElementById('paymentStepsPrice');
+    const topbarToggleButton = document.getElementById('topbarToggleButton');
+    const topbarShowButton = document.getElementById('topbarShowButton');
+    const heroIntroText = document.getElementById('heroIntroText');
+    const bookingIntroSubtitle = document.getElementById('bookingIntroSubtitle');
+    const bookingSummaryText = document.getElementById('bookingSummaryText');
+    const nextStepChoiceText = document.getElementById('nextStepChoiceText');
+    const nextStepInvoiceText = document.getElementById('nextStepInvoiceText');
+
+    const params = new URLSearchParams(window.location.search);
+    const name = params.get('name') || 'Ej angivet';
+    const date = params.get('date') || 'Ej valt';
+    const time = params.get('time') || 'Ej vald';
+    const housingType = params.get('housingType') || params.get('boatSize') || 'Ej vald';
+    const windowCount = params.get('windowCount') || '';
+    const serviceScope = params.get('serviceScope') || '';
+    const addons = params.get('addons') || '';
+    const price = params.get('price') || '599';
+    const paymentMethod = params.get('paymentMethod') || '';
+
+    function formatDateForDisplay(dateString) {
+      if (!dateString || dateString === 'Ej valt') return dateString;
+      const dateObject = new Date(dateString + 'T12:00:00');
+      return dateObject.toLocaleDateString('sv-SE', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+    }
+
+    function buildSwishMessage(nameValue, dateValue, timeValue) {
+      const compactDate = dateValue && dateValue !== 'Ej valt' ? dateValue.replaceAll('-', '') : 'datum';
+      const compactTime = timeValue && timeValue !== 'Ej vald' ? timeValue.replace(':', '') : 'tid';
+      return `${nameValue} ${compactDate} ${compactTime}`.slice(0, 50);
+    }
+
+    function buildPackageSummary() {
+      const parts = [];
+
+      if (housingType && housingType !== 'Ej vald') {
+        parts.push(housingType);
+      }
+
+      if (windowCount) {
+        parts.push(windowCount);
+      }
+
+      if (serviceScope) {
+        parts.push(serviceScope);
+      }
+
+      if (addons) {
+        parts.push(`Tillägg: ${addons}`);
+      }
+
+      return parts.length ? parts.join(' • ') : 'Ej valt ännu';
+    }
+
+    function setStatus(message, title = 'Betalning') {
+      statusBox.style.display = 'block';
+      statusBox.querySelector('strong').textContent = title;
+      statusText.textContent = message;
+    }
+
+    const paymentMessage = buildSwishMessage(name, date, time);
+
+    bookingName.textContent = name;
+    bookingDate.textContent = formatDateForDisplay(date);
+    bookingTime.textContent = time;
+    bookingBoatSize.textContent = housingType;
+    bookingPackage.textContent = buildPackageSummary();
+    bookingPrice.textContent = price;
+    swishDisplayNumber.textContent = SWISH_DISPLAY_NUMBER;
+    swishMessage.textContent = paymentMessage;
+    paymentDisplayPrice.textContent = price;
+    paymentStepsPrice.textContent = price;
+
+    copyMessageButton.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(paymentMessage);
+        setStatus('Betalningsmeddelandet är kopierat.', 'Kopierat');
+      } catch (error) {
+        setStatus('Kunde inte kopiera automatiskt. Kopiera meddelandet manuellt.', 'Kopiering misslyckades');
+      }
+    });
+
+    payLaterButton.addEventListener('click', () => {
+      setStatus('Vi hör av oss när fönsterputsen är slutförd med information om betalning.', 'Bokning mottagen');
+      statusBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+
+    if (paymentMethod === 'Faktura via e-post') {
+      const paymentSectionTitle = document.querySelectorAll('.section-title')[1];
+      const paymentSectionSubtitle = document.querySelectorAll('.section-subtitle')[1];
+      const paymentTrustRow = document.querySelector('.payment-trust-row');
+      const optionStack = document.querySelector('.option-stack');
+
+      if (heroIntroText) {
+        heroIntroText.textContent = 'Din bokning är registrerad. Du har valt faktura via e-post och den kommer inom 3-7 dagar.';
+      }
+
+      if (bookingIntroSubtitle) {
+        bookingIntroSubtitle.style.display = 'none';
+      }
+
+      if (bookingSummaryText) {
+        bookingSummaryText.textContent = 'Din tid är nu reserverad, dubbelkolla dina uppgifter.';
+      }
+
+      if (nextStepChoiceText) {
+        nextStepChoiceText.textContent = 'Du får en faktura via e-post inom 3-7 dagar.';
+      }
+
+      if (nextStepInvoiceText) {
+        nextStepInvoiceText.textContent = 'Vi får in bokningen direkt och hör av oss om något behöver stämmas av innan jobbet utförs.';
+      }
+
+      if (paymentSectionTitle) {
+        paymentSectionTitle.textContent = 'Bokning bekräftad';
+      }
+
+      if (paymentSectionSubtitle) {
+        paymentSectionSubtitle.textContent = 'Faktura är vald som betalningsmetod och bokningen är nu bekräftad.';
+      }
+
+      if (paymentTrustRow) {
+        paymentTrustRow.style.display = 'none';
+      }
+
+      if (optionStack) {
+        optionStack.style.display = 'none';
+      }
+
+      setStatus('Din bokning är bekräftad. Faktura kommer via e-post inom 3-7 dagar.', 'Bokning bekräftad');
+    }
+
+    topbarToggleButton?.addEventListener('click', () => {
+      document.body.classList.add('topbar-manual-hidden');
+    });
+
+    topbarShowButton?.addEventListener('click', () => {
+      document.body.classList.remove('topbar-manual-hidden');
+    });
+  </script>
+</body>
+</html>
