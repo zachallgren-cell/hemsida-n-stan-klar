@@ -3,29 +3,37 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Berga Båttvätt | Om oss</title>
-  <meta name="description" content="Lär känna Berga Båttvätt. Vi är fyra 17-åriga killar med båtintresse som erbjuder personlig och lokal båtrengöring." />
+  <title>Berga Fönsterputs | Om oss</title>
+  <meta name="description" content="Lär känna Berga Fönsterputs. Möt Zac och Martin bakom en personlig och lokal fönsterputstjänst." />
+  <link rel="icon" type="image/png" href="favicon-rounded.png" />
+  <link rel="shortcut icon" href="favicon-rounded.png" />
+  <link rel="apple-touch-icon" href="favicon-rounded.png" />
   <style>
     :root {
       --primary: #0b6fa4;
       --primary-dark: #084f74;
-      --bg: #eef7fb;
+      --cta: #ffb347;
+      --cta-dark: #f1992d;
+      --bg: #cfe8f5;
+      --surface: rgba(255,255,255,0.97);
       --text: #173042;
       --muted: #5f7280;
       --white: #ffffff;
-      --border: #d9e7ef;
-      --shadow: 0 14px 36px rgba(11, 111, 164, 0.12);
+      --border: #c6dfec;
+      --shadow: 0 16px 38px rgba(11, 111, 164, 0.14);
       --radius: 22px;
-      --max-width: 1080px;
+      --max-width: 1120px;
     }
 
     * { box-sizing: border-box; }
 
+    html { scroll-behavior: smooth; }
+
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
       color: var(--text);
-      background: linear-gradient(to bottom, #f5fbff, var(--bg));
+      background: linear-gradient(to bottom, #e2f2fb, var(--bg));
       line-height: 1.6;
     }
 
@@ -40,9 +48,43 @@
     }
 
     header {
-      background: linear-gradient(135deg, rgba(11, 111, 164, 0.92), rgba(8, 79, 116, 0.88));
+      background:
+        linear-gradient(135deg, rgba(8, 82, 120, 0.76), rgba(6, 58, 88, 0.72)),
+        linear-gradient(90deg, rgba(255,255,255,0.52) 0 1.3%, rgba(195,236,252,0.18) 1.3% 2.6%, transparent 2.6% 47.4%, rgba(255,255,255,0.52) 47.4% 48.8%, rgba(195,236,252,0.18) 48.8% 51.2%, rgba(255,255,255,0.52) 51.2% 52.6%, transparent 52.6% 97.4%, rgba(255,255,255,0.52) 97.4% 98.7%, rgba(195,236,252,0.18) 98.7% 100%),
+        linear-gradient(180deg, rgba(255,255,255,0.56) 0 1.8%, rgba(195,236,252,0.18) 1.8% 3.2%, transparent 3.2% 46.8%, rgba(255,255,255,0.56) 46.8% 48.2%, rgba(195,236,252,0.18) 48.2% 51.8%, rgba(255,255,255,0.56) 51.8% 53.2%, transparent 53.2% 96.8%, rgba(255,255,255,0.56) 96.8% 98.2%, rgba(195,236,252,0.18) 98.2% 100%),
+        linear-gradient(118deg, rgba(255,255,255,0.40) 10%, rgba(255,255,255,0.08) 26%, transparent 42%),
+        radial-gradient(circle at 21% 24%, rgba(255,255,255,0.55), transparent 14%),
+        radial-gradient(circle at 72% 26%, rgba(255,255,255,0.42), transparent 16%),
+        radial-gradient(circle at 62% 62%, rgba(255,255,255,0.18), transparent 24%),
+        linear-gradient(180deg, #effbff 0%, #c9efff 26%, #8fd8f4 58%, #5eb9df 82%, #2f7ba7 100%);
       color: var(--white);
-      padding: 24px 0 92px;
+      padding: 22px 0 290px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(128deg, transparent 16%, rgba(255,255,255,0.14) 24%, rgba(255,255,255,0.46) 31%, rgba(255,255,255,0.12) 38%, transparent 48%),
+        linear-gradient(38deg, transparent 58%, rgba(255,255,255,0.16) 66%, rgba(255,255,255,0.06) 72%, transparent 78%),
+        linear-gradient(to bottom, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 60%, rgba(11,111,164,0.14) 80%, rgba(11,111,164,0.09) 91%, rgba(125,185,214,0.14) 97%, #cfe8f5 100%);
+      pointer-events: none;
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      right: -120px;
+      bottom: -120px;
+      width: 340px;
+      height: 340px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      pointer-events: none;
     }
 
     .topbar {
@@ -51,34 +93,64 @@
       align-items: center;
       gap: 16px;
       flex-wrap: wrap;
+      position: fixed;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(92%, var(--max-width));
+      padding: 12px 16px;
+      border-radius: 28px;
+      background: rgba(8, 56, 82, 0.34);
+      border: 1px solid rgba(255,255,255,0.16);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 18px 34px rgba(4, 25, 36, 0.16);
+      z-index: 20;
+      opacity: 1;
+      transition: padding 0.28s ease, border-radius 0.28s ease, gap 0.28s ease, background 0.28s ease, box-shadow 0.28s ease, opacity 0.38s ease, transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), filter 0.38s ease;
+    }
+
+    body.topbar-manual-hidden .topbar {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-26px) scale(0.92);
+      filter: blur(6px);
+      pointer-events: none;
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 14px;
-      padding: 10px 16px 10px 12px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.18);
+      justify-content: center;
+      padding: 8px;
+      width: min(146px, 31vw);
+      height: min(146px, 31vw);
+      border-radius: 26px;
+      background: #ffffff;
+      border: 1px solid rgba(255,255,255,0.98);
       backdrop-filter: blur(10px);
-      box-shadow: 0 16px 34px rgba(4, 25, 36, 0.12);
-      font-size: 1.2rem;
-      font-weight: 700;
+      box-shadow:
+        0 15px 28px rgba(4, 25, 36, 0.17),
+        0 5px 12px rgba(255,255,255,0.28) inset;
+      overflow: hidden;
+      flex-shrink: 0;
+      transition: width 0.28s ease, height 0.28s ease, padding 0.28s ease, border-radius 0.28s ease, box-shadow 0.28s ease;
+    }
+
+    .topbar .brand {
+      text-decoration: none;
     }
 
     .brand img {
-      height: 82px;
-      width: auto;
+      width: 114%;
+      height: 114%;
+      object-fit: contain;
+      object-position: center;
       display: block;
       border-radius: 22px;
+      filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.12));
+      transition: border-radius 0.28s ease;
     }
 
-    .brand-text {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
+    .brand-text { display: none; }
 
     .brand-title {
       font-size: 1.2rem;
@@ -95,50 +167,185 @@
 
     nav {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.15);
-      padding: 8px;
+      justify-content: center;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 6px;
       border-radius: 999px;
       backdrop-filter: blur(10px);
+      align-items: center;
+      transition: gap 0.28s ease, padding 0.28s ease, background 0.28s ease;
     }
 
     nav a {
       font-weight: 700;
-      padding: 8px 14px;
+      padding: 9px 13px;
       border-radius: 999px;
+      font-size: 0.95rem;
+      line-height: 1;
+      color: rgba(255,255,255,0.94);
+      background: rgba(255,255,255,0.03);
+      border: 1px solid transparent;
+      transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+
+    nav a:hover {
+      background: rgba(255,255,255,0.14);
+      border-color: rgba(255,255,255,0.14);
+      transform: translateY(-1px);
+    }
+
+    nav a.is-active {
+      background: rgba(255,255,255,0.18);
+      border-color: rgba(255,255,255,0.22);
+      color: #ffffff;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .topbar-toggle,
+    .topbar-show-button {
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(255,255,255,0.10);
+      color: rgba(255,255,255,0.96);
+      border-radius: 999px;
+      font-weight: 800;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, opacity 0.28s ease;
+    }
+
+    .topbar-toggle {
+      padding: 10px 14px;
+      font-size: 0.92rem;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .topbar-show-button {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      z-index: 24;
+      padding: 12px 18px;
+      background: linear-gradient(135deg, rgba(11,111,164,0.94), rgba(8,79,116,0.96));
+      border: 1px solid rgba(255,255,255,0.28);
+      color: #ffffff;
+      box-shadow: 0 18px 34px rgba(4, 25, 36, 0.22);
+      font-size: 0.95rem;
+      letter-spacing: 0.01em;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-10px);
+    }
+
+    body.topbar-manual-hidden .topbar-show-button {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .topbar-toggle:hover,
+    .topbar-show-button:hover {
+      transform: translateY(-1px);
+      background: linear-gradient(135deg, rgba(14,126,185,0.98), rgba(8,92,135,0.98));
+      border-color: rgba(255,255,255,0.36);
+    }
+
+    body.topbar-compact .topbar {
+      gap: 12px;
+      padding: 8px 12px;
+      border-radius: 24px;
+      background: rgba(8, 56, 82, 0.42);
+      box-shadow: 0 16px 28px rgba(4, 25, 36, 0.2);
+    }
+
+    body.topbar-compact .brand {
+      padding: 6px;
+      width: min(112px, 24vw);
+      height: min(112px, 24vw);
+      border-radius: 22px;
+      box-shadow:
+        0 12px 24px rgba(4, 25, 36, 0.16),
+        0 4px 10px rgba(255,255,255,0.28) inset;
+    }
+
+    body.topbar-compact .brand img {
+      border-radius: 18px;
+    }
+
+    body.topbar-compact nav {
+      gap: 6px;
+      padding: 6px;
+    }
+
+    body.topbar-compact nav a {
+      padding: 7px 12px;
+      font-size: 0.93rem;
     }
 
     .hero {
-      margin-top: 48px;
-      max-width: 760px;
+      margin-top: 214px;
+      max-width: 820px;
+      position: relative;
+      z-index: 1;
     }
 
     .hero h1 {
       font-size: clamp(2.2rem, 4vw, 3.7rem);
       line-height: 1.05;
-      margin: 0 0 16px;
+      margin: 0 0 14px;
     }
 
     .hero p {
       margin: 0;
       font-size: 1.08rem;
       color: rgba(255,255,255,0.92);
+      max-width: 680px;
     }
 
     main {
-      margin-top: -48px;
-      padding-bottom: 48px;
+      margin-top: -184px;
+      padding-bottom: 56px;
     }
 
     .card {
-      background: rgba(255,255,255,0.97);
-      border: 1px solid rgba(217, 231, 239, 0.9);
+      background: var(--surface);
+      border: 1px solid rgba(214, 225, 222, 0.9);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       padding: 30px;
       margin-bottom: 24px;
+      transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+    }
+
+    .card:hover,
+    .member-card:hover,
+    .team-note:hover,
+    .team-photo:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 42px rgba(11, 111, 164, 0.16);
+      border-color: #b8d9e8;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(34px);
+      transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .grid-2 {
@@ -150,6 +357,7 @@
     .section-title {
       font-size: 1.9rem;
       margin: 0 0 10px;
+      line-height: 1.1;
     }
 
     .section-subtitle {
@@ -187,12 +395,14 @@
       box-shadow: var(--shadow);
       background: #e6f1f7;
       min-height: 340px;
+      cursor: zoom-in;
     }
 
     .team-photo img {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      object-position: center;
       display: block;
     }
 
@@ -214,17 +424,20 @@
 
     .team-members {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 18px;
       margin-top: 24px;
     }
 
     .member-card {
+      position: relative;
       border: 1px solid var(--border);
       border-radius: 20px;
       overflow: hidden;
       background: linear-gradient(to bottom, #fbfeff, #f4fbff);
       box-shadow: var(--shadow);
+      transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+      transform-style: preserve-3d;
     }
 
     .member-card img {
@@ -233,6 +446,7 @@
       object-fit: cover;
       display: block;
       background: #e4f0f6;
+      cursor: zoom-in;
     }
 
     .member-card img.portrait-shot {
@@ -260,6 +474,375 @@
     .member-copy p {
       margin: 0;
       color: var(--muted);
+    }
+
+    .member-role-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .member-role {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 16px;
+      background: linear-gradient(to bottom, #eef9ff, #e1f2fb);
+      border: 1px solid #c3e2f0;
+      color: var(--primary-dark);
+      font-weight: 800;
+      font-size: 0.86rem;
+      line-height: 1.15;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.55);
+    }
+
+    .member-role-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #ffffff;
+      font-size: 0.95rem;
+      flex-shrink: 0;
+      box-shadow: 0 10px 18px rgba(11, 111, 164, 0.18);
+    }
+
+    .member-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 16px;
+      padding: 10px 14px;
+      border: 1px solid #c7deeb;
+      border-radius: 999px;
+      background: #ffffff;
+      color: var(--primary-dark);
+      font-weight: 800;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .member-toggle:hover {
+      transform: translateY(-1px);
+      background: #f4fbff;
+      border-color: #b7d7e6;
+    }
+
+    .member-toggle-arrow {
+      transition: transform 0.28s ease;
+    }
+
+    .member-card.is-open .member-toggle-arrow {
+      transform: rotate(180deg);
+    }
+
+    .member-details {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.36s ease;
+    }
+
+    .member-card.is-open .member-details {
+      grid-template-rows: 1fr;
+    }
+
+    .member-details-inner {
+      overflow: hidden;
+    }
+
+    .member-details-content {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid #cfe3ee;
+      background: linear-gradient(to bottom, #ffffff, #f3fbff);
+    }
+
+    .member-facts {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .member-facts li {
+      color: var(--text);
+    }
+
+    .member-facts strong {
+      color: var(--primary-dark);
+    }
+
+    .timeline {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin-top: 22px;
+      padding-top: 18px;
+    }
+
+    .timeline-progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 6px;
+      width: 100%;
+      border-radius: 999px;
+      background: rgba(11, 111, 164, 0.14);
+      overflow: hidden;
+    }
+
+    .timeline-progress-bar {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(to right, var(--cta), var(--primary));
+      box-shadow: 0 6px 18px rgba(11, 111, 164, 0.22);
+      transition: width 0.18s linear;
+    }
+
+    .timeline-step {
+      position: relative;
+      padding: 24px 20px 20px;
+      border-radius: 22px;
+      background: linear-gradient(to bottom, #fbfeff, #f4fbff);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+      transform-style: preserve-3d;
+    }
+
+    .timeline-step:hover,
+    .gallery-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 42px rgba(11, 111, 164, 0.16);
+      border-color: #b8d9e8;
+    }
+
+    .timeline-step::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: 20px;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--cta), var(--cta-dark));
+      box-shadow: 0 14px 24px rgba(241, 153, 45, 0.28);
+    }
+
+    .timeline-number {
+      position: absolute;
+      top: -1px;
+      left: 35px;
+      transform: translateX(-50%);
+      color: #173042;
+      font-weight: 900;
+      font-size: 0.95rem;
+      z-index: 1;
+    }
+
+    .timeline-step h3 {
+      margin: 16px 0 8px;
+      font-size: 1.08rem;
+    }
+
+    .timeline-step p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .gallery-slider {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gallery-viewport {
+      overflow: hidden;
+      border-radius: 24px;
+    }
+
+    .gallery-track {
+      display: flex;
+      transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .gallery-card {
+      position: relative;
+      overflow: hidden;
+      min-height: 360px;
+      min-width: 100%;
+      border-radius: 22px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      background: #dceef8;
+      transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+      cursor: zoom-in;
+      transform-style: preserve-3d;
+    }
+
+    .gallery-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.45s ease;
+    }
+
+    .gallery-card:hover img {
+      transform: scale(1.03);
+    }
+
+    .gallery-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(6, 31, 44, 0.72), rgba(6, 31, 44, 0.08) 52%, transparent);
+      pointer-events: none;
+    }
+
+    .gallery-copy {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 18px;
+      z-index: 1;
+      color: #ffffff;
+    }
+
+    .gallery-copy h3 {
+      margin: 0 0 6px;
+      font-size: 1.04rem;
+    }
+
+    .gallery-copy p {
+      margin: 0;
+      color: rgba(255,255,255,0.88);
+      font-size: 0.95rem;
+    }
+
+    .gallery-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .gallery-arrow-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .gallery-arrow {
+      width: 48px;
+      height: 48px;
+      border: none;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #ffffff;
+      font-size: 1.35rem;
+      cursor: pointer;
+      box-shadow: 0 16px 28px rgba(11, 111, 164, 0.22);
+      transition: transform 0.2s ease, filter 0.2s ease;
+    }
+
+    .gallery-arrow:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.04);
+    }
+
+    .gallery-dots {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gallery-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(11, 111, 164, 0.24);
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .gallery-dot.is-active {
+      background: var(--primary);
+      transform: scale(1.25);
+    }
+
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+      background: rgba(4, 18, 28, 0.84);
+      backdrop-filter: blur(10px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.28s ease;
+      z-index: 60;
+    }
+
+    .lightbox.is-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .lightbox-panel {
+      position: relative;
+      width: min(92vw, 1080px);
+      max-height: 88vh;
+      padding: 16px;
+      border-radius: 28px;
+      background: rgba(245, 252, 255, 0.08);
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: 0 28px 60px rgba(0, 0, 0, 0.34);
+      transform: scale(0.96) translateY(10px);
+      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .lightbox.is-open .lightbox-panel {
+      transform: scale(1) translateY(0);
+    }
+
+    .lightbox-image-wrap {
+      overflow: hidden;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.06);
+    }
+
+    .lightbox img {
+      width: 100%;
+      max-height: calc(88vh - 74px);
+      object-fit: contain;
+      display: block;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: -14px;
+      right: -14px;
+      width: 46px;
+      height: 46px;
+      border: none;
+      border-radius: 50%;
+      background: #ffffff;
+      color: #173042;
+      font-size: 1.5rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 18px 34px rgba(0, 0, 0, 0.22);
     }
 
     .cta-panel {
@@ -305,6 +888,10 @@
       border: 1px solid rgba(255,255,255,0.35);
     }
 
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.18);
+    }
+
     .social-links {
       display: inline-flex;
       flex-wrap: wrap;
@@ -317,7 +904,7 @@
       align-items: center;
       gap: 8px;
       padding: 8px 12px;
-      border-radius: 999px;
+      border-radius: 10px;
       background: #eef7fb;
       border: 1px solid var(--border);
       color: var(--primary-dark);
@@ -339,10 +926,15 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.72rem;
-      font-weight: 800;
       color: var(--white);
       flex-shrink: 0;
+    }
+
+    .social-icon svg {
+      width: 13px;
+      height: 13px;
+      display: block;
+      fill: currentColor;
     }
 
     .social-icon.instagram { background: linear-gradient(135deg, #fd5949, #d6249f, #285AEB); }
@@ -376,120 +968,281 @@
     @media (max-width: 900px) {
       .grid-2,
       .team-gallery,
-      .team-members {
+      .team-members,
+      .timeline,
+      .gallery-slider {
         grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        top: 10px;
+        padding: 10px 12px;
+      }
+
+      .topbar-actions {
+        width: 100%;
+        justify-content: flex-end;
+      }
+
+      .brand {
+        width: min(108px, 28vw);
+        height: min(108px, 28vw);
+        border-radius: 20px;
+      }
+
+      .hero {
+        margin-top: 208px;
+      }
+
+      nav {
+        border-radius: 20px;
+        gap: 5px;
+        padding: 6px;
+      }
+
+      nav a {
+        padding: 8px 11px;
+        font-size: 0.89rem;
+      }
+
+      body.topbar-compact .brand {
+        width: min(96px, 26vw);
+        height: min(96px, 26vw);
+      }
+
+      .topbar-show-button {
+        top: 14px;
+        right: 14px;
+        padding: 11px 16px;
+      }
+
+      main {
+        margin-top: -150px;
+      }
+
+      .member-role-list {
+        grid-template-columns: 1fr;
+      }
+
+      .gallery-card {
+        min-height: 300px;
+      }
+
+      .lightbox {
+        padding: 18px;
+      }
+
+      .lightbox-panel {
+        width: 100%;
+        padding: 12px;
+        border-radius: 22px;
+      }
+
+      .lightbox-close {
+        top: -8px;
+        right: -4px;
       }
     }
   </style>
 </head>
 <body>
-  <header>
+  <header id="top">
     <div class="container">
       <div class="topbar">
-        <div class="brand">
-          <img src="logga.png" alt="Berga Båttvätt logga" onerror="this.style.display='none'">
+        <a class="brand" href="index.html#top" aria-label="Till startsidan">
+          <img src="logga-fonsterputs.png" alt="Berga Fönsterputs logga" onerror="this.style.display='none'">
           <div class="brand-text">
-            <span class="brand-title">Berga Båttvätt</span>
+            <span class="brand-title">Berga Fönsterputs</span>
             <span class="brand-tagline">Personlig och lokal service</span>
           </div>
+        </a>
+        <div class="topbar-actions">
+          <nav>
+            <a href="index.html">Startsida</a>
+            <a href="var-tjanst.html">Vår tjänst</a>
+            <a href="om-oss.html" class="is-active">Om oss</a>
+            <a href="index.html#bokning">Boka</a>
+            <a href="index.html#kontakt">Kontakt</a>
+          </nav>
+          <button type="button" class="topbar-toggle" id="topbarToggleButton">Dölj</button>
         </div>
-        <nav>
-          <a href="index.html">Startsida</a>
-          <a href="index.html#tjanster">Tjänst</a>
-          <a href="index.html#bokning">Boka</a>
-          <a href="index.html#kontakt">Kontakt</a>
-        </nav>
       </div>
 
       <div class="hero">
-        <h1>Om oss</h1>
-        <p>Vi är fyra 17-åriga killar med stort båtintresse som driver Berga Båttvätt. Vi vill skapa en personlig, lokal och trygg tjänst för båtägare som vill få båten ren utan krångel.</p>
+        <h1>Vi bakom Berga Fönsterputs</h1>
+        <p>En personlig och lokal tjänst byggd med driv, noggrannhet och servicekänsla. Vi är Zac och Martin bakom Berga Fönsterputs, och för oss handlar det om personlig service, tydlig kontakt och ett enkelt sätt att boka fönsterputs hemma hos dig.</p>
       </div>
     </div>
   </header>
+  <button type="button" class="topbar-show-button" id="topbarShowButton">Visa meny</button>
 
   <main class="container">
-    <section class="card">
-      <h2 class="section-title">Vi bakom Berga Båttvätt</h2>
-      <p class="section-subtitle">En personlig och lokal tjänst byggd av unga killar med genuint båtintresse.</p>
+    <section class="card reveal">
       <div class="team-gallery">
         <div class="team-photo">
-          <img src="IMG_5553.jpg" alt="Berga Båttvätt ute med båt i solnedgång">
+          <img src="IMG_5553.jpg" alt="Teamet bakom Berga Fönsterputs">
         </div>
         <div class="team-note">
-          <h3>Mer än bara tvätt</h3>
-          <p>För oss handlar det inte bara om att göra båtar rena. Det handlar också om intresset för båtlivet, viljan att bygga något eget och att ge människor i närområdet en tjänst som känns enkel, personlig och trygg.</p>
-          <p style="margin-top:14px;"><strong>Vi som driver Berga Båttvätt:</strong> Zac, Hugo, Martin och Erik.</p>
-          <p style="margin-top:10px;">Du kan alltid fylla på med mer information om var och en senare, så bygger vi ut sidan när du vill.</p>
+          <h3>Mer än bara puts</h3>
+          <p>För oss handlar det inte bara om att göra fönster rena. Det handlar också om att bygga något eget och ge människor i närområdet en tjänst som känns enkel, personlig och trygg.</p>
+          <p style="margin-top:14px;"><strong>Vi som driver Berga Fönsterputs:</strong> Zac och Martin.</p>
+          <p style="margin-top:10px;">När du vill kan vi också fylla på med mer personlig text om er båda och göra sidan ännu mer levande.</p>
         </div>
       </div>
     </section>
 
-    <section class="card">
+    <section class="card reveal">
       <h2 class="section-title">Teamet</h2>
-      <p class="section-subtitle">Några bilder på oss bakom Berga Båttvätt.</p>
+      <p class="section-subtitle">Några bilder på oss bakom Berga Fönsterputs.</p>
       <div class="team-members">
         <article class="member-card">
-          <img src="IMG_5514.jpeg" alt="Hugo från Berga Båttvätt">
-          <div class="member-copy">
-            <h3>Hugo</h3>
-            <p>Del av teamet bakom Berga Båttvätt och en av killarna som driver företaget framåt.</p>
-          </div>
-        </article>
-
-        <article class="member-card">
-          <img src="IMG_5633.JPG" alt="Zac från Berga Båttvätt" class="portrait-shot zac-shot">
+          <img src="IMG_5633.JPG" alt="Zac från Berga Fönsterputs" class="portrait-shot zac-shot">
           <div class="member-copy">
             <h3>Zac</h3>
-            <p>En del av gänget bakom Berga Båttvätt med intresse för båtliv och lokal service.</p>
+            <p>En del av gänget bakom Berga Fönsterputs med fokus på lokal service och tydlig kontakt.</p>
+            <div class="member-role-list">
+              <span class="member-role"><span class="member-role-icon">🪟</span>Putsar</span>
+              <span class="member-role"><span class="member-role-icon">💻</span>Webbutvecklare</span>
+            </div>
+            <button type="button" class="member-toggle">
+              Läs mer om Zac <span class="member-toggle-arrow">⌄</span>
+            </button>
+            <div class="member-details">
+              <div class="member-details-inner">
+                <div class="member-details-content">
+                  <ul class="member-facts">
+                    <li><strong>Ålder:</strong> 16 år</li>
+                    <li><strong>Studerar:</strong> Naturprogrammet på Täby Enskilda Gymnasium</li>
+                    <li><strong>Beskrivning:</strong> Glad kille som gillar att bygga något eget och få saker att fungera ordentligt.</li>
+                    <li><strong>Det bästa med jobbet:</strong> Att se faktiska resultat när jobbet är klart.</li>
+                    <li><strong>Utanför jobbet:</strong> Älskar att åka skidor på vintern och vara ute med båt på sommaren.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
         </article>
 
         <article class="member-card">
-          <img src="IMG_6793.JPG" alt="Martin från Berga Båttvätt" class="portrait-shot martin-shot">
+          <img src="IMG_6793.JPG" alt="Martin från Berga Fönsterputs" class="portrait-shot martin-shot">
           <div class="member-copy">
             <h3>Martin</h3>
-            <p>En del av teamet som vill göra båtrengöring enklare, mer personlig och mer tillgänglig.</p>
-          </div>
-        </article>
-
-        <article class="member-card">
-          <img src="IMG_6792.JPG" alt="Erik från Berga Båttvätt">
-          <div class="member-copy">
-            <h3>Erik</h3>
-            <p>En viktig del av Berga Båttvätt med fokus på båtliv, lokal känsla och bra service.</p>
+            <p>En del av teamet som vill göra fönsterputs enklare, mer personlig och mer tillgänglig.</p>
+            <div class="member-role-list">
+              <span class="member-role"><span class="member-role-icon">🪟</span>Putsar</span>
+              <span class="member-role"><span class="member-role-icon">📱</span>Sociala medier</span>
+              <span class="member-role"><span class="member-role-icon">📅</span>Bokningar</span>
+            </div>
+            <button type="button" class="member-toggle">
+              Läs mer om Martin <span class="member-toggle-arrow">⌄</span>
+            </button>
+            <div class="member-details">
+              <div class="member-details-inner">
+                <div class="member-details-content">
+                  <ul class="member-facts">
+                    <li><strong>Ålder:</strong> 16 år</li>
+                    <li><strong>Studerar:</strong> Ekonomiprogrammet på Österåkers Gymnasium</li>
+                    <li><strong>Beskrivning:</strong> Nyfiken kille som gillar att utveckla företaget och ha bra kontakt med kunder.</li>
+                    <li><strong>Det bästa med jobbet:</strong> Att få göra människor nöjda.</li>
+                    <li><strong>Utanför jobbet:</strong> Martin gymmar.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
         </article>
       </div>
     </section>
 
-    <section class="card">
+    <section class="card reveal">
+      <h2 class="section-title">Vår resa</h2>
+      <p class="section-subtitle">Från idé till en lokal tjänst som ska kännas enkel att boka och trygg att använda.</p>
+      <div class="timeline">
+        <div class="timeline-progress"><div class="timeline-progress-bar" id="timelineProgressBar"></div></div>
+        <article class="timeline-step">
+          <span class="timeline-number">1</span>
+          <h3>Idén tog form</h3>
+          <p>Vi ville bygga något eget tillsammans och skapa en tjänst som känns personlig, lokal och enkel att boka.</p>
+        </article>
+        <article class="timeline-step">
+          <span class="timeline-number">2</span>
+          <h3>Hemsidan byggdes</h3>
+          <p>Vi satte upp sidan, bokningssystemet och en tydlig struktur så det ska vara enkelt för kunder att höra av sig.</p>
+        </article>
+        <article class="timeline-step">
+          <span class="timeline-number">3</span>
+          <h3>Nästa steg</h3>
+          <p>Nu fokuserar vi på att växa lokalt, ta emot bokningar och bygga vidare på Berga Fönsterputs steg för steg.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="card reveal">
+      <h2 class="section-title">Lite mer från oss</h2>
+      <p class="section-subtitle">Bilder som ger sidan mer liv och visar känslan bakom företaget.</p>
+      <div class="gallery-slider">
+        <div class="gallery-viewport">
+          <div class="gallery-track" id="galleryTrack">
+        <article class="gallery-card">
+          <img src="IMG_5553.jpg" alt="Berga Fönsterputs ute vid vattnet">
+          <div class="gallery-copy">
+            <h3>Bakom företaget</h3>
+            <p>Vi vill bygga något eget med bra energi, tydlig service och lokal känsla.</p>
+          </div>
+        </article>
+        <article class="gallery-card">
+          <img src="IMG_5827.jpg" alt="Bild från vardagen bakom Berga Fönsterputs">
+          <div class="gallery-copy">
+            <h3>Vardagen</h3>
+            <p>Det här är en del av resan när vi bygger upp företaget.</p>
+          </div>
+        </article>
+        <article class="gallery-card">
+          <img src="IMG_5828.jpeg" alt="Bild på teamet bakom Berga Fönsterputs">
+          <div class="gallery-copy">
+            <h3>Lokalt och personligt</h3>
+            <p>Vi vill att det ska kännas tryggt att boka oss.</p>
+          </div>
+        </article>
+          </div>
+        </div>
+        <div class="gallery-controls">
+          <div class="gallery-arrow-group">
+            <button type="button" class="gallery-arrow" id="galleryPrev" aria-label="Föregående bild">‹</button>
+            <button type="button" class="gallery-arrow" id="galleryNext" aria-label="Nästa bild">›</button>
+          </div>
+          <div class="gallery-dots" id="galleryDots" aria-hidden="true"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card reveal">
       <h2 class="section-title">Vår idé</h2>
-      <p class="section-subtitle">Vi tror på personlig service, tydliga priser och att göra ett bra jobb där båten står.</p>
+      <p class="section-subtitle">Vi tror på personlig service, tydliga priser och att göra ett bra jobb där fönstren finns.</p>
       <div class="grid-2">
         <div>
-          <p>Berga Båttvätt startades av oss som själva har ett stort intresse för båtar. Vi såg att många vill hålla båten ren och fräsch men inte alltid har tid eller möjlighet att göra jobbet själva.</p>
-          <p>Därför bygger vi en lokal tjänst där vi kommer till båtarna, arbetar noggrant och gör bokningen enkel från första kontakt till färdig tvätt.</p>
+          <p>Berga Fönsterputs startades av oss för att göra det enklare att få rena fönster utan att du själv behöver lägga tid och energi på jobbet.</p>
+          <p>Därför bygger vi en lokal tjänst där vi kommer hem till dig, arbetar noggrant och gör bokningen enkel från första kontakt till färdig putsning.</p>
         </div>
         <div>
           <ul class="fact-list">
-            <li>Fyra 17-åriga killar med båtintresse</li>
-            <li>Zac, Hugo, Martin och Erik</li>
-            <li>Personlig och lokal service i Berga och Stockholm</li>
+            <li>Två unga killar med driv och noggrannhet</li>
+            <li>Zac och Martin</li>
+            <li>Personlig och lokal service i Åkersberga och Stockholm</li>
             <li>Fokus på bra pris, flexibilitet och trygg kontakt</li>
-            <li>Vi börjar med utvändig tvätt och kan bygga vidare framöver</li>
+            <li>Vi börjar med fönsterputs och kan bygga vidare framöver</li>
           </ul>
         </div>
       </div>
     </section>
 
-    <section class="card">
+    <section class="card reveal">
       <h2 class="section-title">Det här är viktigt för oss</h2>
       <p class="section-subtitle">Vi vill att det ska kännas enkelt och tryggt att boka oss.</p>
       <div class="grid-2">
         <div class="card" style="margin:0;">
           <h3>Personlig kontakt</h3>
-          <p>Vi vill vara lätta att nå och tydliga i vår kommunikation, både före och efter tvätten.</p>
+          <p>Vi vill vara lätta att nå och tydliga i vår kommunikation, både före och efter putsningen.</p>
         </div>
         <div class="card" style="margin:0;">
           <h3>Lokal känsla</h3>
@@ -498,11 +1251,11 @@
       </div>
     </section>
 
-    <section class="card cta-panel">
+    <section class="card cta-panel reveal">
       <h2 class="section-title">Vill du boka eller höra av dig?</h2>
-      <p>Du kan boka direkt på startsidan eller kontakta oss om du har frågor om pris, båtstorlek eller plats.</p>
+      <p>Du kan boka direkt på startsidan eller kontakta oss om du har frågor om pris, adress eller omfattning.</p>
       <div class="hero-buttons">
-        <a href="index.html#bokning" class="btn btn-primary">Boka båttvätt</a>
+        <a href="index.html#bokning" class="btn btn-primary">Boka fönsterputs</a>
         <a href="index.html#kontakt" class="btn btn-secondary">Kontakta oss</a>
       </div>
     </section>
@@ -510,22 +1263,171 @@
 
   <footer>
     <div class="container">
-      <p><strong>Berga Båttvätt</strong></p>
+      <p><strong>Berga Fönsterputs</strong></p>
       <p>E-post: bergabattvatt@gmail.com</p>
       <p>Telefon: 073-388 12 16</p>
-      <p>Sociala medier:
-        <span class="social-links">
-          <a class="social-link" href="https://www.instagram.com/bergabattvatt" target="_blank" rel="noopener noreferrer"><span class="social-icon instagram">IG</span>Instagram</a>
-          <a class="social-link" href="https://www.tiktok.com/@bergabttvtt2" target="_blank" rel="noopener noreferrer"><span class="social-icon tiktok">TT</span>TikTok</a>
-          <a class="social-link" href="https://www.facebook.com/bergab%C3%A5ttv%C3%A4tt" target="_blank" rel="noopener noreferrer"><span class="social-icon facebook">f</span>Facebook</a>
-        </span>
-      </p>
+      <p>Sociala medier: <span class="social-links"><a class="social-link" href="https://www.instagram.com/bergabattvatt" target="_blank" rel="noopener noreferrer"><span class="social-icon instagram" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2Zm-.2 2A3.6 3.6 0 0 0 4 7.6v8.8A3.6 3.6 0 0 0 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6A3.6 3.6 0 0 0 16.4 4H7.6Zm9.65 1.5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2.1a2.9 2.9 0 1 0 0 5.8 2.9 2.9 0 0 0 0-5.8Z"/></svg></span>Instagram</a><a class="social-link" href="https://www.tiktok.com/@bergabttvtt2" target="_blank" rel="noopener noreferrer"><span class="social-icon tiktok" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14.9 2c.45 2.58 1.98 4.12 4.52 4.32v3.12c-1.48.14-2.8-.35-4.02-1.08v6.04c0 4.58-4.98 7.44-8.95 5.44-3.83-1.94-4.07-7.63-.45-9.93 1.04-.66 2.15-.98 3.72-.86v3.28c-.69-.22-1.47-.17-2.1.15-1.51.76-1.92 2.78-.82 4.01 1.55 1.73 4.53.64 4.53-1.74V2h3.57Z"/></svg></span>TikTok</a><a class="social-link" href="https://www.facebook.com/bergab%C3%A5ttv%C3%A4tt" target="_blank" rel="noopener noreferrer"><span class="social-icon facebook" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13.4 22v-8.1h2.73l.41-3.17H13.4V8.7c0-.92.25-1.54 1.57-1.54h1.68V4.32c-.82-.09-1.64-.14-2.46-.13-2.44 0-4.11 1.49-4.11 4.24v2.29H7.3v3.17h2.78V22h3.32Z"/></svg></span>Facebook</a></span></p>
       <div class="footer-links">
         <a href="index.html">Startsida</a>
+        <a href="var-tjanst.html">Vår tjänst</a>
         <a href="index.html#bokning">Boka tid</a>
         <a href="index.html#kontakt">Kontakt</a>
       </div>
     </div>
   </footer>
+  <div class="lightbox" id="imageLightbox" aria-hidden="true">
+    <div class="lightbox-panel">
+      <button type="button" class="lightbox-close" id="lightboxClose" aria-label="Stäng bild">×</button>
+      <div class="lightbox-image-wrap">
+        <img id="lightboxImage" src="" alt="">
+      </div>
+    </div>
+  </div>
+  <script>
+    const topbar = document.querySelector('.topbar');
+    const topbarToggleButton = document.getElementById('topbarToggleButton');
+    const topbarShowButton = document.getElementById('topbarShowButton');
+    const revealItems = document.querySelectorAll('.reveal');
+    const memberCards = document.querySelectorAll('.member-card');
+    const tiltTargets = document.querySelectorAll('.member-card, .timeline-step, .gallery-card');
+    const timeline = document.querySelector('.timeline');
+    const timelineProgressBar = document.getElementById('timelineProgressBar');
+    const lightbox = document.getElementById('imageLightbox');
+    const lightboxImage = document.getElementById('lightboxImage');
+    const lightboxClose = document.getElementById('lightboxClose');
+    const zoomableImages = document.querySelectorAll('.team-photo img, .member-card img, .gallery-card img');
+    const galleryTrack = document.getElementById('galleryTrack');
+    const galleryPrev = document.getElementById('galleryPrev');
+    const galleryNext = document.getElementById('galleryNext');
+    const galleryDots = document.getElementById('galleryDots');
+    const gallerySlides = galleryTrack ? Array.from(galleryTrack.children) : [];
+    let currentGalleryIndex = 0;
+
+    const updateTopbar = () => {
+      if (!topbar) return;
+      document.body.classList.toggle('topbar-compact', window.scrollY > 80);
+    };
+
+    topbarToggleButton?.addEventListener('click', () => {
+      document.body.classList.add('topbar-manual-hidden');
+    });
+
+    topbarShowButton?.addEventListener('click', () => {
+      document.body.classList.remove('topbar-manual-hidden');
+    });
+
+    const updateReveal = () => {
+      const triggerPoint = window.innerHeight * 0.86;
+      revealItems.forEach((item) => {
+        const rect = item.getBoundingClientRect();
+        const isVisible = rect.top < triggerPoint && rect.bottom > 80;
+        item.classList.toggle('is-visible', isVisible);
+      });
+    };
+
+    const updateTimelineProgress = () => {
+      if (!timeline || !timelineProgressBar) return;
+      const rect = timeline.getBoundingClientRect();
+      const start = window.innerHeight * 0.86;
+      const end = window.innerHeight * 0.2;
+      const total = Math.max(1, start - end + rect.height);
+      const progress = Math.min(Math.max((start - rect.top) / total, 0), 1);
+      timelineProgressBar.style.width = `${progress * 100}%`;
+    };
+
+    const setGalleryIndex = (index) => {
+      if (!galleryTrack || !gallerySlides.length) return;
+      currentGalleryIndex = (index + gallerySlides.length) % gallerySlides.length;
+      galleryTrack.style.transform = `translateX(-${currentGalleryIndex * 100}%)`;
+      Array.from(galleryDots.children).forEach((dot, dotIndex) => {
+        dot.classList.toggle('is-active', dotIndex === currentGalleryIndex);
+      });
+    };
+
+    if (galleryDots && gallerySlides.length) {
+      gallerySlides.forEach((_, index) => {
+        const dot = document.createElement('span');
+        dot.className = 'gallery-dot';
+        galleryDots.appendChild(dot);
+      });
+      setGalleryIndex(0);
+    }
+
+    if (galleryPrev) {
+      galleryPrev.addEventListener('click', () => setGalleryIndex(currentGalleryIndex - 1));
+    }
+
+    if (galleryNext) {
+      galleryNext.addEventListener('click', () => setGalleryIndex(currentGalleryIndex + 1));
+    }
+
+    memberCards.forEach((card) => {
+      const toggle = card.querySelector('.member-toggle');
+      if (!toggle) return;
+      toggle.addEventListener('click', () => {
+        memberCards.forEach((otherCard) => {
+          if (otherCard !== card) {
+            otherCard.classList.remove('is-open');
+          }
+        });
+        card.classList.toggle('is-open');
+      });
+    });
+
+    const openLightbox = (image) => {
+      lightboxImage.src = image.currentSrc || image.src;
+      lightboxImage.alt = image.alt || '';
+      lightbox.classList.add('is-open');
+      lightbox.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    };
+
+    const closeLightbox = () => {
+      lightbox.classList.remove('is-open');
+      lightbox.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      lightboxImage.src = '';
+    };
+
+    zoomableImages.forEach((image) => {
+      image.addEventListener('click', () => openLightbox(image));
+    });
+
+    tiltTargets.forEach((element) => {
+      element.addEventListener('mousemove', (event) => {
+        if (window.innerWidth <= 900) return;
+        const rect = element.getBoundingClientRect();
+        const x = ((event.clientX - rect.left) / rect.width - 0.5) * 8;
+        const y = ((event.clientY - rect.top) / rect.height - 0.5) * -8;
+        element.style.transform = `perspective(900px) rotateX(${y}deg) rotateY(${x}deg) translateY(-4px)`;
+      });
+
+      element.addEventListener('mouseleave', () => {
+        element.style.transform = '';
+      });
+    });
+
+    lightboxClose.addEventListener('click', closeLightbox);
+    lightbox.addEventListener('click', (event) => {
+      if (event.target === lightbox) {
+        closeLightbox();
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && lightbox.classList.contains('is-open')) {
+        closeLightbox();
+      }
+    });
+
+    updateTopbar();
+    updateReveal();
+    updateTimelineProgress();
+    window.addEventListener('scroll', updateTopbar, { passive: true });
+    window.addEventListener('scroll', updateReveal, { passive: true });
+    window.addEventListener('scroll', updateTimelineProgress, { passive: true });
+    window.addEventListener('resize', updateReveal);
+    window.addEventListener('resize', updateTimelineProgress);
+  </script>
 </body>
 </html>

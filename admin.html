@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin | Berga Fönsterputs</title>
+  <link rel="icon" type="image/png" href="favicon-rounded.png" />
+  <link rel="shortcut icon" href="favicon-rounded.png" />
+  <link rel="apple-touch-icon" href="favicon-rounded.png" />
+  <style>
+    :root {
+      --bg-top: #2d658d;
+      --bg-bottom: #d9edf9;
+      --ink: #18364b;
+      --muted: #5d7488;
+      --card: rgba(255, 255, 255, 0.94);
+      --line: rgba(69, 140, 187, 0.22);
+      --brand: #0f5b96;
+      --brand-soft: rgba(15, 91, 150, 0.1);
+      --success: #17805c;
+      --success-soft: rgba(23, 128, 92, 0.12);
+      --warning: #d88910;
+      --warning-soft: rgba(216, 137, 16, 0.13);
+      --shadow: 0 22px 48px rgba(13, 57, 90, 0.18);
+      --radius-xl: 34px;
+      --radius-lg: 26px;
+      --radius-md: 18px;
+      --radius-sm: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(255, 255, 255, 0.42), transparent 34%),
+        linear-gradient(180deg, var(--bg-top) 0%, #25628b 28%, #d0e8f7 68%, #dff0f8 100%);
+      min-height: 100vh;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::before {
+      inset: 0 auto auto 0;
+      width: 64vw;
+      height: 78vh;
+      background: linear-gradient(135deg, rgba(255,255,255,0.22), transparent 58%);
+      clip-path: polygon(0 0, 100% 0, 0 100%);
+      opacity: 0.8;
+    }
+
+    body::after {
+      right: -14rem;
+      bottom: -12rem;
+      width: 30rem;
+      height: 30rem;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 50%;
+    }
+
+    .container {
+      width: min(1240px, calc(100% - 40px));
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    header {
+      padding: 20px 0 28px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 18px 22px;
+      border-radius: var(--radius-xl);
+      background: rgba(43, 93, 127, 0.78);
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 16px;
+      text-decoration: none;
+      color: white;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .brand img {
+      width: 104px;
+      height: 104px;
+      object-fit: cover;
+      border-radius: 28px;
+      background: white;
+      box-shadow: 0 18px 36px rgba(10, 39, 60, 0.18);
+    }
+
+    .topbar-links {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .topbar-links a,
+    .topbar-links button {
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.08);
+      color: white;
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 12px 18px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    .topbar-links button.hidden { display: none; }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.2fr 0.9fr;
+      gap: 26px;
+      align-items: start;
+      padding: 18px 0 26px;
+    }
+
+    .hero h1 {
+      margin: 0 0 18px;
+      font-size: clamp(3rem, 6vw, 5.2rem);
+      line-height: 0.95;
+      color: white;
+      text-wrap: balance;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 760px;
+      color: rgba(255,255,255,0.92);
+      font-size: 1.36rem;
+      line-height: 1.5;
+    }
+
+    .pill {
+      display: inline-flex;
+      margin-bottom: 18px;
+      padding: 12px 18px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.14);
+      color: white;
+      font-weight: 800;
+    }
+
+    .hero-card,
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 18px 38px rgba(18, 67, 103, 0.08);
+    }
+
+    .hero-card {
+      padding: 28px;
+    }
+
+    .hero-card h2 {
+      margin: 0 0 14px;
+      font-size: 1.9rem;
+    }
+
+    .hero-card ul {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    main {
+      padding-bottom: 64px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 330px minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .panel {
+      padding: 26px;
+    }
+
+    .panel h2 {
+      margin: 0 0 10px;
+      font-size: 2rem;
+    }
+
+    .panel p {
+      margin: 0 0 18px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .login-form {
+      display: grid;
+      gap: 14px;
+    }
+
+    label {
+      display: grid;
+      gap: 8px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    input,
+    select,
+    textarea,
+    button {
+      font: inherit;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 1px solid rgba(76, 143, 189, 0.3);
+      background: white;
+      color: var(--ink);
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border: none;
+      border-radius: 999px;
+      padding: 14px 18px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+    }
+
+    .button:hover { transform: translateY(-1px); }
+    .button:disabled { opacity: 0.55; cursor: wait; transform: none; }
+
+    .button-primary {
+      background: linear-gradient(135deg, #ffbb48, #ff9f2d);
+      color: #18364b;
+      box-shadow: 0 14px 26px rgba(255, 168, 46, 0.28);
+    }
+
+    .button-secondary {
+      background: rgba(15, 91, 150, 0.1);
+      color: var(--brand);
+      border: 1px solid rgba(15, 91, 150, 0.18);
+    }
+
+    .button-success {
+      background: var(--success-soft);
+      color: var(--success);
+      border: 1px solid rgba(23, 128, 92, 0.18);
+    }
+
+    .button-danger {
+      background: rgba(177, 58, 58, 0.1);
+      color: #b13a3a;
+      border: 1px solid rgba(177, 58, 58, 0.18);
+    }
+
+    .button-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .status-message {
+      min-height: 24px;
+      color: var(--muted);
+      font-size: 0.98rem;
+    }
+
+    .status-message.error { color: #b13a3a; }
+    .status-message.success { color: var(--success); }
+
+    .bookings-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    #bookingsPanel {
+      grid-column: 1 / -1;
+      width: 100%;
+    }
+
+    .bookings-header h2 {
+      margin: 0;
+      font-size: 2rem;
+    }
+
+    .bookings-list {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .booking-card {
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: rgba(255,255,255,0.94);
+      width: 100%;
+    }
+
+    .booking-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 18px;
+    }
+
+    .booking-top h3 {
+      margin: 0 0 6px;
+      font-size: 1.55rem;
+    }
+
+    .booking-meta {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .badge.pending { background: var(--warning-soft); color: #a55d00; border-color: rgba(216, 137, 16, 0.18); }
+    .badge.confirmed { background: rgba(15, 91, 150, 0.1); color: var(--brand); border-color: rgba(15, 91, 150, 0.18); }
+    .badge.completed { background: var(--success-soft); color: var(--success); border-color: rgba(23, 128, 92, 0.18); }
+    .badge.paid { background: rgba(16, 156, 110, 0.15); color: #0e7a56; border-color: rgba(16, 156, 110, 0.18); }
+    .badge.unpaid { background: rgba(94, 116, 136, 0.12); color: var(--muted); border-color: rgba(94, 116, 136, 0.16); }
+
+    .booking-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .detail {
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(13, 91, 150, 0.04);
+      border: 1px solid rgba(15, 91, 150, 0.08);
+    }
+
+    .detail strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.92rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .detail span {
+      display: block;
+      font-size: 1.03rem;
+      line-height: 1.5;
+    }
+
+    .completion-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .completion-row select {
+      width: min(260px, 100%);
+    }
+
+    .empty-state {
+      padding: 36px;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed rgba(76, 143, 189, 0.36);
+      border-radius: 24px;
+      background: rgba(255,255,255,0.7);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 980px) {
+      .hero,
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .booking-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .container { width: min(100% - 24px, 1240px); }
+      .topbar { padding: 16px; }
+      .brand img { width: 82px; height: 82px; border-radius: 22px; }
+      .hero h1 { font-size: 3rem; }
+      .hero p { font-size: 1.08rem; }
+      .booking-top { flex-direction: column; }
+      .badge-row { justify-content: flex-start; }
+      .bookings-header { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="topbar">
+        <a class="brand" href="index.html">
+          <img src="logga-fonsterputs.png" alt="Berga Fönsterputs">
+        </a>
+        <div class="topbar-links">
+          <a href="index.html">Startsida</a>
+          <a href="var-tjanst.html">Vår tjänst</a>
+          <a href="om-oss.html">Om oss</a>
+          <button type="button" id="logoutButton" class="hidden">Logga ut</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div>
+        <span class="pill">Admin för Berga Fönsterputs</span>
+        <h1>Hantera bokningar och skicka klartmail.</h1>
+        <p>Här kan ni logga in, se bokningar, bekräfta dem, markera jobbet som klart och automatiskt skicka betalningsinformation och recensionslänk till kunden.</p>
+      </div>
+      <div class="hero-card">
+        <h2>Det här kan ni göra här</h2>
+        <ul>
+          <li>Se alla bokningar på ett ställe</li>
+          <li>Markera bokning som bekräftad</li>
+          <li>Markera jobb som klart och skicka betalning</li>
+          <li>Markera bokning som betald efter inkommen betalning</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="grid">
+      <aside class="card panel" id="loginPanel">
+        <h2>Logga in</h2>
+        <p>Använd ett Supabase-konto för admin. Efter inloggning kan ni hantera bokningar direkt här.</p>
+        <form class="login-form" id="loginForm">
+          <label>
+            E-post
+            <input type="email" id="adminEmail" placeholder="bokning@bergafonsterputs.se" required>
+          </label>
+          <label>
+            Lösenord
+            <input type="password" id="adminPassword" placeholder="Lösenord" required>
+          </label>
+          <button type="submit" class="button button-primary" id="loginButton">Logga in</button>
+        </form>
+        <p class="status-message" id="loginMessage"></p>
+      </aside>
+
+      <section class="card panel hidden" id="bookingsPanel">
+        <div class="bookings-header">
+          <div>
+            <h2>Bokningar</h2>
+            <p>Här uppdaterar ni status och skickar klartmail när jobbet är utfört.</p>
+          </div>
+          <button type="button" class="button button-secondary" id="refreshButton">Uppdatera</button>
+        </div>
+        <div class="bookings-list" id="bookingsList"></div>
+      </section>
+    </section>
+  </main>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+    const SUPABASE_URL = 'https://xeyippgcoqfskcmqzazx.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_MUKxAwv0vNXDrcgumq81fQ_Uvx4eOuq';
+    const COMPLETE_BOOKING_URL = `${SUPABASE_URL}/functions/v1/complete-booking`;
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const loginPanel = document.getElementById('loginPanel');
+    const bookingsPanel = document.getElementById('bookingsPanel');
+    const loginForm = document.getElementById('loginForm');
+    const loginButton = document.getElementById('loginButton');
+    const loginMessage = document.getElementById('loginMessage');
+    const logoutButton = document.getElementById('logoutButton');
+    const refreshButton = document.getElementById('refreshButton');
+    const bookingsList = document.getElementById('bookingsList');
+
+    function setLoginMessage(text, type = '') {
+      loginMessage.textContent = text;
+      loginMessage.className = `status-message ${type}`.trim();
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function formatDate(value) {
+      if (!value) return 'Ej valt';
+      return new Date(`${value}T12:00:00`).toLocaleDateString('sv-SE', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+    }
+
+    function getBadgeClass(value) {
+      const normalized = String(value || '').toLowerCase();
+      if (normalized === 'confirmed') return 'confirmed';
+      if (normalized === 'completed') return 'completed';
+      if (normalized === 'paid') return 'paid';
+      if (normalized === 'unpaid') return 'unpaid';
+      return 'pending';
+    }
+
+    function parseWindowCount(value) {
+      const match = String(value || '').match(/\d+/);
+      return match ? Number(match[0]) : 0;
+    }
+
+    function getBasePrice(housingTypeLabel, windowCount) {
+      if (housingTypeLabel === 'Enplansvilla') {
+        return windowCount > 15 ? 799 : 699;
+      }
+
+      if (housingTypeLabel === 'Tvåplansvilla') {
+        return windowCount > 17 ? 999 : 899;
+      }
+
+      return null;
+    }
+
+    function getInteriorAddon(housingTypeLabel, windowCount) {
+      if (housingTypeLabel === 'Enplansvilla') {
+        return windowCount > 15 ? 399 : 349;
+      }
+
+      if (housingTypeLabel === 'Tvåplansvilla') {
+        return windowCount > 17 ? 499 : 449;
+      }
+
+      return 0;
+    }
+
+    function getSeaMilesAddon(seaMilesLabel) {
+      if (!seaMilesLabel) return { price: 0, isQuote: false };
+      if (seaMilesLabel === '0-5 sjömil') return { price: 300, isQuote: false };
+      if (seaMilesLabel === '6-10 sjömil') return { price: 600, isQuote: false };
+      if (seaMilesLabel === '11-15 sjömil') return { price: 900, isQuote: false };
+      if (seaMilesLabel === '16+ sjömil') return { price: 0, isQuote: true };
+      return { price: 0, isQuote: false };
+    }
+
+    function getAddonsPrice(addonsValue) {
+      const text = String(addonsValue || '').toLowerCase();
+      let total = 0;
+
+      if (text.includes('inglasad altan') || text.includes('uterum')) {
+        total += 299;
+      }
+
+      if (text.includes('spröjs')) {
+        total += 149;
+      }
+
+      return total;
+    }
+
+    function getBookingPriceDisplay(booking) {
+      const directPrice = booking.price || booking.total_price;
+      if (directPrice) {
+        const directText = String(directPrice).trim();
+        if (/kr|offert/i.test(directText)) return directText;
+        return `${directText} kr`;
+      }
+
+      const housingType = booking.housing_type || booking.house_size || '';
+      const windowCount = parseWindowCount(booking.window_count);
+      const basePrice = getBasePrice(housingType, windowCount);
+
+      if (!basePrice) return 'Ej angivet';
+
+      const interiorAddon = booking.service_scope === 'Invändig + utvändig'
+        ? getInteriorAddon(housingType, windowCount)
+        : 0;
+      const addonsPrice = getAddonsPrice(booking.addons);
+      const seaMilesAddon = booking.transport_type === 'Båttransport behövs'
+        ? getSeaMilesAddon(booking.sea_miles)
+        : { price: 0, isQuote: false };
+
+      if (seaMilesAddon.isQuote) {
+        return 'Pris enligt offert';
+      }
+
+      return `${basePrice + interiorAddon + addonsPrice + seaMilesAddon.price} kr`;
+    }
+
+    function renderBookings(bookings) {
+      if (!bookings.length) {
+        bookingsList.innerHTML = '<div class="empty-state">Inga bokningar hittades ännu.</div>';
+        return;
+      }
+
+      bookingsList.innerHTML = bookings.map((booking) => {
+        const packageParts = [
+          booking.housing_type || booking.house_size,
+          booking.window_count,
+          booking.service_scope,
+          booking.addons,
+          booking.transport_type,
+          booking.sea_miles ? `Sjömil från Svinnige marina: ${booking.sea_miles}` : '',
+          booking.coordinates ? `Koordinater: ${booking.coordinates}` : ''
+        ].filter(Boolean);
+
+        return `
+          <article class="booking-card" data-booking-id="${booking.id}">
+            <div class="booking-top">
+              <div>
+                <h3>${escapeHtml(booking.customer_name || 'Namn saknas')}</h3>
+                <div class="booking-meta">
+                  ${escapeHtml(booking.email || 'Ingen e-post')}<br>
+                  ${escapeHtml(booking.phone || 'Inget telefonnummer')}
+                </div>
+              </div>
+              <div class="badge-row">
+                <span class="badge ${getBadgeClass(booking.status)}">${escapeHtml(booking.status || 'pending')}</span>
+                <span class="badge ${getBadgeClass(booking.payment_status)}">${escapeHtml(booking.payment_status || 'unpaid')}</span>
+              </div>
+            </div>
+
+            <div class="booking-grid">
+              <div class="detail"><strong>Datum</strong><span>${escapeHtml(formatDate(booking.booking_date))}</span></div>
+              <div class="detail"><strong>Tid</strong><span>${escapeHtml(booking.booking_time || 'Ej valt')}</span></div>
+              <div class="detail"><strong>Adress</strong><span>${escapeHtml(booking.address || booking.location || 'Ej angiven')}</span></div>
+              <div class="detail"><strong>Pris</strong><span>${escapeHtml(getBookingPriceDisplay(booking))}</span></div>
+              <div class="detail"><strong>Paket</strong><span>${packageParts.length ? escapeHtml(packageParts.join(' • ')) : 'Ej angivet'}</span></div>
+              <div class="detail"><strong>Övrig information</strong><span>${escapeHtml(booking.message || 'Ingen extra information')}</span></div>
+            </div>
+
+            <div class="completion-row">
+              <select class="completion-payment-method">
+                <option value="Swish">Skicka Swish-betalning</option>
+                <option value="Faktura via e-post">Skicka faktura via e-post</option>
+              </select>
+              <button type="button" class="button button-secondary action-confirm">Bekräfta</button>
+              <button type="button" class="button button-success action-complete">Klart + skicka</button>
+              <button type="button" class="button button-secondary action-paid">Markera betald</button>
+              <button type="button" class="button button-danger action-delete">Ta bort</button>
+            </div>
+
+            <p class="status-message"></p>
+          </article>
+        `;
+      }).join('');
+    }
+
+    async function fetchBookings() {
+      bookingsList.innerHTML = '<div class="empty-state">Hämtar bokningar...</div>';
+
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        bookingsList.innerHTML = `<div class="empty-state">Kunde inte hämta bokningar: ${escapeHtml(error.message)}</div>`;
+        return;
+      }
+
+      const visibleBookings = (data || []).filter((booking) => {
+        const status = String(booking.status || '').toLowerCase();
+        const paymentStatus = String(booking.payment_status || '').toLowerCase();
+        return !(status === 'completed' && paymentStatus === 'paid');
+      });
+
+      renderBookings(visibleBookings);
+    }
+
+    async function updateBooking(id, patch, messageElement) {
+      const { error } = await supabase.from('bookings').update(patch).eq('id', id);
+
+      if (error) {
+        messageElement.textContent = `Kunde inte uppdatera bokningen: ${error.message}`;
+        messageElement.className = 'status-message error';
+        return false;
+      }
+
+      return true;
+    }
+
+    async function deleteBooking(id, messageElement, button) {
+      const confirmed = window.confirm('Är du säker på att du vill ta bort den här bokningen? Detta går inte att ångra och bokningen försvinner helt.');
+
+      if (!confirmed) {
+        return;
+      }
+
+      button.disabled = true;
+      messageElement.textContent = 'Tar bort bokningen...';
+      messageElement.className = 'status-message';
+
+      const { error } = await supabase.from('bookings').delete().eq('id', id);
+
+      if (error) {
+        const errorMessage = /row-level security|permission denied|policy/i.test(error.message)
+          ? 'Kunde inte ta bort bokningen. Delete-rättighet saknas i Supabase just nu.'
+          : `Kunde inte ta bort bokningen: ${error.message}`;
+        messageElement.textContent = errorMessage;
+        messageElement.className = 'status-message error';
+        button.disabled = false;
+        return;
+      }
+
+      messageElement.textContent = 'Bokningen är borttagen.';
+      messageElement.className = 'status-message success';
+      await fetchBookings();
+    }
+
+    async function completeBooking(id, paymentMethod, messageElement, button) {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+
+      if (!accessToken) {
+        messageElement.textContent = 'Du måste vara inloggad för att skicka klartmail.';
+        messageElement.className = 'status-message error';
+        return;
+      }
+
+      button.disabled = true;
+      messageElement.textContent = 'Skickar klartmail...';
+      messageElement.className = 'status-message';
+
+      try {
+        const response = await fetch(COMPLETE_BOOKING_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+            apikey: SUPABASE_ANON_KEY
+          },
+          body: JSON.stringify({
+            bookingId: id,
+            paymentMethod
+          })
+        });
+
+        const body = await response.json().catch(() => ({}));
+
+        if (!response.ok || body?.error) {
+          throw new Error(body?.details || body?.error || 'Okänt fel när klartmail skulle skickas.');
+        }
+
+        messageElement.textContent = 'Klartmail skickat och bokningen är markerad som completed.';
+        messageElement.className = 'status-message success';
+        await fetchBookings();
+      } catch (error) {
+        messageElement.textContent = error instanceof Error ? error.message : 'Något gick fel när klartmail skulle skickas.';
+        messageElement.className = 'status-message error';
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    bookingsList.addEventListener('click', async (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+
+      const card = target.closest('.booking-card');
+      if (!card) return;
+
+      const id = Number(card.dataset.bookingId);
+      const messageElement = card.querySelector('.status-message');
+      const paymentSelect = card.querySelector('.completion-payment-method');
+
+      if (!(messageElement instanceof HTMLElement) || !(paymentSelect instanceof HTMLSelectElement)) return;
+
+      if (target.classList.contains('action-confirm')) {
+        target.setAttribute('disabled', 'disabled');
+        const ok = await updateBooking(id, { status: 'confirmed' }, messageElement);
+        target.removeAttribute('disabled');
+        if (ok) {
+          messageElement.textContent = 'Bokningen är nu markerad som confirmed.';
+          messageElement.className = 'status-message success';
+          await fetchBookings();
+        }
+      }
+
+      if (target.classList.contains('action-paid')) {
+        target.setAttribute('disabled', 'disabled');
+        const ok = await updateBooking(id, { payment_status: 'paid' }, messageElement);
+        target.removeAttribute('disabled');
+        if (ok) {
+          messageElement.textContent = 'Bokningen är nu markerad som paid.';
+          messageElement.className = 'status-message success';
+          await fetchBookings();
+        }
+      }
+
+      if (target.classList.contains('action-complete')) {
+        await completeBooking(id, paymentSelect.value, messageElement, target);
+      }
+
+      if (target.classList.contains('action-delete')) {
+        await deleteBooking(id, messageElement, target);
+      }
+    });
+
+    loginForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      setLoginMessage('');
+      loginButton.disabled = true;
+
+      const email = document.getElementById('adminEmail').value.trim();
+      const password = document.getElementById('adminPassword').value;
+
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+      loginButton.disabled = false;
+
+      if (error) {
+        setLoginMessage(`Kunde inte logga in: ${error.message}`, 'error');
+        return;
+      }
+
+      setLoginMessage('Inloggning lyckades.', 'success');
+      await refreshSession();
+    });
+
+    logoutButton.addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      await refreshSession();
+    });
+
+    refreshButton.addEventListener('click', async () => {
+      await fetchBookings();
+    });
+
+    async function refreshSession() {
+      const { data } = await supabase.auth.getSession();
+      const session = data.session;
+      const isLoggedIn = Boolean(session);
+
+      loginPanel.classList.toggle('hidden', isLoggedIn);
+      bookingsPanel.classList.toggle('hidden', !isLoggedIn);
+      logoutButton.classList.toggle('hidden', !isLoggedIn);
+
+      if (isLoggedIn) {
+        await fetchBookings();
+      }
+    }
+
+    await refreshSession();
+  </script>
+</body>
+</html>

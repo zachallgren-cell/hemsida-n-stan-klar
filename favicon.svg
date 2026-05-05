@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <clipPath id="rounded">
+      <rect width="256" height="256" rx="42" ry="42" />
+    </clipPath>
+  </defs>
+  <rect width="256" height="256" rx="42" ry="42" fill="#ffffff" />
+  <image
+    href="logga-fonsterputs.png"
+    x="0"
+    y="0"
+    width="256"
+    height="256"
+    clip-path="url(#rounded)"
+    preserveAspectRatio="xMidYMid slice"
+  />
+</svg>
