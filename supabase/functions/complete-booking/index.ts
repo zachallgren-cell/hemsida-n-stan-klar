@@ -86,6 +86,7 @@ Deno.serve(async (req) => {
 
     const paymentMethod = payload.paymentMethod || booking.payment_method || 'Swish';
     const completedAt = new Date().toISOString();
+    const stripePaymentUrl = booking.stripe_payment_url ? String(booking.stripe_payment_url) : '';
 
     const updateRes = await fetch(`${supabaseUrl}/rest/v1/bookings?id=eq.${payload.bookingId}`, {
       method: 'PATCH',
@@ -111,11 +112,18 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'Customer email is invalid for completion mail' }, 400);
     }
 
+    const stripePaymentInstructions = stripePaymentUrl
+      ? `
+        <p><a href="${escapeHtml(stripePaymentUrl)}" style="display:inline-block;padding:12px 18px;border-radius:999px;background:#0b6fa4;color:#ffffff;text-decoration:none;font-weight:800;">Betala säkert via Stripe</a></p>
+      `
+      : '';
+
     const paymentInstructions = paymentMethod === 'Faktura via e-post'
       ? `
         <p>Vi skickar faktura via e-post inom 3-7 dagar.</p>
       `
       : `
+        ${stripePaymentInstructions}
         <p>Betala gärna med Swish till <strong>${escapeHtml(swishNumber)}</strong>.</p>
         <p>Använd gärna meddelandet <strong>Bokning ${escapeHtml(String(booking.id))}</strong> så att vi enkelt kan matcha betalningen.</p>
       `;

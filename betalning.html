@@ -391,9 +391,13 @@
 
     .option-stack {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: 16px;
       align-items: stretch;
+    }
+
+    .option-stack.is-two-column {
+      grid-template-columns: 1fr 1fr;
     }
 
     .option-card h3 {
@@ -403,6 +407,10 @@
     .option-card.primary {
       border: 2px solid rgba(11, 111, 164, 0.32);
       box-shadow: 0 14px 30px rgba(11, 111, 164, 0.1);
+    }
+
+    .option-card[hidden] {
+      display: none;
     }
 
     .option-card.recommended {
@@ -484,6 +492,12 @@
       background: linear-gradient(to right, var(--cta), var(--cta-dark));
       color: #173042;
       box-shadow: 0 18px 32px rgba(241, 153, 45, 0.24);
+    }
+
+    .btn-stripe {
+      background: linear-gradient(to right, #635bff, #0a2540);
+      color: #ffffff;
+      box-shadow: 0 18px 32px rgba(99, 91, 255, 0.22);
     }
 
     .btn-secondary {
@@ -751,11 +765,19 @@
         <p class="section-subtitle">Välj det alternativ som passar dig bäst.</p>
         <div class="payment-trust-row">
           <span class="trust-pill">Bokningen är mottagen</span>
-          <span class="trust-pill">Betala efter putsning är enklast</span>
-          <span class="trust-pill">Swish passar om du inte är hemma</span>
+          <span class="trust-pill">Stripe-länk finns även i mejlet</span>
+          <span class="trust-pill">Du kan fortfarande betala efter putsning</span>
         </div>
 
         <div class="option-stack">
+          <div class="option-card primary recommended" id="stripePaymentCard" hidden>
+            <h3>Betala direkt via Stripe</h3>
+            <p>Betala säkert med kort och de betalmetoder som är aktiverade i Stripe.</p>
+            <p>Samma betalningslänk skickas också i bekräftelsemejlet.</p>
+            <a href="#" id="stripeCheckoutLink" class="btn btn-stripe">Betala säkert via Stripe</a>
+            <p class="payment-note" id="stripePaymentNote">Stripe öppnas i en säker kassa.</p>
+          </div>
+
           <div class="option-card">
             <h3>Betala nu med Swish</h3>
             <p>✔ Bra om du inte är hemma när vi är klara</p>
@@ -774,7 +796,7 @@
             </ol>
           </div>
 
-          <div class="option-card primary recommended">
+          <div class="option-card primary">
             <h3>Betala efter putsning</h3>
             <p>Det här är det enklaste valet för de flesta. Vi putsar först och hör sedan av oss med betalningsinformation när jobbet är klart.</p>
             <button type="button" id="payLaterButton" class="btn btn-ghost">Jag betalar efter putsning</button>
@@ -828,6 +850,9 @@
     const paymentNote = document.getElementById('paymentNote');
     const paymentDisplayPrice = document.getElementById('paymentDisplayPrice');
     const paymentStepsPrice = document.getElementById('paymentStepsPrice');
+    const stripePaymentCard = document.getElementById('stripePaymentCard');
+    const stripeCheckoutLink = document.getElementById('stripeCheckoutLink');
+    const stripePaymentNote = document.getElementById('stripePaymentNote');
     const topbarToggleButton = document.getElementById('topbarToggleButton');
     const topbarShowButton = document.getElementById('topbarShowButton');
     const heroIntroText = document.getElementById('heroIntroText');
@@ -835,8 +860,10 @@
     const bookingSummaryText = document.getElementById('bookingSummaryText');
     const nextStepChoiceText = document.getElementById('nextStepChoiceText');
     const nextStepInvoiceText = document.getElementById('nextStepInvoiceText');
+    const optionStack = document.querySelector('.option-stack');
 
     const params = new URLSearchParams(window.location.search);
+    const bookingId = params.get('bookingId') || '';
     const name = params.get('name') || 'Ej angivet';
     const date = params.get('date') || 'Ej valt';
     const time = params.get('time') || 'Ej vald';
@@ -849,6 +876,8 @@
     const coordinates = params.get('coordinates') || '';
     const price = params.get('price') || '599';
     const paymentMethod = params.get('paymentMethod') || '';
+    const stripeCheckoutUrl = params.get('stripeCheckoutUrl') || '';
+    const stripeStatus = params.get('stripe') || '';
 
     function formatDateForDisplay(dateString) {
       if (!dateString || dateString === 'Ej valt') return dateString;
@@ -919,6 +948,27 @@
     swishMessage.textContent = paymentMessage;
     paymentDisplayPrice.textContent = price;
     paymentStepsPrice.textContent = price;
+
+    if (stripeCheckoutUrl && !String(price).toLowerCase().includes('offert')) {
+      stripePaymentCard.hidden = false;
+      stripeCheckoutLink.href = stripeCheckoutUrl;
+      stripePaymentNote.textContent = bookingId
+        ? `Boknings-ID ${bookingId} följer med till Stripe så betalningen kan matchas automatiskt.`
+        : 'Bokningen följer med till Stripe så betalningen kan matchas automatiskt.';
+    } else {
+      optionStack?.classList.add('is-two-column');
+    }
+
+    if (stripeStatus === 'success') {
+      setStatus('Tack! Stripe har tagit emot betalningen. Bokningen markeras som betald automatiskt när Stripe-webhooken har bekräftat betalningen.', 'Betalning mottagen');
+      if (optionStack) {
+        optionStack.style.display = 'none';
+      }
+    }
+
+    if (stripeStatus === 'cancelled') {
+      setStatus('Betalningen avbröts. Bokningen finns kvar och du kan använda betalningslänken i mejlet eller betala efter putsningen.', 'Betalning avbruten');
+    }
 
     copyMessageButton.addEventListener('click', async () => {
       try {

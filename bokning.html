@@ -1211,7 +1211,8 @@
         throw new Error(`Kunde inte spara bokningen. ${errorText}`);
       }
 
-      await res.json();
+      const [savedBooking] = await res.json();
+      return { bookingId: savedBooking?.id || null, stripeCheckoutUrl: null };
     }
 
     async function createBooking(booking) {
@@ -1225,16 +1226,17 @@
 
       if (!res.ok) {
         if (responseBody?.error === 'Booking saved but email failed') {
-          return;
+          return responseBody;
         }
 
-        await createBookingViaTable(booking);
-        return;
+        return createBookingViaTable(booking);
       }
 
       if (responseBody?.error) {
-        await createBookingViaTable(booking);
+        return createBookingViaTable(booking);
       }
+
+      return responseBody;
     }
 
     housingTypeInput.addEventListener('change', updateLivePrice);
@@ -1336,7 +1338,7 @@
 
       try {
         setStatus('Sparar bokningen...', 'success');
-        await createBooking(booking);
+        const createdBooking = await createBooking(booking);
 
         const params = new URLSearchParams({
           name: booking.name,
@@ -1351,6 +1353,14 @@
           coordinates: booking.coordinates,
           price: String(booking.price)
         });
+
+        if (createdBooking?.bookingId) {
+          params.set('bookingId', String(createdBooking.bookingId));
+        }
+
+        if (createdBooking?.stripeCheckoutUrl) {
+          params.set('stripeCheckoutUrl', createdBooking.stripeCheckoutUrl);
+        }
 
         window.location.href = `betalning.html?${params.toString()}`;
       } catch (error) {
