@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Berga Fönsterputs</title>
-  <meta name="description" content="Berga Fönsterputs erbjuder personlig och lokal fönsterputs på plats med tydliga priser och enkel onlinebokning." />
+  <meta name="description" content="Berga Fönsterputs erbjuder personlig och lokal fönsterputs i Åkersberga, Stockholm och skärgården med tydliga priser och enkel onlinebokning." />
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
   <link rel="shortcut icon" href="/favicon-48.png" />
@@ -1000,12 +1000,88 @@
       align-items: start;
     }
 
+    #bokning .booking-layout {
+      grid-template-columns: 1fr;
+    }
+
+    #bokning .calendar-card {
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
     .calendar-card {
-      background: linear-gradient(to bottom, #fcfeff, #f1f8fc);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 10px 24px rgba(11, 111, 164, 0.08);
+      position: relative;
+      overflow: hidden;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.94), rgba(238,248,253,0.96)),
+        radial-gradient(circle at 92% 8%, rgba(11,111,164,0.12), transparent 28%);
+      border: 1px solid rgba(178, 215, 232, 0.92);
+      border-radius: 20px;
+      padding: 26px;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.9),
+        0 18px 38px rgba(11, 111, 164, 0.12);
+    }
+
+    .calendar-card::before {
+      content: '';
+      position: absolute;
+      inset: 0 0 auto;
+      height: 6px;
+      background: linear-gradient(to right, var(--primary), #66c3ec, var(--cta));
+    }
+
+    .calendar-brand {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .calendar-brand-copy {
+      display: grid;
+      gap: 4px;
+    }
+
+    .calendar-kicker {
+      color: var(--primary);
+      font-size: 0.82rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .calendar-brand-copy h3 {
+      margin: 0;
+      font-size: 1.65rem;
+      color: #12384c;
+    }
+
+    .calendar-brand-copy p {
+      max-width: 570px;
+      margin: 0;
+    }
+
+    .calendar-logo {
+      display: grid;
+      place-items: center;
+      width: 92px;
+      height: 92px;
+      padding: 7px;
+      border-radius: 22px;
+      background: #ffffff;
+      border: 1px solid rgba(191, 221, 235, 0.95);
+      box-shadow: 0 14px 28px rgba(11, 111, 164, 0.12);
+      flex-shrink: 0;
+    }
+
+    .calendar-logo img {
+      width: 112%;
+      height: 112%;
+      object-fit: contain;
+      border-radius: 18px;
+      display: block;
     }
 
     .calendar-header {
@@ -1013,17 +1089,34 @@
       justify-content: space-between;
       align-items: center;
       gap: 12px;
-      margin-bottom: 16px;
+      margin-bottom: 18px;
+      padding: 12px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid rgba(198, 223, 236, 0.9);
     }
 
     .calendar-nav {
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 10px 14px;
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(to bottom, #ffffff, #eff8fd);
+      border: 1px solid rgba(177, 213, 230, 0.95);
+      border-radius: 16px;
+      padding: 0;
       cursor: pointer;
-      font-weight: 700;
+      font-size: 1.1rem;
+      font-weight: 900;
       color: var(--primary-dark);
+      box-shadow: 0 8px 18px rgba(11, 111, 164, 0.08);
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .calendar-nav:hover:not(:disabled) {
+      border-color: var(--primary);
+      transform: translateY(-1px);
+      box-shadow: 0 12px 22px rgba(11, 111, 164, 0.12);
     }
 
     .calendar-nav:disabled {
@@ -1032,9 +1125,11 @@
     }
 
     .calendar-title {
-      font-size: 1.1rem;
-      font-weight: 700;
+      color: #12384c;
+      font-size: 1.32rem;
+      font-weight: 900;
       text-transform: capitalize;
+      text-align: center;
     }
 
     .calendar-weekdays,
@@ -1046,43 +1141,67 @@
 
     .calendar-weekdays div {
       text-align: center;
-      font-size: 0.85rem;
-      color: var(--muted);
-      font-weight: 700;
-      padding-bottom: 6px;
+      font-size: 0.82rem;
+      color: #55758a;
+      font-weight: 900;
+      padding: 4px 0 8px;
+      text-transform: uppercase;
     }
 
     .calendar-empty,
     .calendar-day {
-      min-height: 50px;
-      border-radius: 14px;
+      min-height: 56px;
+      border-radius: 16px;
     }
 
     .calendar-day {
-      border: 1px solid var(--border);
-      background: var(--white);
+      position: relative;
+      border: 1px solid rgba(177, 213, 230, 0.95);
+      background: linear-gradient(to bottom, #ffffff, #f3fbff);
       cursor: pointer;
-      font-weight: 700;
+      font-size: 1.02rem;
+      font-weight: 900;
       color: var(--text);
       transition: all 0.2s ease;
-      box-shadow: 0 4px 12px rgba(11, 111, 164, 0.05);
+      box-shadow: 0 6px 14px rgba(11, 111, 164, 0.06);
     }
 
     .calendar-day:hover {
       border-color: var(--primary);
       transform: translateY(-1px);
+      box-shadow: 0 12px 22px rgba(11, 111, 164, 0.12);
     }
 
     .calendar-day.selected {
       background: linear-gradient(to right, var(--primary), #1183bf);
       color: var(--white);
       border-color: var(--primary);
+      box-shadow: 0 14px 26px rgba(11, 111, 164, 0.22);
+    }
+
+    .calendar-day.today:not(.selected) {
+      border-color: var(--cta-dark);
+      color: #7c5200;
     }
 
     .calendar-day.booked {
       background: #fff9ef;
       border-color: #edd59d;
       color: #8a5a00;
+    }
+
+    .calendar-day.booked::after,
+    .calendar-day.today::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      bottom: 9px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      transform: translateX(-50%);
+      background: currentColor;
+      opacity: 0.65;
     }
 
     .calendar-day.fully-booked {
@@ -1100,22 +1219,24 @@
     }
 
     .selected-date-box {
-      margin-top: 16px;
-      padding: 14px;
-      border-radius: 14px;
-      background: var(--white);
-      border: 1px solid var(--border);
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-radius: 16px;
+      background: linear-gradient(to bottom, #ffffff, #f4fbff);
+      border: 1px solid rgba(177, 213, 230, 0.95);
       color: var(--text);
-      font-weight: 700;
+      font-weight: 900;
+      box-shadow: 0 8px 18px rgba(11, 111, 164, 0.07);
     }
 
     .time-picker {
-      margin-top: 16px;
+      margin-top: 18px;
     }
 
     .time-picker h4 {
       margin: 0 0 10px;
-      font-size: 1rem;
+      color: #12384c;
+      font-size: 1.05rem;
     }
 
     .time-slots {
@@ -1125,13 +1246,14 @@
     }
 
     .time-slot {
-      border: 1px solid var(--border);
-      background: var(--white);
+      border: 1px solid rgba(177, 213, 230, 0.95);
+      background: linear-gradient(to bottom, #ffffff, #f3fbff);
       border-radius: 14px;
-      padding: 12px;
-      font-weight: 700;
+      padding: 13px 12px;
+      font-weight: 900;
       cursor: pointer;
       transition: all 0.2s ease;
+      box-shadow: 0 6px 14px rgba(11, 111, 164, 0.05);
     }
 
     .time-slot:hover {
@@ -1143,6 +1265,7 @@
       background: linear-gradient(to right, var(--primary), #1183bf);
       border-color: var(--primary);
       color: var(--white);
+      box-shadow: 0 14px 24px rgba(11, 111, 164, 0.2);
     }
 
     .time-slot.disabled {
@@ -1155,57 +1278,6 @@
       color: var(--muted);
       text-decoration: line-through;
       cursor: not-allowed;
-    }
-
-    form {
-      display: grid;
-      gap: 16px;
-      background: linear-gradient(to bottom, rgba(255,255,255,0.88), rgba(248,252,255,0.92));
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 22px;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.72);
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-
-    .form-stack {
-      display: grid;
-      gap: 8px;
-    }
-
-    .conditional-fields[hidden] {
-      display: none !important;
-    }
-
-    label {
-      font-weight: 700;
-      font-size: 0.95rem;
-      margin-bottom: 6px;
-      display: block;
-    }
-
-    input,
-    select,
-    textarea {
-      width: 100%;
-      padding: 13px 14px;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      font-size: 1rem;
-      background: #fff;
-      box-shadow: inset 0 1px 2px rgba(17, 57, 74, 0.03);
-    }
-
-    input:focus,
-    select:focus,
-    textarea:focus {
-      outline: 2px solid rgba(11, 111, 164, 0.18);
-      border-color: var(--primary);
     }
 
     .submit-btn {
@@ -1225,113 +1297,18 @@
       transform: translateY(-1px);
     }
 
+    .submit-btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
     .booking-note,
     .contact-note {
       color: var(--muted);
       font-size: 0.95rem;
       margin: 0;
-    }
-
-    .field-note {
-      color: var(--muted);
-      font-size: 0.9rem;
-      margin: 2px 0 0;
-      line-height: 1.45;
-    }
-
-    .rut-notice {
-      display: grid;
-      gap: 10px;
-      margin-top: 10px;
-      padding: 14px 16px;
-      border-radius: 16px;
-      border: 1px solid #ffd08b;
-      background: linear-gradient(to bottom, #fff8ec, #fff3dd);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
-    }
-
-    .rut-notice strong {
-      color: #8a5a00;
-      font-size: 0.95rem;
-    }
-
-    .rut-help-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .field-help {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      position: relative;
-      width: fit-content;
-    }
-
-    .field-help-trigger {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: 1px solid #c9e2ee;
-      background: #f3fbff;
-      color: var(--primary-dark);
-      font-size: 0.88rem;
-      font-weight: 800;
-      cursor: help;
-    }
-
-    .field-help-tooltip {
-      position: absolute;
-      left: 0;
-      top: calc(100% + 10px);
-      width: min(320px, 78vw);
-      padding: 12px 14px;
-      border-radius: 14px;
-      background: #12384c;
-      color: #ffffff;
-      font-size: 0.88rem;
-      line-height: 1.5;
-      box-shadow: 0 18px 34px rgba(17, 57, 74, 0.24);
-      opacity: 0;
-      pointer-events: none;
-      transform: translateY(-4px);
-      transition: opacity 0.2s ease, transform 0.2s ease;
-      z-index: 3;
-    }
-
-    .field-help:hover .field-help-tooltip,
-    .field-help:focus-within .field-help-tooltip {
-      opacity: 1;
-      pointer-events: auto;
-      transform: translateY(0);
-    }
-
-    .consent-box {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 15px 16px;
-      border: 1px solid #cfe4ee;
-      border-radius: 14px;
-      background: linear-gradient(to bottom, #fbfeff, #f3fbff);
-    }
-
-    .consent-box input[type="checkbox"] {
-      width: 20px;
-      height: 20px;
-      margin-top: 2px;
-      flex-shrink: 0;
-      accent-color: var(--primary);
-      box-shadow: none;
-    }
-
-    .consent-box label {
-      margin: 0;
-      font-weight: 700;
-      line-height: 1.5;
     }
 
     .booking-intro {
@@ -1358,265 +1335,6 @@
     .booking-intro-card span {
       color: var(--muted);
       font-size: 0.92rem;
-    }
-
-    .live-price-box {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 16px 18px;
-      border-radius: 16px;
-      background: linear-gradient(to right, #eff9fd, #dff1fa);
-      border: 1px solid #bfddeb;
-      margin-bottom: 16px;
-    }
-
-    .live-price-copy strong {
-      display: block;
-      margin-bottom: 4px;
-      color: var(--primary-dark);
-    }
-
-    .live-price-copy span {
-      color: var(--muted);
-      font-size: 0.92rem;
-    }
-
-    .live-price-value {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 2px;
-      text-align: right;
-    }
-
-    .live-price-value strong {
-      font-size: 2rem;
-      font-weight: 900;
-      color: var(--primary-dark);
-      white-space: nowrap;
-    }
-
-    .live-price-value span {
-      color: var(--muted);
-      font-size: 0.82rem;
-      line-height: 1.2;
-      white-space: nowrap;
-    }
-
-    .booking-packages {
-      margin-bottom: 18px;
-      border-radius: 16px;
-      border: 1px solid #cfe4ee;
-      background: linear-gradient(to bottom, #fcfeff, #eef8fd);
-      overflow: hidden;
-    }
-
-    .booking-packages-header {
-      width: 100%;
-      display: flex;
-      align-items: end;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 20px 22px;
-      border: 0;
-      background: transparent;
-      cursor: pointer;
-      text-align: left;
-    }
-
-    .booking-packages-header h3 {
-      margin: 0;
-      font-size: 1.08rem;
-      color: var(--primary-dark);
-    }
-
-    .booking-packages-header span {
-      color: var(--muted);
-      font-size: 0.92rem;
-      font-weight: 700;
-    }
-
-    .booking-packages-header::after {
-      content: 'Visa';
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 72px;
-      padding: 10px 14px;
-      border-radius: 999px;
-      background: #ffffff;
-      border: 1px solid #c9e2ee;
-      color: var(--primary-dark);
-      font-size: 0.88rem;
-      font-weight: 800;
-    }
-
-    .booking-packages.is-open .booking-packages-header::after {
-      content: 'Dölj';
-    }
-
-    .booking-packages-content {
-      display: grid;
-      grid-template-rows: 0fr;
-      transition: grid-template-rows 0.32s ease;
-    }
-
-    .booking-packages.is-open .booking-packages-content {
-      grid-template-rows: 1fr;
-    }
-
-    .booking-packages-inner {
-      overflow: hidden;
-      min-height: 0;
-      padding: 0 22px 0;
-    }
-
-    .booking-packages.is-open .booking-packages-inner {
-      padding-bottom: 20px;
-    }
-
-    .booking-package-grid {
-      display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
-      gap: 14px;
-    }
-
-    .booking-package-card {
-      padding: 16px;
-      border-radius: 14px;
-      background: #ffffff;
-      border: 1px solid #c9e2ee;
-    }
-
-    .booking-package-card strong {
-      display: block;
-      color: var(--primary-dark);
-      margin-bottom: 6px;
-    }
-
-    .booking-package-card p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.94rem;
-    }
-
-    .price-list {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      font-size: 0.94rem;
-    }
-
-    .price-list th,
-    .price-list td {
-      text-align: left;
-      padding: 10px 0;
-      border-bottom: 1px solid #dbeaf2;
-    }
-
-    .price-list th {
-      color: var(--muted);
-      font-size: 0.82rem;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-
-    .price-list tr:last-child td {
-      border-bottom: none;
-    }
-
-    .price-list td:last-child {
-      font-weight: 900;
-      color: var(--primary-dark);
-      white-space: nowrap;
-    }
-
-    .package-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    .package-tag {
-      display: inline-flex;
-      align-items: center;
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: #e9f6fc;
-      border: 1px solid #c4e0ec;
-      color: var(--primary-dark);
-      font-size: 0.88rem;
-      font-weight: 800;
-    }
-
-    .stepper {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .stepper-btn {
-      width: 46px;
-      height: 46px;
-      border: 1px solid #c9e2ee;
-      border-radius: 14px;
-      background: linear-gradient(to bottom, #ffffff, #eef8fd);
-      color: var(--primary-dark);
-      font-size: 1.4rem;
-      font-weight: 900;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-
-    .stepper-btn:hover {
-      border-color: var(--primary);
-      transform: translateY(-1px);
-    }
-
-    .stepper input[readonly] {
-      text-align: center;
-      font-weight: 800;
-      cursor: default;
-    }
-
-    .addon-options {
-      display: grid;
-      gap: 10px;
-    }
-
-    .addon-option {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 14px 16px;
-      border: 1px solid #cfe4ee;
-      border-radius: 14px;
-      background: linear-gradient(to bottom, #fbfeff, #f3fbff);
-    }
-
-    .addon-option input[type="checkbox"] {
-      width: 20px;
-      height: 20px;
-      margin-top: 2px;
-      accent-color: var(--primary);
-      box-shadow: none;
-      flex-shrink: 0;
-    }
-
-    .addon-option strong {
-      display: block;
-      color: var(--primary-dark);
-      margin-bottom: 3px;
-    }
-
-    .addon-option span {
-      display: block;
-      color: var(--muted);
-      font-size: 0.92rem;
-      line-height: 1.45;
     }
 
     .booking-requirements {
@@ -1777,16 +1495,6 @@
       padding-bottom: 2px;
     }
 
-    .success-message {
-      display: none;
-      margin-top: 16px;
-      padding: 15px 16px;
-      border-radius: 14px;
-      background: #e8f8f1;
-      color: var(--success);
-      font-weight: 700;
-    }
-
     footer {
       background: linear-gradient(to bottom, #0f3340, #0b2430);
       color: rgba(255,255,255,0.9);
@@ -1820,7 +1528,6 @@
       .service-area,
       .trust-strip,
       .booking-layout,
-      .form-row,
       .time-slots {
         grid-template-columns: 1fr;
       }
@@ -1842,6 +1549,25 @@
       .topbar-actions {
         width: 100%;
         justify-content: flex-end;
+      }
+
+      .calendar-card {
+        padding: 20px;
+      }
+
+      .calendar-brand {
+        align-items: flex-start;
+        gap: 14px;
+      }
+
+      .calendar-brand-copy h3 {
+        font-size: 1.42rem;
+      }
+
+      .calendar-logo {
+        width: 74px;
+        height: 74px;
+        border-radius: 18px;
       }
 
       nav a {
@@ -1913,9 +1639,9 @@
 
       <div class="hero">
         <div>
-          <div class="hero-highlight">Fönsterputs i Åkersberga och Stockholm</div>
+          <div class="hero-highlight">Fönsterputs i Åkersberga, Stockholm och skärgården</div>
           <h1>Skinande rena fönster utan krångel.</h1>
-          <p>Vi kommer hem till dig, putsar noggrant och ser till att du är nöjd. Bokningen är enkel från första klick till färdig puts.</p>
+          <p>Vi kommer hem till dig på fastlandet eller ute i skärgården, putsar noggrant och ser till att du är nöjd. Bokningen är enkel från första klick till färdig puts.</p>
           <div class="hero-buttons">
             <a href="#bokning" class="btn btn-primary">Boka fönsterputs nu</a>
             <a href="#varfor-oss" class="btn btn-secondary">Varför välja oss</a>
@@ -1926,8 +1652,8 @@
               <span>Tydliga priser beroende på bostad och omfattning</span>
             </div>
             <div class="hero-fact">
-              <strong>Åkersberga / Stockholm</strong>
-              <span>Personlig och lokal hjälp med fönsterputs</span>
+              <strong>Åkersberga / skärgården</strong>
+              <span>Personlig och lokal hjälp även på öar efter planering</span>
             </div>
           </div>
         </div>
@@ -1938,6 +1664,7 @@
             <li>Du får ett tydligt pris direkt på hemsidan innan du bokar</li>
             <li>Puts av glas, karmar och lättare smuts runt fönster</li>
             <li>Flexibla tider på kvällar och helger</li>
+            <li>Vi planerar även jobb ute i skärgården med båttransport</li>
             <li>Trygg kontakt via mejl, telefon och sociala medier</li>
           </ul>
         </div>
@@ -1956,7 +1683,7 @@
         </div>
         <div class="trust-item">
           <strong>Lokal service</strong>
-          <span>Personlig hjälp i Åkersberga och Stockholm</span>
+          <span>Personlig hjälp i Åkersberga, Stockholm och skärgården</span>
         </div>
       </div>
     </section>
@@ -1964,7 +1691,7 @@
     <section class="section reveal">
       <div class="area-box">
         <h2>Vi kommer hem till dig</h2>
-        <p>Vi arbetar främst i Österåker, Vaxholm och Täby. Du får ändå gärna höra av dig även om du bor utanför de områdena, så ser vi om vi kan hjälpa dig.</p>
+        <p>Vi arbetar främst i Österåker, Vaxholm, Täby och ute i skärgården. Du får ändå gärna höra av dig även om du bor utanför de områdena, så ser vi om vi kan hjälpa dig.</p>
       </div>
     </section>
 
@@ -2019,7 +1746,7 @@
           </article>
           <article class="feature-box">
             <h3>Enkel bokning online</h3>
-            <p>Välj datum, välj tid och fyll i dina uppgifter snabbt utan att behöva ringa först.</p>
+            <p>Välj datum och tid först. Sedan hoppar sidan vidare till formuläret där du fyller i uppgifter och ser livepriset.</p>
           </article>
           <article class="feature-box">
             <h3>Smidigt efteråt</h3>
@@ -2040,7 +1767,7 @@
           </div>
           <div class="step">
             <h3>Fyll i dina uppgifter</h3>
-            <p>Fyll i kontaktuppgifter, bostadstyp, adress och om det behövs båttransport för att vi ska kunna räkna rätt pris direkt.</p>
+            <p>Fyll i kontaktuppgifter, bostadstyp, adress och om det behövs båttransport i skärgården för att vi ska kunna räkna rätt pris direkt.</p>
           </div>
           <div class="step">
             <h3>Slutför bokningen</h3>
@@ -2052,10 +1779,10 @@
         <div class="card" id="kontakt">
           <h2 class="section-title">Kontakt</h2>
           <p class="section-subtitle">Har du frågor om bokning, tider eller fönsterputs?</p>
-          <p><strong>E-post:</strong> bergabattvatt@gmail.com</p>
+          <p><strong>E-post:</strong> info@bergafonsterputs.se</p>
           <p><strong>Telefon:</strong> 073-388 12 16</p>
           <p><strong>Sociala medier:</strong> <span class="social-links"><a class="social-link" href="https://www.instagram.com/bergabattvatt" target="_blank" rel="noopener noreferrer"><span class="social-icon instagram" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2Zm-.2 2A3.6 3.6 0 0 0 4 7.6v8.8A3.6 3.6 0 0 0 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6A3.6 3.6 0 0 0 16.4 4H7.6Zm9.65 1.5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2.1a2.9 2.9 0 1 0 0 5.8 2.9 2.9 0 0 0 0-5.8Z"/></svg></span>Instagram</a><a class="social-link" href="https://www.tiktok.com/@bergabttvtt2" target="_blank" rel="noopener noreferrer"><span class="social-icon tiktok" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14.9 2c.45 2.58 1.98 4.12 4.52 4.32v3.12c-1.48.14-2.8-.35-4.02-1.08v6.04c0 4.58-4.98 7.44-8.95 5.44-3.83-1.94-4.07-7.63-.45-9.93 1.04-.66 2.15-.98 3.72-.86v3.28c-.69-.22-1.47-.17-2.1.15-1.51.76-1.92 2.78-.82 4.01 1.55 1.73 4.53.64 4.53-1.74V2h3.57Z"/></svg></span>TikTok</a><a class="social-link" href="https://www.facebook.com/bergab%C3%A5ttv%C3%A4tt" target="_blank" rel="noopener noreferrer"><span class="social-icon facebook" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13.4 22v-8.1h2.73l.41-3.17H13.4V8.7c0-.92.25-1.54 1.57-1.54h1.68V4.32c-.82-.09-1.64-.14-2.46-.13-2.44 0-4.11 1.49-4.11 4.24v2.29H7.3v3.17h2.78V22h3.32Z"/></svg></span>Facebook</a></span></p>
-          <p><strong>Plats:</strong> Åkersberga / Stockholm</p>
+          <p><strong>Plats:</strong> Åkersberga / Stockholm / skärgården</p>
           <p class="contact-note">Vi svarar gärna på frågor om bokning, pris, adress, omfattning och hur fönsterputsen går till.</p>
         </div>
     </section>
@@ -2075,7 +1802,7 @@
 
         <div class="cta-panel">
           <h2 class="section-title">Redo att boka fönsterputs?</h2>
-          <p>Välj en tid som passar dig och fyll i bokningen direkt på sidan. Vi fokuserar på bra pris, flexibilitet och personlig service där vi kommer hem till dig.</p>
+          <p>Välj en tid som passar dig och gå vidare till bokningssidan. Vi fokuserar på bra pris, flexibilitet och personlig service där vi kommer hem till dig, även ute i skärgården.</p>
           <div class="hero-buttons">
             <a href="#bokning" class="btn btn-primary">Boka fönsterputs</a>
             <a href="om-oss.html" class="btn btn-secondary">Lär känna oss</a>
@@ -2087,7 +1814,7 @@
     <section id="bokning" class="section reveal">
       <div class="booking-card">
         <h2 class="section-title">Boka tid</h2>
-        <p class="section-subtitle">Välj först ett datum. Fyll sedan i några enkla uppgifter så är bokningen klar på bara någon minut.</p>
+        <p class="section-subtitle">Välj datum och tid först. Tryck sedan på knappen under kalendern för att komma till bokningsformuläret med din tid förifylld.</p>
 
         <div class="booking-intro">
           <div class="booking-intro-card">
@@ -2095,127 +1822,12 @@
             <span>Lediga tider visas direkt i kalendern.</span>
           </div>
           <div class="booking-intro-card">
-            <strong>2. Fyll i uppgifter</strong>
-            <span>Kontakt, RUT-uppgifter och omfattning fylls i direkt i formuläret.</span>
+            <strong>2. Gå vidare</strong>
+            <span>Knappen under kalendern öppnar bokningssidan.</span>
           </div>
           <div class="booking-intro-card">
-            <strong>3. Klart</strong>
-            <span>Du går vidare till betalning eller väljer att betala senare.</span>
-          </div>
-        </div>
-
-        <div class="live-price-box">
-          <div class="live-price-copy">
-            <strong>Pris just nu</strong>
-            <span id="livePriceText">Välj hustyp, antal fönster och putsning så uppdateras priset direkt.</span>
-          </div>
-          <div class="live-price-value">
-            <strong id="livePriceValue">699 kr</strong>
-            <span>efter RUT-avdrag</span>
-          </div>
-        </div>
-
-        <div class="booking-packages" id="bookingPackages">
-          <button type="button" class="booking-packages-header" id="bookingPackagesToggle" aria-expanded="false" aria-controls="bookingPackagesContent">
-            <h3>Våra paket</h3>
-            <span>Klicka för att se hela prislistan</span>
-          </button>
-          <div class="booking-packages-content" id="bookingPackagesContent">
-            <div class="booking-packages-inner">
-              <div class="booking-package-grid">
-                <div class="booking-package-card">
-                  <strong>Utvändig puts efter RUT</strong>
-                  <table class="price-list" aria-label="Prislista för fönsterputs">
-                    <thead>
-                      <tr>
-                        <th>Typ</th>
-                        <th>Antal fönster</th>
-                        <th>Pris före RUT</th>
-                        <th>Detta betalar du</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>Enplansvilla</td>
-                        <td>upp till 15</td>
-                        <td>1198 kr</td>
-                        <td>699 kr</td>
-                      </tr>
-                      <tr>
-                        <td>Enplansvilla</td>
-                        <td>15+</td>
-                        <td>1398 kr</td>
-                        <td>799 kr</td>
-                      </tr>
-                      <tr>
-                        <td>Tvåplansvilla</td>
-                        <td>upp till 17</td>
-                        <td>1598 kr</td>
-                        <td>899 kr</td>
-                      </tr>
-                      <tr>
-                        <td>Tvåplansvilla</td>
-                        <td>17+</td>
-                        <td>1798 kr</td>
-                        <td>999 kr</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                <div class="booking-package-card">
-                  <strong>Populära tillval</strong>
-                  <table class="price-list" aria-label="Prislista för invändig puts">
-                    <thead>
-                      <tr>
-                        <th>Hustyp</th>
-                        <th>Invändig tillägg</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>Enplans ≤15</td>
-                        <td>+349 kr</td>
-                      </tr>
-                      <tr>
-                        <td>Enplans 15+</td>
-                        <td>+399 kr</td>
-                      </tr>
-                      <tr>
-                        <td>Tvåplan ≤17</td>
-                        <td>+449 kr</td>
-                      </tr>
-                      <tr>
-                        <td>Tvåplan 17+</td>
-                        <td>+499 kr</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                  <table class="price-list" aria-label="Prislista för övriga tillägg">
-                    <thead>
-                      <tr>
-                        <th>Tillägg</th>
-                        <th>Pris</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>Uterum</td>
-                        <td>från +299 kr</td>
-                      </tr>
-                      <tr>
-                        <td>Spröjsade fönster</td>
-                        <td>från +149 kr</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                  <div class="package-tags">
-                    <span class="package-tag">Invändig puts</span>
-                    <span class="package-tag">Uterum</span>
-                    <span class="package-tag">Spröjsade glas</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <strong>3. Fyll i formuläret</strong>
+            <span>Där fyller du uppgifter, ser livepris och slutför bokningen.</span>
           </div>
         </div>
 
@@ -2223,15 +1835,24 @@
           <h3>Det här krävs för att boka</h3>
           <ul>
             <li>Fönstren behöver vara åtkomliga på ett säkert sätt.</li>
-            <li>Du behöver fylla i adress, typ av bostad och ungefär hur många fönster eller glaspartier det gäller.</li>
-            <li>Personnummer används bara om vi ska kunna registrera 50% RUT-avdrag hos Skatteverket.</li>
+            <li>Du väljer ett framtida datum och en ledig tid innan formuläret öppnas.</li>
+            <li>RUT-uppgifter fyller du i senare via ett säkert RUT-formulär som skickas i bekräftelsemejlet.</li>
+            <li>Vill du inte använda RUT-avdrag kontaktar du oss, så hjälper vi dig med pris utan RUT.</li>
           </ul>
         </div>
 
         <div class="booking-layout">
           <div class="calendar-card">
-            <h3>Välj datum</h3>
-            <p class="booking-note">Kalendern visar framtida bokningsbara datum från och med idag. Bokade tider markeras automatiskt.</p>
+            <div class="calendar-brand">
+              <div class="calendar-brand-copy">
+                <span class="calendar-kicker">Berga Fönsterputs</span>
+                <h3>Välj datum</h3>
+                <p class="booking-note">Kalendern visar framtida bokningsbara datum från och med idag. Bokade tider markeras automatiskt.</p>
+              </div>
+              <div class="calendar-logo" aria-hidden="true">
+                <img src="logga-fonsterputs.png" alt="">
+              </div>
+            </div>
 
             <div class="calendar-header">
               <button type="button" class="calendar-nav" id="prevMonth">←</button>
@@ -2258,151 +1879,11 @@
                 <button type="button" class="time-slot disabled">Välj först ett datum</button>
               </div>
             </div>
+
+            <button type="button" class="submit-btn" id="continueBookingButton" disabled>Gå vidare till formuläret</button>
+            <p class="booking-note">Du kommer till en separat bokningssida där formulär, RUT-val och livepris finns.</p>
           </div>
 
-          <form id="bookingForm">
-            <input type="hidden" id="date" required>
-            <input type="hidden" id="time" required>
-
-            <div class="form-row">
-              <div>
-                <label for="name">Namn</label>
-                <input type="text" id="name" placeholder="Ditt namn" required>
-              </div>
-              <div>
-                <label for="phone">Telefonnummer</label>
-                <input type="tel" id="phone" placeholder="073-123 45 67" required>
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div>
-                <label for="email">E-postadress</label>
-                <input type="email" id="email" placeholder="dinmail@exempel.se" required>
-              </div>
-              <div>
-                <label for="location">Adress där jobbet ska utföras</label>
-                <input type="text" id="location" placeholder="Till exempel din adress i Åkersberga" required>
-              </div>
-            </div>
-
-            <div class="form-stack">
-              <div>
-                <label for="personalNumber">Fullständigt personnummer</label>
-                <input type="text" id="personalNumber" inputmode="numeric" placeholder="ÅÅÅÅMMDD-XXXX" required>
-              </div>
-              <div class="rut-notice">
-                <strong>Viktigt: läs RUT-informationen innan du bokar.</strong>
-                <div class="rut-help-row">
-                  <div class="field-help">
-                    <span class="field-help-trigger" tabindex="0">Vad är RUT-avdrag?</span>
-                    <div class="field-help-tooltip">RUT-avdrag gör att du som privatperson kan få 50% avdrag på arbetskostnaden för fönsterputs. Vi använder personnumret bara för att kunna registrera det hos Skatteverket.</div>
-                  </div>
-                  <div class="field-help">
-                    <span class="field-help-trigger" tabindex="0">Vad händer utan RUT?</span>
-                    <div class="field-help-tooltip">Om du redan har använt mer än 75 000 kr i RUT-avdrag, eller av någon annan anledning inte blir godkänd av Skatteverket, tillkommer de resterande 50% som inte ingår i priset på hemsidan.</div>
-                  </div>
-                </div>
-              </div>
-              <p class="field-note">Personnummer används endast för att kunna registrera 50% RUT-avdrag hos Skatteverket.</p>
-            </div>
-
-            <div class="form-row">
-              <div>
-                <label for="boatSize">Typ av bostad</label>
-                <select id="boatSize" required>
-                  <option value="">Välj bostad</option>
-                  <option value="Villa / normalstor bostad" data-label="Enplansvilla">Enplansvilla</option>
-                  <option value="Större villa / fler fönster" data-label="Tvåplansvilla">Tvåplansvilla</option>
-                </select>
-              </div>
-              <div>
-                <label for="windowCount">Ungefär antal fönster / glaspartier</label>
-                <div class="stepper">
-                  <button type="button" class="stepper-btn" id="windowCountDecrease" aria-label="Minska antal fönster">−</button>
-                  <input type="text" id="windowCount" value="0 fönster" readonly required aria-live="polite">
-                  <button type="button" class="stepper-btn" id="windowCountIncrease" aria-label="Öka antal fönster">+</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div>
-                <label for="serviceScope">Invändig + utvändig eller endast utvändig</label>
-                <select id="serviceScope" required>
-                  <option value="">Välj putsning</option>
-                  <option value="Invändig + utvändig">Invändig + utvändig</option>
-                  <option value="Endast utvändig">Endast utvändig</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div>
-                <label for="transportType">Är det fastland eller behövs båt?</label>
-                <select id="transportType" required>
-                  <option value="">Välj alternativ</option>
-                  <option value="Fastland">Fastland</option>
-                  <option value="Båttransport behövs">Båttransport behövs</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="form-stack conditional-fields" id="boatFields" hidden>
-              <div class="form-row">
-                <div>
-                  <label for="seaMiles">Ungefär antal sjömil från Svinnige marina</label>
-                  <select id="seaMiles">
-                    <option value="">Välj sjömil</option>
-                    <option value="0-5 sjömil" data-price="300">0-5 sjömil</option>
-                    <option value="6-10 sjömil" data-price="600">6-10 sjömil</option>
-                    <option value="11-15 sjömil" data-price="900">11-15 sjömil</option>
-                    <option value="16+ sjömil" data-price="quote">16+ sjömil (offert)</option>
-                  </select>
-                </div>
-                <div>
-                  <label for="coordinates">Koordinater</label>
-                  <input type="text" id="coordinates" placeholder="Skriv koordinater eller exakt plats där vi ska lägga till">
-                </div>
-              </div>
-              <p class="booking-note">Vid båttransport tillkommer resekostnad beroende på antal sjömil från Svinnige marina. Välj 16+ sjömil om du vill att vi räknar på jobbet via offert.</p>
-            </div>
-
-            <div class="form-stack">
-              <label>Välj tillval</label>
-              <div class="addon-options">
-                <label class="addon-option" for="addonSunroom">
-                  <input type="checkbox" id="addonSunroom">
-                  <span>
-                    <strong>Inglasad altan / uterum</strong>
-                    <span>Lägg till från 299 kr. Räknas direkt in i priset.</span>
-                  </span>
-                </label>
-                <label class="addon-option" for="addonMuntins">
-                  <input type="checkbox" id="addonMuntins">
-                  <span>
-                    <strong>Spröjsade fönster</strong>
-                    <span>Lägg till från 149 kr. Räknas direkt in i priset.</span>
-                  </span>
-                </label>
-              </div>
-            </div>
-
-            <div>
-              <label for="message">Övrig information</label>
-              <textarea id="message" rows="4" placeholder="Skriv gärna extra detaljer om bostaden, parkering, portkod eller annat som är bra för oss att veta"></textarea>
-            </div>
-
-            <div class="consent-box">
-              <input type="checkbox" id="consent" required>
-              <label for="consent">Jag godkänner att mina personuppgifter används för bokning och RUT-hantering.</label>
-            </div>
-
-            <button type="submit" class="submit-btn">Gå vidare till betalning</button>
-            <p class="booking-note">Bokningen sparas som väntande först. På nästa sida kan kunden välja att betala direkt eller efter putsningen.</p>
-            <p class="booking-note">Vi bekräftar sedan bokningen manuellt via mejl eller telefon om något behöver stämmas av.</p>
-            <div class="success-message" id="successMessage">Bokningen har sparats.</div>
-          </form>
         </div>
       </div>
     </section>
@@ -2419,7 +1900,7 @@
           </div>
           <div class="faq-item">
             <button type="button" class="faq-question">Vad krävs för att boka?</button>
-            <div class="faq-answer"><div class="faq-answer-inner">Fönstren behöver gå att komma åt på ett säkert sätt. Skriv gärna adress, ungefärligt antal fönster och om det finns höga eller svåråtkomliga rutor.</div></div>
+            <div class="faq-answer"><div class="faq-answer-inner">Fönstren behöver gå att komma åt på ett säkert sätt. Skriv gärna adress, ungefärligt antal fönster och om det finns höga eller svåråtkomliga rutor. Om jobbet är ute i skärgården väljer du båttransport i bokningen.</div></div>
           </div>
           <div class="faq-item">
             <button type="button" class="faq-question">Hur betalar jag?</button>
@@ -2433,8 +1914,8 @@
   <footer>
     <div class="container">
       <p><strong>Berga Fönsterputs</strong></p>
-      <p>Personlig och lokal fönsterputs med fokus på bra pris, flexibilitet och trygg kontakt.</p>
-      <p>E-post: bergabattvatt@gmail.com</p>
+      <p>Personlig och lokal fönsterputs med fokus på bra pris, flexibilitet och trygg kontakt i Åkersberga, Stockholm och skärgården.</p>
+      <p>E-post: info@bergafonsterputs.se</p>
       <p>Telefon: 073-388 12 16</p>
       <p>Sociala medier: <span class="social-links"><a class="social-link" href="https://www.instagram.com/bergabattvatt" target="_blank" rel="noopener noreferrer"><span class="social-icon instagram" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2Zm-.2 2A3.6 3.6 0 0 0 4 7.6v8.8A3.6 3.6 0 0 0 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6A3.6 3.6 0 0 0 16.4 4H7.6Zm9.65 1.5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2.1a2.9 2.9 0 1 0 0 5.8 2.9 2.9 0 0 0 0-5.8Z"/></svg></span>Instagram</a><a class="social-link" href="https://www.tiktok.com/@bergabttvtt2" target="_blank" rel="noopener noreferrer"><span class="social-icon tiktok" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14.9 2c.45 2.58 1.98 4.12 4.52 4.32v3.12c-1.48.14-2.8-.35-4.02-1.08v6.04c0 4.58-4.98 7.44-8.95 5.44-3.83-1.94-4.07-7.63-.45-9.93 1.04-.66 2.15-.98 3.72-.86v3.28c-.69-.22-1.47-.17-2.1.15-1.51.76-1.92 2.78-.82 4.01 1.55 1.73 4.53.64 4.53-1.74V2h3.57Z"/></svg></span>TikTok</a><a class="social-link" href="https://www.facebook.com/bergab%C3%A5ttv%C3%A4tt" target="_blank" rel="noopener noreferrer"><span class="social-icon facebook" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13.4 22v-8.1h2.73l.41-3.17H13.4V8.7c0-.92.25-1.54 1.57-1.54h1.68V4.32c-.82-.09-1.64-.14-2.46-.13-2.44 0-4.11 1.49-4.11 4.24v2.29H7.3v3.17h2.78V22h3.32Z"/></svg></span>Facebook</a></span></p>
       <div class="footer-links">
@@ -2448,34 +1929,17 @@
   </footer>
 
   <script>
-    const bookingForm = document.getElementById('bookingForm');
-    const dateInput = document.getElementById('date');
-    const timeInput = document.getElementById('time');
-    const successMessage = document.getElementById('successMessage');
     const calendarGrid = document.getElementById('calendarGrid');
     const calendarTitle = document.getElementById('calendarTitle');
     const selectedDateBox = document.getElementById('selectedDateBox');
     const timeSlots = document.getElementById('timeSlots');
     const prevMonthButton = document.getElementById('prevMonth');
     const nextMonthButton = document.getElementById('nextMonth');
-    const housingTypeInput = document.getElementById('boatSize');
-    const windowCountInput = document.getElementById('windowCount');
-    const windowCountDecreaseButton = document.getElementById('windowCountDecrease');
-    const windowCountIncreaseButton = document.getElementById('windowCountIncrease');
-    const bookingPackages = document.getElementById('bookingPackages');
-    const bookingPackagesToggle = document.getElementById('bookingPackagesToggle');
-    const addonSunroomInput = document.getElementById('addonSunroom');
-    const addonMuntinsInput = document.getElementById('addonMuntins');
-    const transportTypeInput = document.getElementById('transportType');
-    const boatFields = document.getElementById('boatFields');
-    const seaMilesInput = document.getElementById('seaMiles');
-    const coordinatesInput = document.getElementById('coordinates');
+    const continueBookingButton = document.getElementById('continueBookingButton');
     const pageHeader = document.querySelector('header');
     const bookingSection = document.getElementById('bokning');
     const topbarToggleButton = document.getElementById('topbarToggleButton');
     const topbarShowButton = document.getElementById('topbarShowButton');
-    const livePriceValue = document.getElementById('livePriceValue');
-    const livePriceText = document.getElementById('livePriceText');
     const compareStage = document.getElementById('compareStage');
     const compareCard = document.querySelector('.compare-card');
     const compareRange = document.getElementById('compareRange');
@@ -2489,7 +1953,6 @@
     const SUPABASE_URL = 'https://xeyippgcoqfskcmqzazx.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_MUKxAwv0vNXDrcgumq81fQ_Uvx4eOuq';
     const SUPABASE_TABLE = 'bookings';
-    const BOOKING_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/create-booking`;
     const todayDate = new Date();
     todayDate.setHours(12, 0, 0, 0);
     const bookingYear = todayDate.getFullYear();
@@ -2505,6 +1968,7 @@
 
     let currentMonth = todayDate.getMonth();
     let selectedDate = '';
+    let selectedTime = '';
     let bookingsCache = [];
 
     function getHeaders() {
@@ -2534,114 +1998,6 @@
       }
     }
 
-    function buildFunctionPayload(booking) {
-      return {
-        name: booking.name,
-        email: booking.email,
-        phone: booking.phone,
-        boatSize: booking.housingType,
-        housing_type: booking.housingType,
-        housingType: booking.housingType,
-        personal_number: booking.personalNumber,
-        personalNumber: booking.personalNumber,
-        window_count: booking.windowCount,
-        windowCount: booking.windowCount,
-        service_scope: booking.serviceScope,
-        serviceScope: booking.serviceScope,
-        transport_type: booking.transportType,
-        transportType: booking.transportType,
-        sea_miles: booking.seaMiles || null,
-        seaMiles: booking.seaMiles || null,
-        coordinates: booking.coordinates || null,
-        addons: booking.addons || null,
-        paymentMethod: null,
-        booking_date: booking.date,
-        date: booking.date,
-        booking_time: booking.time,
-        time: booking.time,
-        service: 'Fönsterputs',
-        address: booking.location,
-        location: booking.location,
-        consent_accepted: booking.consentAccepted,
-        consentAccepted: booking.consentAccepted,
-        message: booking.fullMessage || null,
-        price: booking.price
-      };
-    }
-
-    function buildTablePayload(booking) {
-      return {
-        customer_name: booking.name,
-        email: booking.email,
-        phone: booking.phone,
-        house_size: booking.housingType,
-        housing_type: booking.housingType,
-        personal_number: booking.personalNumber,
-        window_count: booking.windowCount,
-        service_scope: booking.serviceScope,
-        transport_type: booking.transportType,
-        sea_miles: booking.seaMiles || null,
-        coordinates: booking.coordinates || null,
-        addons: booking.addons || null,
-        booking_date: booking.date,
-        booking_time: booking.time,
-        service: 'Fönsterputs',
-        address: booking.location,
-        location: booking.location,
-        consent_accepted: booking.consentAccepted,
-        message: booking.fullMessage || null,
-        price: String(booking.price),
-        status: 'pending',
-        payment_status: 'unpaid'
-      };
-    }
-
-    async function createBookingViaTable(booking) {
-      const payload = buildTablePayload(booking);
-
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}?select=id`, {
-        method: 'POST',
-        headers: {
-          ...getHeaders(),
-          Prefer: 'return=representation'
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(`Kunde inte spara bokningen. ${errorText}`);
-      }
-
-      await res.json();
-      addBookingToCache(booking.date, booking.time);
-    }
-
-    async function createBooking(booking) {
-      const payload = buildFunctionPayload(booking);
-
-      const res = await fetch(BOOKING_FUNCTION_URL, {
-        method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify(payload)
-      });
-
-      if (!res.ok) {
-        console.warn('Mailfunktionen svarade inte korrekt, faller tillbaka till vanlig bokning.');
-        await createBookingViaTable(booking);
-        return;
-      }
-
-      const responseBody = await res.json().catch(() => null);
-      if (responseBody?.error) {
-        console.warn('Mailfunktionen gav fel, faller tillbaka till vanlig bokning.', responseBody.error);
-        await createBookingViaTable(booking);
-        return;
-      }
-
-      addBookingToCache(booking.date, booking.time);
-    }
-
     function formatDate(year, month, day) {
       return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     }
@@ -2656,179 +2012,85 @@
       });
     }
 
-    function getWindowCountValue() {
-      const rawValue = windowCountInput?.value || '';
-      const match = rawValue.match(/\d+/);
-      return match ? Number(match[0]) : 0;
-    }
-
-    function setWindowCountValue(nextValue) {
-      if (!windowCountInput) return;
-      const safeValue = Math.max(0, Math.min(60, nextValue));
-      windowCountInput.value = `${safeValue} fönster`;
-      updateLivePrice();
-    }
-
-    function getSelectedAddons() {
-      const addons = [];
-
-      if (addonSunroomInput?.checked) {
-        addons.push({ label: 'Inglasad altan / uterum', price: 299 });
-      }
-
-      if (addonMuntinsInput?.checked) {
-        addons.push({ label: 'Spröjsade fönster', price: 149 });
-      }
-
-      return addons;
-    }
-
-    function getBasePrice(housingTypeLabel, windowCount) {
-      if (housingTypeLabel === 'Enplansvilla') {
-        return windowCount > 15 ? 799 : 699;
-      }
-
-      if (housingTypeLabel === 'Tvåplansvilla') {
-        return windowCount > 17 ? 999 : 899;
-      }
-
-      return 699;
-    }
-
-    function getInteriorAddon(housingTypeLabel, windowCount) {
-      if (housingTypeLabel === 'Enplansvilla') {
-        return windowCount > 15 ? 399 : 349;
-      }
-
-      if (housingTypeLabel === 'Tvåplansvilla') {
-        return windowCount > 17 ? 499 : 449;
-      }
-
-      return 0;
-    }
-
-    function getSeaMilesAddon() {
-      const selectedOption = seaMilesInput?.options?.[seaMilesInput.selectedIndex];
-      if (!selectedOption) return { label: '', price: 0, isQuote: false };
-      const priceValue = selectedOption.dataset.price || '';
-      if (priceValue === 'quote') {
-        return { label: selectedOption.value, price: 0, isQuote: true };
-      }
-      const parsedPrice = Number(priceValue || 0);
-      return {
-        label: selectedOption.value,
-        price: Number.isFinite(parsedPrice) ? parsedPrice : 0,
-        isQuote: false
-      };
-    }
-
-    function updateTransportFields() {
-      const boatRequired = transportTypeInput?.value === 'Båttransport behövs';
-      if (boatFields) {
-        boatFields.hidden = !boatRequired;
-      }
-      if (seaMilesInput) {
-        seaMilesInput.required = boatRequired;
-      }
-      if (coordinatesInput) {
-        coordinatesInput.required = boatRequired;
-        if (!boatRequired) {
-          coordinatesInput.value = '';
-        }
-      }
-      if (!boatRequired && seaMilesInput) {
-        seaMilesInput.value = '';
-      }
-      updateLivePrice();
-    }
-
-    function calculateEstimatedPrice() {
-      const housingTypeLabel = getHousingTypeLabel();
-      const windowCount = getWindowCountValue();
-      const serviceScopeValue = document.getElementById('serviceScope')?.value || '';
-      const basePrice = getBasePrice(housingTypeLabel, windowCount);
-      const interiorAddon = serviceScopeValue === 'Invändig + utvändig'
-        ? getInteriorAddon(housingTypeLabel, windowCount)
-        : 0;
-      const addons = getSelectedAddons();
-      const addonsPrice = addons.reduce((sum, addon) => sum + addon.price, 0);
-      const transportType = transportTypeInput?.value || '';
-      const seaMilesAddon = transportType === 'Båttransport behövs'
-        ? getSeaMilesAddon()
-        : { label: '', price: 0, isQuote: false };
-      const isQuote = seaMilesAddon.isQuote;
-
-      return {
-        total: isQuote ? null : basePrice + interiorAddon + addonsPrice + seaMilesAddon.price,
-        basePrice,
-        interiorAddon,
-        addons,
-        addonsPrice,
-        transportType,
-        seaMilesAddon,
-        isQuote,
-        housingTypeLabel,
-        windowCount,
-        serviceScopeValue
-      };
-    }
-
-    function getHousingTypeLabel() {
-      const selectedOption = housingTypeInput.options[housingTypeInput.selectedIndex];
-      return selectedOption?.dataset.label || selectedOption?.textContent || housingTypeInput.value;
-    }
-
     function getBookedTimes(date) {
       return bookingsCache.filter((b) => b.date === date).map((b) => b.time);
     }
 
-    function updateLivePrice() {
-      if (!livePriceValue) return;
-      const estimate = calculateEstimatedPrice();
-
-      if (!livePriceText) return;
-
-      if (!estimate.housingTypeLabel) {
-        livePriceValue.textContent = '699 kr';
-        livePriceText.textContent = 'Välj hustyp, antal fönster och putsning så uppdateras priset direkt.';
+    function updateSelectedDateBox() {
+      if (!selectedDate) {
+        selectedDateBox.textContent = 'Inget datum valt ännu';
+        if (continueBookingButton) {
+          continueBookingButton.disabled = true;
+        }
         return;
       }
 
-      if (!estimate.windowCount) {
-        livePriceValue.textContent = `${getBasePrice(estimate.housingTypeLabel, 0)} kr`;
-        livePriceText.textContent = 'Fyll i ungefär antal fönster för att få rätt prisnivå.';
+      if (!selectedTime) {
+        selectedDateBox.textContent = `Valt datum: ${formatDateForDisplay(selectedDate)}. Välj en ledig tid för att gå vidare till formuläret.`;
+        if (continueBookingButton) {
+          continueBookingButton.disabled = true;
+        }
         return;
       }
 
-      if (estimate.transportType === 'Båttransport behövs' && !estimate.seaMilesAddon.label) {
-        livePriceValue.textContent = `${estimate.basePrice + estimate.interiorAddon + estimate.addonsPrice} kr`;
-        livePriceText.textContent = 'Välj antal sjömil så räknar vi in båttillägget direkt.';
+      selectedDateBox.textContent = `Vald tid: ${formatDateForDisplay(selectedDate)} kl. ${selectedTime}. Tryck på knappen nedan för att fylla i formuläret.`;
+      if (continueBookingButton) {
+        continueBookingButton.disabled = false;
+      }
+    }
+
+    function syncBookingUrl() {
+      if (!selectedDate || !selectedTime) return;
+
+      const url = new URL(window.location.href);
+      url.searchParams.set('date', selectedDate);
+      url.searchParams.set('time', selectedTime);
+      url.hash = 'bokning';
+      window.history.replaceState({}, '', url);
+    }
+
+    function selectBookingTime(time) {
+      selectedTime = time;
+      updateSelectedDateBox();
+      syncBookingUrl();
+      renderTimes();
+    }
+
+    function goToBookingPage() {
+      if (!selectedDate || !selectedTime) {
+        updateSelectedDateBox();
         return;
       }
 
-      if (estimate.isQuote) {
-        livePriceValue.textContent = 'Offert';
-        livePriceText.textContent = 'Båttransport över 16 sjömil räknas via offert. Skicka in bokningen så återkommer vi med exakt pris.';
-        return;
-      }
-
-      livePriceValue.textContent = `${estimate.total} kr`;
-
-      const parts = [`Utvändig puts ${estimate.basePrice} kr efter RUT`];
-
-      if (estimate.interiorAddon > 0) {
-        parts.push(`invändig tillägg ${estimate.interiorAddon} kr`);
-      }
-
-      estimate.addons.forEach((addon) => {
-        parts.push(`${addon.label.toLowerCase()} ${addon.price} kr`);
+      const params = new URLSearchParams({
+        date: selectedDate,
+        time: selectedTime
       });
+      window.location.href = `bokning.html?${params.toString()}`;
+    }
 
-      if (estimate.seaMilesAddon.price > 0) {
-        parts.push(`båttillägg ${estimate.seaMilesAddon.price} kr`);
+    function applyInitialBookingSelection() {
+      const params = new URLSearchParams(window.location.search);
+      const initialDate = params.get('date') || params.get('booking_date');
+      const initialTime = params.get('time') || params.get('booking_time');
+
+      if (!initialDate) return;
+
+      const dateObject = new Date(`${initialDate}T12:00:00`);
+      const isValidDate = !Number.isNaN(dateObject.getTime())
+        && dateObject.getFullYear() === bookingYear
+        && initialDate >= todayString;
+
+      if (!isValidDate || isFullyBooked(initialDate)) return;
+
+      selectedDate = initialDate;
+      currentMonth = dateObject.getMonth();
+
+      if (initialTime && getTimes(initialDate).includes(initialTime) && !getBookedTimes(initialDate).includes(initialTime)) {
+        selectedTime = initialTime;
       }
 
-      livePriceText.textContent = parts.join(' + ') + '.';
+      updateSelectedDateBox();
     }
 
     function updateCompareSlider() {
@@ -2895,14 +2157,6 @@
       }
     }
 
-    function addBookingToCache(date, time) {
-      const alreadyExists = bookingsCache.some((booking) => booking.date === date && booking.time === time);
-
-      if (!alreadyExists) {
-        bookingsCache.push({ date, time });
-      }
-    }
-
     function isHoliday(date) {
       const d = new Date(date + 'T12:00:00');
       return d.getDay() === 0 || redDays.has(date);
@@ -2945,13 +2199,10 @@
           btn.disabled = true;
           btn.textContent = `${time} • bokad`;
         } else {
-          btn.onclick = () => {
-            timeInput.value = time;
-            renderTimes();
-          };
+          btn.onclick = () => selectBookingTime(time);
         }
 
-        if (timeInput.value === time) {
+        if (selectedTime === time) {
           btn.classList.add('selected');
         }
 
@@ -2994,6 +2245,10 @@
           btn.classList.add('selected');
         }
 
+        if (date === todayString) {
+          btn.classList.add('today');
+        }
+
         if (past) {
           btn.classList.add('past');
           btn.disabled = true;
@@ -3007,9 +2262,8 @@
         if (!past && !full) {
           btn.onclick = () => {
             selectedDate = date;
-            dateInput.value = date;
-            timeInput.value = '';
-            selectedDateBox.textContent = `Valt datum: ${formatDateForDisplay(date)}`;
+            selectedTime = '';
+            updateSelectedDateBox();
             renderTimes();
             renderCalendar();
           };
@@ -3033,27 +2287,10 @@
       }
     });
 
+    continueBookingButton?.addEventListener('click', goToBookingPage);
+
     window.addEventListener('scroll', updateTopbarState, { passive: true });
     window.addEventListener('resize', updateTopbarState);
-    housingTypeInput.addEventListener('change', updateLivePrice);
-    document.getElementById('serviceScope')?.addEventListener('change', updateLivePrice);
-    transportTypeInput?.addEventListener('change', updateTransportFields);
-    seaMilesInput?.addEventListener('change', updateLivePrice);
-    addonSunroomInput?.addEventListener('change', updateLivePrice);
-    addonMuntinsInput?.addEventListener('change', updateLivePrice);
-
-    bookingPackagesToggle?.addEventListener('click', () => {
-      const isOpen = bookingPackages?.classList.toggle('is-open');
-      bookingPackagesToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-    });
-
-    windowCountDecreaseButton?.addEventListener('click', () => {
-      setWindowCountValue(getWindowCountValue() - 1);
-    });
-
-    windowCountIncreaseButton?.addEventListener('click', () => {
-      setWindowCountValue(getWindowCountValue() + 1);
-    });
 
     topbarToggleButton?.addEventListener('click', () => {
       document.body.classList.toggle('topbar-manual-hidden');
@@ -3150,111 +2387,11 @@
       });
     });
 
-    bookingForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      successMessage.style.display = 'none';
-
-      if (!dateInput.value || !timeInput.value) {
-        selectedDateBox.textContent = 'Välj datum och tid innan du bokar.';
-        return;
-      }
-
-      if (!getWindowCountValue()) {
-        selectedDateBox.textContent = 'Välj ungefär hur många fönster det gäller innan du bokar.';
-        return;
-      }
-
-      if (transportTypeInput?.value === 'Båttransport behövs') {
-        if (!seaMilesInput?.value) {
-          selectedDateBox.textContent = 'Välj ungefär antal sjömil från Svinnige marina innan du bokar.';
-          return;
-        }
-
-        if (!coordinatesInput?.value.trim()) {
-          selectedDateBox.textContent = 'Skriv koordinater eller exakt plats innan du bokar.';
-          return;
-        }
-      }
-
-      const estimate = calculateEstimatedPrice();
-
-      const booking = {
-        name: document.getElementById('name').value.trim(),
-        email: document.getElementById('email').value.trim(),
-        phone: document.getElementById('phone').value.trim(),
-        housingTypeLegacyValue: housingTypeInput.value,
-        housingType: getHousingTypeLabel(),
-        personalNumber: document.getElementById('personalNumber').value.trim(),
-        windowCount: windowCountInput.value.trim(),
-        serviceScope: document.getElementById('serviceScope').value,
-        transportType: transportTypeInput?.value || 'Fastland',
-        seaMiles: seaMilesInput?.value || '',
-        coordinates: coordinatesInput?.value.trim() || '',
-        addons: getSelectedAddons().map((addon) => addon.label).join(', '),
-        date: dateInput.value,
-        time: timeInput.value,
-        location: document.getElementById('location').value.trim(),
-        message: document.getElementById('message').value.trim(),
-        price: estimate.isQuote ? 'Pris enligt offert' : estimate.total,
-        consentAccepted: document.getElementById('consent').checked
-      };
-
-      const messageParts = [
-        `Personnummer: ${booking.personalNumber}`,
-        `Typ av bostad: ${booking.housingType}`,
-        `Antal fönster / glaspartier: ${booking.windowCount}`,
-        `Putsning: ${booking.serviceScope}`,
-        `Transport: ${booking.transportType}`,
-        `Önskat datum / helg: ${isHoliday(booking.date) ? `${formatDateForDisplay(booking.date)} (helg/röd dag)` : formatDateForDisplay(booking.date)}`
-      ];
-      if (booking.seaMiles) {
-        messageParts.push(`Sjömil: ${booking.seaMiles}`);
-      }
-      if (booking.coordinates) {
-        messageParts.push(`Koordinater: ${booking.coordinates}`);
-      }
-      if (booking.addons) {
-        messageParts.push(`Tillägg: ${booking.addons}`);
-      }
-      if (booking.message) {
-        messageParts.push(`Övrig information: ${booking.message}`);
-      }
-      booking.fullMessage = messageParts.filter(Boolean).join('\n\n');
-
-      try {
-        await createBooking(booking);
-        renderCalendar();
-        renderTimes();
-
-        const params = new URLSearchParams({
-          name: booking.name,
-          date: booking.date,
-          time: booking.time,
-          housingType: booking.housingType,
-          windowCount: booking.windowCount,
-          serviceScope: booking.serviceScope,
-          addons: booking.addons,
-          transportType: booking.transportType,
-          seaMiles: booking.seaMiles,
-          coordinates: booking.coordinates,
-          price: String(booking.price)
-        });
-
-        window.location.href = `betalning.html?${params.toString()}`;
-      } catch (error) {
-        console.error('Bokningsfel:', error);
-        selectedDateBox.textContent = 'Kunde inte spara bokningen. Kontrollera Supabase eller försök igen.';
-      }
-    });
-
-    updateTransportFields();
-
     (async () => {
       await fetchBookings();
+      applyInitialBookingSelection();
       renderCalendar();
       renderTimes();
-      setWindowCountValue(0);
-      updateLivePrice();
       updateCompareSlider();
       updateTopbarToggleLabels();
       updateTopbarState();

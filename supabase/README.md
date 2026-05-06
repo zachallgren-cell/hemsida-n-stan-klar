@@ -3,7 +3,7 @@
 Den här lösningen gör två saker i samma steg:
 
 1. sparar bokningen i tabellen `bookings`
-2. skickar ett mail till `bergabattvatt@gmail.com`
+2. skickar ett mail till `info@bergafonsterputs.se`
 
 ## Så fungerar det
 
@@ -60,8 +60,9 @@ och policies så att inloggade admin-användare kan läsa och uppdatera bokninga
 Lägg in dessa i Supabase Edge Functions secrets:
 
 - `RESEND_API_KEY`
-- `BOOKING_NOTIFICATION_EMAIL=bergabattvatt@gmail.com`
+- `BOOKING_NOTIFICATION_EMAIL=info@bergafonsterputs.se`
 - `BOOKING_FROM_EMAIL=Berga Fönsterputs <bokning@din-domän.se>`
+- `BOOKING_RUT_FORM_URL=https://...` om ni vill lägga RUT-formuläret direkt i kundens bekräftelsemejl
 
 ## Viktigt
 
@@ -79,8 +80,9 @@ Om du vill sätta secrets från terminalen:
 
 ```bash
 supabase secrets set RESEND_API_KEY=re_xxx
-supabase secrets set BOOKING_NOTIFICATION_EMAIL=bergabattvatt@gmail.com
+supabase secrets set BOOKING_NOTIFICATION_EMAIL=info@bergafonsterputs.se
 supabase secrets set BOOKING_FROM_EMAIL="Berga Fönsterputs <bokning@din-domän.se>"
+supabase secrets set BOOKING_RUT_FORM_URL="https://..."
 ```
 
 ## Efter deploy

@@ -10,6 +10,8 @@ type BookingPayload = {
   boatSize: string;
   housingType?: string;
   personalNumber?: string;
+  rutChoice?: string;
+  rut_choice?: string;
   windowCount?: string;
   serviceScope?: string;
   paymentMethod?: string;
@@ -77,6 +79,7 @@ Deno.serve(async (req) => {
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
     const notificationEmail = Deno.env.get('BOOKING_NOTIFICATION_EMAIL');
     const fromEmail = Deno.env.get('BOOKING_FROM_EMAIL');
+    const rutFormUrl = Deno.env.get('BOOKING_RUT_FORM_URL') || '';
 
     if (!supabaseUrl || !serviceRoleKey) {
       console.error('Supabase secrets are missing', {
@@ -143,9 +146,14 @@ Deno.serve(async (req) => {
     const safeMessage = payload.message ? escapeHtml(payload.message).replaceAll('\n', '<br>') : 'Ingen extra information';
     const safeHousingType = payload.housingType ? escapeHtml(payload.housingType) : escapeHtml(payload.boatSize);
     const safePersonalNumber = payload.personalNumber ? escapeHtml(payload.personalNumber) : 'Ej angivet';
+    const personalNumberRow = payload.personalNumber
+      ? `<tr><td style="padding: 8px 0; font-weight: 700;">Personnummer</td><td style="padding: 8px 0;">${safePersonalNumber}</td></tr>`
+      : '';
     const safeWindowCount = payload.windowCount ? escapeHtml(payload.windowCount) : 'Ej angivet';
     const safeServiceScope = payload.serviceScope ? escapeHtml(payload.serviceScope) : 'Ej angivet';
     const safePaymentMethod = payload.paymentMethod ? escapeHtml(payload.paymentMethod) : 'Ej angivet';
+    const rawRutChoice = payload.rutChoice || payload.rut_choice || '';
+    const safeRutChoice = rawRutChoice ? escapeHtml(rawRutChoice) : 'Ej angivet';
     const safeAddons = payload.addons ? escapeHtml(payload.addons).replaceAll('\n', '<br>') : 'Inga tillägg';
     const safeTransportType = payload.transportType ? escapeHtml(payload.transportType) : 'Fastland';
     const safeSeaMiles = payload.seaMiles ? escapeHtml(payload.seaMiles) : 'Ej angivet';
@@ -153,6 +161,27 @@ Deno.serve(async (req) => {
     const safeMapLink = payload.mapLink ? `<a href="${escapeHtml(payload.mapLink)}">${escapeHtml(payload.mapLink)}</a>` : 'Ej angivet';
     const safePrice = escapeHtml(String(payload.price || 'Ej angivet'));
     const safePriceDisplay = /^\d+$/.test(String(payload.price || '')) ? `${safePrice} kr` : safePrice;
+    const safeRutFormUrl = rutFormUrl ? escapeHtml(rutFormUrl) : '';
+    const rutFormSection = rawRutChoice.includes('Ja')
+      ? `
+        <div style="margin-top: 20px; padding: 14px 16px; border-radius: 12px; background: #f3fbff; border: 1px solid #bfddeb;">
+          <p style="margin: 0 0 8px;"><strong>RUT-avdrag</strong></p>
+          ${safeRutFormUrl
+            ? `<p style="margin: 0;">Fyll i RUT-uppgifterna, till exempel personnummer, i vårt säkra formulär: <a href="${safeRutFormUrl}">${safeRutFormUrl}</a></p>`
+            : '<p style="margin: 0;">Vi skickar en säker formulärlänk för RUT-uppgifterna innan jobbet utförs.</p>'}
+        </div>
+      `
+      : rawRutChoice.includes('Nej')
+        ? `
+          <div style="margin-top: 20px; padding: 14px 16px; border-radius: 12px; background: #fff8ec; border: 1px solid #ffd08b;">
+            <p style="margin: 0;"><strong>RUT-avdrag:</strong> Du har valt att inte använda RUT-avdrag. Kontakta oss gärna om du vill dubbelkolla priset utan RUT.</p>
+          </div>
+        `
+        : `
+          <div style="margin-top: 20px; padding: 14px 16px; border-radius: 12px; background: #fff8ec; border: 1px solid #ffd08b;">
+            <p style="margin: 0;"><strong>RUT-avdrag:</strong> Vi kontaktar dig om RUT-valet behöver stämmas av.</p>
+          </div>
+        `;
 
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; color: #173042; line-height: 1.6;">
@@ -166,7 +195,8 @@ Deno.serve(async (req) => {
           <tr><td style="padding: 8px 0; font-weight: 700;">Datum</td><td style="padding: 8px 0;">${escapeHtml(payload.date)}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Tid</td><td style="padding: 8px 0;">${escapeHtml(payload.time)}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Typ av bostad</td><td style="padding: 8px 0;">${safeHousingType}</td></tr>
-          <tr><td style="padding: 8px 0; font-weight: 700;">Personnummer</td><td style="padding: 8px 0;">${safePersonalNumber}</td></tr>
+          ${personalNumberRow}
+          <tr><td style="padding: 8px 0; font-weight: 700;">RUT-val</td><td style="padding: 8px 0;">${safeRutChoice}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Antal fönster / glaspartier</td><td style="padding: 8px 0;">${safeWindowCount}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Putsning</td><td style="padding: 8px 0;">${safeServiceScope}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Transport</td><td style="padding: 8px 0;">${safeTransportType}</td></tr>
@@ -201,6 +231,7 @@ Deno.serve(async (req) => {
           <tr><td style="padding: 8px 0; font-weight: 700;">Tillägg</td><td style="padding: 8px 0;">${safeAddons}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Pris</td><td style="padding: 8px 0;">${safePriceDisplay}</td></tr>
         </table>
+        ${rutFormSection}
         <p style="margin-top: 20px;">Om du har frågor kan du svara på detta mail eller kontakta oss på <strong>${escapeHtml(notificationEmail)}</strong>.</p>
         <p>Med vänliga hälsningar,<br><strong>Berga Fönsterputs</strong></p>
       </div>
