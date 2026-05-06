@@ -3,13 +3,56 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Berga Fönsterputs</title>
-  <meta name="description" content="Berga Fönsterputs erbjuder personlig och lokal fönsterputs i Åkersberga, Stockholm och skärgården med tydliga priser och enkel onlinebokning." />
+  <title>Fönsterputs Åkersberga, Stockholm & skärgården | Berga Fönsterputs</title>
+  <meta name="description" content="Boka fönsterputs i Åkersberga, Stockholm och skärgården. Berga Fönsterputs erbjuder livepris, RUT-val, båttransport och trygg kortbetalning via Stripe." />
+  <link rel="canonical" href="https://bergafonsterputs.se/" />
+  <meta property="og:title" content="Fönsterputs Åkersberga, Stockholm & skärgården | Berga Fönsterputs" />
+  <meta property="og:description" content="Lokal fönsterputs med livepris, RUT-val, skärgårdsjobb och trygg kortbetalning via Stripe." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://bergafonsterputs.se/" />
+  <meta property="og:image" content="https://bergafonsterputs.se/logga-fonsterputs.png" />
+  <meta name="twitter:card" content="summary_large_image" />
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
   <link rel="shortcut icon" href="/favicon-48.png" />
   <link rel="apple-touch-icon" sizes="192x192" href="/favicon-192.png" />
   <link rel="manifest" href="/site.webmanifest" />
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Berga Fönsterputs",
+      "url": "https://bergafonsterputs.se/",
+      "logo": "https://bergafonsterputs.se/logga-fonsterputs.png",
+      "image": "https://bergafonsterputs.se/efter-optimized.jpeg",
+      "telephone": "+46733881216",
+      "email": "info@bergafonsterputs.se",
+      "priceRange": "Från 599 kr",
+      "description": "Lokal fönsterputs i Åkersberga, Stockholm och skärgården med livepris, RUT-val och trygg kortbetalning via Stripe.",
+      "areaServed": [
+        "Åkersberga",
+        "Österåker",
+        "Vaxholm",
+        "Ljusterö",
+        "Stockholms skärgård",
+        "Stockholm"
+      ],
+      "makesOffer": {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Fönsterputs",
+          "serviceType": "Fönsterputs för bostäder"
+        },
+        "priceCurrency": "SEK"
+      },
+      "sameAs": [
+        "https://www.instagram.com/bergabattvatt",
+        "https://www.tiktok.com/@bergabttvtt2",
+        "https://www.facebook.com/bergab%C3%A5ttv%C3%A4tt"
+      ]
+    }
+  </script>
   <style>
     :root {
       --primary: #0b6fa4;
@@ -635,6 +678,38 @@
       padding: 14px 16px;
       background: rgba(255,255,255,0.92);
       font-weight: 700;
+    }
+
+    .area-link-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .area-link {
+      display: grid;
+      gap: 5px;
+      padding: 16px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: linear-gradient(to bottom, #fbfeff, #f2f9fd);
+      color: var(--primary-dark);
+      font-weight: 900;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .area-link span {
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
+    .area-link:hover {
+      transform: translateY(-2px);
+      border-color: #b8d9e8;
+      box-shadow: 0 14px 28px rgba(11, 111, 164, 0.12);
     }
 
     .cta-panel {
@@ -1528,6 +1603,7 @@
       .service-area,
       .trust-strip,
       .booking-layout,
+      .area-link-grid,
       .time-slots {
         grid-template-columns: 1fr;
       }
@@ -1807,6 +1883,19 @@
             <a href="#bokning" class="btn btn-primary">Boka fönsterputs</a>
             <a href="om-oss.html" class="btn btn-secondary">Lär känna oss</a>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section reveal">
+      <div class="card">
+        <h2 class="section-title">Fönsterputs i ditt område</h2>
+        <p class="section-subtitle">Vi utgår lokalt och hjälper kunder i Åkersberga, Vaxholm, Ljusterö och ute i skärgården.</p>
+        <div class="area-link-grid">
+          <a class="area-link" href="fonsterputs-akersberga.html">Åkersberga<span>Lokal fönsterputs med enkel onlinebokning.</span></a>
+          <a class="area-link" href="fonsterputs-vaxholm.html">Vaxholm<span>Fönsterputs för villor, radhus och kustnära boenden.</span></a>
+          <a class="area-link" href="fonsterputs-ljustero.html">Ljusterö<span>Planerade tider och båttransport vid behov.</span></a>
+          <a class="area-link" href="fonsterputs-skargarden.html">Skärgården<span>Vi planerar skärgårdsjobb med tydlig transportkostnad.</span></a>
         </div>
       </div>
     </section>

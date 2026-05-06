@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /bokning.html
+Disallow: /betalning.html
+
+Sitemap: https://bergafonsterputs.se/sitemap.xml
