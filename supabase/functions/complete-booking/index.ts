@@ -54,7 +54,6 @@ Deno.serve(async (req) => {
     const notificationEmail = Deno.env.get('BOOKING_NOTIFICATION_EMAIL');
     const fromEmail = Deno.env.get('BOOKING_FROM_EMAIL');
     const reviewUrl = Deno.env.get('BOOKING_REVIEW_URL') || '';
-    const swishNumber = Deno.env.get('BOOKING_SWISH_NUMBER') || '073-388 12 16';
 
     if (!supabaseUrl || !serviceRoleKey) {
       return jsonResponse({ error: 'Supabase secrets are missing' }, 500);
@@ -84,7 +83,7 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'Booking not found' }, 404);
     }
 
-    const paymentMethod = payload.paymentMethod || booking.payment_method || 'Swish';
+    const paymentMethod = payload.paymentMethod || booking.payment_method || 'Stripe Checkout';
     const completedAt = new Date().toISOString();
     const stripePaymentUrl = booking.stripe_payment_url ? String(booking.stripe_payment_url) : '';
 
@@ -112,21 +111,18 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'Customer email is invalid for completion mail' }, 400);
     }
 
-    const stripePaymentInstructions = stripePaymentUrl
-      ? `
-        <p><a href="${escapeHtml(stripePaymentUrl)}" style="display:inline-block;padding:12px 18px;border-radius:999px;background:#0b6fa4;color:#ffffff;text-decoration:none;font-weight:800;">Betala säkert via Stripe</a></p>
-      `
-      : '';
-
     const paymentInstructions = paymentMethod === 'Faktura via e-post'
       ? `
         <p>Vi skickar faktura via e-post inom 3-7 dagar.</p>
       `
-      : `
-        ${stripePaymentInstructions}
-        <p>Betala gärna med Swish till <strong>${escapeHtml(swishNumber)}</strong>.</p>
-        <p>Använd gärna meddelandet <strong>Bokning ${escapeHtml(String(booking.id))}</strong> så att vi enkelt kan matcha betalningen.</p>
-      `;
+      : stripePaymentUrl
+        ? `
+          <p>Du kan betala tryggt med kort via Stripe.</p>
+          <p><a href="${escapeHtml(stripePaymentUrl)}" style="display:inline-block;padding:12px 18px;border-radius:999px;background:#0b6fa4;color:#ffffff;text-decoration:none;font-weight:800;">Betala säkert via Stripe</a></p>
+        `
+        : `
+          <p>Vi skickar en betalningslänk via Stripe när den är redo.</p>
+        `;
 
     const reviewSection = reviewUrl
       ? `

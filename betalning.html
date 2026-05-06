@@ -391,13 +391,13 @@
 
     .option-stack {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: 1fr 1fr;
       gap: 16px;
       align-items: stretch;
     }
 
-    .option-stack.is-two-column {
-      grid-template-columns: 1fr 1fr;
+    .option-stack.is-single-column {
+      grid-template-columns: 1fr;
     }
 
     .option-card h3 {
@@ -435,13 +435,6 @@
       margin-bottom: 14px;
     }
 
-    .swish-number {
-      font-size: 1.35rem;
-      font-weight: 700;
-      letter-spacing: 0.4px;
-      margin: 8px 0;
-    }
-
     .info-note {
       color: var(--muted);
       font-size: 0.95rem;
@@ -449,8 +442,7 @@
     }
 
     .payment-note,
-    .instruction-list,
-    .payment-steps {
+    .instruction-list {
       margin-top: 14px;
       padding: 14px 16px;
       border-radius: 14px;
@@ -463,11 +455,6 @@
     .instruction-list {
       margin-bottom: 0;
       padding-left: 34px;
-    }
-
-    .payment-steps {
-      padding-left: 34px;
-      margin-bottom: 0;
     }
 
     .btn {
@@ -708,7 +695,7 @@
 
       <div class="hero">
         <h1>Slutför din bokning</h1>
-        <p id="heroIntroText">Din bokning är registrerad. Du kan betala direkt med Swish nu, eller vänta och betala efter att vi har putsat fönstren.</p>
+        <p id="heroIntroText">Din bokning är registrerad. Du kan betala tryggt med kort via Stripe nu, eller vänta och betala efter att vi har putsat fönstren.</p>
       </div>
     </div>
   </header>
@@ -765,6 +752,7 @@
         <p class="section-subtitle">Välj det alternativ som passar dig bäst.</p>
         <div class="payment-trust-row">
           <span class="trust-pill">Bokningen är mottagen</span>
+          <span class="trust-pill">Trygg kortbetalning via Stripe</span>
           <span class="trust-pill">Stripe-länk finns även i mejlet</span>
           <span class="trust-pill">Du kan fortfarande betala efter putsning</span>
         </div>
@@ -772,28 +760,10 @@
         <div class="option-stack">
           <div class="option-card primary recommended" id="stripePaymentCard" hidden>
             <h3>Betala direkt via Stripe</h3>
-            <p>Betala säkert med kort och de betalmetoder som är aktiverade i Stripe.</p>
+            <p>Betala tryggt med kort och de betalmetoder som är aktiverade i Stripe.</p>
             <p>Samma betalningslänk skickas också i bekräftelsemejlet.</p>
             <a href="#" id="stripeCheckoutLink" class="btn btn-stripe">Betala säkert via Stripe</a>
             <p class="payment-note" id="stripePaymentNote">Stripe öppnas i en säker kassa.</p>
-          </div>
-
-          <div class="option-card">
-            <h3>Betala nu med Swish</h3>
-            <p>✔ Bra om du inte är hemma när vi är klara</p>
-            <p>✔ Samma meddelande gör betalningen lätt att matcha</p>
-            <p class="info-note">Swish-nummer</p>
-            <div class="swish-number" id="swishDisplayNumber">073-388 12 16</div>
-            <p><strong>Belopp:</strong> <span id="paymentDisplayPrice">599</span> kr</p>
-            <p><strong>Meddelande:</strong> <span id="swishMessage">Berga Fönsterputs</span></p>
-            <button type="button" id="copyMessageButton" class="btn btn-secondary">Kopiera betalningsmeddelande</button>
-            <p class="payment-note" id="paymentNote">Öppna Swish manuellt i mobilen och skicka betalningen till numret ovan.</p>
-            <ol class="payment-steps">
-              <li>Öppna Swish i mobilen.</li>
-              <li>Skriv in numret <strong>073-388 12 16</strong>.</li>
-              <li>Skriv beloppet <strong><span id="paymentStepsPrice">599</span> kr</strong>.</li>
-              <li>Klistra in betalningsmeddelandet så att vi kan matcha bokningen.</li>
-            </ol>
           </div>
 
           <div class="option-card primary">
@@ -832,24 +802,15 @@
   </footer>
 
   <script>
-    const SWISH_NUMBER = '46733881216';
-    const SWISH_DISPLAY_NUMBER = '073-388 12 16';
-
     const bookingName = document.getElementById('bookingName');
     const bookingDate = document.getElementById('bookingDate');
     const bookingTime = document.getElementById('bookingTime');
     const bookingBoatSize = document.getElementById('bookingBoatSize');
     const bookingPackage = document.getElementById('bookingPackage');
     const bookingPrice = document.getElementById('bookingPrice');
-    const swishDisplayNumber = document.getElementById('swishDisplayNumber');
-    const swishMessage = document.getElementById('swishMessage');
-    const copyMessageButton = document.getElementById('copyMessageButton');
     const payLaterButton = document.getElementById('payLaterButton');
     const statusBox = document.getElementById('statusBox');
     const statusText = document.getElementById('statusText');
-    const paymentNote = document.getElementById('paymentNote');
-    const paymentDisplayPrice = document.getElementById('paymentDisplayPrice');
-    const paymentStepsPrice = document.getElementById('paymentStepsPrice');
     const stripePaymentCard = document.getElementById('stripePaymentCard');
     const stripeCheckoutLink = document.getElementById('stripeCheckoutLink');
     const stripePaymentNote = document.getElementById('stripePaymentNote');
@@ -888,12 +849,6 @@
         month: 'long',
         year: 'numeric'
       });
-    }
-
-    function buildSwishMessage(nameValue, dateValue, timeValue) {
-      const compactDate = dateValue && dateValue !== 'Ej valt' ? dateValue.replaceAll('-', '') : 'datum';
-      const compactTime = timeValue && timeValue !== 'Ej vald' ? timeValue.replace(':', '') : 'tid';
-      return `${nameValue} ${compactDate} ${compactTime}`.slice(0, 50);
     }
 
     function buildPackageSummary() {
@@ -936,18 +891,12 @@
       statusText.textContent = message;
     }
 
-    const paymentMessage = buildSwishMessage(name, date, time);
-
     bookingName.textContent = name;
     bookingDate.textContent = formatDateForDisplay(date);
     bookingTime.textContent = time;
     bookingBoatSize.textContent = housingType;
     bookingPackage.textContent = buildPackageSummary();
     bookingPrice.textContent = String(price).includes('offert') || String(price).includes('Offert') ? String(price) : `${price} kr`;
-    swishDisplayNumber.textContent = SWISH_DISPLAY_NUMBER;
-    swishMessage.textContent = paymentMessage;
-    paymentDisplayPrice.textContent = price;
-    paymentStepsPrice.textContent = price;
 
     if (stripeCheckoutUrl && !String(price).toLowerCase().includes('offert')) {
       stripePaymentCard.hidden = false;
@@ -956,7 +905,7 @@
         ? `Boknings-ID ${bookingId} följer med till Stripe så betalningen kan matchas automatiskt.`
         : 'Bokningen följer med till Stripe så betalningen kan matchas automatiskt.';
     } else {
-      optionStack?.classList.add('is-two-column');
+      optionStack?.classList.add('is-single-column');
     }
 
     if (stripeStatus === 'success') {
@@ -969,15 +918,6 @@
     if (stripeStatus === 'cancelled') {
       setStatus('Betalningen avbröts. Bokningen finns kvar och du kan använda betalningslänken i mejlet eller betala efter putsningen.', 'Betalning avbruten');
     }
-
-    copyMessageButton.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(paymentMessage);
-        setStatus('Betalningsmeddelandet är kopierat.', 'Kopierat');
-      } catch (error) {
-        setStatus('Kunde inte kopiera automatiskt. Kopiera meddelandet manuellt.', 'Kopiering misslyckades');
-      }
-    });
 
     payLaterButton.addEventListener('click', () => {
       setStatus('Vi hör av oss när fönsterputsen är slutförd med information om betalning.', 'Bokning mottagen');

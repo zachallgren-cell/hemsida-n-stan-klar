@@ -8,7 +8,7 @@ alter table public.bookings
   add column if not exists stripe_checkout_expires_at timestamp with time zone,
   add column if not exists stripe_paid_at timestamp with time zone;
 
-comment on column public.bookings.payment_provider is 'Betalleverantör, till exempel stripe eller swish.';
+comment on column public.bookings.payment_provider is 'Betalleverantör, till exempel stripe.';
 comment on column public.bookings.stripe_product_id is 'Stripe Product ID som skapades för bokningen.';
 comment on column public.bookings.stripe_price_id is 'Stripe Price ID som används i Checkout-sessionen.';
 comment on column public.bookings.stripe_checkout_session_id is 'Stripe Checkout Session ID för bokningen.';

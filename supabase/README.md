@@ -147,17 +147,15 @@ Där kan ni:
 - markera `paid`
 - markera jobbet som klart och skicka betalningsmail + recensionslänk
 
-## Extra secrets för klartmail
+## Extra secret för klartmail
 
 Lägg gärna också till:
 
 - `BOOKING_REVIEW_URL`
-- `BOOKING_SWISH_NUMBER`
 
 Exempel:
 
 - `BOOKING_REVIEW_URL=https://g.page/r/.../review`
-- `BOOKING_SWISH_NUMBER=073-388 12 16`
 
 ## Deploya klartfunktionen
 
