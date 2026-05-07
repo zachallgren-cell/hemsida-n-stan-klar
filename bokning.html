@@ -631,6 +631,176 @@
         margin-top: -56px;
       }
     }
+
+    @media (max-width: 720px) {
+      .container {
+        width: min(100% - 28px, var(--max-width));
+      }
+
+      header {
+        padding: 12px 0 72px;
+      }
+
+      .topbar {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 10px;
+        padding: 8px 10px;
+        border-radius: 18px;
+      }
+
+      .brand {
+        width: 58px;
+        height: 58px;
+        padding: 4px;
+        border-radius: 14px;
+      }
+
+      .brand img {
+        border-radius: 12px;
+      }
+
+      nav {
+        flex: 1;
+        justify-content: flex-end;
+        gap: 5px;
+        padding: 4px;
+        border-radius: 16px;
+        overflow: hidden;
+      }
+
+      nav a {
+        padding: 9px 10px;
+        font-size: 0.82rem;
+        white-space: nowrap;
+      }
+
+      nav a:not(.is-active):not([href="index.html"]) {
+        display: none;
+      }
+
+      .hero {
+        margin-top: 44px;
+        gap: 10px;
+      }
+
+      .hero-label {
+        padding: 7px 10px;
+        font-size: 0.82rem;
+      }
+
+      h1 {
+        font-size: clamp(2.05rem, 12vw, 3rem);
+        line-height: 1.02;
+      }
+
+      .hero p {
+        font-size: 0.98rem;
+        line-height: 1.45;
+      }
+
+      main {
+        margin-top: -38px;
+        padding-bottom: 36px;
+      }
+
+      .card {
+        padding: 16px;
+        border-radius: 16px;
+      }
+
+      .section-title {
+        font-size: 1.55rem;
+        line-height: 1.15;
+      }
+
+      .section-subtitle {
+        margin-bottom: 16px;
+        font-size: 0.94rem;
+      }
+
+      .selected-booking {
+        padding: 13px 14px;
+        border-radius: 14px;
+        margin-bottom: 14px;
+      }
+
+      .booking-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .side-panel {
+        order: -1;
+        gap: 12px;
+      }
+
+      .live-price-box {
+        flex-wrap: wrap;
+        align-items: flex-start;
+        padding: 14px;
+        border-radius: 14px;
+      }
+
+      .live-price-value strong {
+        font-size: 1.55rem;
+      }
+
+      .booking-packages {
+        border-radius: 14px;
+      }
+
+      .booking-packages-header {
+        padding: 14px;
+      }
+
+      form {
+        gap: 14px;
+      }
+
+      .form-row {
+        gap: 14px;
+      }
+
+      label {
+        font-size: 0.94rem;
+      }
+
+      input,
+      select,
+      textarea {
+        min-height: 50px;
+        border-radius: 12px;
+      }
+
+      textarea {
+        min-height: 108px;
+      }
+
+      .stepper {
+        grid-template-columns: 48px 1fr 48px;
+        border-radius: 12px;
+      }
+
+      .stepper-btn {
+        min-height: 50px;
+      }
+
+      .rut-notice,
+      .consent-box,
+      .addon-option {
+        border-radius: 14px;
+        padding: 14px;
+      }
+
+      .submit-btn {
+        width: 100%;
+        min-height: 56px;
+        border-radius: 14px;
+        font-weight: 900;
+      }
+    }
   </style>
 </head>
 <body>
@@ -807,8 +977,8 @@
             <label for="consent">Jag godkänner att mina personuppgifter används för bokningen och att eventuell RUT-hantering sker via säkert formulär.</label>
           </div>
 
-          <button type="submit" class="submit-btn">Gå vidare till betalning</button>
-          <p class="booking-note">Bokningen sparas som väntande först. På nästa sida kan du välja att betala direkt eller efter putsningen.</p>
+          <button type="submit" class="submit-btn">Skicka bokning</button>
+          <p class="booking-note">Bokningen sparas som väntande först. På nästa sida får du en bekräftelse. Betalningslänken skickas i klartmejlet när jobbet är utfört.</p>
           <div class="status-message" id="bookingStatus"></div>
         </form>
 

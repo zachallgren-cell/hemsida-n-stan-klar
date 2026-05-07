@@ -307,6 +307,10 @@
       margin-top: 24px;
     }
 
+    .mobile-only {
+      display: none;
+    }
+
     .btn {
       display: inline-flex;
       align-items: center;
@@ -766,6 +770,46 @@
       margin: 6px 0;
     }
 
+    .mobile-sticky-booking {
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      bottom: calc(12px + env(safe-area-inset-bottom));
+      z-index: 35;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.96);
+      border: 1px solid rgba(198,223,236,0.95);
+      box-shadow: 0 18px 38px rgba(4,25,36,0.2);
+      backdrop-filter: blur(14px);
+    }
+
+    .mobile-sticky-booking a {
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .mobile-sticky-primary {
+      flex: 1;
+      background: linear-gradient(to right, var(--cta), var(--cta-dark));
+      color: #173042;
+      box-shadow: 0 10px 20px rgba(241,153,45,0.24);
+    }
+
+    .mobile-sticky-secondary {
+      width: 88px;
+      border: 1px solid var(--border);
+      color: var(--primary-dark);
+      background: #ffffff;
+    }
+
     .footer-links {
       display: flex;
       flex-wrap: wrap;
@@ -855,6 +899,220 @@
         min-height: 300px;
       }
     }
+
+    @media (max-width: 720px) {
+      body {
+        padding-bottom: calc(86px + env(safe-area-inset-bottom));
+      }
+
+      .container {
+        width: min(100% - 28px, var(--max-width));
+      }
+
+      .mobile-only {
+        display: block;
+      }
+
+      header {
+        padding: 14px 0 72px;
+      }
+
+      header::before {
+        display: none;
+      }
+
+      .topbar {
+        top: 8px;
+        width: calc(100% - 24px);
+        flex-wrap: nowrap;
+        gap: 8px;
+        padding: 8px 10px;
+        border-radius: 18px;
+        background: rgba(8,56,82,0.5);
+      }
+
+      .brand,
+      body.topbar-compact .brand {
+        width: 58px;
+        height: 58px;
+        padding: 4px;
+        border-radius: 14px;
+      }
+
+      .brand img,
+      body.topbar-compact .brand img {
+        border-radius: 12px;
+      }
+
+      .topbar-actions {
+        width: auto;
+        margin-left: auto;
+        justify-content: flex-end;
+        min-width: 0;
+      }
+
+      .topbar-toggle,
+      .topbar-show-button {
+        display: none;
+      }
+
+      nav,
+      body.topbar-compact nav {
+        gap: 5px;
+        padding: 4px;
+        border-radius: 16px;
+        max-width: calc(100vw - 104px);
+        overflow: hidden;
+      }
+
+      nav a,
+      body.topbar-compact nav a {
+        padding: 9px 10px;
+        font-size: 0.82rem;
+        white-space: nowrap;
+      }
+
+      nav a:not(.is-active):not([href="index.html#bokning"]):not([href="index.html#kontakt"]) {
+        display: none;
+      }
+
+      .hero,
+      body.topbar-compact .hero {
+        margin-top: 96px;
+      }
+
+      .hero-label {
+        padding: 7px 10px;
+        border-radius: 10px;
+        font-size: 0.82rem;
+        margin-bottom: 12px;
+      }
+
+      .hero h1 {
+        font-size: clamp(2.05rem, 11vw, 3rem);
+        line-height: 1.02;
+        margin-bottom: 12px;
+      }
+
+      .hero p {
+        font-size: 0.98rem;
+        line-height: 1.45;
+      }
+
+      .hero-desktop-copy,
+      .hero .hero-buttons {
+        display: none;
+      }
+
+      .mobile-hero-points {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        padding: 0;
+        margin: 14px 0 0;
+        list-style: none;
+      }
+
+      .mobile-hero-points li {
+        min-height: 54px;
+        padding: 10px 11px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.18);
+        color: rgba(255,255,255,0.96);
+        font-size: 0.86rem;
+        font-weight: 800;
+        line-height: 1.25;
+      }
+
+      .mobile-quick-actions {
+        display: grid;
+        grid-template-columns: 1fr 0.74fr;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .mobile-quick-actions .btn {
+        min-height: 52px;
+        padding: 13px 14px;
+        border-radius: 14px;
+        text-align: center;
+      }
+
+      main {
+        margin-top: -34px;
+        padding-bottom: 36px;
+      }
+
+      .section {
+        margin-bottom: 16px;
+      }
+
+      .card {
+        padding: 18px;
+        border-radius: 16px;
+      }
+
+      .card:hover,
+      .slot-card:hover {
+        transform: none;
+      }
+
+      .section-title {
+        font-size: 1.55rem;
+        line-height: 1.15;
+      }
+
+      .section-subtitle {
+        margin-bottom: 16px;
+        font-size: 0.95rem;
+      }
+
+      .slot-grid,
+      .section-grid,
+      .area-layout {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+
+      .slot-card {
+        border-radius: 14px;
+        padding: 14px;
+      }
+
+      .window-sim {
+        min-height: 260px;
+        border-radius: 16px;
+      }
+
+      .area-map {
+        min-height: 270px;
+        border-radius: 16px;
+      }
+
+      .area-panel,
+      .quiz-question,
+      .quiz-result,
+      .simulator-cta {
+        border-radius: 16px;
+        padding: 16px;
+      }
+
+      .quiz-options {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .quiz-option {
+        width: 100%;
+        min-height: 46px;
+        border-radius: 12px;
+      }
+
+      .mobile-sticky-booking.mobile-only {
+        display: flex;
+      }
+    }
   </style>
 </head>
 <body>
@@ -880,15 +1138,30 @@
       <div class="hero">
         <div class="hero-label">Interaktiv fönsterputs</div>
         <h1>Testa hur vår tjänst funkar.</h1>
-        <p>Här kan du se nästa lediga tider, prova en liten puts-simulator, kolla var vi jobbar på fastlandet och ute i skärgården samt göra ett snabbt quiz innan du bokar.</p>
+        <p class="hero-desktop-copy">Här kan du se nästa lediga tider, prova en liten puts-simulator, kolla var vi jobbar på fastlandet och ute i skärgården samt göra ett snabbt quiz innan du bokar.</p>
+        <p class="mobile-hero-copy mobile-only">Se lediga tider, hur bokningen fungerar och var vi jobbar. Snabbt, tydligt och lätt att boka från mobilen.</p>
+        <ul class="mobile-hero-points mobile-only">
+          <li>Lediga tider direkt</li>
+          <li>Livepris i formuläret</li>
+          <li>RUT-val i säkert formulär</li>
+          <li>Skärgårdsjobb planeras</li>
+        </ul>
         <div class="hero-buttons">
           <a href="#lediga-tider" class="btn btn-primary">Se lediga tider</a>
           <a href="#simulator" class="btn btn-secondary">Prova simulatorn</a>
+        </div>
+        <div class="mobile-quick-actions mobile-only">
+          <a href="#lediga-tider" class="btn btn-primary">Se tider</a>
+          <a href="tel:+46733881216" class="btn btn-secondary">Ring oss</a>
         </div>
       </div>
     </div>
   </header>
   <button type="button" class="topbar-show-button" id="topbarShowButton">Visa meny</button>
+  <div class="mobile-sticky-booking mobile-only" aria-label="Snabbval för mobil">
+    <a href="index.html#bokning" class="mobile-sticky-primary">Boka tid</a>
+    <a href="tel:+46733881216" class="mobile-sticky-secondary">Ring</a>
+  </div>
 
   <main class="container">
     <section class="section reveal">
@@ -973,7 +1246,7 @@
           </div>
           <div class="quiz-question">
             <h3>3. Fönstren blir rena</h3>
-            <p>Vi putsar enligt bokningen och du väljer själv om du betalar direkt eller efteråt.</p>
+            <p>Vi putsar enligt bokningen. När jobbet är klart skickas betalningslänken i klartmejlet.</p>
           </div>
         </div>
       </div>
