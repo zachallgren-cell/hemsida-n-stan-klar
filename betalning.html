@@ -696,7 +696,7 @@
 
       <div class="hero">
         <h1>Slutför din bokning</h1>
-        <p id="heroIntroText">Din bokning är registrerad. Du kan betala tryggt med kort via Stripe nu, eller vänta och betala efter att vi har putsat fönstren.</p>
+        <p id="heroIntroText">Din bokning är registrerad. När fönsterputsen är klar skickar vi en trygg betalningslänk via Stripe i klartmejlet.</p>
       </div>
     </div>
   </header>
@@ -706,11 +706,11 @@
     <div class="grid">
       <section class="card">
         <h2 class="section-title">Din bokning</h2>
-        <p class="section-subtitle" id="bookingIntroSubtitle">Kontrollera uppgifterna innan du väljer betalningssätt.</p>
+        <p class="section-subtitle" id="bookingIntroSubtitle">Kontrollera uppgifterna i din bokning.</p>
 
         <div class="summary-box">
           <p><strong>Bokningen är mottagen</strong></p>
-          <p id="bookingSummaryText">Din tid är nu reserverad som väntande medan du väljer betalningssätt.</p>
+          <p id="bookingSummaryText">Din tid är nu reserverad och betalningen sker efter att jobbet är klart.</p>
           <div class="summary-grid">
             <div class="summary-item">
               <strong>Namn</strong>
@@ -740,37 +740,37 @@
         <div class="next-step-box">
           <h3>Det här händer nu</h3>
           <ul>
-            <li id="nextStepChoiceText">Du väljer om du vill betala nu eller efter att fönsterputsen är slutförd.</li>
+            <li id="nextStepChoiceText">Vi utför fönsterputsen enligt bokningen och stämmer av om något behöver justeras.</li>
             <li>Vi får in bokningen direkt och hör av oss om något behöver stämmas av.</li>
-            <li id="nextStepInvoiceText">Om du väljer att betala senare kontaktar vi dig med betalningsinformation när fönsterputsen är klar.</li>
+            <li id="nextStepInvoiceText">När fönsterputsen är klar skickar vi betalningslänken via Stripe i klartmejlet.</li>
           </ul>
         </div>
 
       </section>
 
       <section class="card">
-        <h2 class="section-title">Betalningsval</h2>
-        <p class="section-subtitle">Välj det alternativ som passar dig bäst.</p>
+        <h2 class="section-title">Betalning</h2>
+        <p class="section-subtitle">Du betalar tryggt efter utförd fönsterputs.</p>
         <div class="payment-trust-row">
           <span class="trust-pill">Bokningen är mottagen</span>
           <span class="trust-pill">Trygg kortbetalning via Stripe</span>
-          <span class="trust-pill">Stripe-länk finns även i mejlet</span>
-          <span class="trust-pill">Du kan fortfarande betala efter putsning</span>
+          <span class="trust-pill">Stripe-länk skickas i klartmejlet</span>
+          <span class="trust-pill">Betala efter putsning</span>
         </div>
 
         <div class="option-stack">
           <div class="option-card primary recommended" id="stripePaymentCard" hidden>
-            <h3>Betala direkt via Stripe</h3>
+            <h3>Betala via Stripe</h3>
             <p>Betala tryggt med kort och de betalmetoder som är aktiverade i Stripe.</p>
-            <p>Samma betalningslänk skickas också i bekräftelsemejlet.</p>
+            <p>Den här länken används när du kommer hit från klartmejlet.</p>
             <a href="#" id="stripeCheckoutLink" class="btn btn-stripe">Betala säkert via Stripe</a>
             <p class="payment-note" id="stripePaymentNote">Stripe öppnas i en säker kassa.</p>
           </div>
 
           <div class="option-card primary">
-            <h3>Betala efter putsning</h3>
-            <p>Det här är det enklaste valet för de flesta. Vi putsar först och hör sedan av oss med betalningsinformation när jobbet är klart.</p>
-            <button type="button" id="payLaterButton" class="btn btn-ghost">Jag betalar efter putsning</button>
+            <h3>Betalning efter putsning</h3>
+            <p>Vi putsar först. När jobbet är klart skickar vi ett klartmejl med en säker Stripe-länk för kortbetalning.</p>
+            <button type="button" id="payLaterButton" class="btn btn-ghost">Jag förstår</button>
           </div>
         </div>
 
@@ -917,11 +917,11 @@
     }
 
     if (stripeStatus === 'cancelled') {
-      setStatus('Betalningen avbröts. Bokningen finns kvar och du kan använda betalningslänken i mejlet eller betala efter putsningen.', 'Betalning avbruten');
+      setStatus('Betalningen avbröts. Bokningen finns kvar och du kan använda Stripe-länken i klartmejlet igen.', 'Betalning avbruten');
     }
 
     payLaterButton.addEventListener('click', () => {
-      setStatus('Vi hör av oss när fönsterputsen är slutförd med information om betalning.', 'Bokning mottagen');
+      setStatus('Vi hör av oss när fönsterputsen är slutförd och skickar Stripe-länken i klartmejlet.', 'Bokning mottagen');
       statusBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
 

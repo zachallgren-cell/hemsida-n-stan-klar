@@ -1,24 +1,26 @@
 # Bokningsmail med Supabase
 
-Den här lösningen gör tre saker i samma steg:
+Den här lösningen gör bokning och betalning i två steg:
 
 1. sparar bokningen i tabellen `bookings`
 2. skickar ett mail till `info@bergafonsterputs.se`
-3. skapar en Stripe Checkout-länk när priset är ett fast belopp
+3. skapar en Stripe Checkout-länk först i klartflödet när jobbet markeras som slutfört
 
 ## Så fungerar det
 
 Bokningssidan kan anropa Edge Function:
 
 - `create-booking`
+- `complete-booking`
 - `stripe-webhook`
 
 Funktionen:
 
 - sparar bokningen med `SUPABASE_SERVICE_ROLE_KEY`
-- skapar en Stripe-produkt, Stripe-pris och Stripe Checkout-session
 - skickar bokningsmail via Resend
-- skickar samma Stripe Checkout-länk i kundens bekräftelsemail
+- skickar kundens första bekräftelsemail utan Stripe-länk
+- skapar Stripe-produkt, Stripe-pris och Stripe Checkout-session i `complete-booking`
+- skickar Stripe Checkout-länken i klartmailet när jobbet är utfört
 - markerar bokningen som `paid` när Stripe skickar `checkout.session.completed` till webhooken
 
 ## Nya kolumner för fönsterputs
@@ -109,6 +111,7 @@ När du har Supabase CLI installerat kan du deploya med:
 
 ```bash
 supabase functions deploy create-booking
+supabase functions deploy complete-booking
 supabase functions deploy stripe-webhook
 ```
 
@@ -130,8 +133,8 @@ När funktionen är deployad kommer varje ny bokning från hemsidan att:
 
 - sparas i Supabase
 - skicka ett bokningsmail till er mail
-- skapa Stripe Checkout-länk om priset är ett fast belopp
-- skicka Stripe-länken till kunden i bekräftelsemejlet
+- spara bokningen utan Stripe-länk i första bekräftelsemejlet
+- skapa Stripe-länken först när jobbet markeras som klart
 
 ## Adminsida
 

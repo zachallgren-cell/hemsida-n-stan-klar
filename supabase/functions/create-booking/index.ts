@@ -28,27 +28,6 @@ type BookingPayload = {
   consentAccepted?: boolean;
 };
 
-type StripeProduct = {
-  id: string;
-  default_price?: string | { id?: string };
-};
-
-type StripeCheckoutSession = {
-  id: string;
-  url?: string | null;
-  expires_at?: number | null;
-  payment_intent?: string | null;
-};
-
-type StripeCheckoutDetails = {
-  productId: string;
-  priceId: string;
-  sessionId: string;
-  paymentIntentId: string | null;
-  url: string;
-  expiresAt: string | null;
-};
-
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -70,113 +49,6 @@ function escapeHtml(value: string) {
 
 function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
-}
-
-function parsePriceToOre(value: number | string | undefined) {
-  if (typeof value === 'number') {
-    return Number.isFinite(value) && value > 0 ? Math.round(value * 100) : null;
-  }
-
-  const normalized = String(value || '').replace(/[^\d,.-]/g, '').replace(',', '.');
-  const parsed = Number(normalized);
-
-  return Number.isFinite(parsed) && parsed > 0 ? Math.round(parsed * 100) : null;
-}
-
-async function stripePost<T>(stripeSecretKey: string, path: string, params: URLSearchParams): Promise<T> {
-  const response = await fetch(`https://api.stripe.com${path}`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${stripeSecretKey}`,
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    body: params
-  });
-
-  const body = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    const errorMessage = body?.error?.message || `Stripe request failed with ${response.status}`;
-    throw new Error(errorMessage);
-  }
-
-  return body as T;
-}
-
-function buildPaymentReturnUrl(siteUrl: string, payload: BookingPayload, bookingId: number | string, stripeStatus: string) {
-  const params = new URLSearchParams({
-    bookingId: String(bookingId),
-    stripe: stripeStatus,
-    name: payload.name,
-    date: payload.date,
-    time: payload.time,
-    housingType: payload.housingType || payload.boatSize,
-    windowCount: payload.windowCount || '',
-    serviceScope: payload.serviceScope || '',
-    addons: payload.addons || '',
-    transportType: payload.transportType || 'Fastland',
-    seaMiles: payload.seaMiles || '',
-    coordinates: payload.coordinates || '',
-    price: String(payload.price || '')
-  });
-
-  return `${siteUrl}/betalning.html?${params.toString()}`;
-}
-
-async function createStripeCheckout(
-  stripeSecretKey: string,
-  siteUrl: string,
-  payload: BookingPayload,
-  bookingId: number | string
-): Promise<StripeCheckoutDetails | null> {
-  const unitAmount = parsePriceToOre(payload.price);
-
-  if (!unitAmount) {
-    return null;
-  }
-
-  const productParams = new URLSearchParams();
-  productParams.set('name', `Berga Fönsterputs - ${payload.date} ${payload.time}`);
-  productParams.set('default_price_data[currency]', 'sek');
-  productParams.set('default_price_data[unit_amount]', String(unitAmount));
-  productParams.set('metadata[booking_id]', String(bookingId));
-  productParams.set('metadata[service]', 'Fönsterputs');
-
-  const product = await stripePost<StripeProduct>(stripeSecretKey, '/v1/products', productParams);
-  const defaultPrice = typeof product.default_price === 'string'
-    ? product.default_price
-    : product.default_price?.id;
-
-  if (!defaultPrice) {
-    throw new Error('Stripe product saknar default_price.');
-  }
-
-  const sessionParams = new URLSearchParams();
-  sessionParams.set('line_items[0][price]', defaultPrice);
-  sessionParams.set('line_items[0][quantity]', '1');
-  sessionParams.set('mode', 'payment');
-  sessionParams.set('success_url', buildPaymentReturnUrl(siteUrl, payload, bookingId, 'success'));
-  sessionParams.set('cancel_url', buildPaymentReturnUrl(siteUrl, payload, bookingId, 'cancelled'));
-  sessionParams.set('client_reference_id', String(bookingId));
-  sessionParams.set('customer_email', payload.email.trim());
-  sessionParams.set('metadata[booking_id]', String(bookingId));
-  sessionParams.set('metadata[booking_date]', payload.date);
-  sessionParams.set('metadata[booking_time]', payload.time);
-
-  const session = await stripePost<StripeCheckoutSession>(stripeSecretKey, '/v1/checkout/sessions', sessionParams);
-
-  if (!session.url) {
-    throw new Error('Stripe Checkout-session saknar betalningslänk.');
-  }
-
-  return {
-    productId: product.id,
-    priceId: defaultPrice,
-    sessionId: session.id,
-    paymentIntentId: typeof session.payment_intent === 'string' ? session.payment_intent : null,
-    url: session.url,
-    expiresAt: session.expires_at ? new Date(session.expires_at * 1000).toISOString() : null
-  };
 }
 
 Deno.serve(async (req) => {
@@ -208,8 +80,6 @@ Deno.serve(async (req) => {
     const notificationEmail = Deno.env.get('BOOKING_NOTIFICATION_EMAIL');
     const fromEmail = Deno.env.get('BOOKING_FROM_EMAIL');
     const rutFormUrl = Deno.env.get('BOOKING_RUT_FORM_URL') || '';
-    const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY') || '';
-    const siteUrl = (Deno.env.get('PUBLIC_SITE_URL') || 'https://bergafonsterputs.se').replace(/\/+$/, '');
 
     if (!supabaseUrl || !serviceRoleKey) {
       console.error('Supabase secrets are missing', {
@@ -273,41 +143,6 @@ Deno.serve(async (req) => {
     }
 
     const [savedBooking] = await bookingRes.json();
-    let stripeCheckout: StripeCheckoutDetails | null = null;
-
-    if (stripeSecretKey && savedBooking?.id) {
-      try {
-        stripeCheckout = await createStripeCheckout(stripeSecretKey, siteUrl, payload, savedBooking.id);
-
-        if (stripeCheckout) {
-          const stripeUpdateRes = await fetch(`${supabaseUrl}/rest/v1/bookings?id=eq.${savedBooking.id}`, {
-            method: 'PATCH',
-            headers: {
-              apikey: serviceRoleKey,
-              Authorization: `Bearer ${serviceRoleKey}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              payment_provider: 'stripe',
-              stripe_product_id: stripeCheckout.productId,
-              stripe_price_id: stripeCheckout.priceId,
-              stripe_checkout_session_id: stripeCheckout.sessionId,
-              stripe_payment_intent_id: stripeCheckout.paymentIntentId,
-              stripe_payment_url: stripeCheckout.url,
-              stripe_checkout_expires_at: stripeCheckout.expiresAt
-            })
-          });
-
-          if (!stripeUpdateRes.ok) {
-            const stripeUpdateError = await stripeUpdateRes.text();
-            console.error('Stripe Checkout created but booking update failed', stripeUpdateError);
-          }
-        }
-      } catch (error) {
-        console.error('Stripe Checkout could not be created', error);
-      }
-    }
-
     const safeMessage = payload.message ? escapeHtml(payload.message).replaceAll('\n', '<br>') : 'Ingen extra information';
     const safeHousingType = payload.housingType ? escapeHtml(payload.housingType) : escapeHtml(payload.boatSize);
     const safePersonalNumber = payload.personalNumber ? escapeHtml(payload.personalNumber) : 'Ej angivet';
@@ -326,19 +161,6 @@ Deno.serve(async (req) => {
     const safeMapLink = payload.mapLink ? `<a href="${escapeHtml(payload.mapLink)}">${escapeHtml(payload.mapLink)}</a>` : 'Ej angivet';
     const safePrice = escapeHtml(String(payload.price || 'Ej angivet'));
     const safePriceDisplay = /^\d+$/.test(String(payload.price || '')) ? `${safePrice} kr` : safePrice;
-    const safeStripeCheckoutUrl = stripeCheckout?.url ? escapeHtml(stripeCheckout.url) : '';
-    const stripeAdminRow = safeStripeCheckoutUrl
-      ? `<tr><td style="padding: 8px 0; font-weight: 700;">Stripe Checkout</td><td style="padding: 8px 0;"><a href="${safeStripeCheckoutUrl}">${safeStripeCheckoutUrl}</a></td></tr>`
-      : '';
-    const stripeCustomerSection = safeStripeCheckoutUrl
-      ? `
-        <div style="margin-top: 20px; padding: 16px; border-radius: 12px; background: #f3fbff; border: 1px solid #bfddeb;">
-          <p style="margin: 0 0 12px;"><strong>Vill du betala direkt?</strong></p>
-          <p style="margin: 0 0 14px;">Du kan betala säkert via Stripe med kort och andra tillgängliga betalmetoder.</p>
-          <p style="margin: 0;"><a href="${safeStripeCheckoutUrl}" style="display:inline-block;padding:12px 18px;border-radius:999px;background:#0b6fa4;color:#ffffff;text-decoration:none;font-weight:800;">Betala säkert via Stripe</a></p>
-        </div>
-      `
-      : '';
     const safeRutFormUrl = rutFormUrl ? escapeHtml(rutFormUrl) : '';
     const rutFormSection = rawRutChoice.includes('Ja')
       ? `
@@ -384,7 +206,6 @@ Deno.serve(async (req) => {
           <tr><td style="padding: 8px 0; font-weight: 700;">Tillägg</td><td style="padding: 8px 0;">${safeAddons}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Google Maps</td><td style="padding: 8px 0;">${safeMapLink}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Pris</td><td style="padding: 8px 0;">${safePriceDisplay}</td></tr>
-          ${stripeAdminRow}
           <tr><td style="padding: 8px 0; font-weight: 700; vertical-align: top;">Meddelande</td><td style="padding: 8px 0;">${safeMessage}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Samtycke</td><td style="padding: 8px 0;">${payload.consentAccepted ? 'Ja' : 'Nej'}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Boknings-ID</td><td style="padding: 8px 0;">${escapeHtml(String(savedBooking?.id || 'okänt'))}</td></tr>
@@ -410,7 +231,6 @@ Deno.serve(async (req) => {
           <tr><td style="padding: 8px 0; font-weight: 700;">Tillägg</td><td style="padding: 8px 0;">${safeAddons}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Pris</td><td style="padding: 8px 0;">${safePriceDisplay}</td></tr>
         </table>
-        ${stripeCustomerSection}
         ${rutFormSection}
         <p style="margin-top: 20px;">Om du har frågor kan du svara på detta mail eller kontakta oss på <strong>${escapeHtml(notificationEmail)}</strong>.</p>
         <p>Med vänliga hälsningar,<br><strong>Berga Fönsterputs</strong></p>
@@ -443,9 +263,7 @@ Deno.serve(async (req) => {
       return jsonResponse({
         error: 'Booking saved but email failed',
         details: errorText,
-        bookingId: savedBooking?.id || null,
-        stripeCheckoutUrl: stripeCheckout?.url || null,
-        stripeCheckoutSessionId: stripeCheckout?.sessionId || null
+        bookingId: savedBooking?.id || null
       }, 502);
     }
 
@@ -483,9 +301,7 @@ Deno.serve(async (req) => {
     return jsonResponse({
       success: true,
       bookingId: savedBooking?.id || null,
-      customerEmailSent,
-      stripeCheckoutUrl: stripeCheckout?.url || null,
-      stripeCheckoutSessionId: stripeCheckout?.sessionId || null
+      customerEmailSent
     });
   } catch (error) {
     console.error('Unhandled create-booking error', error);
