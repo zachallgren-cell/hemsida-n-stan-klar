@@ -675,7 +675,8 @@
         white-space: nowrap;
       }
 
-      nav a:not(.is-active):not([href="index.html"]) {
+      nav a[href="index.html"],
+      nav a[href="index.html#kontakt"] {
         display: none;
       }
 

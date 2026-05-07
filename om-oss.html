@@ -964,46 +964,6 @@
       margin: 6px 0;
     }
 
-    .mobile-sticky-booking {
-      position: fixed;
-      left: 12px;
-      right: 12px;
-      bottom: calc(12px + env(safe-area-inset-bottom));
-      z-index: 35;
-      align-items: center;
-      gap: 10px;
-      padding: 10px;
-      border-radius: 18px;
-      background: rgba(255,255,255,0.96);
-      border: 1px solid rgba(198,223,236,0.95);
-      box-shadow: 0 18px 38px rgba(4,25,36,0.2);
-      backdrop-filter: blur(14px);
-    }
-
-    .mobile-sticky-booking a {
-      min-height: 48px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 12px;
-      font-weight: 900;
-      text-align: center;
-    }
-
-    .mobile-sticky-primary {
-      flex: 1;
-      background: linear-gradient(to right, var(--cta), var(--cta-dark));
-      color: #173042;
-      box-shadow: 0 10px 20px rgba(241,153,45,0.24);
-    }
-
-    .mobile-sticky-secondary {
-      width: 88px;
-      border: 1px solid var(--border);
-      color: var(--primary-dark);
-      background: #ffffff;
-    }
-
     .footer-links {
       display: flex;
       flex-wrap: wrap;
@@ -1098,10 +1058,6 @@
     }
 
     @media (max-width: 720px) {
-      body {
-        padding-bottom: calc(86px + env(safe-area-inset-bottom));
-      }
-
       .container {
         width: min(100% - 28px, var(--max-width));
       }
@@ -1169,7 +1125,8 @@
         white-space: nowrap;
       }
 
-      nav a:not(.is-active):not([href="index.html#bokning"]):not([href="index.html#kontakt"]) {
+      nav a[href="index.html"],
+      nav a[href="index.html#kontakt"] {
         display: none;
       }
 
@@ -1338,9 +1295,6 @@
         border-radius: 14px;
       }
 
-      .mobile-sticky-booking.mobile-only {
-        display: flex;
-      }
     }
   </style>
 </head>
@@ -1385,10 +1339,6 @@
     </div>
   </header>
   <button type="button" class="topbar-show-button" id="topbarShowButton">Visa meny</button>
-  <div class="mobile-sticky-booking mobile-only" aria-label="Snabbval för mobil">
-    <a href="index.html#bokning" class="mobile-sticky-primary">Boka tid</a>
-    <a href="tel:+46733881216" class="mobile-sticky-secondary">Ring</a>
-  </div>
 
   <main class="container">
     <section class="card reveal">
