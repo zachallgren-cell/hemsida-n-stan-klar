@@ -69,7 +69,7 @@
       --success: #127c56;
       --shadow: 0 16px 38px rgba(11, 111, 164, 0.14);
       --radius: 22px;
-      --max-width: 1120px;
+      --max-width: 1240px;
     }
 
     * {
@@ -1583,6 +1583,140 @@
 
     footer p {
       margin: 6px 0;
+    }
+
+    @media (min-width: 1100px) {
+      .container {
+        width: min(90%, var(--max-width));
+      }
+
+      .topbar {
+        width: min(90%, var(--max-width));
+        flex-wrap: nowrap;
+        gap: 18px;
+        padding: 10px 14px;
+        border-radius: 24px;
+      }
+
+      .brand {
+        width: auto;
+        height: 78px;
+        max-width: 330px;
+        justify-content: flex-start;
+        gap: 12px;
+        padding: 7px 16px 7px 7px;
+        border-radius: 20px;
+      }
+
+      .brand img {
+        width: 68px;
+        height: 68px;
+        border-radius: 16px;
+        flex-shrink: 0;
+      }
+
+      .brand-text {
+        display: flex;
+      }
+
+      .brand-title,
+      .brand-tagline {
+        color: var(--text);
+      }
+
+      .brand-tagline {
+        font-size: 0.72rem;
+      }
+
+      .topbar-actions {
+        flex: 1;
+        min-width: 0;
+        justify-content: flex-end;
+      }
+
+      nav {
+        flex-wrap: nowrap;
+      }
+
+      nav a {
+        white-space: nowrap;
+      }
+
+      body.topbar-compact .brand {
+        width: auto;
+        height: 62px;
+        padding: 5px 14px 5px 5px;
+        border-radius: 18px;
+      }
+
+      body.topbar-compact .brand img {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+      }
+
+      .hero {
+        grid-template-columns: minmax(0, 1.1fr) minmax(360px, 0.9fr);
+        gap: 44px;
+        margin-top: 150px;
+      }
+
+      .hero h1 {
+        font-size: clamp(3.4rem, 5vw, 5.3rem);
+        max-width: 850px;
+      }
+
+      .hero p {
+        font-size: 1.15rem;
+        max-width: 660px;
+      }
+
+      .hero-card {
+        padding: 32px;
+      }
+
+      .hero-facts {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        max-width: 620px;
+      }
+
+      .grid-2,
+      .feature-grid,
+      .faq-grid,
+      .service-area,
+      .area-link-grid {
+        gap: 28px;
+      }
+
+      .section {
+        margin-bottom: 34px;
+      }
+
+      .card,
+      .booking-card {
+        padding: 34px;
+      }
+
+      .gallery-card img {
+        height: 430px;
+      }
+
+      .compare-stage {
+        height: 500px;
+      }
+
+      #bokning .calendar-card {
+        max-width: 920px;
+        padding: 32px;
+      }
+
+      .calendar-day {
+        min-height: 64px;
+      }
+
+      .time-slots {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
     }
 
     @media (max-width: 900px) {
