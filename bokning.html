@@ -270,6 +270,14 @@
       display: none !important;
     }
 
+    .booking-trap {
+      position: absolute;
+      left: -10000px;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+
     label {
       display: block;
       margin-bottom: 6px;
@@ -840,6 +848,11 @@
         <form id="bookingForm">
           <input type="hidden" id="date" required>
           <input type="hidden" id="time" required>
+          <input type="hidden" id="formStartedAt">
+          <div class="booking-trap" aria-hidden="true">
+            <label for="website">Webbplats</label>
+            <input type="text" id="website" tabindex="-1" autocomplete="off">
+          </div>
 
           <div class="form-row">
             <div>
@@ -1059,6 +1072,8 @@
     const timeInput = document.getElementById('time');
     const selectedBookingText = document.getElementById('selectedBookingText');
     const bookingStatus = document.getElementById('bookingStatus');
+    const formStartedAtInput = document.getElementById('formStartedAt');
+    const websiteInput = document.getElementById('website');
     const housingTypeInput = document.getElementById('boatSize');
     const windowCountInput = document.getElementById('windowCount');
     const windowCountDecreaseButton = document.getElementById('windowCountDecrease');
@@ -1077,7 +1092,6 @@
 
     const SUPABASE_URL = 'https://xeyippgcoqfskcmqzazx.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_MUKxAwv0vNXDrcgumq81fQ_Uvx4eOuq';
-    const SUPABASE_TABLE = 'bookings';
     const BOOKING_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/create-booking`;
     const todayDate = new Date();
     todayDate.setHours(12, 0, 0, 0);
@@ -1312,8 +1326,6 @@
         boatSize: booking.housingType,
         housing_type: booking.housingType,
         housingType: booking.housingType,
-        personal_number: null,
-        personalNumber: null,
         rut_choice: booking.rutChoice,
         rutChoice: booking.rutChoice,
         window_count: booking.windowCount,
@@ -1331,60 +1343,14 @@
         date: booking.date,
         booking_time: booking.time,
         time: booking.time,
-        service: 'Fönsterputs',
-        address: booking.location,
         location: booking.location,
         consent_accepted: booking.consentAccepted,
         consentAccepted: booking.consentAccepted,
         message: booking.fullMessage || null,
-        price: booking.price
+        price: booking.price,
+        formStartedAt: formStartedAtInput?.value || '',
+        website: websiteInput?.value || ''
       };
-    }
-
-    function buildTablePayload(booking) {
-      return {
-        customer_name: booking.name,
-        email: booking.email,
-        phone: booking.phone,
-        house_size: booking.housingType,
-        housing_type: booking.housingType,
-        personal_number: null,
-        window_count: booking.windowCount,
-        service_scope: booking.serviceScope,
-        transport_type: booking.transportType,
-        sea_miles: booking.seaMiles || null,
-        coordinates: booking.coordinates || null,
-        addons: booking.addons || null,
-        booking_date: booking.date,
-        booking_time: booking.time,
-        service: 'Fönsterputs',
-        address: booking.location,
-        location: booking.location,
-        consent_accepted: booking.consentAccepted,
-        message: booking.fullMessage || null,
-        price: String(booking.price),
-        status: 'pending',
-        payment_status: 'unpaid'
-      };
-    }
-
-    async function createBookingViaTable(booking) {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}?select=id`, {
-        method: 'POST',
-        headers: {
-          ...getHeaders(),
-          Prefer: 'return=representation'
-        },
-        body: JSON.stringify(buildTablePayload(booking))
-      });
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(`Kunde inte spara bokningen. ${errorText}`);
-      }
-
-      const [savedBooking] = await res.json();
-      return { bookingId: savedBooking?.id || null };
     }
 
     async function createBooking(booking) {
@@ -1401,11 +1367,11 @@
           return responseBody;
         }
 
-        return createBookingViaTable(booking);
+        throw new Error(responseBody?.details || responseBody?.error || 'Kunde inte spara bokningen.');
       }
 
       if (responseBody?.error) {
-        return createBookingViaTable(booking);
+        throw new Error(responseBody.details || responseBody.error);
       }
 
       return responseBody;
@@ -1530,6 +1496,10 @@
           params.set('bookingId', String(createdBooking.bookingId));
         }
 
+        if (createdBooking?.stripeCheckoutUrl) {
+          params.set('stripeCheckoutUrl', createdBooking.stripeCheckoutUrl);
+        }
+
         window.location.href = `betalning.html?${params.toString()}`;
       } catch (error) {
         console.error('Bokningsfel:', error);
@@ -1538,6 +1508,7 @@
     });
 
     applySelectedTime();
+    formStartedAtInput.value = String(Date.now());
     updateTransportFields();
     setWindowCountValue(0);
     updateLivePrice();

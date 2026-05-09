@@ -635,7 +635,7 @@
         return `${directText} kr`;
       }
 
-      const housingType = booking.housing_type || booking.house_size || '';
+      const housingType = booking.housing_type || '';
       const windowCount = parseWindowCount(booking.window_count);
       const basePrice = getBasePrice(housingType, windowCount);
 
@@ -664,7 +664,7 @@
 
       bookingsList.innerHTML = bookings.map((booking) => {
         const packageParts = [
-          booking.housing_type || booking.house_size,
+          booking.housing_type,
           booking.window_count,
           booking.service_scope,
           booking.addons,
@@ -692,9 +692,9 @@
             <div class="booking-grid">
               <div class="detail"><strong>Datum</strong><span>${escapeHtml(formatDate(booking.booking_date))}</span></div>
               <div class="detail"><strong>Tid</strong><span>${escapeHtml(booking.booking_time || 'Ej valt')}</span></div>
-              <div class="detail"><strong>Adress</strong><span>${escapeHtml(booking.address || booking.location || 'Ej angiven')}</span></div>
+              <div class="detail"><strong>Adress</strong><span>${escapeHtml(booking.address || 'Ej angiven')}</span></div>
               <div class="detail"><strong>Pris</strong><span>${escapeHtml(getBookingPriceDisplay(booking))}</span></div>
-              ${booking.stripe_payment_url ? `<div class="detail"><strong>Stripe</strong><span><a href="${escapeHtml(booking.stripe_payment_url)}" target="_blank" rel="noopener noreferrer">Öppna betalningslänk</a></span></div>` : ''}
+              <div class="detail"><strong>Stripe</strong><span>${booking.stripe_payment_url ? `<a href="${escapeHtml(booking.stripe_payment_url)}" target="_blank" rel="noopener noreferrer">Öppna betalningslänk</a>` : 'Länk skapas på betalningssidan eller när klartmail skickas.'}</span></div>
               <div class="detail"><strong>Paket</strong><span>${packageParts.length ? escapeHtml(packageParts.join(' • ')) : 'Ej angivet'}</span></div>
               <div class="detail"><strong>Övrig information</strong><span>${escapeHtml(booking.message || 'Ingen extra information')}</span></div>
             </div>

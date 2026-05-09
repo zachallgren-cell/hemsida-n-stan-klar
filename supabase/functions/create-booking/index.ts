@@ -9,7 +9,6 @@ type BookingPayload = {
   phone: string;
   boatSize: string;
   housingType?: string;
-  personalNumber?: string;
   rutChoice?: string;
   rut_choice?: string;
   windowCount?: string;
@@ -22,10 +21,32 @@ type BookingPayload = {
   date: string;
   time: string;
   location: string;
-  mapLink?: string;
   message?: string;
   price?: number | string;
   consentAccepted?: boolean;
+  formStartedAt?: string;
+  website?: string;
+};
+
+type StripeProduct = {
+  id: string;
+  default_price?: string | { id?: string };
+};
+
+type StripeCheckoutSession = {
+  id: string;
+  url?: string | null;
+  expires_at?: number | null;
+  payment_intent?: string | null;
+};
+
+type StripeCheckoutDetails = {
+  productId: string;
+  priceId: string;
+  sessionId: string;
+  paymentIntentId: string | null;
+  url: string;
+  expiresAt: string | null;
 };
 
 function jsonResponse(body: unknown, status = 200) {
@@ -51,6 +72,168 @@ function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 }
 
+function normalizePhone(value: string) {
+  return value.replace(/[^\d+]/g, '');
+}
+
+function isSuspiciouslyFastSubmission(startedAt: string | undefined) {
+  const startedTime = Number(startedAt || 0);
+  return Number.isFinite(startedTime) && startedTime > 0 && Date.now() - startedTime < 1200;
+}
+
+function parsePriceToOre(value: number | string | undefined) {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) && value > 0 ? Math.round(value * 100) : null;
+  }
+
+  const rawValue = String(value || '').trim();
+  if (!rawValue || /offert|kontakta/i.test(rawValue)) {
+    return null;
+  }
+
+  let normalized = rawValue.replace(/\s/g, '').replace(/[^\d,.-]/g, '');
+
+  if (normalized.includes(',') && normalized.includes('.')) {
+    normalized = normalized.replaceAll('.', '').replace(',', '.');
+  } else if (/^\d{1,3}(\.\d{3})+$/.test(normalized)) {
+    normalized = normalized.replaceAll('.', '');
+  } else {
+    normalized = normalized.replace(',', '.');
+  }
+
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.round(parsed * 100) : null;
+}
+
+async function stripePost<T>(stripeSecretKey: string, path: string, params: URLSearchParams): Promise<T> {
+  const response = await fetch(`https://api.stripe.com${path}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${stripeSecretKey}`,
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: params
+  });
+
+  const body = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    const errorMessage = body?.error?.message || `Stripe request failed with ${response.status}`;
+    throw new Error(errorMessage);
+  }
+
+  return body as T;
+}
+
+function buildPaymentReturnUrl(siteUrl: string, booking: Record<string, unknown>, stripeStatus: string) {
+  const params = new URLSearchParams({
+    bookingId: String(booking.id || ''),
+    stripe: stripeStatus,
+    name: String(booking.customer_name || ''),
+    date: String(booking.booking_date || ''),
+    time: String(booking.booking_time || ''),
+    housingType: String(booking.housing_type || ''),
+    windowCount: String(booking.window_count || ''),
+    serviceScope: String(booking.service_scope || ''),
+    addons: String(booking.addons || ''),
+    transportType: String(booking.transport_type || 'Fastland'),
+    seaMiles: String(booking.sea_miles || ''),
+    coordinates: String(booking.coordinates || ''),
+    price: String(booking.price || '')
+  });
+
+  return `${siteUrl}/betalning.html?${params.toString()}`;
+}
+
+async function createStripeCheckout(
+  stripeSecretKey: string,
+  siteUrl: string,
+  booking: Record<string, unknown>
+): Promise<StripeCheckoutDetails | null> {
+  const unitAmount = parsePriceToOre(booking.price as number | string | undefined);
+
+  if (!unitAmount) {
+    return null;
+  }
+
+  const productParams = new URLSearchParams();
+  productParams.set('name', `Berga Fönsterputs - ${String(booking.booking_date || '')} ${String(booking.booking_time || '')}`);
+  productParams.set('default_price_data[currency]', 'sek');
+  productParams.set('default_price_data[unit_amount]', String(unitAmount));
+  productParams.set('metadata[booking_id]', String(booking.id || ''));
+  productParams.set('metadata[service]', 'Fönsterputs');
+
+  const product = await stripePost<StripeProduct>(stripeSecretKey, '/v1/products', productParams);
+  const defaultPrice = typeof product.default_price === 'string'
+    ? product.default_price
+    : product.default_price?.id;
+
+  if (!defaultPrice) {
+    throw new Error('Stripe product saknar default_price.');
+  }
+
+  const sessionParams = new URLSearchParams();
+  sessionParams.set('line_items[0][price]', defaultPrice);
+  sessionParams.set('line_items[0][quantity]', '1');
+  sessionParams.set('mode', 'payment');
+  sessionParams.set('success_url', buildPaymentReturnUrl(siteUrl, booking, 'success'));
+  sessionParams.set('cancel_url', buildPaymentReturnUrl(siteUrl, booking, 'cancelled'));
+  sessionParams.set('client_reference_id', String(booking.id || ''));
+  sessionParams.set('metadata[booking_id]', String(booking.id || ''));
+  sessionParams.set('metadata[booking_date]', String(booking.booking_date || ''));
+  sessionParams.set('metadata[booking_time]', String(booking.booking_time || ''));
+
+  if (isValidEmail(String(booking.email || ''))) {
+    sessionParams.set('customer_email', String(booking.email).trim());
+  }
+
+  const session = await stripePost<StripeCheckoutSession>(stripeSecretKey, '/v1/checkout/sessions', sessionParams);
+
+  if (!session.url) {
+    throw new Error('Stripe Checkout-session saknar betalningslänk.');
+  }
+
+  return {
+    productId: product.id,
+    priceId: defaultPrice,
+    sessionId: session.id,
+    paymentIntentId: typeof session.payment_intent === 'string' ? session.payment_intent : null,
+    url: session.url,
+    expiresAt: session.expires_at ? new Date(session.expires_at * 1000).toISOString() : null
+  };
+}
+
+async function saveStripeCheckoutOnBooking(
+  supabaseUrl: string,
+  serviceRoleKey: string,
+  bookingId: number | string,
+  stripeCheckout: StripeCheckoutDetails
+) {
+  const updateRes = await fetch(`${supabaseUrl}/rest/v1/bookings?id=eq.${bookingId}`, {
+    method: 'PATCH',
+    headers: {
+      apikey: serviceRoleKey,
+      Authorization: `Bearer ${serviceRoleKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      payment_provider: 'stripe',
+      payment_method: 'Stripe Checkout',
+      stripe_product_id: stripeCheckout.productId,
+      stripe_price_id: stripeCheckout.priceId,
+      stripe_checkout_session_id: stripeCheckout.sessionId,
+      stripe_payment_intent_id: stripeCheckout.paymentIntentId,
+      stripe_payment_url: stripeCheckout.url,
+      stripe_checkout_expires_at: stripeCheckout.expiresAt
+    })
+  });
+
+  if (!updateRes.ok) {
+    const errorText = await updateRes.text();
+    throw new Error(errorText || 'Could not save Stripe checkout on booking');
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -62,24 +245,30 @@ Deno.serve(async (req) => {
 
   try {
     const payload = (await req.json()) as BookingPayload;
-    console.log('create-booking invoked', {
-      name: payload.name,
-      email: payload.email,
-      date: payload.date,
-      time: payload.time
-    });
 
     if (!payload.name || !payload.email || !payload.phone || !payload.boatSize || !payload.date || !payload.time || !payload.location) {
-      console.error('Missing required booking fields', payload);
       return jsonResponse({ error: 'Missing required booking fields' }, 400);
+    }
+
+    if (payload.website || isSuspiciouslyFastSubmission(payload.formStartedAt)) {
+      return jsonResponse({
+        success: true,
+        bookingId: null,
+        customerEmailSent: false,
+        stripeCheckoutUrl: null,
+        stripeCheckoutSessionId: null
+      });
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
-    const notificationEmail = Deno.env.get('BOOKING_NOTIFICATION_EMAIL');
+    const notificationEmail = Deno.env.get('BOOKING_NOTIFICATION_EMAIL') || 'bokning@bergafonsterputs.se';
+    const contactEmail = Deno.env.get('BOOKING_CONTACT_EMAIL') || 'info@bergafonsterputs.se';
     const fromEmail = Deno.env.get('BOOKING_FROM_EMAIL');
     const rutFormUrl = Deno.env.get('BOOKING_RUT_FORM_URL') || '';
+    const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY') || '';
+    const siteUrl = (Deno.env.get('PUBLIC_SITE_URL') || 'https://bergafonsterputs.se').replace(/\/+$/, '');
 
     if (!supabaseUrl || !serviceRoleKey) {
       console.error('Supabase secrets are missing', {
@@ -89,22 +278,71 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'Supabase secrets are missing' }, 500);
     }
 
-    if (!resendApiKey || !notificationEmail || !fromEmail) {
+    if (!resendApiKey || !fromEmail) {
       console.error('Email secrets are missing', {
         hasResendApiKey: Boolean(resendApiKey),
-        hasNotificationEmail: Boolean(notificationEmail),
-        hasFromEmail: Boolean(fromEmail)
+        hasFromEmail: Boolean(fromEmail),
+        notificationEmail,
+        contactEmail
       });
       return jsonResponse({ error: 'Email secrets are missing' }, 500);
+    }
+
+    const existingBookingRes = await fetch(
+      `${supabaseUrl}/rest/v1/bookings?select=id&booking_date=eq.${encodeURIComponent(payload.date)}&booking_time=eq.${encodeURIComponent(payload.time)}&status=in.(pending,confirmed)&limit=1`,
+      {
+        headers: {
+          apikey: serviceRoleKey,
+          Authorization: `Bearer ${serviceRoleKey}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    if (!existingBookingRes.ok) {
+      console.error('Could not check existing bookings', await existingBookingRes.text());
+      return jsonResponse({ error: 'Could not check booking availability' }, 500);
+    }
+
+    const existingBookings = await existingBookingRes.json();
+    if (Array.isArray(existingBookings) && existingBookings.length) {
+      return jsonResponse({ error: 'Den valda tiden är redan bokad. Välj en annan tid.' }, 409);
+    }
+
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const normalizedPhone = normalizePhone(payload.phone);
+    const rateLimitParts = [
+      `email=eq.${encodeURIComponent(payload.email.trim())}`,
+      normalizedPhone ? `phone=eq.${encodeURIComponent(normalizedPhone)}` : ''
+    ].filter(Boolean);
+
+    if (rateLimitParts.length) {
+      const rateLimitRes = await fetch(
+        `${supabaseUrl}/rest/v1/bookings?select=id&created_at=gte.${encodeURIComponent(oneHourAgo)}&or=(${rateLimitParts.join(',')})&limit=4`,
+        {
+          headers: {
+            apikey: serviceRoleKey,
+            Authorization: `Bearer ${serviceRoleKey}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (rateLimitRes.ok) {
+        const recentBookings = await rateLimitRes.json();
+        if (Array.isArray(recentBookings) && recentBookings.length >= 3) {
+          return jsonResponse({ error: 'För många bokningsförsök på kort tid. Testa igen lite senare eller kontakta oss.' }, 429);
+        }
+      } else {
+        console.error('Could not check booking rate limit', await rateLimitRes.text());
+      }
     }
 
     const bookingInsert = {
       customer_name: payload.name,
       email: payload.email,
-      phone: payload.phone,
-      house_size: payload.housingType || payload.boatSize,
+      phone: normalizedPhone || payload.phone,
       housing_type: payload.housingType || payload.boatSize,
-      personal_number: payload.personalNumber || null,
       window_count: payload.windowCount || null,
       service_scope: payload.serviceScope || null,
       payment_method: payload.paymentMethod || null,
@@ -114,10 +352,7 @@ Deno.serve(async (req) => {
       coordinates: payload.coordinates || null,
       booking_date: payload.date,
       booking_time: payload.time,
-      service: 'Fönsterputs',
       address: payload.location,
-      location: payload.location,
-      map_link: payload.mapLink || null,
       message: payload.message || null,
       price: payload.price ? String(payload.price) : null,
       consent_accepted: Boolean(payload.consentAccepted),
@@ -143,12 +378,42 @@ Deno.serve(async (req) => {
     }
 
     const [savedBooking] = await bookingRes.json();
+    let stripeCheckout: StripeCheckoutDetails | null = null;
+
+    if (stripeSecretKey && savedBooking?.id) {
+      const stripeBooking = {
+        id: savedBooking.id,
+        customer_name: payload.name,
+        email: payload.email,
+        booking_date: payload.date,
+        booking_time: payload.time,
+        housing_type: payload.housingType || payload.boatSize,
+        window_count: payload.windowCount || '',
+        service_scope: payload.serviceScope || '',
+        addons: payload.addons || '',
+        transport_type: payload.transportType || 'Fastland',
+        sea_miles: payload.seaMiles || '',
+        coordinates: payload.coordinates || '',
+        price: payload.price
+      };
+
+      try {
+        stripeCheckout = await createStripeCheckout(stripeSecretKey, siteUrl, stripeBooking);
+        if (stripeCheckout) {
+          try {
+            await saveStripeCheckoutOnBooking(supabaseUrl, serviceRoleKey, savedBooking.id, stripeCheckout);
+          } catch (saveStripeError) {
+            console.error('Stripe checkout created but could not be saved on booking', saveStripeError);
+          }
+        }
+      } catch (stripeError) {
+        console.error('Booking saved but Stripe checkout could not be created', stripeError);
+        stripeCheckout = null;
+      }
+    }
+
     const safeMessage = payload.message ? escapeHtml(payload.message).replaceAll('\n', '<br>') : 'Ingen extra information';
     const safeHousingType = payload.housingType ? escapeHtml(payload.housingType) : escapeHtml(payload.boatSize);
-    const safePersonalNumber = payload.personalNumber ? escapeHtml(payload.personalNumber) : 'Ej angivet';
-    const personalNumberRow = payload.personalNumber
-      ? `<tr><td style="padding: 8px 0; font-weight: 700;">Personnummer</td><td style="padding: 8px 0;">${safePersonalNumber}</td></tr>`
-      : '';
     const safeWindowCount = payload.windowCount ? escapeHtml(payload.windowCount) : 'Ej angivet';
     const safeServiceScope = payload.serviceScope ? escapeHtml(payload.serviceScope) : 'Ej angivet';
     const safePaymentMethod = payload.paymentMethod ? escapeHtml(payload.paymentMethod) : 'Ej angivet';
@@ -158,7 +423,6 @@ Deno.serve(async (req) => {
     const safeTransportType = payload.transportType ? escapeHtml(payload.transportType) : 'Fastland';
     const safeSeaMiles = payload.seaMiles ? escapeHtml(payload.seaMiles) : 'Ej angivet';
     const safeCoordinates = payload.coordinates ? escapeHtml(payload.coordinates) : 'Ej angivet';
-    const safeMapLink = payload.mapLink ? `<a href="${escapeHtml(payload.mapLink)}">${escapeHtml(payload.mapLink)}</a>` : 'Ej angivet';
     const safePrice = escapeHtml(String(payload.price || 'Ej angivet'));
     const safePriceDisplay = /^\d+$/.test(String(payload.price || '')) ? `${safePrice} kr` : safePrice;
     const safeRutFormUrl = rutFormUrl ? escapeHtml(rutFormUrl) : '';
@@ -195,7 +459,6 @@ Deno.serve(async (req) => {
           <tr><td style="padding: 8px 0; font-weight: 700;">Datum</td><td style="padding: 8px 0;">${escapeHtml(payload.date)}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Tid</td><td style="padding: 8px 0;">${escapeHtml(payload.time)}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Typ av bostad</td><td style="padding: 8px 0;">${safeHousingType}</td></tr>
-          ${personalNumberRow}
           <tr><td style="padding: 8px 0; font-weight: 700;">RUT-val</td><td style="padding: 8px 0;">${safeRutChoice}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Antal fönster / glaspartier</td><td style="padding: 8px 0;">${safeWindowCount}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Putsning</td><td style="padding: 8px 0;">${safeServiceScope}</td></tr>
@@ -204,7 +467,6 @@ Deno.serve(async (req) => {
           <tr><td style="padding: 8px 0; font-weight: 700;">Koordinater</td><td style="padding: 8px 0;">${safeCoordinates}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Betalningsmetod</td><td style="padding: 8px 0;">${safePaymentMethod}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Tillägg</td><td style="padding: 8px 0;">${safeAddons}</td></tr>
-          <tr><td style="padding: 8px 0; font-weight: 700;">Google Maps</td><td style="padding: 8px 0;">${safeMapLink}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Pris</td><td style="padding: 8px 0;">${safePriceDisplay}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700; vertical-align: top;">Meddelande</td><td style="padding: 8px 0;">${safeMessage}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Samtycke</td><td style="padding: 8px 0;">${payload.consentAccepted ? 'Ja' : 'Nej'}</td></tr>
@@ -232,7 +494,7 @@ Deno.serve(async (req) => {
           <tr><td style="padding: 8px 0; font-weight: 700;">Pris</td><td style="padding: 8px 0;">${safePriceDisplay}</td></tr>
         </table>
         ${rutFormSection}
-        <p style="margin-top: 20px;">Om du har frågor kan du svara på detta mail eller kontakta oss på <strong>${escapeHtml(notificationEmail)}</strong>.</p>
+        <p style="margin-top: 20px;">Om du har frågor kan du svara på detta mail eller kontakta oss på <strong>${escapeHtml(contactEmail)}</strong>.</p>
         <p>Med vänliga hälsningar,<br><strong>Berga Fönsterputs</strong></p>
       </div>
     `;
@@ -281,7 +543,7 @@ Deno.serve(async (req) => {
           to: [payload.email.trim()],
           subject: `Din bokning hos Berga Fönsterputs ${payload.date} ${payload.time}`,
           html: customerEmailHtml,
-          reply_to: notificationEmail
+          reply_to: contactEmail
         })
       });
 
@@ -293,15 +555,12 @@ Deno.serve(async (req) => {
       }
     }
 
-    console.log('Booking saved and email sent', {
-      bookingId: savedBooking?.id || null,
-      customerEmailSent
-    });
-
     return jsonResponse({
       success: true,
       bookingId: savedBooking?.id || null,
-      customerEmailSent
+      customerEmailSent,
+      stripeCheckoutUrl: stripeCheckout?.url || null,
+      stripeCheckoutSessionId: stripeCheckout?.sessionId || null
     });
   } catch (error) {
     console.error('Unhandled create-booking error', error);

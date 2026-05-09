@@ -2431,7 +2431,7 @@
 
     const SUPABASE_URL = 'https://xeyippgcoqfskcmqzazx.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_MUKxAwv0vNXDrcgumq81fQ_Uvx4eOuq';
-    const SUPABASE_TABLE = 'bookings';
+    const BOOKED_SLOTS_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/booked-slots`;
     const todayDate = new Date();
     todayDate.setHours(12, 0, 0, 0);
     const bookingYear = todayDate.getFullYear();
@@ -2460,7 +2460,7 @@
 
     async function fetchBookings() {
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}?select=booking_date,booking_time,status&status=in.(pending,confirmed)`, {
+        const res = await fetch(BOOKED_SLOTS_FUNCTION_URL, {
           headers: getHeaders()
         });
 
@@ -2470,7 +2470,7 @@
         }
 
         const data = await res.json();
-        bookingsCache = data.map((b) => ({ date: b.booking_date, time: b.booking_time }));
+        bookingsCache = Array.isArray(data?.bookings) ? data.bookings : [];
       } catch (error) {
         console.error(error);
         bookingsCache = [];

@@ -3,23 +3,27 @@
 Den här lösningen gör bokning och betalning i två steg:
 
 1. sparar bokningen i tabellen `bookings`
-2. skickar ett mail till `info@bergafonsterputs.se`
-3. skapar en Stripe Checkout-länk först i klartflödet när jobbet markeras som slutfört
+2. skickar ett bokningsmail till `bokning@bergafonsterputs.se`
+3. skapar en Stripe Checkout-länk för direktbetalning på betalningssidan när fast pris finns
+4. skickar en Stripe-länk i klartmailet när jobbet markeras som slutfört, och skapar en ny om den första har gått ut
 
 ## Så fungerar det
 
 Bokningssidan kan anropa Edge Function:
 
 - `create-booking`
+- `booked-slots`
 - `complete-booking`
 - `stripe-webhook`
 
 Funktionen:
 
 - sparar bokningen med `SUPABASE_SERVICE_ROLE_KEY`
+- visar bokade datum/tider publikt via `booked-slots` utan kunduppgifter
 - skickar bokningsmail via Resend
 - skickar kundens första bekräftelsemail utan Stripe-länk
-- skapar Stripe-produkt, Stripe-pris och Stripe Checkout-session i `complete-booking`
+- skapar Stripe-produkt, Stripe-pris och Stripe Checkout-session i `create-booking` när fast pris finns
+- återanvänder eller skapar ny Stripe Checkout-session i `complete-booking`
 - skickar Stripe Checkout-länken i klartmailet när jobbet är utfört
 - markerar bokningen som `paid` när Stripe skickar `checkout.session.completed` till webhooken
 
@@ -32,18 +36,23 @@ Kör först SQL-filen:
 Den lägger till dessa kolumner i `bookings`:
 
 - `address`
-- `personal_number`
 - `housing_type`
 - `window_count`
 - `service_scope`
 - `addons`
 - `payment_method`
-- `map_link`
 - `consent_accepted`
+
+Senare städas gamla dubbla kolumner bort med:
+
+- `supabase/migrations/20260509_drop_duplicate_booking_columns.sql`
+- `supabase/migrations/20260512_drop_unused_sensitive_booking_columns.sql`
+
+De behåller `housing_type` istället för `house_size`, `address` istället för `location`, tar bort gamla `wash_type` och `service`, och tar bort oanvända känsliga fält som `personal_number` och `map_link`.
 
 Kör sedan också:
 
-- `supabase/migrations/20260504_add_boat_transport_fields.sql`
+- `supabase/migrations/20260505_add_boat_transport_fields.sql`
 
 Den lägger till:
 
@@ -54,13 +63,16 @@ Den lägger till:
 För adminflödet, kör också:
 
 - `supabase/migrations/20260504_add_admin_fields_and_policies.sql`
+- `supabase/migrations/20260508_lock_down_booking_policies.sql`
+- `supabase/migrations/20260510_restrict_booking_admins.sql`
+- `supabase/migrations/20260511_move_admin_check_to_private_schema.sql`
 
 Den lägger till:
 
 - `price`
 - `completed_at`
 
-och policies så att inloggade admin-användare kan läsa och uppdatera bokningar.
+och policies så att bara användare i `admin_users` kan läsa, uppdatera och radera bokningar. Säkerhetsmigrationerna tar bort gamla publika policies och gör att en vanlig inloggad användare inte automatiskt blir admin.
 
 För Stripe-flödet, kör också:
 
@@ -82,7 +94,8 @@ Den lägger till:
 Lägg in dessa i Supabase Edge Functions secrets:
 
 - `RESEND_API_KEY`
-- `BOOKING_NOTIFICATION_EMAIL=info@bergafonsterputs.se`
+- `BOOKING_NOTIFICATION_EMAIL=bokning@bergafonsterputs.se`
+- `BOOKING_CONTACT_EMAIL=info@bergafonsterputs.se`
 - `BOOKING_FROM_EMAIL=Berga Fönsterputs <bokning@din-domän.se>`
 - `BOOKING_RUT_FORM_URL=https://...` om ni vill lägga RUT-formuläret direkt i kundens bekräftelsemejl
 - `PUBLIC_SITE_URL=https://bergafonsterputs.se`
@@ -90,6 +103,8 @@ Lägg in dessa i Supabase Edge Functions secrets:
 - `STRIPE_WEBHOOK_SECRET=whsec_...`
 
 ## Viktigt
+
+`BOOKING_NOTIFICATION_EMAIL` är adressen som får nya bokningar. `BOOKING_CONTACT_EMAIL` är adressen som visas för kunden och används som svara-till-adress i kundmailen.
 
 `BOOKING_FROM_EMAIL` måste vara en adress som Resend accepterar för ditt konto. I produktion är det normalt en verifierad domän hos Resend.
 
@@ -111,6 +126,7 @@ När du har Supabase CLI installerat kan du deploya med:
 
 ```bash
 supabase functions deploy create-booking
+supabase functions deploy booked-slots
 supabase functions deploy complete-booking
 supabase functions deploy stripe-webhook
 ```
@@ -119,7 +135,8 @@ Om du vill sätta secrets från terminalen:
 
 ```bash
 supabase secrets set RESEND_API_KEY=re_xxx
-supabase secrets set BOOKING_NOTIFICATION_EMAIL=info@bergafonsterputs.se
+supabase secrets set BOOKING_NOTIFICATION_EMAIL=bokning@bergafonsterputs.se
+supabase secrets set BOOKING_CONTACT_EMAIL=info@bergafonsterputs.se
 supabase secrets set BOOKING_FROM_EMAIL="Berga Fönsterputs <bokning@din-domän.se>"
 supabase secrets set BOOKING_RUT_FORM_URL="https://..."
 supabase secrets set PUBLIC_SITE_URL=https://bergafonsterputs.se
@@ -134,7 +151,8 @@ När funktionen är deployad kommer varje ny bokning från hemsidan att:
 - sparas i Supabase
 - skicka ett bokningsmail till er mail
 - spara bokningen utan Stripe-länk i första bekräftelsemejlet
-- skapa Stripe-länken först när jobbet markeras som klart
+- visa Stripe-betalning på betalningssidan om fast pris och Stripe-secret finns
+- skicka Stripe-länken i klartmailet när jobbet markeras som klart
 
 ## Adminsida
 

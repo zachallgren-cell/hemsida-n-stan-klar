@@ -1295,7 +1295,7 @@
   <script>
     const SUPABASE_URL = 'https://xeyippgcoqfskcmqzazx.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_MUKxAwv0vNXDrcgumq81fQ_Uvx4eOuq';
-    const SUPABASE_TABLE = 'bookings';
+    const BOOKED_SLOTS_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/booked-slots`;
     const topbarToggleButton = document.getElementById('topbarToggleButton');
     const topbarShowButton = document.getElementById('topbarShowButton');
     const availableSlots = document.getElementById('availableSlots');
@@ -1376,12 +1376,12 @@
     }
 
     async function fetchBookings() {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE}?select=booking_date,booking_time,status&status=in.(pending,confirmed)`, {
+      const res = await fetch(BOOKED_SLOTS_FUNCTION_URL, {
         headers: getHeaders()
       });
       if (!res.ok) return [];
       const data = await res.json();
-      return data.map((booking) => ({ date: booking.booking_date, time: booking.booking_time }));
+      return Array.isArray(data?.bookings) ? data.bookings : [];
     }
 
     function findNextSlots(bookings) {

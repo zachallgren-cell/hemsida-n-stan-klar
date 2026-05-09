@@ -3,5 +3,8 @@ project_id = "xeyippgcoqfskcmqzazx"
 [functions.create-booking]
 verify_jwt = false
 
+[functions.booked-slots]
+verify_jwt = false
+
 [functions.stripe-webhook]
 verify_jwt = false

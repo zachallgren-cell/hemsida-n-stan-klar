@@ -118,6 +118,10 @@ Deno.serve(async (req) => {
       return jsonResponse({ received: true, ignored: event.type });
     }
 
+    if (session?.payment_status !== 'paid') {
+      return jsonResponse({ received: true, ignored: `payment_status:${session?.payment_status || 'unknown'}` });
+    }
+
     const bookingId = session?.metadata?.booking_id || session?.client_reference_id;
 
     if (!bookingId) {

@@ -29,6 +29,13 @@ type StripeCheckoutDetails = {
   expiresAt: string | null;
 };
 
+type AdminCheckResult = {
+  ok: true;
+} | {
+  ok: false;
+  response: Response;
+};
+
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -57,7 +64,21 @@ function parsePriceToOre(value: number | string | undefined) {
     return Number.isFinite(value) && value > 0 ? Math.round(value * 100) : null;
   }
 
-  const normalized = String(value || '').replace(/[^\d,.-]/g, '').replace(',', '.');
+  const rawValue = String(value || '').trim();
+  if (!rawValue || /offert|kontakta/i.test(rawValue)) {
+    return null;
+  }
+
+  let normalized = rawValue.replace(/\s/g, '').replace(/[^\d,.-]/g, '');
+
+  if (normalized.includes(',') && normalized.includes('.')) {
+    normalized = normalized.replaceAll('.', '').replace(',', '.');
+  } else if (/^\d{1,3}(\.\d{3})+$/.test(normalized)) {
+    normalized = normalized.replaceAll('.', '');
+  } else {
+    normalized = normalized.replace(',', '.');
+  }
+
   const parsed = Number(normalized);
 
   return Number.isFinite(parsed) && parsed > 0 ? Math.round(parsed * 100) : null;
@@ -83,6 +104,53 @@ async function stripePost<T>(stripeSecretKey: string, path: string, params: URLS
   return body as T;
 }
 
+async function requireBookingAdmin(req: Request, supabaseUrl: string, serviceRoleKey: string): Promise<AdminCheckResult> {
+  const authHeader = req.headers.get('authorization') || '';
+
+  if (!authHeader.toLowerCase().startsWith('bearer ')) {
+    return { ok: false, response: jsonResponse({ error: 'Admin login is required' }, 401) };
+  }
+
+  const userRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
+    headers: {
+      apikey: serviceRoleKey,
+      Authorization: authHeader
+    }
+  });
+
+  if (!userRes.ok) {
+    return { ok: false, response: jsonResponse({ error: 'Admin session could not be verified' }, 401) };
+  }
+
+  const user = await userRes.json();
+  const userId = String(user?.id || '');
+
+  if (!userId) {
+    return { ok: false, response: jsonResponse({ error: 'Admin session is missing user id' }, 401) };
+  }
+
+  const adminRes = await fetch(`${supabaseUrl}/rest/v1/admin_users?select=user_id&user_id=eq.${encodeURIComponent(userId)}&limit=1`, {
+    headers: {
+      apikey: serviceRoleKey,
+      Authorization: `Bearer ${serviceRoleKey}`,
+      'Content-Type': 'application/json'
+    }
+  });
+
+  if (!adminRes.ok) {
+    console.error('Could not verify admin user', await adminRes.text());
+    return { ok: false, response: jsonResponse({ error: 'Admin permission could not be verified' }, 500) };
+  }
+
+  const [adminUser] = await adminRes.json();
+
+  if (!adminUser) {
+    return { ok: false, response: jsonResponse({ error: 'Admin permission is required' }, 403) };
+  }
+
+  return { ok: true };
+}
+
 function buildPaymentReturnUrl(siteUrl: string, booking: Record<string, unknown>, stripeStatus: string) {
   const params = new URLSearchParams({
     bookingId: String(booking.id || ''),
@@ -90,7 +158,7 @@ function buildPaymentReturnUrl(siteUrl: string, booking: Record<string, unknown>
     name: String(booking.customer_name || ''),
     date: String(booking.booking_date || ''),
     time: String(booking.booking_time || ''),
-    housingType: String(booking.housing_type || booking.house_size || ''),
+    housingType: String(booking.housing_type || ''),
     windowCount: String(booking.window_count || ''),
     serviceScope: String(booking.service_scope || ''),
     addons: String(booking.addons || ''),
@@ -101,6 +169,18 @@ function buildPaymentReturnUrl(siteUrl: string, booking: Record<string, unknown>
   });
 
   return `${siteUrl}/betalning.html?${params.toString()}`;
+}
+
+function hasUsableStripeCheckout(booking: Record<string, unknown>) {
+  const checkoutUrl = String(booking.stripe_payment_url || '');
+  const expiresAt = String(booking.stripe_checkout_expires_at || '');
+
+  if (!checkoutUrl || !expiresAt) {
+    return false;
+  }
+
+  const expiryTime = new Date(expiresAt).getTime();
+  return Number.isFinite(expiryTime) && expiryTime > Date.now() + 5 * 60 * 1000;
 }
 
 async function createStripeCheckout(
@@ -181,7 +261,7 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
-    const notificationEmail = Deno.env.get('BOOKING_NOTIFICATION_EMAIL');
+    const contactEmail = Deno.env.get('BOOKING_CONTACT_EMAIL') || 'info@bergafonsterputs.se';
     const fromEmail = Deno.env.get('BOOKING_FROM_EMAIL');
     const reviewUrl = Deno.env.get('BOOKING_REVIEW_URL') || '';
     const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY') || '';
@@ -191,7 +271,12 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'Supabase secrets are missing' }, 500);
     }
 
-    if (!resendApiKey || !notificationEmail || !fromEmail) {
+    const adminCheck = await requireBookingAdmin(req, supabaseUrl, serviceRoleKey);
+    if (!adminCheck.ok) {
+      return adminCheck.response;
+    }
+
+    if (!resendApiKey || !fromEmail) {
       return jsonResponse({ error: 'Email secrets are missing' }, 500);
     }
 
@@ -221,20 +306,25 @@ Deno.serve(async (req) => {
 
     const paymentMethod = payload.paymentMethod || booking.payment_method || 'Stripe Checkout';
     const completedAt = new Date().toISOString();
+    const isAlreadyPaid = String(booking.payment_status || '').toLowerCase() === 'paid' || Boolean(booking.stripe_paid_at);
     let stripePaymentUrl = '';
     let stripeCheckout: StripeCheckoutDetails | null = null;
 
-    if (paymentMethod !== 'Faktura via e-post') {
-      if (!stripeSecretKey) {
-        return jsonResponse({ error: 'Stripe secret is missing' }, 500);
-      }
+    if (paymentMethod !== 'Faktura via e-post' && !isAlreadyPaid) {
+      if (hasUsableStripeCheckout(booking)) {
+        stripePaymentUrl = String(booking.stripe_payment_url || '');
+      } else {
+        if (!stripeSecretKey) {
+          return jsonResponse({ error: 'Stripe secret is missing' }, 500);
+        }
 
-      stripeCheckout = await createStripeCheckout(stripeSecretKey, siteUrl, booking);
-      if (!stripeCheckout) {
-        return jsonResponse({ error: 'Stripe Checkout could not be created because booking price is not a fixed amount' }, 400);
-      }
+        stripeCheckout = await createStripeCheckout(stripeSecretKey, siteUrl, booking);
+        if (!stripeCheckout) {
+          return jsonResponse({ error: 'Stripe-länk kunde inte skapas eftersom bokningen saknar ett fast pris. Välj Faktura via e-post eller sätt ett fast pris på bokningen först.' }, 400);
+        }
 
-      stripePaymentUrl = stripeCheckout?.url || '';
+        stripePaymentUrl = stripeCheckout?.url || '';
+      }
     }
 
     const updateBody: Record<string, unknown> = {
@@ -273,6 +363,10 @@ Deno.serve(async (req) => {
       ? `
         <p>Vi skickar faktura via e-post inom 3-7 dagar.</p>
       `
+      : isAlreadyPaid
+        ? `
+          <p>Betalningen är redan mottagen via Stripe. Tack!</p>
+        `
       : stripePaymentUrl
         ? `
           <p>Du kan betala tryggt med kort via Stripe.</p>
@@ -292,7 +386,7 @@ Deno.serve(async (req) => {
       : '';
 
     const summaryParts = [
-      booking.housing_type || booking.house_size,
+      booking.housing_type,
       booking.window_count,
       booking.service_scope,
       booking.addons,
@@ -309,7 +403,7 @@ Deno.serve(async (req) => {
         <table style="border-collapse: collapse; width: 100%; max-width: 680px;">
           <tr><td style="padding: 8px 0; font-weight: 700;">Datum</td><td style="padding: 8px 0;">${escapeHtml(booking.booking_date || '')}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Tid</td><td style="padding: 8px 0;">${escapeHtml(booking.booking_time || '')}</td></tr>
-          <tr><td style="padding: 8px 0; font-weight: 700;">Adress</td><td style="padding: 8px 0;">${escapeHtml(booking.address || booking.location || '')}</td></tr>
+          <tr><td style="padding: 8px 0; font-weight: 700;">Adress</td><td style="padding: 8px 0;">${escapeHtml(booking.address || '')}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Paket</td><td style="padding: 8px 0;">${escapeHtml(summaryParts || 'Ej angivet')}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Pris</td><td style="padding: 8px 0;">${escapeHtml(String(booking.price || 'Ej angivet'))}</td></tr>
         </table>
@@ -317,7 +411,7 @@ Deno.serve(async (req) => {
           ${paymentInstructions}
         </div>
         ${reviewSection}
-        <p style="margin-top: 24px;">Om du har frågor kan du svara på detta mail eller kontakta oss på <strong>${escapeHtml(notificationEmail)}</strong>.</p>
+        <p style="margin-top: 24px;">Om du har frågor kan du svara på detta mail eller kontakta oss på <strong>${escapeHtml(contactEmail)}</strong>.</p>
         <p>Med vänliga hälsningar,<br><strong>Berga Fönsterputs</strong></p>
       </div>
     `;
@@ -333,7 +427,7 @@ Deno.serve(async (req) => {
         to: [booking.email.trim()],
         subject: `Fönsterputsningen är klar - ${booking.customer_name || 'Berga Fönsterputs'}`,
         html: emailHtml,
-        reply_to: notificationEmail
+        reply_to: contactEmail
       })
     });
 
@@ -348,7 +442,9 @@ Deno.serve(async (req) => {
     return jsonResponse({
       success: true,
       bookingId: booking.id,
-      paymentMethod
+      paymentMethod,
+      stripePaymentUrl: stripePaymentUrl || null,
+      paymentAlreadyPaid: isAlreadyPaid
     });
   } catch (error) {
     console.error('Unhandled complete-booking error', error);
