@@ -1118,6 +1118,50 @@
       margin-bottom: 22px;
     }
 
+    .calendar-progress {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin: 0 0 20px;
+    }
+
+    .calendar-progress-step {
+      display: grid;
+      grid-template-columns: 32px 1fr;
+      align-items: center;
+      gap: 10px;
+      min-height: 54px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid #c9e2ee;
+      background: rgba(255,255,255,0.74);
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .calendar-progress-step span {
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #e7f5fb;
+      color: var(--primary-dark);
+      font-weight: 900;
+    }
+
+    .calendar-progress-step.is-active {
+      border-color: rgba(11,111,164,0.32);
+      background: linear-gradient(to bottom, #ffffff, #eef9fd);
+      color: var(--primary-dark);
+      box-shadow: 0 10px 20px rgba(11,111,164,0.08);
+    }
+
+    .calendar-progress-step.is-active span {
+      background: linear-gradient(to right, var(--cta), var(--cta-dark));
+      color: #173042;
+    }
+
     .calendar-brand-copy {
       display: grid;
       gap: 4px;
@@ -1395,6 +1439,55 @@
       grid-template-columns: repeat(3, 1fr);
       gap: 12px;
       margin-bottom: 18px;
+    }
+
+    .booking-boost-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin: 0 0 18px;
+    }
+
+    .booking-boost-card {
+      position: relative;
+      overflow: hidden;
+      min-height: 104px;
+      padding: 17px 18px;
+      border-radius: 16px;
+      border: 1px solid rgba(198, 226, 238, 0.95);
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.98), rgba(240,249,253,0.96)),
+        radial-gradient(circle at 88% 16%, rgba(255,179,71,0.18), transparent 32%);
+      box-shadow: 0 12px 24px rgba(11, 111, 164, 0.08);
+    }
+
+    .booking-boost-card::after {
+      content: '';
+      position: absolute;
+      right: -34px;
+      bottom: -38px;
+      width: 92px;
+      height: 92px;
+      border-radius: 999px;
+      background: rgba(11, 111, 164, 0.08);
+    }
+
+    .booking-boost-card strong {
+      position: relative;
+      z-index: 1;
+      display: block;
+      color: var(--primary-dark);
+      font-size: 1.02rem;
+      margin-bottom: 6px;
+    }
+
+    .booking-boost-card span {
+      position: relative;
+      z-index: 1;
+      display: block;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.4;
     }
 
     .booking-intro-card {
@@ -1732,6 +1825,7 @@
       }
 
       .booking-intro,
+      .booking-boost-grid,
       .hero,
       .grid-2,
       .feature-grid,
@@ -1767,6 +1861,10 @@
 
       .calendar-card {
         padding: 20px;
+      }
+
+      .calendar-progress {
+        grid-template-columns: 1fr;
       }
 
       .calendar-brand {
@@ -2062,6 +2160,18 @@
         display: none;
       }
 
+      .booking-boost-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+
+      .booking-boost-card {
+        min-height: auto;
+        padding: 13px 14px;
+        border-radius: 14px;
+      }
+
       .booking-requirements {
         padding: 14px 15px;
         border-radius: 14px;
@@ -2085,6 +2195,24 @@
         align-items: center;
         gap: 12px;
         margin-bottom: 14px;
+      }
+
+      .calendar-progress {
+        gap: 7px;
+        margin-bottom: 14px;
+      }
+
+      .calendar-progress-step {
+        min-height: 46px;
+        grid-template-columns: 28px 1fr;
+        padding: 8px 10px;
+        border-radius: 12px;
+        font-size: 0.9rem;
+      }
+
+      .calendar-progress-step span {
+        width: 28px;
+        height: 28px;
       }
 
       .calendar-brand-copy h3 {
@@ -2429,6 +2557,21 @@
           <span>Välj datum, välj ledig tid och tryck på knappen för att fylla i formuläret.</span>
         </div>
 
+        <div class="booking-boost-grid">
+          <div class="booking-boost-card">
+            <strong>Det går snabbt</strong>
+            <span>Välj tid här, resten fyller du i på en separat enkel sida.</span>
+          </div>
+          <div class="booking-boost-card">
+            <strong>Priset följer med</strong>
+            <span>Livepriset uppdateras direkt när du väljer bostad och omfattning.</span>
+          </div>
+          <div class="booking-boost-card">
+            <strong>Betala efter jobbet</strong>
+            <span>Stripe-länken skickas tryggt när fönstren är putsade.</span>
+          </div>
+        </div>
+
         <div class="booking-intro">
           <div class="booking-intro-card">
             <strong>1. Välj tid</strong>
@@ -2467,6 +2610,12 @@
               </div>
             </div>
 
+            <div class="calendar-progress" aria-label="Bokningssteg">
+              <div class="calendar-progress-step is-active"><span>1</span>Välj datum</div>
+              <div class="calendar-progress-step"><span>2</span>Välj tid</div>
+              <div class="calendar-progress-step"><span>3</span>Se livepris</div>
+            </div>
+
             <div class="calendar-header">
               <button type="button" class="calendar-nav" id="prevMonth">←</button>
               <div class="calendar-title" id="calendarTitle">Laddar kalender...</div>
@@ -2493,7 +2642,7 @@
               </div>
             </div>
 
-            <button type="button" class="submit-btn" id="continueBookingButton" disabled>Gå vidare till formuläret</button>
+            <button type="button" class="submit-btn" id="continueBookingButton" disabled>Välj datum först</button>
             <p class="booking-note">Du kommer till en separat bokningssida där formulär, RUT-val och livepris finns.</p>
           </div>
 
@@ -2634,6 +2783,7 @@
         selectedDateBox.textContent = 'Inget datum valt ännu';
         if (continueBookingButton) {
           continueBookingButton.disabled = true;
+          continueBookingButton.textContent = 'Välj datum först';
         }
         return;
       }
@@ -2642,6 +2792,7 @@
         selectedDateBox.textContent = `Valt datum: ${formatDateForDisplay(selectedDate)}. Välj en ledig tid för att gå vidare till formuläret.`;
         if (continueBookingButton) {
           continueBookingButton.disabled = true;
+          continueBookingButton.textContent = 'Välj en ledig tid';
         }
         return;
       }
@@ -2649,6 +2800,7 @@
       selectedDateBox.textContent = `Vald tid: ${formatDateForDisplay(selectedDate)} kl. ${selectedTime}. Tryck på knappen nedan för att fylla i formuläret.`;
       if (continueBookingButton) {
         continueBookingButton.disabled = false;
+        continueBookingButton.textContent = 'Gå vidare och se livepris';
       }
     }
 
@@ -2961,6 +3113,15 @@
       revealItems.forEach((item) => revealObserver.observe(item));
     }
 
+    function revealItemsInViewport() {
+      revealItems.forEach((item) => {
+        const rect = item.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          item.classList.add('is-visible');
+        }
+      });
+    }
+
     if (faqItems.length) {
       faqItems.forEach((item) => {
         const question = item.querySelector('.faq-question');
@@ -3008,6 +3169,8 @@
       updateCompareSlider();
       updateTopbarToggleLabels();
       updateTopbarState();
+      requestAnimationFrame(revealItemsInViewport);
+      setTimeout(revealItemsInViewport, 300);
     })();
   </script>
 </body>

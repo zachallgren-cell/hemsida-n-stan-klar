@@ -206,10 +206,50 @@
       color: var(--muted);
     }
 
-    .live-price-box {
+    .booking-handoff {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 22px;
+      padding: 18px 20px;
+      border-radius: 18px;
+      border: 1px solid #c6dfec;
+      background:
+        linear-gradient(135deg, #ffffff, #f1f9fd),
+        radial-gradient(circle at 92% 18%, rgba(255,179,71,0.18), transparent 28%);
+      box-shadow: 0 12px 24px rgba(11,111,164,0.08);
+    }
+
+    .booking-handoff strong {
+      display: block;
+      color: var(--primary-dark);
+      font-size: 1.12rem;
+      margin-bottom: 4px;
+    }
+
+    .booking-handoff span {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .handoff-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: linear-gradient(to right, var(--cta), var(--cta-dark));
+      color: #173042;
+      font-weight: 900;
+      white-space: nowrap;
+      box-shadow: 0 12px 22px rgba(241,153,45,0.22);
+    }
+
+    .live-price-box {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
       gap: 16px;
       padding: 16px 18px;
       border-radius: 16px;
@@ -253,6 +293,76 @@
     form {
       display: grid;
       gap: 16px;
+    }
+
+    .form-progress {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      padding: 12px;
+      border-radius: 18px;
+      background: linear-gradient(to bottom, #f7fcff, #edf8fd);
+      border: 1px solid #c6dfec;
+    }
+
+    .form-progress-step {
+      display: grid;
+      gap: 3px;
+      padding: 13px 14px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid transparent;
+    }
+
+    .form-progress-step strong {
+      color: var(--primary-dark);
+      font-size: 0.96rem;
+    }
+
+    .form-progress-step small {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .form-progress-step.is-active {
+      border-color: rgba(11,111,164,0.24);
+      background: #ffffff;
+      box-shadow: 0 10px 20px rgba(11,111,164,0.08);
+    }
+
+    .form-section-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 4px;
+      padding: 13px 14px;
+      border-radius: 16px;
+      background: #f4fbff;
+      border: 1px solid #cfe4ee;
+    }
+
+    .form-section-label span {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(to right, var(--primary), var(--primary-dark));
+      color: #ffffff;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+
+    .form-section-label strong {
+      display: block;
+      color: var(--primary-dark);
+    }
+
+    .form-section-label small {
+      display: block;
+      color: var(--muted);
+      font-weight: 700;
+      margin-top: 2px;
     }
 
     .form-row {
@@ -590,6 +700,69 @@
       gap: 16px;
     }
 
+    .booking-progress-meter {
+      grid-column: 1 / -1;
+      display: grid;
+      gap: 8px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(177, 213, 230, 0.9);
+    }
+
+    .booking-progress-copy {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 800;
+    }
+
+    .booking-progress-copy strong {
+      color: var(--primary-dark);
+      white-space: nowrap;
+    }
+
+    .booking-progress-track {
+      overflow: hidden;
+      height: 10px;
+      border-radius: 999px;
+      background: #d9edf7;
+      border: 1px solid #bfddeb;
+    }
+
+    .booking-progress-fill {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(to right, var(--cta), var(--success));
+      transition: width 0.25s ease;
+    }
+
+    .booking-support-card {
+      display: grid;
+      gap: 10px;
+      padding: 17px 18px;
+      border-radius: 16px;
+      border: 1px solid #cfe4ee;
+      background: linear-gradient(to bottom, #ffffff, #f4fbff);
+    }
+
+    .booking-support-card strong {
+      color: var(--primary-dark);
+      font-size: 1.02rem;
+    }
+
+    .booking-support-card ul {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 0.92rem;
+    }
+
     footer {
       padding: 34px 0 42px;
       background: #12384c;
@@ -803,6 +976,19 @@
         margin-bottom: 14px;
       }
 
+      .booking-handoff {
+        display: grid;
+        gap: 12px;
+        padding: 14px;
+        border-radius: 14px;
+        margin-bottom: 16px;
+      }
+
+      .handoff-pill {
+        width: 100%;
+        border-radius: 14px;
+      }
+
       .booking-grid {
         display: flex;
         flex-direction: column;
@@ -815,14 +1001,40 @@
       }
 
       .live-price-box {
-        flex-wrap: wrap;
-        align-items: flex-start;
+        grid-template-columns: 1fr;
         padding: 14px;
         border-radius: 14px;
       }
 
+      .live-price-value {
+        align-items: flex-start;
+        text-align: left;
+      }
+
       .live-price-value strong {
         font-size: 1.55rem;
+      }
+
+      .form-progress {
+        grid-template-columns: 1fr;
+        padding: 10px;
+        border-radius: 14px;
+      }
+
+      .form-progress-step {
+        padding: 11px 12px;
+        border-radius: 12px;
+      }
+
+      .form-section-label {
+        align-items: flex-start;
+        padding: 12px;
+        border-radius: 14px;
+      }
+
+      .booking-progress-copy {
+        display: grid;
+        gap: 3px;
       }
 
       .booking-packages {
@@ -898,9 +1110,9 @@
       </div>
 
       <div class="hero">
-        <div class="hero-label">Bokningsformulär</div>
+        <div class="hero-label">Nästan bokat</div>
         <h1>Fyll i uppgifterna.</h1>
-        <p>Din valda tid följer med från kalendern. Här fyller du i kontaktuppgifter, omfattning, RUT-val och ser priset uppdateras live.</p>
+        <p>Din tid är vald. Nu guidar formuläret dig genom kontakt, omfattning och livepris så bokningen känns enkel hela vägen.</p>
       </div>
     </div>
   </header>
@@ -913,6 +1125,14 @@
         <a class="btn btn-secondary" href="index.html#bokning">Ändra datum eller tid</a>
       </div>
 
+      <div class="booking-handoff">
+        <div>
+          <strong>Du är igång. Bara några enkla val kvar.</strong>
+          <span>Fyll i kontaktuppgifter, välj hur jobbet ser ut och se priset uppdateras direkt.</span>
+        </div>
+        <div class="handoff-pill">Livepris direkt</div>
+      </div>
+
       <div class="booking-grid">
         <form id="bookingForm">
           <input type="hidden" id="date" required>
@@ -921,6 +1141,29 @@
           <div class="booking-trap" aria-hidden="true">
             <label for="website">Webbplats</label>
             <input type="text" id="website" tabindex="-1" autocomplete="off">
+          </div>
+
+          <div class="form-progress" aria-label="Bokningssteg">
+            <div class="form-progress-step is-active">
+              <strong>1. Kontakt</strong>
+              <small>Vem och var</small>
+            </div>
+            <div class="form-progress-step">
+              <strong>2. Jobbet</strong>
+              <small>Fönster och plats</small>
+            </div>
+            <div class="form-progress-step">
+              <strong>3. Skicka</strong>
+              <small>Klart på ett klick</small>
+            </div>
+          </div>
+
+          <div class="form-section-label">
+            <span>1</span>
+            <div>
+              <strong>Kontaktuppgifter</strong>
+              <small>Så vi kan bekräfta bokningen och hitta rätt.</small>
+            </div>
           </div>
 
           <div class="form-row">
@@ -942,6 +1185,14 @@
             <div>
               <label for="location">Adress där jobbet ska utföras</label>
               <input type="text" id="location" placeholder="Till exempel din adress i Åkersberga" required>
+            </div>
+          </div>
+
+          <div class="form-section-label">
+            <span>2</span>
+            <div>
+              <strong>Pris och upplägg</strong>
+              <small>Välj RUT, bostad, antal fönster och transport.</small>
             </div>
           </div>
 
@@ -1030,6 +1281,14 @@
             <p class="booking-note">Vid båttransport tillkommer resekostnad beroende på antal sjömil från Svinnige marina. Välj 16+ sjömil om du vill att vi räknar på jobbet via offert.</p>
           </div>
 
+          <div class="form-section-label">
+            <span>3</span>
+            <div>
+              <strong>Extra detaljer</strong>
+              <small>Lägg till sådant som gör jobbet smidigare på plats.</small>
+            </div>
+          </div>
+
           <div class="form-stack">
             <label>Välj tillval</label>
             <div class="addon-options">
@@ -1075,6 +1334,24 @@
               <strong id="livePriceValue">699 kr</strong>
               <span>efter RUT-avdrag</span>
             </div>
+            <div class="booking-progress-meter" aria-live="polite">
+              <div class="booking-progress-copy">
+                <strong id="bookingProgressLabel">Bokningen startad</strong>
+                <span id="bookingProgressText">Fyll i kontaktuppgifterna först.</span>
+              </div>
+              <div class="booking-progress-track" aria-hidden="true">
+                <div class="booking-progress-fill" id="bookingProgressBar"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="booking-support-card">
+            <strong>Det här gör bokningen enkel</strong>
+            <ul>
+              <li>Du ser priset innan du skickar.</li>
+              <li>RUT-uppgifter tas i säkert formulär efteråt.</li>
+              <li>Betalning sker tryggt via Stripe när jobbet är klart.</li>
+            </ul>
           </div>
 
           <div class="booking-packages" id="bookingPackages">
@@ -1158,6 +1435,10 @@
     const livePriceText = document.getElementById('livePriceText');
     const bookingPackages = document.getElementById('bookingPackages');
     const bookingPackagesToggle = document.getElementById('bookingPackagesToggle');
+    const bookingProgressBar = document.getElementById('bookingProgressBar');
+    const bookingProgressLabel = document.getElementById('bookingProgressLabel');
+    const bookingProgressText = document.getElementById('bookingProgressText');
+    const formProgressSteps = Array.from(document.querySelectorAll('.form-progress-step'));
 
     const SUPABASE_URL = 'https://xeyippgcoqfskcmqzazx.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_MUKxAwv0vNXDrcgumq81fQ_Uvx4eOuq';
@@ -1231,6 +1512,7 @@
       const safeValue = Math.max(0, Math.min(60, nextValue));
       windowCountInput.value = `${safeValue} fönster`;
       updateLivePrice();
+      updateBookingProgress();
     }
 
     function getHousingTypeLabel() {
@@ -1373,6 +1655,55 @@
       livePriceText.textContent = parts.join(' + ') + '.';
     }
 
+    function updateBookingProgress() {
+      const checks = [
+        Boolean(dateInput.value && timeInput.value),
+        Boolean(document.getElementById('name')?.value.trim()),
+        Boolean(document.getElementById('phone')?.value.trim()),
+        Boolean(document.getElementById('email')?.value.trim()),
+        Boolean(document.getElementById('location')?.value.trim()),
+        Boolean(rutChoiceInput?.value),
+        Boolean(getHousingTypeLabel()),
+        getWindowCountValue() > 0,
+        Boolean(document.getElementById('serviceScope')?.value),
+        Boolean(transportTypeInput?.value),
+        Boolean(document.getElementById('consent')?.checked)
+      ];
+
+      if (transportTypeInput?.value === 'Båttransport behövs') {
+        checks.push(Boolean(seaMilesInput?.value));
+        checks.push(Boolean(coordinatesInput?.value.trim()));
+      }
+
+      const completed = checks.filter(Boolean).length;
+      const percent = Math.round((completed / checks.length) * 100);
+
+      if (bookingProgressBar) {
+        bookingProgressBar.style.width = `${percent}%`;
+      }
+
+      formProgressSteps.forEach((step, index) => {
+        const threshold = index === 0 ? 0 : index === 1 ? 38 : 72;
+        step.classList.toggle('is-active', percent >= threshold);
+      });
+
+      if (!bookingProgressLabel || !bookingProgressText) return;
+
+      if (percent >= 100) {
+        bookingProgressLabel.textContent = 'Redo att boka';
+        bookingProgressText.textContent = 'Allt viktigt är ifyllt. Nu kan du skicka bokningen.';
+      } else if (percent >= 72) {
+        bookingProgressLabel.textContent = 'Nästan klart';
+        bookingProgressText.textContent = 'Bara sista detaljerna kvar innan du kan boka.';
+      } else if (percent >= 38) {
+        bookingProgressLabel.textContent = 'Bra fart';
+        bookingProgressText.textContent = 'Priset börjar bli tydligt. Fyll i resten så blir bokningen komplett.';
+      } else {
+        bookingProgressLabel.textContent = 'Bokningen startad';
+        bookingProgressText.textContent = 'Fyll i kontaktuppgifterna först.';
+      }
+    }
+
     function updateTransportFields() {
       const boatRequired = transportTypeInput?.value === 'Båttransport behövs';
       boatFields.hidden = !boatRequired;
@@ -1385,6 +1716,7 @@
       }
 
       updateLivePrice();
+      updateBookingProgress();
     }
 
     function buildFunctionPayload(booking) {
@@ -1453,6 +1785,8 @@
     addonSunroomInput.addEventListener('change', updateLivePrice);
     addonMuntinsInput.addEventListener('change', updateLivePrice);
     rutChoiceInput.addEventListener('change', updateLivePrice);
+    bookingForm.addEventListener('input', updateBookingProgress);
+    bookingForm.addEventListener('change', updateBookingProgress);
 
     windowCountDecreaseButton.addEventListener('click', () => {
       setWindowCountValue(getWindowCountValue() - 1);
@@ -1581,6 +1915,7 @@
     updateTransportFields();
     setWindowCountValue(0);
     updateLivePrice();
+    updateBookingProgress();
   </script>
 </body>
 </html>
