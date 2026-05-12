@@ -4,8 +4,8 @@ Den här lösningen gör bokning och betalning i två steg:
 
 1. sparar bokningen i tabellen `bookings`
 2. skickar ett bokningsmail till `bokning@bergafonsterputs.se`
-3. skapar en Stripe Checkout-länk för direktbetalning på betalningssidan när fast pris finns
-4. skickar en Stripe-länk i klartmailet när jobbet markeras som slutfört, och skapar en ny om den första har gått ut
+3. visar en tack-sida där kunden ser att betalning sker efter utfört jobb
+4. skickar en Stripe-länk i klartmailet när jobbet markeras som slutfört, och skapar en ny om den tidigare har gått ut
 
 ## Så fungerar det
 
@@ -22,8 +22,7 @@ Funktionen:
 - visar bokade datum/tider publikt via `booked-slots` utan kunduppgifter
 - skickar bokningsmail via Resend
 - skickar kundens första bekräftelsemail utan Stripe-länk
-- skapar Stripe-produkt, Stripe-pris och Stripe Checkout-session i `create-booking` när fast pris finns
-- återanvänder eller skapar ny Stripe Checkout-session i `complete-booking`
+- återanvänder eller skapar ny Stripe Checkout-session i `complete-booking` när jobbet markeras som klart
 - skickar Stripe Checkout-länken i klartmailet när jobbet är utfört
 - markerar bokningen som `paid` när Stripe skickar `checkout.session.completed` till webhooken
 
@@ -151,7 +150,7 @@ När funktionen är deployad kommer varje ny bokning från hemsidan att:
 - sparas i Supabase
 - skicka ett bokningsmail till er mail
 - spara bokningen utan Stripe-länk i första bekräftelsemejlet
-- visa Stripe-betalning på betalningssidan om fast pris och Stripe-secret finns
+- visa tack-sidan utan direktbetalning
 - skicka Stripe-länken i klartmailet när jobbet markeras som klart
 
 ## Adminsida

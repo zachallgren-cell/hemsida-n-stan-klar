@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Berga Fönsterputs | Betalning</title>
-  <meta name="description" content="Välj om du vill betala din bokning nu eller efter utförd fönsterputs." />
+  <title>Berga Fönsterputs | Tack för bokningen</title>
+  <meta name="description" content="Tack för din bokning hos Berga Fönsterputs. Betalning sker tryggt efter utförd fönsterputs." />
   <meta name="robots" content="noindex, nofollow" />
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
@@ -392,13 +392,9 @@
 
     .option-stack {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       gap: 16px;
       align-items: stretch;
-    }
-
-    .option-stack.is-single-column {
-      grid-template-columns: 1fr;
     }
 
     .option-card h3 {
@@ -408,10 +404,6 @@
     .option-card.primary {
       border: 2px solid rgba(11, 111, 164, 0.32);
       box-shadow: 0 14px 30px rgba(11, 111, 164, 0.1);
-    }
-
-    .option-card[hidden] {
-      display: none;
     }
 
     .option-card.recommended {
@@ -442,7 +434,6 @@
       margin: 0;
     }
 
-    .payment-note,
     .instruction-list {
       margin-top: 14px;
       padding: 14px 16px;
@@ -480,12 +471,6 @@
       background: linear-gradient(to right, var(--cta), var(--cta-dark));
       color: #173042;
       box-shadow: 0 18px 32px rgba(241, 153, 45, 0.24);
-    }
-
-    .btn-stripe {
-      background: linear-gradient(to right, #635bff, #0a2540);
-      color: #ffffff;
-      box-shadow: 0 18px 32px rgba(99, 91, 255, 0.22);
     }
 
     .btn-secondary {
@@ -695,8 +680,8 @@
       </div>
 
       <div class="hero">
-        <h1>Slutför din bokning</h1>
-        <p id="heroIntroText">Din bokning är registrerad. Om Stripe-knappen visas kan du betala direkt, annars skickar vi en trygg betalningslänk i klartmejlet när jobbet är utfört.</p>
+        <h1>Tack för din bokning</h1>
+        <p id="heroIntroText">Din bokning är registrerad. Vi putsar först och skickar en trygg betalningslänk i klartmejlet när jobbet är utfört.</p>
       </div>
     </div>
   </header>
@@ -742,34 +727,27 @@
           <ul>
             <li id="nextStepChoiceText">Vi utför fönsterputsen enligt bokningen och stämmer av om något behöver justeras.</li>
             <li>Vi får in bokningen direkt och hör av oss om något behöver stämmas av.</li>
-            <li id="nextStepInvoiceText">Du kan betala direkt om Stripe-knappen visas, annars skickas betalningslänken i klartmejlet när jobbet är utfört.</li>
+            <li id="nextStepInvoiceText">När jobbet är klart skickar vi ett klartmejl med en säker Stripe-länk för betalning.</li>
           </ul>
         </div>
 
       </section>
 
       <section class="card">
-        <h2 class="section-title">Betalning</h2>
-        <p class="section-subtitle">Du betalar tryggt efter utförd fönsterputs.</p>
+        <h2 class="section-title">Nästa steg</h2>
+        <p class="section-subtitle">Du betalar först när fönsterputsen är utförd.</p>
         <div class="payment-trust-row">
           <span class="trust-pill">Bokningen är mottagen</span>
           <span class="trust-pill">Trygg kortbetalning via Stripe</span>
-          <span class="trust-pill">Stripe-länk i klartmejlet vid behov</span>
+          <span class="trust-pill">Stripe-länk i klartmejlet</span>
           <span class="trust-pill">Betala efter putsning</span>
         </div>
 
         <div class="option-stack">
-          <div class="option-card primary recommended" id="stripePaymentCard" hidden>
-            <h3>Betala via Stripe</h3>
-            <p>Betala tryggt med kort och de betalmetoder som är aktiverade i Stripe.</p>
-            <p>Den här länken används när du kommer hit från klartmejlet.</p>
-            <a href="#" id="stripeCheckoutLink" class="btn btn-stripe">Betala säkert via Stripe</a>
-            <p class="payment-note" id="stripePaymentNote">Stripe öppnas i en säker kassa.</p>
-          </div>
-
-          <div class="option-card primary">
+          <div class="option-card primary recommended">
             <h3>Betalning efter putsning</h3>
-            <p>Vi putsar först. När jobbet är klart skickar vi ett klartmejl med en säker Stripe-länk för kortbetalning.</p>
+            <p>Vi putsar först. När jobbet är klart får du ett klartmejl med en säker Stripe-länk för kortbetalning.</p>
+            <p>Det gör att du kan dubbelkolla att allt känns rätt innan du betalar.</p>
             <button type="button" id="payLaterButton" class="btn btn-ghost">Jag förstår</button>
           </div>
         </div>
@@ -812,9 +790,6 @@
     const payLaterButton = document.getElementById('payLaterButton');
     const statusBox = document.getElementById('statusBox');
     const statusText = document.getElementById('statusText');
-    const stripePaymentCard = document.getElementById('stripePaymentCard');
-    const stripeCheckoutLink = document.getElementById('stripeCheckoutLink');
-    const stripePaymentNote = document.getElementById('stripePaymentNote');
     const topbarToggleButton = document.getElementById('topbarToggleButton');
     const topbarShowButton = document.getElementById('topbarShowButton');
     const heroIntroText = document.getElementById('heroIntroText');
@@ -822,7 +797,6 @@
     const bookingSummaryText = document.getElementById('bookingSummaryText');
     const nextStepChoiceText = document.getElementById('nextStepChoiceText');
     const nextStepInvoiceText = document.getElementById('nextStepInvoiceText');
-    const optionStack = document.querySelector('.option-stack');
 
     const params = new URLSearchParams(window.location.search);
     const bookingId = params.get('bookingId') || '';
@@ -837,8 +811,6 @@
     const seaMiles = params.get('seaMiles') || '';
     const coordinates = params.get('coordinates') || '';
     const price = params.get('price') || '599';
-    const paymentMethod = params.get('paymentMethod') || '';
-    const stripeCheckoutUrl = params.get('stripeCheckoutUrl') || '';
     const stripeStatus = params.get('stripe') || '';
 
     function formatDateForDisplay(dateString) {
@@ -886,7 +858,7 @@
       return parts.length ? parts.join(' • ') : 'Ej valt ännu';
     }
 
-    function setStatus(message, title = 'Betalning') {
+    function setStatus(message, title = 'Bokning mottagen') {
       statusBox.style.display = 'block';
       statusBox.querySelector('strong').textContent = title;
       statusText.textContent = message;
@@ -899,25 +871,34 @@
     bookingPackage.textContent = buildPackageSummary();
     bookingPrice.textContent = String(price).includes('offert') || String(price).includes('Offert') ? String(price) : `${price} kr`;
 
-    if (stripeCheckoutUrl && !String(price).toLowerCase().includes('offert')) {
-      stripePaymentCard.hidden = false;
-      stripeCheckoutLink.href = stripeCheckoutUrl;
-      stripePaymentNote.textContent = bookingId
-        ? `Boknings-ID ${bookingId} följer med till Stripe så betalningen kan matchas automatiskt.`
-        : 'Bokningen följer med till Stripe så betalningen kan matchas automatiskt.';
-    } else {
-      optionStack?.classList.add('is-single-column');
-    }
+    setStatus('Tack! Vi har tagit emot bokningen. Betalningslänken kommer i klartmejlet när fönsterputsen är utförd.');
 
     if (stripeStatus === 'success') {
-      setStatus('Tack! Stripe har tagit emot betalningen. Bokningen markeras som betald automatiskt när Stripe-webhooken har bekräftat betalningen.', 'Betalning mottagen');
+      const paymentSectionTitle = document.querySelectorAll('.section-title')[1];
+      const paymentSectionSubtitle = document.querySelectorAll('.section-subtitle')[1];
+      const optionStack = document.querySelector('.option-stack');
+
+      if (heroIntroText) {
+        heroIntroText.textContent = 'Tack! Stripe har tagit emot betalningen. Vi matchar den automatiskt mot din bokning.';
+      }
+
+      if (paymentSectionTitle) {
+        paymentSectionTitle.textContent = 'Betalning mottagen';
+      }
+
+      if (paymentSectionSubtitle) {
+        paymentSectionSubtitle.textContent = 'Tack för betalningen. Bokningen uppdateras automatiskt när Stripe bekräftar händelsen.';
+      }
+
       if (optionStack) {
         optionStack.style.display = 'none';
       }
+
+      setStatus('Tack! Stripe har tagit emot betalningen. Vi uppdaterar bokningen automatiskt när webhooken har bekräftat betalningen.', 'Betalning mottagen');
     }
 
     if (stripeStatus === 'cancelled') {
-      setStatus('Betalningen avbröts. Bokningen finns kvar och du kan använda Stripe-länken i klartmejlet igen.', 'Betalning avbruten');
+      setStatus('Betalningen avbröts. Bokningen finns kvar och du kan använda Stripe-länken i klartmejlet igen när du vill prova på nytt.', 'Betalning avbruten');
     }
 
     payLaterButton.addEventListener('click', () => {
@@ -969,52 +950,6 @@
 
       setStatus('Tack! Vi återkommer med offert för båttransporten innan något ska betalas.', 'Offertläge');
     }
-
-    if (paymentMethod === 'Faktura via e-post') {
-      const paymentSectionTitle = document.querySelectorAll('.section-title')[1];
-      const paymentSectionSubtitle = document.querySelectorAll('.section-subtitle')[1];
-      const paymentTrustRow = document.querySelector('.payment-trust-row');
-      const optionStack = document.querySelector('.option-stack');
-
-      if (heroIntroText) {
-        heroIntroText.textContent = 'Din bokning är registrerad. Du har valt faktura via e-post och den kommer inom 3-7 dagar.';
-      }
-
-      if (bookingIntroSubtitle) {
-        bookingIntroSubtitle.style.display = 'none';
-      }
-
-      if (bookingSummaryText) {
-        bookingSummaryText.textContent = 'Din tid är nu reserverad, dubbelkolla dina uppgifter.';
-      }
-
-      if (nextStepChoiceText) {
-        nextStepChoiceText.textContent = 'Du får en faktura via e-post inom 3-7 dagar.';
-      }
-
-      if (nextStepInvoiceText) {
-        nextStepInvoiceText.textContent = 'Vi får in bokningen direkt och hör av oss om något behöver stämmas av innan jobbet utförs.';
-      }
-
-      if (paymentSectionTitle) {
-        paymentSectionTitle.textContent = 'Bokning bekräftad';
-      }
-
-      if (paymentSectionSubtitle) {
-        paymentSectionSubtitle.textContent = 'Faktura är vald som betalningsmetod och bokningen är nu bekräftad.';
-      }
-
-      if (paymentTrustRow) {
-        paymentTrustRow.style.display = 'none';
-      }
-
-      if (optionStack) {
-        optionStack.style.display = 'none';
-      }
-
-      setStatus('Din bokning är bekräftad. Faktura kommer via e-post inom 3-7 dagar.', 'Bokning bekräftad');
-    }
-
     topbarToggleButton?.addEventListener('click', () => {
       document.body.classList.add('topbar-manual-hidden');
     });

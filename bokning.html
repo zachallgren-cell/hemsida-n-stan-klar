@@ -1899,10 +1899,6 @@
           params.set('bookingId', String(createdBooking.bookingId));
         }
 
-        if (createdBooking?.stripeCheckoutUrl) {
-          params.set('stripeCheckoutUrl', createdBooking.stripeCheckoutUrl);
-        }
-
         window.location.href = `betalning.html?${params.toString()}`;
       } catch (error) {
         console.error('Bokningsfel:', error);
