@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
+  <link rel="stylesheet" href="cookie-consent.css" />
+  <script src="cookie-consent.js" defer></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Fönsterputs Åkersberga, Stockholm & skärgården | Berga Fönsterputs</title>
@@ -1510,8 +1512,8 @@
     }
 
     .booking-requirements {
-      margin-bottom: 18px;
-      padding: 20px 22px;
+      margin-bottom: 16px;
+      padding: 14px 18px;
       border-radius: 14px;
       border: 1px solid #cfe4ee;
       border-left: 6px solid var(--primary);
@@ -1519,18 +1521,26 @@
     }
 
     .booking-requirements h3 {
-      margin: 0 0 10px;
-      font-size: 1.05rem;
+      margin: 0 0 7px;
+      font-size: 1rem;
     }
 
     .booking-requirements ul {
+      columns: 2;
+      column-gap: 28px;
       margin: 0;
       padding-left: 18px;
       color: var(--muted);
+      font-size: 0.93rem;
+      line-height: 1.35;
+    }
+
+    .booking-requirements li {
+      break-inside: avoid;
     }
 
     .booking-requirements li + li {
-      margin-top: 8px;
+      margin-top: 4px;
     }
 
     .faq-item {
@@ -1796,6 +1806,10 @@
 
       .compare-stage {
         height: 500px;
+      }
+
+      .compare-stage img {
+        height: 100%;
       }
 
       #bokning .calendar-card {
@@ -2183,6 +2197,7 @@
       }
 
       .booking-requirements ul {
+        columns: auto;
         font-size: 0.9rem;
       }
 
@@ -2537,11 +2552,11 @@
     <section class="section reveal">
       <div class="card">
         <h2 class="section-title">Fönsterputs i ditt område</h2>
-        <p class="section-subtitle">Vi utgår lokalt och hjälper kunder i Åkersberga, Vaxholm, Ljusterö och ute i skärgården.</p>
+        <p class="section-subtitle">Vi utgår lokalt och hjälper kunder i Österåker, Täby, Vaxholm och ute i skärgården.</p>
         <div class="area-link-grid">
-          <a class="area-link" href="fonsterputs-akersberga.html">Åkersberga<span>Lokal fönsterputs med enkel onlinebokning.</span></a>
+          <a class="area-link" href="fonsterputs-akersberga.html">Österåker<span>Lokal fönsterputs med enkel onlinebokning.</span></a>
+          <a class="area-link" href="#bokning">Täby<span>Smidig fönsterputs för villor, radhus och privatpersoner.</span></a>
           <a class="area-link" href="fonsterputs-vaxholm.html">Vaxholm<span>Fönsterputs för villor, radhus och kustnära boenden.</span></a>
-          <a class="area-link" href="fonsterputs-ljustero.html">Ljusterö<span>Planerade tider och båttransport vid behov.</span></a>
           <a class="area-link" href="fonsterputs-skargarden.html">Skärgården<span>Vi planerar skärgårdsjobb med tydlig transportkostnad.</span></a>
         </div>
       </div>
@@ -2555,21 +2570,6 @@
         <div class="mobile-booking-strip mobile-only">
           <strong>Snabb mobilbokning</strong>
           <span>Välj datum, välj ledig tid och tryck på knappen för att fylla i formuläret.</span>
-        </div>
-
-        <div class="booking-boost-grid">
-          <div class="booking-boost-card">
-            <strong>Det går snabbt</strong>
-            <span>Välj tid här, resten fyller du i på en separat enkel sida.</span>
-          </div>
-          <div class="booking-boost-card">
-            <strong>Priset följer med</strong>
-            <span>Livepriset uppdateras direkt när du väljer bostad och omfattning.</span>
-          </div>
-          <div class="booking-boost-card">
-            <strong>Betala efter jobbet</strong>
-            <span>Stripe-länken skickas tryggt när fönstren är putsade.</span>
-          </div>
         </div>
 
         <div class="booking-intro">
@@ -2588,12 +2588,12 @@
         </div>
 
         <div class="booking-requirements">
-          <h3>Det här krävs för att boka</h3>
+          <h3>Inför bokning</h3>
           <ul>
-            <li>Fönstren behöver vara åtkomliga på ett säkert sätt.</li>
-            <li>Du väljer ett framtida datum och en ledig tid innan formuläret öppnas.</li>
-            <li>RUT-uppgifter fyller du i senare via ett säkert RUT-formulär som skickas i bekräftelsemejlet.</li>
-            <li>Vill du inte använda RUT-avdrag kontaktar du oss, så hjälper vi dig med pris utan RUT.</li>
+            <li>Fönstren ska vara säkert åtkomliga.</li>
+            <li>Invändig puts: töm fönsterbrädan.</li>
+            <li>RUT fylls i senare via säkert formulär.</li>
+            <li>Pris utan RUT? Kontakta oss.</li>
           </ul>
         </div>
 
@@ -2637,9 +2637,7 @@
 
             <div class="time-picker">
               <h4>Välj tid</h4>
-              <div class="time-slots" id="timeSlots">
-                <button type="button" class="time-slot disabled">Välj först ett datum</button>
-              </div>
+              <div class="time-slots" id="timeSlots"></div>
             </div>
 
             <button type="button" class="submit-btn" id="continueBookingButton" disabled>Välj datum först</button>
@@ -2947,7 +2945,6 @@
       timeSlots.innerHTML = '';
 
       if (!selectedDate) {
-        timeSlots.innerHTML = '<button type="button" class="time-slot disabled">Välj först ett datum</button>';
         return;
       }
 

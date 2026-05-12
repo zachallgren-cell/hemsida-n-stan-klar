@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
+  <link rel="stylesheet" href="cookie-consent.css" />
+  <script src="cookie-consent.js" defer></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Fönsterputs med RUT, livepris och Stripe | Berga Fönsterputs</title>
@@ -159,7 +161,24 @@
       transition: border-radius 0.28s ease;
     }
 
-    .brand-text { display: none; }
+    .brand-text {
+      display: none;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .brand-tagline {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.88);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
 
     nav {
       display: flex;
@@ -530,118 +549,173 @@
       transition: width 0.18s ease;
     }
 
+    .area-chips {
+      display: none;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 20px 0 24px;
+    }
+
+    .area-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      min-height: 46px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 10px 16px;
+      background: linear-gradient(to bottom, #ffffff, #f4fbff);
+      color: var(--primary-dark);
+      box-shadow: 0 12px 24px rgba(8, 79, 116, 0.08);
+      font-weight: 900;
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .area-chip::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: rgba(11, 111, 164, 0.28);
+      box-shadow: 0 0 0 5px rgba(11, 111, 164, 0.08);
+    }
+
+    .area-chip:hover,
+    .area-chip.is-active {
+      transform: translateY(-2px);
+      border-color: rgba(241, 153, 45, 0.72);
+      background: #fff9ef;
+      box-shadow: 0 16px 30px rgba(241, 153, 45, 0.16);
+    }
+
+    .area-chip.is-active::before {
+      background: var(--cta-dark);
+      box-shadow: 0 0 0 6px rgba(255, 179, 71, 0.22);
+    }
+
     .area-layout {
       display: grid;
-      grid-template-columns: 1.05fr 0.95fr;
-      gap: 22px;
+      grid-template-columns: minmax(0, 1fr) minmax(360px, 0.48fr);
+      gap: 30px;
       align-items: stretch;
+    }
+
+    .area-map-column {
+      display: grid;
+      gap: 14px;
+      min-width: 0;
     }
 
     .area-map {
       position: relative;
       isolation: isolate;
-      min-height: 360px;
+      min-height: 456px;
       border: 1px solid var(--border);
-      border-radius: 22px;
+      border-radius: 24px;
       overflow: hidden;
       background:
-        linear-gradient(120deg, rgba(255,255,255,0.48), transparent 42%),
-        radial-gradient(circle at 30% 28%, rgba(255,255,255,0.78), transparent 18%),
-        linear-gradient(145deg, #eef9f1 0%, #d8f0d5 100%);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.68);
+        radial-gradient(circle at 29% 29%, rgba(255,255,255,0.72), transparent 18%),
+        radial-gradient(circle at 56% 70%, rgba(245,255,238,0.7), transparent 24%),
+        linear-gradient(145deg, #edf7f1 0%, #d9edf1 48%, #c6e3ef 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 20px 34px rgba(8, 79, 116, 0.09);
     }
 
     .area-map::before {
       content: "";
       position: absolute;
       inset: 0;
-      background:
-        radial-gradient(circle at 24% 32%, rgba(255,255,255,0.34), transparent 22%),
-        radial-gradient(circle at 54% 64%, rgba(98, 173, 117, 0.22), transparent 23%);
       z-index: 0;
+      background:
+        radial-gradient(circle at 24% 37%, rgba(77, 151, 89, 0.12), transparent 22%),
+        radial-gradient(circle at 74% 43%, rgba(255,179,71,0.1), transparent 22%),
+        linear-gradient(110deg, transparent 0 19%, rgba(255,255,255,0.2) 19.3% 19.7%, transparent 20% 45%, rgba(255,255,255,0.18) 45.3% 45.7%, transparent 46%),
+        linear-gradient(28deg, transparent 0 30%, rgba(255,255,255,0.18) 30.2% 30.6%, transparent 31% 76%, rgba(255,255,255,0.14) 76.2% 76.6%, transparent 77%);
       pointer-events: none;
     }
 
-    .area-land {
-      position: absolute;
-      z-index: 1;
-      pointer-events: none;
-    }
-
-    .area-land-taby {
-      left: 22%;
-      top: 39%;
-      width: clamp(190px, 46%, 255px);
-      height: clamp(120px, 42%, 155px);
-      border-radius: 50% 52% 58% 44%;
-      background: radial-gradient(circle at 40% 35%, rgba(232, 248, 221, 0.98), rgba(160, 215, 148, 0.74));
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 16px 28px rgba(56, 128, 93, 0.12);
-      transform: rotate(-7deg);
-    }
-
-    .area-island-vaxholm {
-      left: 72%;
-      top: 13%;
-      width: clamp(74px, 19%, 126px);
-      height: clamp(54px, 22%, 86px);
-      border-radius: 54% 46% 58% 42%;
-      background: radial-gradient(circle at 35% 30%, rgba(246, 252, 232, 0.98), rgba(159, 215, 146, 0.88));
-      box-shadow: 0 0 0 11px rgba(171, 226, 247, 0.9), inset 0 1px 0 rgba(255,255,255,0.7), 0 18px 28px rgba(8, 79, 116, 0.12);
-      transform: rotate(9deg);
-    }
-
-    .area-coast {
+    .area-map-art {
       position: absolute;
       inset: 0;
       z-index: 1;
+      width: 100%;
+      height: 100%;
+    }
+
+    .area-landmass {
+      fill: url(#areaLand);
+      filter: drop-shadow(0 16px 22px rgba(50, 124, 78, 0.08));
       pointer-events: none;
     }
 
-    .area-sea {
-      fill: rgba(115, 199, 236, 0.7);
-    }
-
-    .area-sea-deep {
-      fill: rgba(52, 161, 218, 0.2);
-    }
-
-    .area-coastline {
-      fill: none;
-      stroke: rgba(47, 139, 183, 0.2);
-      stroke-width: 0.9;
-      stroke-linecap: round;
-    }
-
-    .area-roads {
-      position: absolute;
-      inset: 0;
-      z-index: 2;
+    .area-water-shade {
+      fill: url(#areaWater);
       pointer-events: none;
     }
 
-    .area-road-casing,
-    .area-road-fill,
-    .area-road-dash {
+    .area-zone {
+      fill: rgba(255,255,255,0.18);
+      stroke: rgba(11, 111, 164, 0.2);
+      stroke-width: 2;
+      stroke-linejoin: round;
+      cursor: pointer;
+      transition: fill 0.2s ease, stroke 0.2s ease, filter 0.2s ease;
+    }
+
+    .area-zone:hover,
+    .area-zone.is-active {
+      fill: rgba(255, 179, 71, 0.16);
+      stroke: var(--cta-dark);
+      filter: drop-shadow(0 10px 16px rgba(241, 153, 45, 0.18));
+    }
+
+    .area-zone-skargarden {
+      fill: rgba(255,255,255,0.1);
+      stroke-width: 2.6;
+    }
+
+    .area-island {
+      fill: url(#areaIsland);
+      stroke: rgba(255,255,255,0.72);
+      stroke-width: 1.4;
+      pointer-events: none;
+    }
+
+    .area-route,
+    .area-coastline,
+    .area-wave {
       fill: none;
       stroke-linecap: round;
       stroke-linejoin: round;
     }
 
-    .area-road-casing {
-      stroke: rgba(105, 158, 181, 0.25);
-      stroke-width: 3.7;
+    .area-route {
+      stroke: rgba(255,255,255,0.95);
+      stroke-width: 8;
+      filter: drop-shadow(0 6px 9px rgba(8, 79, 116, 0.12));
+      pointer-events: none;
     }
 
-    .area-road-fill {
-      stroke: rgba(239, 249, 253, 0.92);
-      stroke-width: 2.6;
-      filter: drop-shadow(0 5px 7px rgba(8, 79, 116, 0.09));
+    .area-route-line {
+      fill: none;
+      stroke: rgba(9, 88, 128, 0.26);
+      stroke-width: 1.6;
+      stroke-linecap: round;
+      stroke-dasharray: 8 10;
+      pointer-events: none;
     }
 
-    .area-road-dash {
-      stroke: rgba(9, 88, 128, 0.24);
-      stroke-width: 0.38;
-      stroke-dasharray: 3 3.8;
+    .area-coastline {
+      stroke: rgba(47, 139, 183, 0.25);
+      stroke-width: 2.2;
+      pointer-events: none;
+    }
+
+    .area-wave {
+      stroke: rgba(255,255,255,0.62);
+      stroke-width: 2;
+      opacity: 0.78;
+      pointer-events: none;
     }
 
     .area-road-label {
@@ -658,53 +732,204 @@
     }
 
     .area-road-label-276 {
-      left: 20%;
-      top: 48%;
+      left: 34%;
+      top: 43%;
     }
 
     .area-road-label-e18 {
-      left: 44%;
-      top: 70%;
+      left: 20%;
+      top: 64%;
     }
 
     .area-pin {
       position: absolute;
       z-index: 5;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       transform: translate(-50%, -50%);
-      border: none;
+      border: 1px solid rgba(11, 111, 164, 0.14);
       border-radius: 999px;
-      padding: 10px 13px;
-      background: #ffffff;
+      padding: 11px 18px 11px 14px;
+      background: rgba(255,255,255,0.96);
       color: var(--primary-dark);
-      border: 1px solid rgba(11, 111, 164, 0.22);
-      box-shadow: 0 14px 24px rgba(8, 79, 116, 0.14);
+      box-shadow: 0 14px 26px rgba(8, 79, 116, 0.13);
       font-weight: 900;
       cursor: pointer;
-      transition: transform 0.2s ease, background 0.2s ease;
+      white-space: nowrap;
+      transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .area-pin::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--primary);
+      box-shadow: 0 0 0 5px rgba(11, 111, 164, 0.12);
     }
 
     .area-pin:hover,
     .area-pin.is-active {
       transform: translate(-50%, -50%) scale(1.05);
+      border-color: rgba(241, 153, 45, 0.82);
       background: linear-gradient(to right, var(--cta), var(--cta-dark));
       color: #173042;
+      box-shadow: 0 20px 34px rgba(241, 153, 45, 0.26);
+    }
+
+    .area-pin.is-active::before {
+      background: #173042;
+      box-shadow: 0 0 0 6px rgba(255,255,255,0.42);
+    }
+
+    .area-pin-osteraker { left: 34%; top: 27%; }
+    .area-pin-akersberga { left: 39%; top: 45%; }
+    .area-pin-taby { left: 20%; top: 61%; }
+    .area-pin-vaxholm { left: 62%; top: 65%; }
+    .area-pin-skargarden { left: 77%; top: 36%; }
+
+    .area-kicker {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--cta-dark);
+      font-size: 0.78rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .area-map-note {
+      border: 1px solid rgba(11, 111, 164, 0.16);
+      border-radius: 18px;
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.82);
+      color: var(--muted);
+      box-shadow: 0 12px 24px rgba(8, 79, 116, 0.06);
+    }
+
+    .area-map-note strong {
+      color: var(--primary-dark);
     }
 
     .area-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 18px;
+      align-self: start;
+      min-height: 456px;
       border: 1px solid var(--border);
-      border-radius: 22px;
-      padding: 24px;
-      background: linear-gradient(to bottom, #fbfeff, #f3fbff);
+      border-radius: 24px;
+      padding: 34px;
+      background:
+        radial-gradient(circle at 18% 13%, rgba(255, 179, 71, 0.14), transparent 16%),
+        linear-gradient(to bottom, #ffffff, #f8fcfe);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.78), 0 20px 38px rgba(8, 79, 116, 0.09);
+    }
+
+    .area-panel.is-updating {
+      animation: areaPanelIn 0.24s ease;
+    }
+
+    @keyframes areaPanelIn {
+      from {
+        opacity: 0.72;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .area-panel-kicker {
+      color: var(--cta-dark);
+      font-size: 0.78rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .area-panel-icon {
+      position: relative;
+      width: 82px;
+      height: 82px;
+      border-radius: 999px;
+      background: linear-gradient(145deg, #fff8ed, #fff0d8);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.85);
+    }
+
+    .area-panel-icon::before {
+      content: "";
+      position: absolute;
+      left: 26px;
+      top: 20px;
+      width: 28px;
+      height: 28px;
+      border: 3px solid var(--cta-dark);
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+    }
+
+    .area-panel-icon::after {
+      content: "";
+      position: absolute;
+      left: 37px;
+      top: 31px;
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--cta-dark);
+      box-shadow: 0 20px 0 -2px rgba(241, 153, 45, 0.42);
     }
 
     .area-panel h3 {
-      margin: 0 0 8px;
-      font-size: 1.4rem;
+      margin: 0;
+      font-size: clamp(1.8rem, 3vw, 2.65rem);
+      line-height: 1.08;
+    }
+
+    .area-title-rule {
+      width: 46px;
+      height: 3px;
+      margin-top: -8px;
+      border-radius: 999px;
+      background: var(--cta-dark);
     }
 
     .area-panel p {
       margin: 0;
       color: var(--muted);
+    }
+
+    .area-consideration {
+      display: grid;
+      gap: 6px;
+      border-left: 4px solid var(--cta-dark);
+      border-radius: 14px;
+      padding: 13px 14px;
+      background: rgba(255,255,255,0.72);
+    }
+
+    .area-consideration strong {
+      color: var(--primary-dark);
+    }
+
+    .area-trust-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+    }
+
+    .area-trust-row span {
+      border: 1px solid rgba(11, 111, 164, 0.14);
+      border-radius: 999px;
+      padding: 7px 10px;
+      background: rgba(255,255,255,0.82);
+      color: var(--primary-dark);
+      font-size: 0.9rem;
+      font-weight: 800;
     }
 
     .quiz {
@@ -828,9 +1053,18 @@
       }
 
       .brand-text {
-        display: inline-flex;
+        display: flex;
         color: var(--text);
         white-space: nowrap;
+      }
+
+      .brand-title,
+      .brand-tagline {
+        color: var(--text);
+      }
+
+      .brand-tagline {
+        font-size: 0.72rem;
       }
 
       .topbar-actions {
@@ -887,9 +1121,12 @@
         padding: 34px;
       }
 
-      .window-sim,
-      .area-map {
+      .window-sim {
         min-height: 430px;
+      }
+
+      .area-map {
+        min-height: 456px;
       }
 
       .slot-grid {
@@ -956,9 +1193,20 @@
         margin-top: -130px;
       }
 
-      .window-sim,
-      .area-map {
+      .window-sim {
         min-height: 300px;
+      }
+
+      .area-chips {
+        display: flex;
+      }
+
+      .area-map {
+        min-height: 430px;
+      }
+
+      .area-panel {
+        min-height: auto;
       }
     }
 
@@ -1144,9 +1392,56 @@
         border-radius: 16px;
       }
 
+      .area-chips {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        margin: 14px 0 16px;
+      }
+
+      .area-chip {
+        justify-content: center;
+        min-height: 44px;
+        padding: 10px 12px;
+      }
+
+      .area-chip:last-child {
+        grid-column: 1 / -1;
+      }
+
       .area-map {
-        min-height: 270px;
+        min-height: 360px;
         border-radius: 16px;
+      }
+
+      .area-pin {
+        gap: 6px;
+        padding: 8px 10px;
+        font-size: 0.78rem;
+      }
+
+      .area-pin::before {
+        width: 8px;
+        height: 8px;
+      }
+
+      .area-road-label {
+        display: none;
+      }
+
+      .area-map-note {
+        border-radius: 14px;
+        padding: 13px;
+      }
+
+      .area-trust-row {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .area-panel .hero-buttons,
+      .area-panel .btn {
+        width: 100%;
       }
 
       .area-panel,
@@ -1177,7 +1472,10 @@
       <div class="topbar">
         <a class="brand" href="index.html#top" aria-label="Till startsidan">
           <img src="logga-fonsterputs-transparent.png" alt="Berga Fönsterputs logga" onerror="this.style.display='none'">
-          <span class="brand-text">Berga Fönsterputs</span>
+          <div class="brand-text">
+            <span class="brand-title">Berga Fönsterputs</span>
+            <span class="brand-tagline">Personlig och lokal service</span>
+          </div>
         </a>
         <div class="topbar-actions">
           <nav>
@@ -1304,40 +1602,99 @@
       </div>
     </section>
 
-    <section class="section reveal">
+    <section class="section reveal" id="var-jobbar-vi">
       <div class="card">
+        <span class="area-kicker">Vårt område</span>
         <h2 class="section-title">Var jobbar vi?</h2>
-        <p class="section-subtitle">Tryck på ett område för att se hur vi tänker kring platsen, både på fastlandet och ute i skärgården. Skriv alltid exakt adress i bokningen.</p>
+        <p class="section-subtitle">Vi utgår från Åkersberga och hjälper kunder i hela norra Stockholm - från Täby och Österåker till Vaxholm och ut i hela skärgården. Tryck på ett område för att se mer information.</p>
+        <div class="area-chips" aria-label="Välj serviceområde">
+          <button type="button" class="area-chip" data-area="osteraker" data-area-control aria-pressed="false">Österåker</button>
+          <button type="button" class="area-chip" data-area="akersberga" data-area-control aria-pressed="false">Åkersberga</button>
+          <button type="button" class="area-chip" data-area="taby" data-area-control aria-pressed="false">Täby</button>
+          <button type="button" class="area-chip" data-area="vaxholm" data-area-control aria-pressed="false">Vaxholm</button>
+          <button type="button" class="area-chip is-active" data-area="skargarden" data-area-control aria-pressed="true">Skärgården</button>
+        </div>
         <div class="area-layout">
-          <div class="area-map" aria-label="Karta över våra serviceområden">
-            <svg class="area-coast" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-              <path class="area-sea" d="M66 0 C64 14 69 23 66 35 C63 47 66 56 61 68 C56 80 60 91 68 100 L100 100 L100 0 Z"></path>
-              <path class="area-sea-deep" d="M80 0 C79 19 86 35 82 53 C78 71 84 87 95 100 L100 100 L100 0 Z"></path>
-              <path class="area-coastline" d="M66 0 C64 14 69 23 66 35 C63 47 66 56 61 68 C56 80 60 91 68 100"></path>
-            </svg>
-            <div class="area-land area-land-taby" aria-hidden="true"></div>
-            <div class="area-land area-island-vaxholm" aria-hidden="true"></div>
-            <svg class="area-roads" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-              <path class="area-road-casing" d="M28 38 C28 45 30 53 34 61"></path>
-              <path class="area-road-fill" d="M28 38 C28 45 30 53 34 61"></path>
-              <path class="area-road-dash" d="M28 38 C28 45 30 53 34 61"></path>
-              <path class="area-road-casing" d="M13 73 C27 70 42 68 57 63"></path>
-              <path class="area-road-fill" d="M13 73 C27 70 42 68 57 63"></path>
-              <path class="area-road-dash" d="M13 73 C27 70 42 68 57 63"></path>
-            </svg>
-            <span class="area-road-label area-road-label-276" aria-hidden="true">276</span>
-            <span class="area-road-label area-road-label-e18" aria-hidden="true">E18</span>
-            <button type="button" class="area-pin is-active" style="left: 36%; top: 33%;" data-area="akersberga">Åkersberga</button>
-            <button type="button" class="area-pin" style="left: 36%; top: 53%;" data-area="taby">Täby</button>
-            <button type="button" class="area-pin" style="left: 84%; top: 25%;" data-area="vaxholm">Vaxholm</button>
-          </div>
-          <div class="area-panel">
-            <h3 id="areaTitle">Åkersberga</h3>
-            <p id="areaText">Här är vi som mest lokala. Vi kommer gärna hem till dig och stämmer av detaljer om fönster, våning och tillgänglighet vid behov.</p>
-            <div class="hero-buttons">
-              <a href="index.html#bokning" class="btn btn-primary">Boka i ditt område</a>
+          <div class="area-map-column">
+            <div class="area-map" aria-label="Illustrerad karta över våra serviceområden">
+              <svg class="area-map-art" viewBox="0 0 900 520" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                <defs>
+                  <linearGradient id="areaWater" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#ecf9ff"></stop>
+                    <stop offset="52%" stop-color="#cfeaf6"></stop>
+                    <stop offset="100%" stop-color="#b9deee"></stop>
+                  </linearGradient>
+                  <linearGradient id="areaLand" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#f4fbef"></stop>
+                    <stop offset="54%" stop-color="#dcedcf"></stop>
+                    <stop offset="100%" stop-color="#c5dfba"></stop>
+                  </linearGradient>
+                  <linearGradient id="areaIsland" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#fbf6df"></stop>
+                    <stop offset="100%" stop-color="#d7e8be"></stop>
+                  </linearGradient>
+                </defs>
+                <rect width="900" height="520" fill="url(#areaWater)"></rect>
+                <path class="area-water-shade" d="M555 0 C540 54 562 94 535 141 C505 193 528 233 499 282 C470 331 482 377 440 421 C401 463 384 495 382 520 L900 520 L900 0 Z"></path>
+                <path class="area-landmass" d="M0 0 H572 C548 58 566 91 536 139 C506 187 532 231 501 278 C469 327 484 374 444 416 C407 455 387 491 384 520 H0 Z"></path>
+                <path class="area-coastline" d="M572 0 C548 58 566 91 536 139 C506 187 532 231 501 278 C469 327 484 374 444 416 C407 455 387 491 384 520"></path>
+                <path class="area-zone" data-area-zone="osteraker" data-area="osteraker" d="M215 70 C316 38 445 55 518 112 C493 169 395 204 286 188 C208 176 168 126 215 70 Z"></path>
+                <path class="area-zone" data-area-zone="akersberga" data-area="akersberga" d="M282 198 C360 176 449 196 490 244 C450 304 350 319 280 292 C226 270 226 221 282 198 Z"></path>
+                <path class="area-zone" data-area-zone="taby" data-area="taby" d="M72 318 C158 284 260 302 320 365 C282 441 154 462 70 415 C24 384 28 341 72 318 Z"></path>
+                <path class="area-zone" data-area-zone="vaxholm" data-area="vaxholm" d="M506 325 C568 295 657 311 704 366 C673 431 571 452 507 411 C461 381 465 346 506 325 Z"></path>
+                <path class="area-zone area-zone-skargarden is-active" data-area-zone="skargarden" data-area="skargarden" d="M623 83 C695 32 811 29 862 90 C853 173 834 229 785 280 C750 317 751 367 692 412 C644 448 590 439 580 383 C570 333 602 304 596 261 C588 209 578 159 623 83 Z"></path>
+                <path class="area-route" d="M135 385 C240 340 304 292 373 252 C391 204 399 154 389 100"></path>
+                <path class="area-route-line" d="M135 385 C240 340 304 292 373 252 C391 204 399 154 389 100"></path>
+                <path class="area-route" d="M424 263 C506 285 548 329 593 374"></path>
+                <path class="area-route-line" d="M424 263 C506 285 548 329 593 374"></path>
+                <path class="area-route-line" d="M616 375 C664 332 690 284 723 222"></path>
+                <path class="area-island" d="M632 139 C650 126 677 128 688 146 C676 165 648 169 632 155 Z"></path>
+                <path class="area-island" d="M710 109 C732 94 764 101 773 124 C756 146 721 145 707 128 Z"></path>
+                <path class="area-island" d="M773 158 C801 145 837 155 845 180 C822 204 785 200 769 181 Z"></path>
+                <path class="area-island" d="M662 222 C682 208 713 214 724 237 C707 258 675 256 658 240 Z"></path>
+                <path class="area-island" d="M733 250 C759 237 792 247 801 272 C780 292 747 291 729 272 Z"></path>
+                <path class="area-island" d="M618 303 C640 288 670 295 680 319 C659 338 630 334 614 318 Z"></path>
+                <path class="area-island" d="M695 341 C720 325 760 333 771 361 C750 386 711 384 691 363 Z"></path>
+                <path class="area-wave" d="M575 455 C595 442 614 468 634 455 C654 442 673 468 693 455"></path>
+                <path class="area-wave" d="M710 468 C729 456 748 480 767 468 C786 456 804 480 823 468"></path>
+                <path class="area-wave" d="M742 205 C760 194 778 216 796 205 C814 194 831 216 849 205"></path>
+                <g opacity="0.78">
+                  <circle cx="825" cy="468" r="27" fill="rgba(255,255,255,0.72)" stroke="rgba(11,111,164,0.18)" stroke-width="2"></circle>
+                  <path d="M825 445 L833 467 L825 491 L817 467 Z" fill="none" stroke="rgba(8,79,116,0.68)" stroke-width="2"></path>
+                  <circle cx="825" cy="468" r="4" fill="rgba(241,153,45,0.9)"></circle>
+                </g>
+              </svg>
+              <span class="area-road-label area-road-label-276" aria-hidden="true">276</span>
+              <span class="area-road-label area-road-label-e18" aria-hidden="true">E18</span>
+              <button type="button" class="area-pin area-pin-osteraker" data-area="osteraker" data-area-control aria-pressed="false">Österåker</button>
+              <button type="button" class="area-pin area-pin-akersberga" data-area="akersberga" data-area-control aria-pressed="false">Åkersberga</button>
+              <button type="button" class="area-pin area-pin-taby" data-area="taby" data-area-control aria-pressed="false">Täby</button>
+              <button type="button" class="area-pin area-pin-vaxholm" data-area="vaxholm" data-area-control aria-pressed="false">Vaxholm</button>
+              <button type="button" class="area-pin area-pin-skargarden is-active" data-area="skargarden" data-area-control aria-pressed="true">Skärgården</button>
+            </div>
+            <div class="area-map-note">
+              <strong>Bor du utanför dessa områden?</strong> Skicka en förfrågan så ser vi om vi kan hjälpa dig.
             </div>
           </div>
+          <aside class="area-panel" id="areaPanel" aria-live="polite">
+            <span class="area-panel-icon" aria-hidden="true"></span>
+            <span class="area-panel-kicker">Valt område</span>
+            <h3 id="areaTitle">Skärgården</h3>
+            <span class="area-title-rule" aria-hidden="true"></span>
+            <p id="areaText">Vi planerar även jobb ute i skärgården. Ange exakt adress och om båttransport behövs så återkommer vi med tydlig prisbedömning.</p>
+            <div class="area-consideration">
+              <strong>Att tänka på</strong>
+              <span id="areaConsideration">Ange brygga, transportbehov och hur vi kommer åt fönstren på plats.</span>
+            </div>
+            <div class="area-trust-row" aria-label="Trygghet">
+              <span>✓ Tydligt pris innan bokning</span>
+              <span>✓ Lokal service</span>
+              <span>✓ Flexibel planering</span>
+            </div>
+            <div class="hero-buttons">
+              <a href="index.html#bokning" class="btn btn-primary" id="areaCta">Boka skärgårdsjobb</a>
+            </div>
+          </aside>
         </div>
       </div>
     </section>
@@ -1407,9 +1764,13 @@
     const cleanText = document.getElementById('cleanText');
     const simulatorCta = document.getElementById('simulatorCta');
     const resetSimulator = document.getElementById('resetSimulator');
-    const areaPins = Array.from(document.querySelectorAll('.area-pin'));
+    const areaControls = Array.from(document.querySelectorAll('[data-area-control]'));
+    const areaZones = Array.from(document.querySelectorAll('[data-area-zone]'));
+    const areaPanel = document.getElementById('areaPanel');
     const areaTitle = document.getElementById('areaTitle');
     const areaText = document.getElementById('areaText');
+    const areaConsideration = document.getElementById('areaConsideration');
+    const areaCta = document.getElementById('areaCta');
     const quiz = document.getElementById('serviceQuiz');
     const quizResult = document.getElementById('quizResult');
     const revealItems = document.querySelectorAll('.reveal');
@@ -1426,17 +1787,35 @@
       : new Set();
 
     const areaInfo = {
+      osteraker: {
+        title: 'Österåker',
+        text: 'Vi arbetar i hela Österåker och hjälper dig med enkel och personlig fönsterputs nära hemmet.',
+        consideration: 'Skriv exakt adress så planerar vi rutt, omfattning och tillgänglighet från början.',
+        cta: 'Boka i Österåker'
+      },
       akersberga: {
         title: 'Åkersberga',
-        text: 'Här är vi som mest lokala. Vi kommer gärna hem till dig och stämmer av detaljer om fönster, våning och tillgänglighet vid behov.'
+        text: 'Här är vi som mest lokala. Vi hjälper kunder i Åkersberga med fönsterputs för villor, radhus, lägenheter och andra bostäder.',
+        consideration: 'Välj datum och skriv bostadstyp, antal fönster och om något sitter högt eller svåråtkomligt.',
+        cta: 'Boka i Åkersberga'
       },
       taby: {
         title: 'Täby',
-        text: 'Täby kan passa bra efter avstämning. Skriv adress och ungefärlig omfattning i bokningen så återkommer vi om något behöver kollas.'
+        text: 'Vi hjälper även kunder i Täby med professionell fönsterputs, tydliga priser och smidig bokning.',
+        consideration: 'Beskriv bostaden och ungefärligt antal fönster så blir livepriset och planeringen rätt.',
+        cta: 'Boka i Täby'
       },
       vaxholm: {
-        title: 'Vaxholm och skärgården',
-        text: 'Vaxholm och skärgården fungerar ofta efter planering. Lägg gärna in exakt adress, eventuell brygga, båttransport och detaljer om hur vi kommer åt fönstren.'
+        title: 'Vaxholm',
+        text: 'Vi utför fönsterputs i Vaxholm och kustnära områden, med planering efter adress och tillgänglighet.',
+        consideration: 'Ange adress och tillgänglighet, särskilt om parkering, våning eller kustnära läge påverkar planeringen.',
+        cta: 'Boka i Vaxholm'
+      },
+      skargarden: {
+        title: 'Skärgården',
+        text: 'Vi planerar även jobb ute i skärgården. Ange exakt adress och om båttransport behövs så återkommer vi med tydlig prisbedömning.',
+        consideration: 'Ange brygga, transportbehov och hur vi kommer åt fönstren på plats.',
+        cta: 'Boka skärgårdsjobb'
       }
     };
 
@@ -1653,14 +2032,38 @@
 
     resetSimulator.addEventListener('click', drawDirt);
 
-    areaPins.forEach((pin) => {
-      pin.addEventListener('click', () => {
-        const info = areaInfo[pin.dataset.area];
-        areaPins.forEach((otherPin) => otherPin.classList.remove('is-active'));
-        pin.classList.add('is-active');
-        areaTitle.textContent = info.title;
-        areaText.textContent = info.text;
+    function setActiveArea(area) {
+      const info = areaInfo[area];
+      if (!info || !areaTitle || !areaText || !areaConsideration || !areaCta) return;
+
+      areaControls.forEach((control) => {
+        const isActive = control.dataset.area === area;
+        control.classList.toggle('is-active', isActive);
+        control.setAttribute('aria-pressed', isActive ? 'true' : 'false');
       });
+      areaZones.forEach((zone) => {
+        zone.classList.toggle('is-active', zone.dataset.areaZone === area);
+      });
+
+      areaTitle.textContent = info.title;
+      areaText.textContent = info.text;
+      areaConsideration.textContent = info.consideration;
+      areaCta.textContent = info.cta;
+      areaCta.href = 'index.html#bokning';
+
+      if (areaPanel) {
+        areaPanel.classList.remove('is-updating');
+        void areaPanel.offsetWidth;
+        areaPanel.classList.add('is-updating');
+      }
+    }
+
+    areaControls.forEach((control) => {
+      control.addEventListener('click', () => setActiveArea(control.dataset.area));
+    });
+
+    areaZones.forEach((zone) => {
+      zone.addEventListener('click', () => setActiveArea(zone.dataset.areaZone));
     });
 
     const quizAnswers = {};
