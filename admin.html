@@ -515,7 +515,7 @@
         <div class="bookings-header">
           <div>
             <h2>Bokningar</h2>
-            <p>Här uppdaterar ni status och skickar klartmail när jobbet är utfört.</p>
+            <p>Här visas alla bokningar, även slutförda och betalda, så att inget försvinner ur adminvyn.</p>
           </div>
           <button type="button" class="button button-secondary" id="refreshButton">Uppdatera</button>
         </div>
@@ -726,17 +726,15 @@
         .order('created_at', { ascending: false });
 
       if (error) {
-        bookingsList.innerHTML = `<div class="empty-state">Kunde inte hämta bokningar: ${escapeHtml(error.message)}</div>`;
+        const isPermissionError = /permission denied|row-level security|policy|schema private|is_booking_admin/i.test(error.message);
+        const message = isPermissionError
+          ? 'Kunde inte hämta bokningar. Kontrollera att admin-rättigheterna i Supabase är uppdaterade och att den inloggade användaren finns i admin_users.'
+          : `Kunde inte hämta bokningar: ${error.message}`;
+        bookingsList.innerHTML = `<div class="empty-state">${escapeHtml(message)}</div>`;
         return;
       }
 
-      const visibleBookings = (data || []).filter((booking) => {
-        const status = String(booking.status || '').toLowerCase();
-        const paymentStatus = String(booking.payment_status || '').toLowerCase();
-        return !(status === 'completed' && paymentStatus === 'paid');
-      });
-
-      renderBookings(visibleBookings);
+      renderBookings(data || []);
     }
 
     async function updateBooking(id, patch, messageElement) {
