@@ -421,6 +421,16 @@
       display: block;
     }
 
+    .team-photo.work-photo {
+      aspect-ratio: 4 / 5;
+      min-height: 0;
+    }
+
+    .team-photo img.work-shot,
+    .gallery-card img.work-shot {
+      object-position: center 62%;
+    }
+
     .team-note {
       border: 1px solid var(--border);
       border-radius: 22px;
@@ -693,7 +703,7 @@
     .gallery-card {
       position: relative;
       overflow: hidden;
-      min-height: 360px;
+      height: 360px;
       min-width: 100%;
       border-radius: 22px;
       border: 1px solid var(--border);
@@ -1082,12 +1092,16 @@
         min-height: 460px;
       }
 
+      .team-photo.work-photo {
+        min-height: 0;
+      }
+
       .member-card img {
         height: 320px;
       }
 
       .gallery-card {
-        min-height: 460px;
+        height: 460px;
       }
     }
 
@@ -1151,7 +1165,7 @@
       }
 
       .gallery-card {
-        min-height: 300px;
+        height: 300px;
       }
 
       .lightbox {
@@ -1344,6 +1358,10 @@
         border-radius: 16px;
       }
 
+      .team-photo.work-photo {
+        min-height: 0;
+      }
+
       .team-note,
       .timeline-step,
       .member-card,
@@ -1385,7 +1403,7 @@
       }
 
       .gallery-card {
-        min-height: 260px;
+        height: 260px;
       }
 
       .gallery-controls {
@@ -1456,8 +1474,8 @@
   <main class="container">
     <section class="card reveal">
       <div class="team-gallery">
-        <div class="team-photo">
-          <img src="IMG_5553.jpg" alt="Teamet bakom Berga Fönsterputs">
+        <div class="team-photo work-photo">
+          <img src="om-oss-fonsterputs-arbete-1.jpeg" alt="Fönsterputs på plats hos kund" class="work-shot" width="1500" height="2000">
         </div>
         <div class="team-note">
           <h3>Mer än bara puts</h3>
@@ -1561,7 +1579,7 @@
         <div class="gallery-viewport">
           <div class="gallery-track" id="galleryTrack">
         <article class="gallery-card">
-          <img src="IMG_5553.jpg" alt="Berga Fönsterputs ute vid vattnet">
+          <img src="om-oss-fonsterputs-arbete-2.jpeg" alt="Berga Fönsterputs putsar fönster med professionell utrustning" class="work-shot" width="1500" height="2000" loading="lazy" decoding="async">
           <div class="gallery-copy">
             <h3>Bakom företaget</h3>
             <p>Vi vill bygga något eget med bra energi, tydlig service och lokal känsla.</p>
