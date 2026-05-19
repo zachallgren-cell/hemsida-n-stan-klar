@@ -273,8 +273,8 @@ Deno.serve(async (req) => {
       ...(payload.coordinates ? [['Koordinater', safeCoordinates]] : [])
     ].map(([label, value]) => `
           <tr>
-            <td style="padding: 12px 0; border-bottom: 1px solid #e6edf3; color: #5b6b7a; font-size: 14px; vertical-align: top;">${label}</td>
-            <td style="padding: 12px 0; border-bottom: 1px solid #e6edf3; color: #0f2638; font-size: 14px; font-weight: 700; text-align: right; vertical-align: top;">${value || 'Ej angivet'}</td>
+            <td width="42%" style="width: 42%; padding: 12px 0; border-bottom: 1px solid #e6edf3; color: #5b6b7a; font-size: 14px; vertical-align: top;">${label}</td>
+            <td width="58%" style="width: 58%; padding: 12px 0; border-bottom: 1px solid #e6edf3; color: #0f2638; font-size: 14px; font-weight: 700; text-align: right; vertical-align: top;">${value || 'Ej angivet'}</td>
           </tr>
         `).join('');
     const rutFormSection = rawRutChoice.includes('Ja')
@@ -330,8 +330,8 @@ Deno.serve(async (req) => {
       <div style="margin: 0; padding: 0; background: #f3f6f8; font-family: Arial, Helvetica, sans-serif; color: #0f2638;">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; background: #f3f6f8;">
           <tr>
-            <td align="center" style="padding: 28px 12px;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width: 100%; max-width: 680px; border-collapse: collapse;">
+            <td align="center" style="padding: 32px 16px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width: 100%; max-width: 820px; border-collapse: collapse;">
                 <tr>
                   <td style="background: #0f2638; border-radius: 18px 18px 0 0; padding: 28px 24px 20px; text-align: center;">
                     <img src="${safeLogoUrl}" width="118" alt="Berga Fönsterputs" style="display: block; width: 118px; max-width: 118px; height: auto; margin: 0 auto 18px;">
@@ -345,14 +345,14 @@ Deno.serve(async (req) => {
                   </td>
                 </tr>
                 <tr>
-                  <td style="background: #ffffff; padding: 34px 26px 12px;">
-                    <h1 style="margin: 0 0 12px; color: #0f2638; font-size: 30px; line-height: 1.18; font-weight: 800;">Tack för din bokning!</h1>
+                  <td style="background: #ffffff; padding: 38px 42px 14px;">
+                    <h1 style="margin: 0 0 12px; color: #0f2638; font-size: 34px; line-height: 1.16; font-weight: 800;">Tack för din bokning!</h1>
                     <p style="margin: 0 0 8px; color: #173042; font-size: 17px; line-height: 1.6;">Hej ${escapeHtml(payload.name || '')},</p>
                     <p style="margin: 0; color: #536574; font-size: 15px; line-height: 1.7;">Vi har tagit emot din bokning och ser fram emot att hjälpa dig.</p>
                   </td>
                 </tr>
                 <tr>
-                  <td style="background: #ffffff; padding: 20px 26px 8px;">
+                  <td style="background: #ffffff; padding: 22px 42px 8px;">
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; background: #f8fafb; border: 1px solid #e6edf3; border-radius: 14px;">
                       <tr>
                         <td style="padding: 20px 20px 6px;">
@@ -366,7 +366,7 @@ Deno.serve(async (req) => {
                   </td>
                 </tr>
                 <tr>
-                  <td style="background: #ffffff; padding: 18px 26px 8px;">
+                  <td style="background: #ffffff; padding: 18px 42px 8px;">
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; border: 1px solid #d7e7dd; border-radius: 14px; background: #f7fbf8;">
                       <tr>
                         <td style="padding: 20px;">
@@ -394,7 +394,7 @@ Deno.serve(async (req) => {
                   </td>
                 </tr>
                 <tr>
-                  <td style="background: #ffffff; padding: 18px 26px 8px;">
+                  <td style="background: #ffffff; padding: 18px 42px 8px;">
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
                       <tr>
                         <td style="padding: 20px; background: #f8fafb; border: 1px solid #e6edf3; border-radius: 14px;">
@@ -411,7 +411,7 @@ Deno.serve(async (req) => {
                   </td>
                 </tr>
                 <tr>
-                  <td style="background: #ffffff; padding: 18px 26px 8px;">
+                  <td style="background: #ffffff; padding: 18px 42px 8px;">
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
                       <tr>
                         <td style="padding: 20px; background: #0f2638; border-radius: 14px;">
@@ -432,7 +432,7 @@ Deno.serve(async (req) => {
                   </td>
                 </tr>
                 <tr>
-                  <td style="background: #ffffff; padding: 18px 26px 30px;">
+                  <td style="background: #ffffff; padding: 18px 42px 34px;">
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; background: #f8fafb; border: 1px solid #e6edf3; border-radius: 14px;">
                       <tr>
                         <td style="padding: 20px;">
