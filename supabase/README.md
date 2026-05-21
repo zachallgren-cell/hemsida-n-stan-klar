@@ -15,6 +15,7 @@ Bokningssidan kan anropa Edge Function:
 - `booked-slots`
 - `complete-booking`
 - `stripe-webhook`
+- `submit-rut`
 
 Funktionen:
 
@@ -25,6 +26,31 @@ Funktionen:
 - återanvänder eller skapar ny Stripe Checkout-session i `complete-booking` när jobbet markeras som klart
 - skickar Stripe Checkout-länken i klartmailet när jobbet är utfört
 - markerar bokningen som `paid` när Stripe skickar `checkout.session.completed` till webhooken
+
+## Säkert RUT-formulär utan egen RUT-databas
+
+RUT-uppgifter hanteras via:
+
+- `rut.html`
+- `supabase/functions/submit-rut/index.ts`
+
+Flödet är:
+
+1. kunden väljer RUT i bokningen
+2. bekräftelsemejlet länkar till `rut.html`
+3. `rut.html` skickar personnummer och RUT-belopp till Edge Function `submit-rut`
+4. funktionen validerar uppgifterna server-side
+5. funktionen sparar inte RUT-data i Supabase-tabeller
+6. om Fortnox-token och Fortnox-dokument finns skickas underlaget till Fortnox `/3/taxreductions`
+7. ett internt mail skickas utan personnummer som kvittens/status
+8. om Fortnox-kopplingen saknas returnerar formuläret fel, så RUT-uppgifter inte tas emot och tappas bort
+
+För att skapa en Tax Reduction i Fortnox behöver formuläret få ett Fortnox-dokument:
+
+- `referenceDocumentType=INVOICE`, `ORDER` eller `OFFER`
+- `referenceNumber=<Fortnox dokumentnummer>`
+
+Utan dessa kan funktionen notifiera internt att koppling saknas, men den tar inte emot kundens RUT-underlag som lyckat. Det är medvetet: personnummer ska inte tappas bort, sparas i fel system eller skickas i mail.
 
 ## Nya kolumner för fönsterputs
 
@@ -100,6 +126,10 @@ Lägg in dessa i Supabase Edge Functions secrets:
 - `PUBLIC_SITE_URL=https://bergafonsterputs.se`
 - `STRIPE_SECRET_KEY=sk_live_...`
 - `STRIPE_WEBHOOK_SECRET=whsec_...`
+- `FORTNOX_ACCESS_TOKEN=...` för första Fortnox-kopplingen till `submit-rut`
+- `RUT_ALLOW_NO_FORTNOX=true` endast i testläge om formuläret ska acceptera utan Fortnox-postning
+
+För produktion bör Fortnox OAuth-token hanteras med en liten privat token-store, eftersom Fortnox access tokens går ut och refresh tokens roteras. Den token-storen ska bara lagra integrationstokens, inte kundens RUT-uppgifter.
 
 ## Viktigt
 
@@ -128,6 +158,7 @@ supabase functions deploy create-booking
 supabase functions deploy booked-slots
 supabase functions deploy complete-booking
 supabase functions deploy stripe-webhook
+supabase functions deploy submit-rut
 ```
 
 Om du vill sätta secrets från terminalen:
@@ -141,6 +172,7 @@ supabase secrets set BOOKING_RUT_FORM_URL="https://..."
 supabase secrets set PUBLIC_SITE_URL=https://bergafonsterputs.se
 supabase secrets set STRIPE_SECRET_KEY="$STRIPE_SECRET_KEY"
 supabase secrets set STRIPE_WEBHOOK_SECRET="$STRIPE_WEBHOOK_SECRET"
+supabase secrets set FORTNOX_ACCESS_TOKEN="$FORTNOX_ACCESS_TOKEN"
 ```
 
 ## Efter deploy

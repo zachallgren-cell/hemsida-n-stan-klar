@@ -249,7 +249,6 @@ Deno.serve(async (req) => {
     const safeCoordinates = payload.coordinates ? escapeHtml(payload.coordinates) : 'Ej angivet';
     const safePrice = escapeHtml(String(payload.price || 'Ej angivet'));
     const safePriceDisplay = /^\d+$/.test(String(payload.price || '')) ? `${safePrice} kr` : safePrice;
-    const safeRutFormUrl = rutFormUrl ? escapeHtml(rutFormUrl) : '';
     const logoUrl = `${siteUrl}/logga-fonsterputs-transparent.png`;
     const safeLogoUrl = escapeHtml(logoUrl);
     const safeContactEmail = escapeHtml(contactEmail);
@@ -260,6 +259,24 @@ Deno.serve(async (req) => {
     const priceBeforeRutDisplay = formatSek(priceBeforeRutNumber);
     const rutDeductionDisplay = rutDeductionNumber === null ? 'Ej angivet' : `-${formatSek(rutDeductionNumber)}`;
     const priceAfterRutDisplay = priceAfterRutNumber === null ? safePriceDisplay : formatSek(priceAfterRutNumber);
+    let rutFormUrlWithBooking = rutFormUrl;
+
+    if (rutFormUrlWithBooking) {
+      try {
+        const rutUrl = new URL(rutFormUrlWithBooking);
+        if (savedBooking?.id) rutUrl.searchParams.set('bookingId', String(savedBooking.id));
+        if (rutDeductionNumber !== null) rutUrl.searchParams.set('rutAmount', String(Math.round(rutDeductionNumber)));
+        rutFormUrlWithBooking = rutUrl.toString();
+      } catch {
+        const separator = rutFormUrlWithBooking.includes('?') ? '&' : '?';
+        const params = new URLSearchParams();
+        if (savedBooking?.id) params.set('bookingId', String(savedBooking.id));
+        if (rutDeductionNumber !== null) params.set('rutAmount', String(Math.round(rutDeductionNumber)));
+        rutFormUrlWithBooking = params.toString() ? `${rutFormUrlWithBooking}${separator}${params.toString()}` : rutFormUrlWithBooking;
+      }
+    }
+
+    const safeRutFormUrl = rutFormUrlWithBooking ? escapeHtml(rutFormUrlWithBooking) : '';
     const customerDetailRows = [
       ['Datum', escapeHtml(payload.date || 'Ej angivet')],
       ['Tid', escapeHtml(payload.time || 'Ej angivet')],
@@ -279,23 +296,43 @@ Deno.serve(async (req) => {
         `).join('');
     const rutFormSection = rawRutChoice.includes('Ja')
       ? `
-        <div style="margin-top: 20px; padding: 14px 16px; border-radius: 12px; background: #f3fbff; border: 1px solid #bfddeb;">
-          <p style="margin: 0 0 8px;"><strong>RUT-avdrag</strong></p>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; background: #f7fbf8; border: 1px solid #d7e7dd; border-radius: 14px;">
+          <tr>
+            <td style="padding: 20px;">
+              <p style="margin: 0 0 8px; color: #287a45; font-size: 12px; line-height: 1.3; font-weight: 800; text-transform: uppercase; letter-spacing: .05em;">Viktigt inför RUT</p>
+              <h2 style="margin: 0 0 10px; color: #0f2638; font-size: 20px; line-height: 1.25;">Fyll i RUT-formuläret</h2>
           ${safeRutFormUrl
-            ? `<p style="margin: 0;">Fyll i RUT-uppgifterna, till exempel personnummer, i vårt säkra formulär: <a href="${safeRutFormUrl}">${safeRutFormUrl}</a></p>`
-            : '<p style="margin: 0;">Vi skickar en säker formulärlänk för RUT-uppgifterna innan jobbet utförs.</p>'}
-        </div>
+            ? `<p style="margin: 0 0 14px; color: #536574; font-size: 14px; line-height: 1.7;">För att vi ska kunna hantera RUT-avdraget behöver du fylla i uppgifterna i vårt säkra formulär.</p>
+              <table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+                <tr>
+                  <td align="center" style="background: #247a43; border-radius: 999px;">
+                    <a href="${safeRutFormUrl}" style="display: block; padding: 14px 20px; color: #ffffff; font-size: 13px; font-weight: 800; letter-spacing: .04em; text-decoration: none;">FYLL I RUT-FORMULÄR</a>
+                  </td>
+                </tr>
+              </table>`
+            : '<p style="margin: 0; color: #536574; font-size: 14px; line-height: 1.7;">Vi skickar en säker formulärlänk för RUT-uppgifterna innan jobbet utförs.</p>'}
+            </td>
+          </tr>
+        </table>
       `
       : rawRutChoice.includes('Nej')
         ? `
-          <div style="margin-top: 20px; padding: 14px 16px; border-radius: 12px; background: #fff8ec; border: 1px solid #ffd08b;">
-            <p style="margin: 0;"><strong>RUT-avdrag:</strong> Du har valt att inte använda RUT-avdrag. Kontakta oss gärna om du vill dubbelkolla priset utan RUT.</p>
-          </div>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; background: #fff8ec; border: 1px solid #ffd08b; border-radius: 14px;">
+            <tr>
+              <td style="padding: 18px 20px;">
+                <p style="margin: 0; color: #0f2638; font-size: 14px; line-height: 1.7;"><strong>RUT-avdrag:</strong> Du har valt att inte använda RUT-avdrag. Kontakta oss gärna om du vill dubbelkolla priset utan RUT.</p>
+              </td>
+            </tr>
+          </table>
         `
         : `
-          <div style="margin-top: 20px; padding: 14px 16px; border-radius: 12px; background: #fff8ec; border: 1px solid #ffd08b;">
-            <p style="margin: 0;"><strong>RUT-avdrag:</strong> Vi kontaktar dig om RUT-valet behöver stämmas av.</p>
-          </div>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; background: #fff8ec; border: 1px solid #ffd08b; border-radius: 14px;">
+            <tr>
+              <td style="padding: 18px 20px;">
+                <p style="margin: 0; color: #0f2638; font-size: 14px; line-height: 1.7;"><strong>RUT-avdrag:</strong> Vi kontaktar dig om RUT-valet behöver stämmas av.</p>
+              </td>
+            </tr>
+          </table>
         `;
 
     const emailHtml = `
@@ -334,7 +371,13 @@ Deno.serve(async (req) => {
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width: 100%; max-width: 820px; border-collapse: collapse;">
                 <tr>
                   <td style="background: #0f2638; border-radius: 18px 18px 0 0; padding: 28px 24px 20px; text-align: center;">
-                    <img src="${safeLogoUrl}" width="118" alt="Berga Fönsterputs" style="display: block; width: 118px; max-width: 118px; height: auto; margin: 0 auto 18px;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" align="center" style="margin: 0 auto 18px; border-collapse: collapse;">
+                      <tr>
+                        <td align="center" style="background: #ffffff; border-radius: 16px; padding: 10px 12px;">
+                          <img src="${safeLogoUrl}" width="118" alt="Berga Fönsterputs" style="display: block; width: 118px; max-width: 118px; height: auto; margin: 0 auto;">
+                        </td>
+                      </tr>
+                    </table>
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
                       <tr>
                         <td align="center" style="padding: 4px; color: #ffffff; font-size: 12px; font-weight: 700;">Tryggt &amp; säkert</td>
@@ -353,6 +396,28 @@ Deno.serve(async (req) => {
                 </tr>
                 <tr>
                   <td style="background: #ffffff; padding: 22px 42px 8px;">
+                    ${rutFormSection}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="background: #ffffff; padding: 18px 42px 8px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+                      <tr>
+                        <td style="padding: 20px; background: #f8fafb; border: 1px solid #e6edf3; border-radius: 14px;">
+                          <h2 style="margin: 0 0 12px; color: #0f2638; font-size: 18px;">Inför besöket</h2>
+                          <ul style="margin: 0; padding-left: 20px; color: #536574; font-size: 14px; line-height: 1.7;">
+                            <li>Plocka undan föremål nära fönster.</li>
+                            <li>Säkerställ att vi kommer åt fönstren.</li>
+                            <li>Meddela oss om något fönster är skadat eller svårt att nå.</li>
+                          </ul>
+                          <p style="margin: 14px 0 0; padding: 12px 14px; background: #eef3f6; border-left: 4px solid #0f2638; color: #173042; font-size: 13px; line-height: 1.6;">Vi utför endast arbete som kan genomföras säkert från mark, normal hushållsstege eller inifrån bostaden.</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="background: #ffffff; padding: 18px 42px 8px;">
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; background: #f8fafb; border: 1px solid #e6edf3; border-radius: 14px;">
                       <tr>
                         <td style="padding: 20px 20px 6px;">
@@ -387,24 +452,6 @@ Deno.serve(async (req) => {
                               <td align="right" style="padding: 18px 18px; color: #ffffff; font-size: 26px; line-height: 1.1; font-weight: 800;">${priceAfterRutDisplay}</td>
                             </tr>
                           </table>
-                        </td>
-                      </tr>
-                    </table>
-                    ${rutFormSection}
-                  </td>
-                </tr>
-                <tr>
-                  <td style="background: #ffffff; padding: 18px 42px 8px;">
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
-                      <tr>
-                        <td style="padding: 20px; background: #f8fafb; border: 1px solid #e6edf3; border-radius: 14px;">
-                          <h2 style="margin: 0 0 12px; color: #0f2638; font-size: 18px;">Inför besöket</h2>
-                          <ul style="margin: 0; padding-left: 20px; color: #536574; font-size: 14px; line-height: 1.7;">
-                            <li>Plocka undan föremål nära fönster.</li>
-                            <li>Säkerställ att vi kommer åt fönstren.</li>
-                            <li>Meddela oss om något fönster är skadat eller svårt att nå.</li>
-                          </ul>
-                          <p style="margin: 14px 0 0; padding: 12px 14px; background: #eef3f6; border-left: 4px solid #0f2638; color: #173042; font-size: 13px; line-height: 1.6;">Vi utför endast arbete som kan genomföras säkert från mark, normal hushållsstege eller inifrån bostaden.</p>
                         </td>
                       </tr>
                     </table>
