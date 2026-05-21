@@ -15,6 +15,7 @@ Bokningssidan kan anropa Edge Function:
 - `booked-slots`
 - `complete-booking`
 - `stripe-webhook`
+- `rut-booking-details`
 - `submit-rut`
 
 Funktionen:
@@ -38,12 +39,14 @@ Flödet är:
 
 1. kunden väljer RUT i bokningen
 2. bekräftelsemejlet länkar till `rut.html`
-3. `rut.html` skickar personnummer och RUT-belopp till Edge Function `submit-rut`
-4. funktionen validerar uppgifterna server-side
-5. funktionen sparar inte RUT-data i Supabase-tabeller
-6. om Fortnox-token och Fortnox-dokument finns skickas underlaget till Fortnox `/3/taxreductions`
-7. ett internt mail skickas utan personnummer som kvittens/status
-8. om Fortnox-kopplingen saknas returnerar formuläret fel, så RUT-uppgifter inte tas emot och tappas bort
+3. `rut.html` hämtar namn, e-post, telefon och RUT-belopp från `rut-booking-details` med boknings-ID
+4. kunden fyller bara i RUT-specifika uppgifter som personnummer och eventuell fastighetsbeteckning
+5. `rut.html` skickar personnummer och RUT-belopp till Edge Function `submit-rut`
+6. funktionen validerar uppgifterna server-side
+7. funktionen sparar inte RUT-data i Supabase-tabeller
+8. om Fortnox-token och Fortnox-dokument finns skickas underlaget till Fortnox `/3/taxreductions`
+9. ett internt mail skickas utan personnummer som kvittens/status
+10. om Fortnox-kopplingen saknas returnerar formuläret fel, så RUT-uppgifter inte tas emot och tappas bort
 
 För att skapa en Tax Reduction i Fortnox behöver formuläret få ett Fortnox-dokument:
 
@@ -158,6 +161,7 @@ supabase functions deploy create-booking
 supabase functions deploy booked-slots
 supabase functions deploy complete-booking
 supabase functions deploy stripe-webhook
+supabase functions deploy rut-booking-details
 supabase functions deploy submit-rut
 ```
 

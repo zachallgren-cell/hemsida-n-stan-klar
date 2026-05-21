@@ -207,6 +207,11 @@
       font-size: 0.94rem;
     }
 
+    .field-note.is-success {
+      color: var(--success);
+      font-weight: 800;
+    }
+
     .consent-box {
       display: grid;
       grid-template-columns: auto 1fr;
@@ -331,6 +336,7 @@
           <div>
             <label for="name">Namn</label>
             <input type="text" id="name" autocomplete="name" required>
+            <p class="field-note" id="customerDetailsNote">Hämtas automatiskt från bokningen när länken innehåller boknings-ID.</p>
           </div>
           <div>
             <label for="email">E-postadress</label>
@@ -390,11 +396,13 @@
     const SUPABASE_URL = 'https://xeyippgcoqfskcmqzazx.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_MUKxAwv0vNXDrcgumq81fQ_Uvx4eOuq';
     const RUT_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/submit-rut`;
+    const RUT_BOOKING_DETAILS_URL = `${SUPABASE_URL}/functions/v1/rut-booking-details`;
 
     const rutForm = document.getElementById('rutForm');
     const rutStatus = document.getElementById('rutStatus');
     const submitButton = document.getElementById('submitButton');
     const formStartedAtInput = document.getElementById('formStartedAt');
+    const customerDetailsNote = document.getElementById('customerDetailsNote');
     const params = new URLSearchParams(window.location.search);
 
     function setStatus(message, type = 'error') {
@@ -432,6 +440,14 @@
       if (input && value) input.value = value;
     }
 
+    function setCustomerField(id, value) {
+      const input = document.getElementById(id);
+      if (!input || !value) return;
+      input.value = value;
+      input.setAttribute('value', value);
+      input.readOnly = true;
+    }
+
     function applyAskedAmountFromBooking() {
       const askedAmountInput = document.getElementById('askedAmount');
       const askedAmountNote = document.getElementById('askedAmountNote');
@@ -448,6 +464,56 @@
       }
     }
 
+    function applyAskedAmountValue(value) {
+      const askedAmountInput = document.getElementById('askedAmount');
+      const askedAmountNote = document.getElementById('askedAmountNote');
+      const amount = normalizeAmount(value);
+
+      if (!askedAmountInput || !askedAmountNote || !amount) return;
+
+      askedAmountInput.value = amount;
+      askedAmountInput.setAttribute('value', amount);
+      askedAmountNote.textContent = `Automatiskt från bokningen: ${Number(amount).toLocaleString('sv-SE')} kr.`;
+    }
+
+    async function loadBookingDetails() {
+      const bookingId = document.getElementById('bookingId')?.value.trim();
+      if (!bookingId) return;
+
+      try {
+        const detailsUrl = new URL(RUT_BOOKING_DETAILS_URL);
+        detailsUrl.searchParams.set('bookingId', bookingId);
+
+        const res = await fetch(detailsUrl.toString(), {
+          method: 'GET',
+          headers: getHeaders()
+        });
+        const body = await res.json().catch(() => null);
+
+        if (!res.ok || body?.error) {
+          throw new Error(body?.error || 'Kunde inte hämta bokningsuppgifter.');
+        }
+
+        setCustomerField('name', body.name);
+        setCustomerField('email', body.email);
+        setCustomerField('phone', body.phone);
+
+        if (body.rutAmount) {
+          applyAskedAmountValue(body.rutAmount);
+        }
+
+        if (customerDetailsNote) {
+          customerDetailsNote.textContent = 'Kontaktuppgifter hämtade från bokningen.';
+          customerDetailsNote.classList.add('is-success');
+        }
+      } catch (error) {
+        if (customerDetailsNote) {
+          customerDetailsNote.textContent = 'Kunde inte hämta kontaktuppgifter automatiskt. Fyll i dem manuellt.';
+          customerDetailsNote.classList.remove('is-success');
+        }
+      }
+    }
+
     setFieldFromQuery('bookingId', ['bookingId', 'booking']);
     setFieldFromQuery('name', ['name']);
     setFieldFromQuery('email', ['email']);
@@ -455,6 +521,7 @@
     setFieldFromQuery('referenceDocumentType', ['referenceDocumentType', 'documentType']);
     setFieldFromQuery('referenceNumber', ['referenceNumber', 'documentNumber']);
     applyAskedAmountFromBooking();
+    loadBookingDetails();
 
     formStartedAtInput.value = String(Date.now());
 
