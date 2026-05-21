@@ -478,11 +478,19 @@
 
     async function loadBookingDetails() {
       const bookingId = document.getElementById('bookingId')?.value.trim();
-      if (!bookingId) return;
+      const token = getQueryValue(['token']);
+      if (!bookingId || !token) {
+        if (customerDetailsNote) {
+          customerDetailsNote.textContent = 'Använd den säkra RUT-länken från bokningsbekräftelsen för att fylla i formuläret.';
+          customerDetailsNote.classList.remove('is-success');
+        }
+        return;
+      }
 
       try {
         const detailsUrl = new URL(RUT_BOOKING_DETAILS_URL);
         detailsUrl.searchParams.set('bookingId', bookingId);
+        detailsUrl.searchParams.set('token', token);
 
         const res = await fetch(detailsUrl.toString(), {
           method: 'GET',
@@ -537,6 +545,7 @@
         email: document.getElementById('email').value.trim(),
         phone: document.getElementById('phone').value.trim(),
         bookingId: document.getElementById('bookingId').value.trim() || null,
+        token: getQueryValue(['token']) || null,
         referenceDocumentType: document.getElementById('referenceDocumentType').value.trim() || null,
         referenceNumber: document.getElementById('referenceNumber').value.trim() || null,
         socialSecurityNumber: document.getElementById('socialSecurityNumber').value.trim(),
