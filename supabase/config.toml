@@ -8,3 +8,9 @@ verify_jwt = false
 
 [functions.stripe-webhook]
 verify_jwt = false
+
+[functions.rut-booking-details]
+verify_jwt = false
+
+[functions.submit-rut]
+verify_jwt = false

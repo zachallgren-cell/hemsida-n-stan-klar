@@ -508,7 +508,8 @@
         }
       } catch (error) {
         if (customerDetailsNote) {
-          customerDetailsNote.textContent = 'Kunde inte hämta kontaktuppgifter automatiskt. Fyll i dem manuellt.';
+          const detail = error instanceof Error && error.message ? ` (${error.message})` : '';
+          customerDetailsNote.textContent = `Kunde inte hämta kontaktuppgifter automatiskt${detail}. Fyll i dem manuellt.`;
           customerDetailsNote.classList.remove('is-success');
         }
       }
