@@ -441,6 +441,7 @@
 
       if (amountFromBooking) {
         askedAmountInput.value = amountFromBooking;
+        askedAmountInput.setAttribute('value', amountFromBooking);
         askedAmountNote.textContent = `Automatiskt från bokningen: ${Number(amountFromBooking).toLocaleString('sv-SE')} kr.`;
       } else {
         askedAmountNote.textContent = 'Beloppet fylls i automatiskt från bokningslänken. Saknas det, skriv RUT-beloppet från bekräftelsen.';
