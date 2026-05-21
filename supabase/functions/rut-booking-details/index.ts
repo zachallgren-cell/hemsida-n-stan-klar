@@ -21,6 +21,46 @@ function parsePriceNumber(value: unknown) {
   return Number.isFinite(parsed) ? Math.round(parsed) : null;
 }
 
+async function fetchBooking(supabaseUrl: string, serviceRoleKey: string, bookingId: string) {
+  const selectAttempts = [
+    'id,customer_name,email,phone,price',
+    'id,customer_name,email,phone',
+    'id,email,phone,price',
+    'id,email,phone'
+  ];
+
+  let lastError = '';
+
+  for (const select of selectAttempts) {
+    const bookingRes = await fetch(
+      `${supabaseUrl}/rest/v1/bookings?select=${encodeURIComponent(select)}&id=eq.${encodeURIComponent(bookingId)}&limit=1`,
+      {
+        headers: {
+          apikey: serviceRoleKey,
+          Authorization: `Bearer ${serviceRoleKey}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    if (bookingRes.ok) {
+      const bookings = await bookingRes.json();
+      return {
+        booking: Array.isArray(bookings) ? bookings[0] : null,
+        error: ''
+      };
+    }
+
+    lastError = await bookingRes.text();
+    console.error('Could not fetch RUT booking details with select', select, lastError);
+  }
+
+  return {
+    booking: null,
+    error: lastError || 'Unknown Supabase REST error'
+  };
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -45,32 +85,14 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'Ogiltigt boknings-ID.' }, 400);
     }
 
-    const bookingRes = await fetch(
-      `${supabaseUrl}/rest/v1/bookings?select=id,customer_name,email,phone,price,rut_choice&id=eq.${encodeURIComponent(bookingId)}&limit=1`,
-      {
-        headers: {
-          apikey: serviceRoleKey,
-          Authorization: `Bearer ${serviceRoleKey}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
+    const { booking, error } = await fetchBooking(supabaseUrl, serviceRoleKey, bookingId);
 
-    if (!bookingRes.ok) {
-      console.error('Could not fetch RUT booking details', await bookingRes.text());
+    if (error) {
       return jsonResponse({ error: 'Kunde inte hämta bokningsuppgifter.' }, 500);
     }
 
-    const bookings = await bookingRes.json();
-    const booking = Array.isArray(bookings) ? bookings[0] : null;
-
     if (!booking) {
       return jsonResponse({ error: 'Bokningen hittades inte.' }, 404);
-    }
-
-    const rutChoice = String(booking.rut_choice || '');
-    if (rutChoice && !rutChoice.includes('Ja')) {
-      return jsonResponse({ error: 'Bokningen är inte markerad för RUT.' }, 409);
     }
 
     return jsonResponse({
