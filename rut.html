@@ -354,7 +354,7 @@
           <div>
             <label for="askedAmount">Begärt RUT-belopp</label>
             <input type="text" id="askedAmount" inputmode="numeric" placeholder="Till exempel 699" required>
-            <p class="field-note">Beloppet är normalt avdraget som visas i bokningen.</p>
+            <p class="field-note" id="askedAmountNote">Beloppet fylls i automatiskt från bokningen när länken innehåller RUT-belopp.</p>
           </div>
           <div>
             <label for="propertyDesignation">Fastighetsbeteckning</label>
@@ -415,19 +415,45 @@
       };
     }
 
+    function getQueryValue(names) {
+      return names.map((name) => params.get(name)).find(Boolean) || '';
+    }
+
+    function normalizeAmount(value) {
+      const match = String(value || '').replace(/\s/g, '').replace(',', '.').match(/\d+(\.\d+)?/);
+      if (!match) return '';
+      const parsed = Number(match[0]);
+      return Number.isFinite(parsed) ? String(Math.round(parsed)) : '';
+    }
+
     function setFieldFromQuery(id, names) {
       const input = document.getElementById(id);
-      const value = names.map((name) => params.get(name)).find(Boolean);
+      const value = getQueryValue(names);
       if (input && value) input.value = value;
+    }
+
+    function applyAskedAmountFromBooking() {
+      const askedAmountInput = document.getElementById('askedAmount');
+      const askedAmountNote = document.getElementById('askedAmountNote');
+      const amountFromBooking = normalizeAmount(getQueryValue(['rutAmount', 'amount', 'priceAfterRut', 'price']));
+
+      if (!askedAmountInput || !askedAmountNote) return;
+
+      if (amountFromBooking) {
+        askedAmountInput.value = amountFromBooking;
+        askedAmountNote.textContent = `Automatiskt från bokningen: ${Number(amountFromBooking).toLocaleString('sv-SE')} kr.`;
+      } else {
+        askedAmountNote.textContent = 'Beloppet fylls i automatiskt från bokningslänken. Saknas det, skriv RUT-beloppet från bekräftelsen.';
+      }
     }
 
     setFieldFromQuery('bookingId', ['bookingId', 'booking']);
     setFieldFromQuery('name', ['name']);
     setFieldFromQuery('email', ['email']);
     setFieldFromQuery('phone', ['phone']);
-    setFieldFromQuery('askedAmount', ['rutAmount', 'amount', 'price']);
     setFieldFromQuery('referenceDocumentType', ['referenceDocumentType', 'documentType']);
     setFieldFromQuery('referenceNumber', ['referenceNumber', 'documentNumber']);
+    applyAskedAmountFromBooking();
 
     formStartedAtInput.value = String(Date.now());
 

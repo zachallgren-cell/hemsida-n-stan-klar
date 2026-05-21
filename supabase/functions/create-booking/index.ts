@@ -265,13 +265,19 @@ Deno.serve(async (req) => {
       try {
         const rutUrl = new URL(rutFormUrlWithBooking);
         if (savedBooking?.id) rutUrl.searchParams.set('bookingId', String(savedBooking.id));
-        if (rutDeductionNumber !== null) rutUrl.searchParams.set('rutAmount', String(Math.round(rutDeductionNumber)));
+        if (rutDeductionNumber !== null) {
+          rutUrl.searchParams.set('rutAmount', String(Math.round(rutDeductionNumber)));
+          rutUrl.searchParams.set('priceAfterRut', String(Math.round(rutDeductionNumber)));
+        }
         rutFormUrlWithBooking = rutUrl.toString();
       } catch {
         const separator = rutFormUrlWithBooking.includes('?') ? '&' : '?';
         const params = new URLSearchParams();
         if (savedBooking?.id) params.set('bookingId', String(savedBooking.id));
-        if (rutDeductionNumber !== null) params.set('rutAmount', String(Math.round(rutDeductionNumber)));
+        if (rutDeductionNumber !== null) {
+          params.set('rutAmount', String(Math.round(rutDeductionNumber)));
+          params.set('priceAfterRut', String(Math.round(rutDeductionNumber)));
+        }
         rutFormUrlWithBooking = params.toString() ? `${rutFormUrlWithBooking}${separator}${params.toString()}` : rutFormUrlWithBooking;
       }
     }
