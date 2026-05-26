@@ -72,6 +72,14 @@ function isSuspiciouslyFastSubmission(startedAt: string | undefined) {
   return Number.isFinite(startedTime) && startedTime > 0 && Date.now() - startedTime < 1200;
 }
 
+function createRutFormToken() {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes)
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('');
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -176,6 +184,7 @@ Deno.serve(async (req) => {
       }
     }
 
+    const rutFormToken = createRutFormToken();
     const bookingInsert = {
       customer_name: payload.name,
       email: payload.email,
@@ -194,6 +203,7 @@ Deno.serve(async (req) => {
       message: payload.message || null,
       price: payload.price ? String(payload.price) : null,
       rut_choice: payload.rutChoice || payload.rut_choice || null,
+      rut_form_token: rutFormToken,
       consent_accepted: Boolean(payload.consentAccepted),
       status: 'pending',
       payment_status: 'unpaid'
@@ -212,7 +222,7 @@ Deno.serve(async (req) => {
 
     if (!bookingRes.ok) {
       const errorText = await bookingRes.text();
-      if (/rut_choice|schema cache|column/i.test(errorText)) {
+      if (/rut_choice/i.test(errorText) && !/rut_form_token/i.test(errorText)) {
         const fallbackInsert = { ...bookingInsert };
         delete (fallbackInsert as Record<string, unknown>).rut_choice;
         bookingRes = await fetch(`${supabaseUrl}/rest/v1/bookings?select=id`, {
@@ -265,6 +275,7 @@ Deno.serve(async (req) => {
       try {
         const rutUrl = new URL(rutFormUrlWithBooking);
         if (savedBooking?.id) rutUrl.searchParams.set('bookingId', String(savedBooking.id));
+        rutUrl.searchParams.set('token', rutFormToken);
         if (rutDeductionNumber !== null) {
           rutUrl.searchParams.set('rutAmount', String(Math.round(rutDeductionNumber)));
           rutUrl.searchParams.set('priceAfterRut', String(Math.round(rutDeductionNumber)));
@@ -274,6 +285,7 @@ Deno.serve(async (req) => {
         const separator = rutFormUrlWithBooking.includes('?') ? '&' : '?';
         const params = new URLSearchParams();
         if (savedBooking?.id) params.set('bookingId', String(savedBooking.id));
+        params.set('token', rutFormToken);
         if (rutDeductionNumber !== null) {
           params.set('rutAmount', String(Math.round(rutDeductionNumber)));
           params.set('priceAfterRut', String(Math.round(rutDeductionNumber)));

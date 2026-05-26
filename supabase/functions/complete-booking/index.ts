@@ -84,6 +84,51 @@ function parsePriceToOre(value: number | string | undefined) {
   return Number.isFinite(parsed) && parsed > 0 ? Math.round(parsed * 100) : null;
 }
 
+function formatSekFromOre(valueOre: number | null) {
+  return valueOre === null ? '' : `${Math.round(valueOre / 100).toLocaleString('sv-SE')} kr`;
+}
+
+function hasDisplayValue(value: unknown) {
+  return String(value ?? '').trim().length > 0;
+}
+
+function escapeDisplayValue(value: unknown) {
+  return escapeHtml(String(value ?? '').trim());
+}
+
+function buildDetailRow(label: string, value: unknown) {
+  if (!hasDisplayValue(value)) {
+    return '';
+  }
+
+  return `
+    <tr>
+      <td width="42%" style="width: 42%; padding: 12px 0; border-bottom: 1px solid #e6edf3; color: #5b6b7a; font-size: 14px; vertical-align: top;">${label}</td>
+      <td width="58%" style="width: 58%; padding: 12px 0; border-bottom: 1px solid #e6edf3; color: #0f2638; font-size: 14px; font-weight: 700; text-align: right; vertical-align: top;">${escapeDisplayValue(value)}</td>
+    </tr>
+  `;
+}
+
+function buildWorkRow(value: unknown) {
+  if (!hasDisplayValue(value)) {
+    return '';
+  }
+
+  return `
+    <tr>
+      <td width="28" style="width: 28px; padding: 6px 0; color: #287a45; font-size: 15px; font-weight: 800; vertical-align: top;">&#10003;</td>
+      <td style="padding: 6px 0; color: #0f2638; font-size: 14px; line-height: 1.55; font-weight: 700;">${escapeDisplayValue(value)}</td>
+    </tr>
+  `;
+}
+
+function splitAddons(value: unknown) {
+  return String(value ?? '')
+    .split(/[\n,]+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 async function stripePost<T>(stripeSecretKey: string, path: string, params: URLSearchParams): Promise<T> {
   const response = await fetch(`https://api.stripe.com${path}`, {
     method: 'POST',
@@ -252,7 +297,6 @@ Deno.serve(async (req) => {
 
   try {
     const payload = (await req.json()) as CompleteBookingPayload;
-    console.log('complete-booking invoked', payload);
 
     if (!payload.bookingId) {
       return jsonResponse({ error: 'Missing bookingId' }, 400);
@@ -262,6 +306,7 @@ Deno.serve(async (req) => {
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
     const contactEmail = Deno.env.get('BOOKING_CONTACT_EMAIL') || 'info@bergafonsterputs.se';
+    const contactPhone = Deno.env.get('BOOKING_CONTACT_PHONE') || '073-388 12 16';
     const fromEmail = Deno.env.get('BOOKING_FROM_EMAIL');
     const reviewUrl = Deno.env.get('BOOKING_REVIEW_URL') || '';
     const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY') || '';
@@ -327,92 +372,233 @@ Deno.serve(async (req) => {
       }
     }
 
-    const updateBody: Record<string, unknown> = {
-      status: 'completed',
-      payment_method: paymentMethod,
-      completed_at: completedAt
-    };
-
     if (stripeCheckout) {
-      updateBody.payment_provider = 'stripe';
-      updateBody.stripe_product_id = stripeCheckout.productId;
-      updateBody.stripe_price_id = stripeCheckout.priceId;
-      updateBody.stripe_checkout_session_id = stripeCheckout.sessionId;
-      updateBody.stripe_payment_intent_id = stripeCheckout.paymentIntentId;
-      updateBody.stripe_payment_url = stripeCheckout.url;
-      updateBody.stripe_checkout_expires_at = stripeCheckout.expiresAt;
+      const stripeUpdateRes = await fetch(`${supabaseUrl}/rest/v1/bookings?id=eq.${payload.bookingId}`, {
+        method: 'PATCH',
+        headers: {
+          apikey: serviceRoleKey,
+          Authorization: `Bearer ${serviceRoleKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          payment_provider: 'stripe',
+          stripe_product_id: stripeCheckout.productId,
+          stripe_price_id: stripeCheckout.priceId,
+          stripe_checkout_session_id: stripeCheckout.sessionId,
+          stripe_payment_intent_id: stripeCheckout.paymentIntentId,
+          stripe_payment_url: stripeCheckout.url,
+          stripe_checkout_expires_at: stripeCheckout.expiresAt
+        })
+      });
+
+      if (!stripeUpdateRes.ok) {
+        const errorText = await stripeUpdateRes.text();
+        console.error('Could not save Stripe checkout details', errorText);
+        return jsonResponse({ error: 'Could not save Stripe checkout details', details: errorText }, 500);
+      }
     }
 
-    const updateRes = await fetch(`${supabaseUrl}/rest/v1/bookings?id=eq.${payload.bookingId}`, {
-      method: 'PATCH',
-      headers: {
-        apikey: serviceRoleKey,
-        Authorization: `Bearer ${serviceRoleKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(updateBody)
-    });
-
-    if (!updateRes.ok) {
-      const errorText = await updateRes.text();
-      console.error('Could not update booking', errorText);
-      return jsonResponse({ error: 'Could not update booking', details: errorText }, 500);
-    }
-
-    const paymentInstructions = paymentMethod === 'Faktura via e-post'
+    const logoUrl = `${siteUrl}/logga-fonsterputs-transparent.png`;
+    const safeLogoUrl = escapeHtml(logoUrl);
+    const safeContactEmail = escapeHtml(contactEmail);
+    const safeContactPhone = escapeHtml(contactPhone);
+    const safeStripePaymentUrl = escapeHtml(stripePaymentUrl);
+    const safeReviewUrl = escapeHtml(reviewUrl);
+    const priceAfterRutOre = parsePriceToOre(booking.price as number | string | undefined);
+    const priceBeforeRutDisplay = formatSekFromOre(priceAfterRutOre === null ? null : priceAfterRutOre * 2);
+    const rutDeductionDisplay = priceAfterRutOre === null ? '' : `-${formatSekFromOre(priceAfterRutOre)}`;
+    const priceAfterRutDisplay = priceAfterRutOre === null
+      ? escapeDisplayValue(booking.price)
+      : formatSekFromOre(priceAfterRutOre);
+    const windowWorkItem = /^\d+$/.test(String(booking.window_count || '').trim())
+      ? `${String(booking.window_count).trim()} glaspartier`
+      : booking.window_count;
+    const detailRows = [
+      buildDetailRow('Datum', booking.booking_date),
+      buildDetailRow('Tid', booking.booking_time),
+      buildDetailRow('Adress', booking.address),
+      buildDetailRow('Tjänst', booking.service_scope),
+      buildDetailRow('Typ av bostad', booking.housing_type),
+      ...(booking.transport_type ? [buildDetailRow('Transport', booking.transport_type)] : []),
+      ...(booking.sea_miles ? [buildDetailRow('Sjömil', booking.sea_miles)] : []),
+      ...(booking.coordinates ? [buildDetailRow('Koordinater', booking.coordinates)] : [])
+    ].join('');
+    const workRows = [
+      windowWorkItem,
+      ...splitAddons(booking.addons)
+    ].map(buildWorkRow).join('');
+    const priceRows = priceBeforeRutDisplay && rutDeductionDisplay
       ? `
-        <p>Vi skickar faktura via e-post inom 3-7 dagar.</p>
+        <tr>
+          <td style="padding: 9px 0; color: #5b6b7a; font-size: 14px;">Pris före RUT</td>
+          <td align="right" style="padding: 9px 0; color: #0f2638; font-size: 15px; font-weight: 700;">${priceBeforeRutDisplay}</td>
+        </tr>
+        <tr>
+          <td style="padding: 9px 0; color: #5b6b7a; font-size: 14px;">RUT-avdrag (50%)</td>
+          <td align="right" style="padding: 9px 0; color: #287a45; font-size: 15px; font-weight: 700;">${rutDeductionDisplay}</td>
+        </tr>
+      `
+      : '';
+    const stripePaymentSection = paymentMethod === 'Faktura via e-post'
+      ? `
+        <p style="margin: 0; color: #d8e1e8; font-size: 14px; line-height: 1.7;">Vi skickar faktura via e-post inom 3-7 dagar.</p>
       `
       : isAlreadyPaid
         ? `
-          <p>Betalningen är redan mottagen via Stripe. Tack!</p>
+          <p style="margin: 0; color: #d8e1e8; font-size: 14px; line-height: 1.7;">Betalningen är redan mottagen via Stripe. Tack!</p>
         `
-      : stripePaymentUrl
-        ? `
-          <p>Du kan betala tryggt med kort via Stripe.</p>
-          <p><a href="${escapeHtml(stripePaymentUrl)}" style="display:inline-block;padding:12px 18px;border-radius:999px;background:#0b6fa4;color:#ffffff;text-decoration:none;font-weight:800;">Betala säkert via Stripe</a></p>
-        `
-        : `
-          <p>Vi skickar en betalningslänk via Stripe när den är redo.</p>
-        `;
-
+        : stripePaymentUrl
+          ? `
+            <p style="margin: 0 0 14px; color: #d8e1e8; font-size: 14px; line-height: 1.7;">Betala enkelt online med kort via Stripe.</p>
+            <table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+              <tr>
+                <td align="center" style="background: #ffffff; border-radius: 999px;">
+                  <a href="${safeStripePaymentUrl}" style="display: block; padding: 14px 20px; color: #0f2638; font-size: 13px; font-weight: 800; letter-spacing: .04em; text-decoration: none;">BETALA MED KORT</a>
+                </td>
+              </tr>
+            </table>
+          `
+          : `
+            <p style="margin: 0; color: #d8e1e8; font-size: 14px; line-height: 1.7;">Vi skickar en betalningslänk via Stripe när den är redo.</p>
+          `;
     const reviewSection = reviewUrl
       ? `
-        <div style="margin-top: 22px;">
-          <p>Om du är nöjd blir vi jätteglada om du vill lämna en recension.</p>
-          <p><a href="${escapeHtml(reviewUrl)}" style="display:inline-block;padding:12px 18px;border-radius:999px;background:#ffac37;color:#18364b;text-decoration:none;font-weight:800;">Lämna recension</a></p>
-        </div>
+        <tr>
+          <td style="background: #ffffff; padding: 18px 42px 8px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; background: #fff8ec; border: 1px solid #ffd08b; border-radius: 14px;">
+              <tr>
+                <td style="padding: 20px;">
+                  <h2 style="margin: 0 0 10px; color: #0f2638; font-size: 18px;">Hjälp oss växa</h2>
+                  <p style="margin: 0 0 14px; color: #536574; font-size: 14px; line-height: 1.7;">Om du är nöjd skulle vi bli otroligt glada om du lämnar en recension.</p>
+                  <table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+                    <tr>
+                      <td align="center" style="background: #ffac37; border-radius: 999px;">
+                        <a href="${safeReviewUrl}" style="display: block; padding: 14px 20px; color: #18364b; font-size: 13px; font-weight: 800; letter-spacing: .04em; text-decoration: none;">LÄMNA RECENSION</a>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
       `
       : '';
 
-    const summaryParts = [
-      booking.housing_type,
-      booking.window_count,
-      booking.service_scope,
-      booking.addons,
-      booking.transport_type,
-      booking.sea_miles ? `Sjömil från Svinnige marina: ${booking.sea_miles}` : '',
-      booking.coordinates ? `Koordinater: ${booking.coordinates}` : ''
-    ].filter(Boolean).join(' • ');
-
     const emailHtml = `
-      <div style="font-family: Arial, sans-serif; color: #173042; line-height: 1.7;">
-        <h2 style="margin-bottom: 12px;">Tack! Fönsterputsningen är nu klar</h2>
-        <p>Hej ${escapeHtml(booking.customer_name || '')},</p>
-        <p>Vi har nu slutfört jobbet och här kommer betalningsinformationen.</p>
-        <table style="border-collapse: collapse; width: 100%; max-width: 680px;">
-          <tr><td style="padding: 8px 0; font-weight: 700;">Datum</td><td style="padding: 8px 0;">${escapeHtml(booking.booking_date || '')}</td></tr>
-          <tr><td style="padding: 8px 0; font-weight: 700;">Tid</td><td style="padding: 8px 0;">${escapeHtml(booking.booking_time || '')}</td></tr>
-          <tr><td style="padding: 8px 0; font-weight: 700;">Adress</td><td style="padding: 8px 0;">${escapeHtml(booking.address || '')}</td></tr>
-          <tr><td style="padding: 8px 0; font-weight: 700;">Paket</td><td style="padding: 8px 0;">${escapeHtml(summaryParts || 'Ej angivet')}</td></tr>
-          <tr><td style="padding: 8px 0; font-weight: 700;">Pris</td><td style="padding: 8px 0;">${escapeHtml(String(booking.price || 'Ej angivet'))}</td></tr>
+      <div style="margin: 0; padding: 0; background: #f3f6f8; font-family: Arial, Helvetica, sans-serif; color: #0f2638;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; background: #f3f6f8;">
+          <tr>
+            <td align="center" style="padding: 32px 16px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width: 100%; max-width: 820px; border-collapse: collapse;">
+                <tr>
+                  <td style="background: #0f2638; border-radius: 18px 18px 0 0; padding: 28px 24px 20px; text-align: center;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" align="center" style="margin: 0 auto 18px; border-collapse: collapse;">
+                      <tr>
+                        <td align="center" style="background: #ffffff; border-radius: 16px; padding: 10px 12px;">
+                          <img src="${safeLogoUrl}" width="118" alt="Berga Fönsterputs" style="display: block; width: 118px; max-width: 118px; height: auto; margin: 0 auto;">
+                        </td>
+                      </tr>
+                    </table>
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+                      <tr>
+                        <td align="center" style="padding: 4px; color: #ffffff; font-size: 12px; font-weight: 700;">Tryggt &amp; säkert</td>
+                        <td align="center" style="padding: 4px; color: #ffffff; font-size: 12px; font-weight: 700;">Skinande resultat</td>
+                        <td align="center" style="padding: 4px; color: #ffffff; font-size: 12px; font-weight: 700;">100% nöjd kund</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="background: #ffffff; padding: 38px 42px 14px;">
+                    <h1 style="margin: 0 0 12px; color: #0f2638; font-size: 34px; line-height: 1.16; font-weight: 800;">Tack! Fönsterputsningen är klar</h1>
+                    <p style="margin: 0 0 8px; color: #173042; font-size: 17px; line-height: 1.6;">Hej ${escapeHtml(booking.customer_name || '')},</p>
+                    <p style="margin: 0; color: #536574; font-size: 15px; line-height: 1.7;">Vi har nu slutfört arbetet och hoppas att du är riktigt nöjd med resultatet.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="background: #ffffff; padding: 18px 42px 8px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+                      <tr>
+                        <td style="padding: 22px; background: #0f2638; border-radius: 14px;">
+                          <h2 style="margin: 0 0 10px; color: #ffffff; font-size: 20px;">Betala enkelt</h2>
+                          <p style="margin: 0 0 16px; color: #d8e1e8; font-size: 14px; line-height: 1.7;">Fönsterputsningen är klar. Här betalar du smidigt med kort eller Swish.</p>
+                          ${stripePaymentSection}
+                          <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top: 14px; border-collapse: collapse;">
+                            <tr>
+                              <td style="padding: 8px 12px; background: #ffffff; color: #0f2638; font-size: 13px; font-weight: 700; border-radius: 999px;">Swish 0733-881216</td>
+                              <td style="width: 8px;"></td>
+                              <td style="padding: 8px 12px; background: #ffffff; color: #0f2638; font-size: 13px; font-weight: 700; border-radius: 999px;">Meddelande: Bokning ${escapeHtml(String(booking.id || ''))}</td>
+                            </tr>
+                          </table>
+                          <p style="margin: 14px 0 0; color: #d8e1e8; font-size: 13px; line-height: 1.6;">Betalning sker gärna inom 3 dagar.</p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="background: #ffffff; padding: 18px 42px 8px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; border: 1px solid #d7e7dd; border-radius: 14px; background: #f7fbf8;">
+                      <tr>
+                        <td style="padding: 20px;">
+                          <h2 style="margin: 0 0 14px; color: #0f2638; font-size: 18px; line-height: 1.3;">Betalningsöversikt</h2>
+                          ${priceRows ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">${priceRows}</table>` : ''}
+                          ${priceAfterRutDisplay ? `
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top: 12px; border-collapse: collapse; background: #247a43; border-radius: 12px;">
+                            <tr>
+                              <td style="padding: 18px 18px; color: #ffffff; font-size: 15px; font-weight: 700;">Att betala</td>
+                              <td align="right" style="padding: 18px 18px; color: #ffffff; font-size: 26px; line-height: 1.1; font-weight: 800;">${priceAfterRutDisplay}</td>
+                            </tr>
+                          </table>
+                          ` : ''}
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                ${detailRows || workRows ? `
+                <tr>
+                  <td style="background: #ffffff; padding: 18px 42px 8px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; background: #f8fafb; border: 1px solid #e6edf3; border-radius: 14px;">
+                      <tr>
+                        <td style="padding: 20px 20px 6px;">
+                          <h2 style="margin: 0 0 6px; color: #0f2638; font-size: 18px; line-height: 1.3;">Jobbdetaljer</h2>
+                          ${detailRows ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">${detailRows}</table>` : ''}
+                          ${workRows ? `
+                            <h3 style="margin: 18px 0 8px; color: #0f2638; font-size: 15px; line-height: 1.3;">Utfört arbete</h3>
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">${workRows}</table>
+                          ` : ''}
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                ` : ''}
+                ${reviewSection}
+                <tr>
+                  <td style="background: #ffffff; padding: 18px 42px 34px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; background: #f8fafb; border: 1px solid #e6edf3; border-radius: 14px;">
+                      <tr>
+                        <td style="padding: 20px;">
+                          <h2 style="margin: 0 0 10px; color: #0f2638; font-size: 18px;">Frågor?</h2>
+                          <p style="margin: 0 0 12px; color: #536574; font-size: 14px; line-height: 1.7;">Svara direkt på detta mail om du har frågor eller funderingar.</p>
+                          <p style="margin: 0; color: #0f2638; font-size: 14px; line-height: 1.8;"><strong>Telefon:</strong> ${safeContactPhone}<br><strong>E-post:</strong> <a href="mailto:${safeContactEmail}" style="color: #0f5475; text-decoration: underline;">${safeContactEmail}</a></p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="background: #0f2638; border-radius: 0 0 18px 18px; padding: 24px 20px; text-align: center;">
+                    <p style="margin: 0 0 6px; color: #ffffff; font-size: 16px; font-weight: 800;">Tack för att du väljer Berga Fönsterputs!</p>
+                    <p style="margin: 0; color: #d8e1e8; font-size: 13px; line-height: 1.6;">Lokalt företag – personligt bemötande – skinande resultat</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
         </table>
-        <div style="margin-top: 18px;">
-          ${paymentInstructions}
-        </div>
-        ${reviewSection}
-        <p style="margin-top: 24px;">Om du har frågor kan du svara på detta mail eller kontakta oss på <strong>${escapeHtml(contactEmail)}</strong>.</p>
-        <p>Med vänliga hälsningar,<br><strong>Berga Fönsterputs</strong></p>
       </div>
     `;
 
@@ -437,7 +623,27 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'Completion email failed', details: errorText }, 502);
     }
 
-    console.log('Completion email sent', { bookingId: booking.id, paymentMethod });
+    const completionUpdateRes = await fetch(`${supabaseUrl}/rest/v1/bookings?id=eq.${payload.bookingId}`, {
+      method: 'PATCH',
+      headers: {
+        apikey: serviceRoleKey,
+        Authorization: `Bearer ${serviceRoleKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        status: 'completed',
+        payment_method: paymentMethod,
+        completed_at: completedAt,
+        payment_email_sent: true,
+        payment_email_sent_at: completedAt
+      })
+    });
+
+    if (!completionUpdateRes.ok) {
+      const errorText = await completionUpdateRes.text();
+      console.error('Completion email sent, but booking could not be marked completed', errorText);
+      return jsonResponse({ error: 'Completion email sent, but booking could not be marked completed', details: errorText }, 500);
+    }
 
     return jsonResponse({
       success: true,

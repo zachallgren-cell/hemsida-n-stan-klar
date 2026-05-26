@@ -21,19 +21,23 @@ function parsePriceNumber(value: unknown) {
   return Number.isFinite(parsed) ? Math.round(parsed) : null;
 }
 
-async function fetchBooking(supabaseUrl: string, serviceRoleKey: string, bookingId: string) {
+function isValidToken(value: string) {
+  return /^[a-f0-9]{64}$/i.test(value);
+}
+
+async function fetchBooking(supabaseUrl: string, serviceRoleKey: string, bookingId: string, token: string) {
   const selectAttempts = [
-    'id,customer_name,email,phone,price',
-    'id,customer_name,email,phone',
-    'id,email,phone,price',
-    'id,email,phone'
+    'id,customer_name,email,phone,price,rut_form_token',
+    'id,customer_name,email,phone,rut_form_token',
+    'id,email,phone,price,rut_form_token',
+    'id,email,phone,rut_form_token'
   ];
 
   let lastError = '';
 
   for (const select of selectAttempts) {
     const bookingRes = await fetch(
-      `${supabaseUrl}/rest/v1/bookings?select=${encodeURIComponent(select)}&id=eq.${encodeURIComponent(bookingId)}&limit=1`,
+      `${supabaseUrl}/rest/v1/bookings?select=${encodeURIComponent(select)}&id=eq.${encodeURIComponent(bookingId)}&rut_form_token=eq.${encodeURIComponent(token)}&limit=1`,
       {
         headers: {
           apikey: serviceRoleKey,
@@ -75,6 +79,7 @@ Deno.serve(async (req) => {
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     const url = new URL(req.url);
     const bookingId = url.searchParams.get('bookingId') || url.searchParams.get('booking') || '';
+    const token = url.searchParams.get('token') || '';
 
     if (!supabaseUrl || !serviceRoleKey) {
       console.error('Supabase secrets are missing for rut-booking-details');
@@ -85,14 +90,18 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'Ogiltigt boknings-ID.' }, 400);
     }
 
-    const { booking, error } = await fetchBooking(supabaseUrl, serviceRoleKey, bookingId);
+    if (!isValidToken(token)) {
+      return jsonResponse({ error: 'Ogiltig eller saknad säkerhetslänk.' }, 403);
+    }
+
+    const { booking, error } = await fetchBooking(supabaseUrl, serviceRoleKey, bookingId, token);
 
     if (error) {
       return jsonResponse({ error: 'Kunde inte hämta bokningsuppgifter.' }, 500);
     }
 
     if (!booking) {
-      return jsonResponse({ error: 'Bokningen hittades inte.' }, 404);
+      return jsonResponse({ error: 'Bokningen hittades inte eller länken är ogiltig.' }, 404);
     }
 
     return jsonResponse({

@@ -8,6 +8,7 @@ type RutPayload = {
   email: string;
   phone: string;
   bookingId?: string;
+  token?: string;
   referenceDocumentType?: 'INVOICE' | 'ORDER' | 'OFFER';
   referenceNumber?: string;
   socialSecurityNumber: string;
@@ -96,6 +97,57 @@ function isValidEmail(value: string) {
 function isSuspiciouslyFastSubmission(startedAt: string | undefined) {
   const startedTime = Number(startedAt || 0);
   return Number.isFinite(startedTime) && startedTime > 0 && Date.now() - startedTime < 1500;
+}
+
+function isValidToken(value: string) {
+  return /^[a-f0-9]{64}$/i.test(value);
+}
+
+async function verifyBookingToken(supabaseUrl: string, serviceRoleKey: string, bookingId: string, token: string) {
+  if (!/^[a-z0-9_-]{1,80}$/i.test(bookingId) || !isValidToken(token)) {
+    return false;
+  }
+
+  const bookingRes = await fetch(
+    `${supabaseUrl}/rest/v1/bookings?select=id&id=eq.${encodeURIComponent(bookingId)}&rut_form_token=eq.${encodeURIComponent(token)}&limit=1`,
+    {
+      headers: {
+        apikey: serviceRoleKey,
+        Authorization: `Bearer ${serviceRoleKey}`,
+        'Content-Type': 'application/json'
+      }
+    }
+  );
+
+  if (!bookingRes.ok) {
+    console.error('Could not verify RUT booking token', await bookingRes.text());
+    throw new Error('Kunde inte verifiera RUT-länken.');
+  }
+
+  const bookings = await bookingRes.json();
+  return Array.isArray(bookings) && Boolean(bookings[0]);
+}
+
+async function markRutReceived(supabaseUrl: string, serviceRoleKey: string, bookingId: string) {
+  const updateRes = await fetch(`${supabaseUrl}/rest/v1/bookings?id=eq.${encodeURIComponent(bookingId)}`, {
+    method: 'PATCH',
+    headers: {
+      apikey: serviceRoleKey,
+      Authorization: `Bearer ${serviceRoleKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      rut_status: 'Mottaget',
+      rut_received_at: new Date().toISOString()
+    })
+  });
+
+  if (!updateRes.ok) {
+    console.error('Could not mark RUT as received', await updateRes.text());
+    return false;
+  }
+
+  return true;
 }
 
 async function postToFortnox(payload: RutPayload, askedAmount: number): Promise<FortnoxResult> {
@@ -246,6 +298,24 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'Samtycke krävs för att skicka RUT-underlaget.' }, 400);
     }
 
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const bookingId = String(payload.bookingId || '').trim();
+    const token = String(payload.token || '').trim();
+
+    if (!supabaseUrl || !serviceRoleKey) {
+      return jsonResponse({ error: 'Server configuration saknas.' }, 500);
+    }
+
+    if (!bookingId || !token) {
+      return jsonResponse({ error: 'Säkerhetslänken saknas. Använd länken från bokningsbekräftelsen.' }, 403);
+    }
+
+    const hasValidBookingToken = await verifyBookingToken(supabaseUrl, serviceRoleKey, bookingId, token);
+    if (!hasValidBookingToken) {
+      return jsonResponse({ error: 'RUT-länken är ogiltig eller har bytts ut. Kontakta oss så skickar vi en ny.' }, 403);
+    }
+
     if (!isValidEmail(payload.email)) {
       return jsonResponse({ error: 'Ange en giltig e-postadress.' }, 400);
     }
@@ -272,11 +342,14 @@ Deno.serve(async (req) => {
       }, 409);
     }
 
+    const rutMarkedReceived = await markRutReceived(supabaseUrl, serviceRoleKey, bookingId);
+
     return jsonResponse({
       success: true,
       received: true,
       fortnoxPosted: fortnoxResult.posted,
-      notificationSent
+      notificationSent,
+      rutMarkedReceived
     });
   } catch (error) {
     console.error('Unhandled submit-rut error', error instanceof Error ? error.message : error);
