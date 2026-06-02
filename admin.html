@@ -580,52 +580,47 @@
       return match ? Number(match[0]) : 0;
     }
 
+    const START_PRICE = 949;
+    const INCLUDED_WINDOWS = 15;
+    const TWO_FLOOR_ADDON = 200;
+    const EXTRA_REGULAR_WINDOW_PRICE = 39;
+    const EXTRA_MUNTINS_WINDOW_PRICE = 49;
+    const INTERIOR_BASE_ADDON = 320;
+    const INTERIOR_EXTRA_WINDOW_PRICE = 39;
+    const ISLAND_START_PRICE = 799;
+    const ISLAND_PRICE_PER_SEA_MILE = 125;
+
     function getBasePrice(housingTypeLabel, windowCount) {
-      if (housingTypeLabel === 'Enplansvilla') {
-        return windowCount > 15 ? 799 : 699;
-      }
-
-      if (housingTypeLabel === 'Tvåplansvilla') {
-        return windowCount > 17 ? 999 : 899;
-      }
-
-      return null;
+      if (!housingTypeLabel) return null;
+      const floorAddon = housingTypeLabel === 'Två våningar' || housingTypeLabel === 'Tvåplansvilla'
+        ? TWO_FLOOR_ADDON
+        : 0;
+      return START_PRICE + floorAddon;
     }
 
     function getInteriorAddon(housingTypeLabel, windowCount) {
-      if (housingTypeLabel === 'Enplansvilla') {
-        return windowCount > 15 ? 399 : 349;
-      }
-
-      if (housingTypeLabel === 'Tvåplansvilla') {
-        return windowCount > 17 ? 499 : 449;
-      }
-
-      return 0;
+      const extraWindows = Math.max(0, windowCount - INCLUDED_WINDOWS);
+      return INTERIOR_BASE_ADDON + (extraWindows * INTERIOR_EXTRA_WINDOW_PRICE);
     }
 
     function getSeaMilesAddon(seaMilesLabel) {
       if (!seaMilesLabel) return { price: 0, isQuote: false };
-      if (seaMilesLabel === '0-5 sjömil') return { price: 300, isQuote: false };
-      if (seaMilesLabel === '6-10 sjömil') return { price: 600, isQuote: false };
-      if (seaMilesLabel === '11-15 sjömil') return { price: 900, isQuote: false };
-      if (seaMilesLabel === '16+ sjömil') return { price: 0, isQuote: true };
-      return { price: 0, isQuote: false };
+      const match = String(seaMilesLabel).match(/\d+/);
+      const miles = match ? Number(match[0]) : 0;
+      return { price: ISLAND_START_PRICE + (miles * ISLAND_PRICE_PER_SEA_MILE), isQuote: false };
     }
 
-    function getAddonsPrice(addonsValue) {
+    function getWindowTypePrice(addonsValue, windowCount) {
       const text = String(addonsValue || '').toLowerCase();
-      let total = 0;
-
-      if (text.includes('inglasad altan') || text.includes('uterum')) {
-        total += 299;
-      }
-
-      if (text.includes('spröjs')) {
-        total += 149;
-      }
-
-      return total;
+      const regularMatch = text.match(/(\d+)\s+utan spröjs/);
+      const muntinsMatch = text.match(/(\d+)\s+(?:med )?spröjs/);
+      const muntinsCount = muntinsMatch ? Number(muntinsMatch[1]) : 0;
+      const regularCount = regularMatch ? Number(regularMatch[1]) : Math.max(0, windowCount - muntinsCount);
+      const includedRegularWindowCount = Math.min(regularCount, INCLUDED_WINDOWS);
+      const includedMuntinsCount = Math.min(muntinsCount, Math.max(0, INCLUDED_WINDOWS - includedRegularWindowCount));
+      const extraRegularWindowCount = Math.max(0, regularCount - includedRegularWindowCount);
+      const extraMuntinsCount = Math.max(0, muntinsCount - includedMuntinsCount);
+      return (extraRegularWindowCount * EXTRA_REGULAR_WINDOW_PRICE) + (extraMuntinsCount * EXTRA_MUNTINS_WINDOW_PRICE);
     }
 
     function getBookingPriceDisplay(booking) {
@@ -645,7 +640,7 @@
       const interiorAddon = booking.service_scope === 'Invändig + utvändig'
         ? getInteriorAddon(housingType, windowCount)
         : 0;
-      const addonsPrice = getAddonsPrice(booking.addons);
+      const windowTypePrice = getWindowTypePrice(booking.addons, windowCount);
       const seaMilesAddon = booking.transport_type === 'Båttransport behövs'
         ? getSeaMilesAddon(booking.sea_miles)
         : { price: 0, isQuote: false };
@@ -654,7 +649,7 @@
         return 'Pris enligt offert';
       }
 
-      return `${basePrice + interiorAddon + addonsPrice + seaMilesAddon.price} kr`;
+      return `${basePrice + windowTypePrice + interiorAddon + seaMilesAddon.price} kr`;
     }
 
     function renderBookings(bookings) {

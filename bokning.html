@@ -1218,7 +1218,7 @@
                 </div>
                 <div class="field-help">
                   <span class="field-help-trigger" tabindex="0">Vad händer utan RUT?</span>
-                  <div class="field-help-tooltip">Priserna på hemsidan visas efter RUT. Om du inte vill använda RUT-avdrag kontaktar du oss, så räknar vi fram rätt pris utan RUT.</div>
+                  <div class="field-help-tooltip">Priset på hemsidan visas efter RUT. Om du vill boka utan RUT-avdrag kontaktar du oss, så stämmer vi av priset innan bokning.</div>
                 </div>
               </div>
             </div>
@@ -1230,12 +1230,12 @@
               <label for="boatSize">Typ av bostad</label>
               <select id="boatSize" required>
                 <option value="">Välj bostad</option>
-                <option value="Villa / normalstor bostad" data-label="Enplansvilla">Enplansvilla</option>
-                <option value="Större villa / fler fönster" data-label="Tvåplansvilla">Tvåplansvilla</option>
+                <option value="En våning" data-label="En våning">En våning</option>
+                <option value="Två våningar" data-label="Två våningar">Två våningar</option>
               </select>
             </div>
             <div>
-              <label for="windowCount">Ungefär antal fönster / glaspartier</label>
+              <label for="windowCount">Antal fönster utan spröjs</label>
               <div class="stepper">
                 <button type="button" class="stepper-btn" id="windowCountDecrease" aria-label="Minska antal fönster">−</button>
                 <input type="text" id="windowCount" value="0 fönster" readonly required aria-live="polite">
@@ -1245,6 +1245,14 @@
           </div>
 
           <div class="form-row">
+            <div>
+              <label for="muntinsCount">Antal fönster med spröjs</label>
+              <div class="stepper">
+                <button type="button" class="stepper-btn" id="muntinsCountDecrease" aria-label="Minska antal spröjsade fönster">−</button>
+                <input type="text" id="muntinsCount" value="0 spröjsade" readonly aria-live="polite">
+                <button type="button" class="stepper-btn" id="muntinsCountIncrease" aria-label="Öka antal spröjsade fönster">+</button>
+              </div>
+            </div>
             <div>
               <label for="serviceScope">Invändig + utvändig eller endast utvändig</label>
               <select id="serviceScope" required>
@@ -1267,20 +1275,14 @@
             <div class="form-row">
               <div>
                 <label for="seaMiles">Ungefär antal sjömil från Svinnige marina</label>
-                <select id="seaMiles">
-                  <option value="">Välj sjömil</option>
-                  <option value="0-5 sjömil" data-price="300">0-5 sjömil</option>
-                  <option value="6-10 sjömil" data-price="600">6-10 sjömil</option>
-                  <option value="11-15 sjömil" data-price="900">11-15 sjömil</option>
-                  <option value="16+ sjömil" data-price="quote">16+ sjömil (offert)</option>
-                </select>
+                <input type="text" id="seaMiles" inputmode="numeric" pattern="[0-9]*" placeholder="Till exempel 10">
               </div>
               <div>
                 <label for="coordinates">Koordinater</label>
                 <input type="text" id="coordinates" placeholder="Skriv koordinater eller exakt plats där vi ska lägga till">
               </div>
             </div>
-            <p class="booking-note">Vid båttransport tillkommer resekostnad beroende på antal sjömil från Svinnige marina. Välj 16+ sjömil om du vill att vi räknar på jobbet via offert.</p>
+            <p class="booking-note">Vid båttransport tillkommer startavgift 799 kr och 125 kr per sjömil från Svinnige marina.</p>
           </div>
 
           <div class="form-section-label">
@@ -1288,26 +1290,6 @@
             <div>
               <strong>Extra detaljer</strong>
               <small>Lägg till sådant som gör jobbet smidigare på plats.</small>
-            </div>
-          </div>
-
-          <div class="form-stack">
-            <label>Välj tillval</label>
-            <div class="addon-options">
-              <label class="addon-option" for="addonSunroom">
-                <input type="checkbox" id="addonSunroom">
-                <span>
-                  <strong>Inglasad altan / uterum</strong>
-                  <span>Lägg till från 299 kr. Räknas direkt in i priset.</span>
-                </span>
-              </label>
-              <label class="addon-option" for="addonMuntins">
-                <input type="checkbox" id="addonMuntins">
-                <span>
-                  <strong>Spröjsade fönster</strong>
-                  <span>Lägg till från 149 kr. Räknas direkt in i priset.</span>
-                </span>
-              </label>
             </div>
           </div>
 
@@ -1333,7 +1315,7 @@
               <span id="livePriceText">Välj hustyp, antal fönster och putsning så uppdateras priset direkt.</span>
             </div>
             <div class="live-price-value">
-              <strong id="livePriceValue">699 kr</strong>
+              <strong id="livePriceValue">949 kr</strong>
               <span>efter RUT-avdrag</span>
             </div>
             <div class="booking-progress-meter" aria-live="polite">
@@ -1362,27 +1344,27 @@
               <span>Klicka för prislista</span>
             </button>
             <div class="booking-packages-content" id="bookingPackagesContent">
-              <strong>Utvändig puts efter RUT</strong>
+              <strong>Fönsterputs efter RUT</strong>
               <table class="price-list" aria-label="Prislista för fönsterputs">
                 <thead>
                   <tr>
-                    <th>Typ</th>
-                    <th>Antal</th>
-                    <th>Betalar</th>
+                    <th>Upplägg</th>
+                    <th>Pris</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr><td>Enplansvilla</td><td>upp till 15</td><td>699 kr</td></tr>
-                  <tr><td>Enplansvilla</td><td>15+</td><td>799 kr</td></tr>
-                  <tr><td>Tvåplansvilla</td><td>upp till 17</td><td>899 kr</td></tr>
-                  <tr><td>Tvåplansvilla</td><td>17+</td><td>999 kr</td></tr>
+                  <tr><td>Startavgift utvändig puts</td><td>949 kr inkl. 15 fönster</td></tr>
+                  <tr><td>Två våningar</td><td>+200 kr</td></tr>
                 </tbody>
               </table>
               <table class="price-list" aria-label="Prislista för tillval">
                 <tbody>
-                  <tr><td>Invändig puts</td><td>från +349 kr</td></tr>
-                  <tr><td>Uterum</td><td>från +299 kr</td></tr>
-                  <tr><td>Spröjsade fönster</td><td>från +149 kr</td></tr>
+                  <tr><td>Extra utan spröjs</td><td>39 kr per fönster</td></tr>
+                  <tr><td>Extra med spröjs</td><td>49 kr per fönster</td></tr>
+                  <tr><td>Invändig puts</td><td>+320 kr</td></tr>
+                  <tr><td>Invändigt extra fönster</td><td>+39 kr per fönster</td></tr>
+                  <tr><td>Skärgård startavgift</td><td>799 kr</td></tr>
+                  <tr><td>Skärgård per sjömil</td><td>125 kr</td></tr>
                 </tbody>
               </table>
             </div>
@@ -1390,7 +1372,7 @@
 
           <div class="selected-booking">
             <strong>RUT och skärgård</strong>
-            <span>RUT-uppgifter skickas via säkert formulär i bekräftelsemejlet. För skärgårdsjobb väljer du båttransport så räknas båttillägget in direkt, eller offert vid längre transport.</span>
+            <span>RUT-uppgifter skickas via säkert formulär i bekräftelsemejlet. För skärgårdsjobb väljer du båttransport så räknas startavgift och sjömilspris in direkt.</span>
           </div>
         </aside>
       </div>
@@ -1426,9 +1408,10 @@
     const windowCountInput = document.getElementById('windowCount');
     const windowCountDecreaseButton = document.getElementById('windowCountDecrease');
     const windowCountIncreaseButton = document.getElementById('windowCountIncrease');
+    const muntinsCountInput = document.getElementById('muntinsCount');
+    const muntinsCountDecreaseButton = document.getElementById('muntinsCountDecrease');
+    const muntinsCountIncreaseButton = document.getElementById('muntinsCountIncrease');
     const rutChoiceInput = document.getElementById('rutChoice');
-    const addonSunroomInput = document.getElementById('addonSunroom');
-    const addonMuntinsInput = document.getElementById('addonMuntins');
     const transportTypeInput = document.getElementById('transportType');
     const boatFields = document.getElementById('boatFields');
     const seaMilesInput = document.getElementById('seaMiles');
@@ -1511,10 +1494,28 @@
     }
 
     function setWindowCountValue(nextValue) {
-      const safeValue = Math.max(0, Math.min(60, nextValue));
+      const maxRegularWindows = Math.max(0, MAX_TOTAL_WINDOWS - getMuntinsCountValue());
+      const safeValue = Math.max(0, Math.min(maxRegularWindows, nextValue));
       windowCountInput.value = `${safeValue} fönster`;
       updateLivePrice();
       updateBookingProgress();
+    }
+
+    function getMuntinsCountValue() {
+      const rawValue = muntinsCountInput?.value || '';
+      const match = rawValue.match(/\d+/);
+      return match ? Number(match[0]) : 0;
+    }
+
+    function setMuntinsCountValue(nextValue, shouldUpdate = true) {
+      const maxMuntinsWindows = Math.max(0, MAX_TOTAL_WINDOWS - getWindowCountValue());
+      const safeValue = Math.max(0, Math.min(maxMuntinsWindows, nextValue));
+      muntinsCountInput.value = `${safeValue} spröjsade`;
+
+      if (shouldUpdate) {
+        updateLivePrice();
+        updateBookingProgress();
+      }
     }
 
     function getHousingTypeLabel() {
@@ -1523,64 +1524,56 @@
       return selectedOption?.dataset.label || selectedOption?.textContent || housingTypeInput.value;
     }
 
+    const START_PRICE = 949;
+    const INCLUDED_WINDOWS = 15;
+    const MAX_TOTAL_WINDOWS = 60;
+    const TWO_FLOOR_ADDON = 200;
+    const EXTRA_REGULAR_WINDOW_PRICE = 39;
+    const EXTRA_MUNTINS_WINDOW_PRICE = 49;
+    const INTERIOR_BASE_ADDON = 320;
+    const INTERIOR_EXTRA_WINDOW_PRICE = 39;
+    const ISLAND_START_PRICE = 799;
+    const ISLAND_PRICE_PER_SEA_MILE = 125;
+
     function getBasePrice(housingTypeLabel, windowCount) {
-      if (housingTypeLabel === 'Enplansvilla') {
-        return windowCount > 15 ? 799 : 699;
-      }
-
-      if (housingTypeLabel === 'Tvåplansvilla') {
-        return windowCount > 17 ? 999 : 899;
-      }
-
-      return 699;
+      const floorAddon = housingTypeLabel === 'Två våningar' ? TWO_FLOOR_ADDON : 0;
+      return START_PRICE + floorAddon;
     }
 
     function getInteriorAddon(housingTypeLabel, windowCount) {
-      if (housingTypeLabel === 'Enplansvilla') {
-        return windowCount > 15 ? 399 : 349;
-      }
-
-      if (housingTypeLabel === 'Tvåplansvilla') {
-        return windowCount > 17 ? 499 : 449;
-      }
-
-      return 0;
+      const extraWindows = Math.max(0, windowCount - INCLUDED_WINDOWS);
+      return INTERIOR_BASE_ADDON + (extraWindows * INTERIOR_EXTRA_WINDOW_PRICE);
     }
 
     function getSelectedAddons() {
-      const addons = [];
-
-      if (addonSunroomInput?.checked) {
-        addons.push({ label: 'Inglasad altan / uterum', price: 299 });
-      }
-
-      if (addonMuntinsInput?.checked) {
-        addons.push({ label: 'Spröjsade fönster', price: 149 });
-      }
-
-      return addons;
+      return [];
     }
 
     function getSeaMilesAddon() {
-      const selectedOption = seaMilesInput?.options?.[seaMilesInput.selectedIndex];
-      if (!selectedOption) return { label: '', price: 0, isQuote: false };
-      const priceValue = selectedOption.dataset.price || '';
-      if (priceValue === 'quote') {
-        return { label: selectedOption.value, price: 0, isQuote: true };
-      }
-      const parsedPrice = Number(priceValue || 0);
+      const rawValue = seaMilesInput?.value || '';
+      if (!rawValue) return { label: '', price: 0, isQuote: false };
+      const parsedMiles = Number(rawValue);
+      const safeMiles = Number.isFinite(parsedMiles) ? Math.max(0, parsedMiles) : 0;
       return {
-        label: selectedOption.value,
-        price: Number.isFinite(parsedPrice) ? parsedPrice : 0,
+        label: `${safeMiles} sjömil`,
+        price: ISLAND_START_PRICE + (safeMiles * ISLAND_PRICE_PER_SEA_MILE),
         isQuote: false
       };
     }
 
     function calculateEstimatedPrice() {
       const housingTypeLabel = getHousingTypeLabel();
-      const windowCount = getWindowCountValue();
+      const regularWindowCount = getWindowCountValue();
+      const muntinsCount = getMuntinsCountValue();
+      const windowCount = regularWindowCount + muntinsCount;
+      const extraWindowCount = Math.max(0, windowCount - INCLUDED_WINDOWS);
+      const includedRegularWindowCount = Math.min(regularWindowCount, INCLUDED_WINDOWS);
+      const includedMuntinsCount = Math.min(muntinsCount, Math.max(0, INCLUDED_WINDOWS - includedRegularWindowCount));
+      const extraRegularWindowCount = Math.max(0, regularWindowCount - includedRegularWindowCount);
+      const extraMuntinsCount = Math.max(0, muntinsCount - includedMuntinsCount);
       const serviceScopeValue = document.getElementById('serviceScope')?.value || '';
       const basePrice = getBasePrice(housingTypeLabel, windowCount);
+      const windowPrice = (extraRegularWindowCount * EXTRA_REGULAR_WINDOW_PRICE) + (extraMuntinsCount * EXTRA_MUNTINS_WINDOW_PRICE);
       const interiorAddon = serviceScopeValue === 'Invändig + utvändig'
         ? getInteriorAddon(housingTypeLabel, windowCount)
         : 0;
@@ -1590,11 +1583,22 @@
       const seaMilesAddon = transportType === 'Båttransport behövs'
         ? getSeaMilesAddon()
         : { label: '', price: 0, isQuote: false };
+      const priceAfterRut = seaMilesAddon.isQuote ? null : basePrice + windowPrice + interiorAddon + addonsPrice + seaMilesAddon.price;
+      const priceBeforeRut = priceAfterRut === null ? null : priceAfterRut * 2;
 
       return {
-        total: seaMilesAddon.isQuote ? null : basePrice + interiorAddon + addonsPrice + seaMilesAddon.price,
+        total: priceAfterRut,
+        priceBeforeRut,
         basePrice,
+        windowPrice,
         interiorAddon,
+        muntinsCount,
+        regularWindowCount,
+        includedRegularWindowCount,
+        includedMuntinsCount,
+        extraWindowCount,
+        extraMuntinsCount,
+        extraRegularWindowCount,
         addons,
         addonsPrice,
         transportType,
@@ -1611,12 +1615,12 @@
 
       if ((rutChoiceInput?.value || '').includes('Nej')) {
         livePriceValue.textContent = 'Kontakta oss';
-        livePriceText.textContent = 'Priserna på hemsidan visas efter RUT. Vill du boka utan RUT-avdrag kontaktar du oss så räknar vi fram rätt pris.';
+        livePriceText.textContent = 'Priset på hemsidan visas efter RUT. Vill du boka utan RUT-avdrag kontaktar du oss så stämmer vi av upplägget.';
         return;
       }
 
       if (!estimate.housingTypeLabel) {
-        livePriceValue.textContent = '699 kr';
+        livePriceValue.textContent = '949 kr';
         livePriceText.textContent = 'Välj hustyp, antal fönster och putsning så uppdateras priset direkt.';
         return;
       }
@@ -1628,22 +1632,24 @@
       }
 
       if (estimate.transportType === 'Båttransport behövs' && !estimate.seaMilesAddon.label) {
-        livePriceValue.textContent = `${estimate.basePrice + estimate.interiorAddon + estimate.addonsPrice} kr`;
-        livePriceText.textContent = 'Välj antal sjömil så räknar vi in båttillägget direkt.';
-        return;
-      }
-
-      if (estimate.isQuote) {
-        livePriceValue.textContent = 'Offert';
-        livePriceText.textContent = 'Båttransport över 16 sjömil räknas via offert. Skicka in bokningen så återkommer vi med exakt pris.';
+        livePriceValue.textContent = `${estimate.basePrice + estimate.windowPrice + estimate.interiorAddon + estimate.addonsPrice} kr`;
+        livePriceText.textContent = 'Välj antal sjömil så räknar vi in startavgift och sjömilspris direkt.';
         return;
       }
 
       livePriceValue.textContent = `${estimate.total} kr`;
-      const parts = [`Utvändig puts ${estimate.basePrice} kr efter RUT`];
+      const parts = [
+        `startavgift ${estimate.basePrice} kr`,
+        `${INCLUDED_WINDOWS} fönster ingår`
+      ];
+
+      if (estimate.extraWindowCount > 0) {
+        parts.push(`${estimate.extraRegularWindowCount} extra utan spröjs ${estimate.extraRegularWindowCount * EXTRA_REGULAR_WINDOW_PRICE} kr`);
+        parts.push(`${estimate.extraMuntinsCount} extra med spröjs ${estimate.extraMuntinsCount * EXTRA_MUNTINS_WINDOW_PRICE} kr`);
+      }
 
       if (estimate.interiorAddon > 0) {
-        parts.push(`invändig tillägg ${estimate.interiorAddon} kr`);
+        parts.push(`invändigt ${estimate.interiorAddon} kr`);
       }
 
       estimate.addons.forEach((addon) => {
@@ -1651,10 +1657,10 @@
       });
 
       if (estimate.seaMilesAddon.price > 0) {
-        parts.push(`båttillägg ${estimate.seaMilesAddon.price} kr`);
+        parts.push(`skärgård ${estimate.seaMilesAddon.price} kr`);
       }
 
-      livePriceText.textContent = parts.join(' + ') + '.';
+      livePriceText.textContent = `${parts.join(' + ')}. Pris efter RUT.`;
     }
 
     function updateBookingProgress() {
@@ -1784,8 +1790,7 @@
     document.getElementById('serviceScope')?.addEventListener('change', updateLivePrice);
     transportTypeInput.addEventListener('change', updateTransportFields);
     seaMilesInput.addEventListener('change', updateLivePrice);
-    addonSunroomInput.addEventListener('change', updateLivePrice);
-    addonMuntinsInput.addEventListener('change', updateLivePrice);
+    seaMilesInput.addEventListener('input', updateLivePrice);
     rutChoiceInput.addEventListener('change', updateLivePrice);
     bookingForm.addEventListener('input', updateBookingProgress);
     bookingForm.addEventListener('change', updateBookingProgress);
@@ -1796,6 +1801,14 @@
 
     windowCountIncreaseButton.addEventListener('click', () => {
       setWindowCountValue(getWindowCountValue() + 1);
+    });
+
+    muntinsCountDecreaseButton.addEventListener('click', () => {
+      setMuntinsCountValue(getMuntinsCountValue() - 1);
+    });
+
+    muntinsCountIncreaseButton.addEventListener('click', () => {
+      setMuntinsCountValue(getMuntinsCountValue() + 1);
     });
 
     bookingPackagesToggle.addEventListener('click', () => {
@@ -1841,12 +1854,12 @@
         phone: document.getElementById('phone').value.trim(),
         housingType: getHousingTypeLabel(),
         rutChoice: rutChoiceInput.value,
-        windowCount: windowCountInput.value.trim(),
+        windowCount: `${estimate.windowCount} fönster totalt`,
         serviceScope: document.getElementById('serviceScope').value,
         transportType: transportTypeInput.value || 'Fastland',
         seaMiles: seaMilesInput.value || '',
         coordinates: coordinatesInput.value.trim() || '',
-        addons: getSelectedAddons().map((addon) => addon.label).join(', '),
+        addons: `${estimate.regularWindowCount} utan spröjs, ${estimate.muntinsCount} med spröjs, ${estimate.extraWindowCount} extra fönster`,
         date: dateInput.value,
         time: timeInput.value,
         location: document.getElementById('location').value.trim(),
@@ -1858,9 +1871,14 @@
       const messageParts = [
         `RUT-avdrag: ${booking.rutChoice}`,
         `Typ av bostad: ${booking.housingType}`,
-        `Antal fönster / glaspartier: ${booking.windowCount}`,
+        `Antal fönster totalt: ${booking.windowCount}`,
+        `Fönster utan spröjs: ${estimate.regularWindowCount}`,
+        `Fönster med spröjs: ${estimate.muntinsCount}`,
         `Putsning: ${booking.serviceScope}`,
         `Transport: ${booking.transportType}`,
+        `Prisrad: startavgift ${estimate.basePrice} kr, extra fönster ${estimate.windowPrice} kr, invändigt ${estimate.interiorAddon} kr, skärgård ${estimate.seaMilesAddon.price} kr`,
+        `Pris efter RUT: ${estimate.total} kr`,
+        `Pris före RUT: ${estimate.priceBeforeRut} kr`,
         `Önskat datum / helg: ${isHoliday(booking.date) ? `${formatDateForDisplay(booking.date)} (helg/röd dag)` : formatDateForDisplay(booking.date)}`
       ];
 
@@ -1869,9 +1887,6 @@
       }
       if (booking.coordinates) {
         messageParts.push(`Koordinater: ${booking.coordinates}`);
-      }
-      if (booking.addons) {
-        messageParts.push(`Tillägg: ${booking.addons}`);
       }
       if (booking.message) {
         messageParts.push(`Övrig information: ${booking.message}`);
