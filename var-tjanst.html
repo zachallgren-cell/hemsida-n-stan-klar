@@ -1539,7 +1539,7 @@
             <p>Vi fokuserar på att göra det enkelt för dig. När förutsättningarna finns på plats kommer vi ut och putsar fönstren där du behöver hjälp.</p>
             <ul>
               <li>Vi arbetar lokalt i Åkersberga, Täby, Vaxholm, närområden och ute i skärgården</li>
-              <li>Flexibla tider på kvällar och helger</li>
+              <li>Bokningsbara tider 10-17 alla dagar</li>
               <li>Smidig kontakt via mejl, telefon och sociala medier</li>
             </ul>
             <div class="hero-buttons">
@@ -1840,20 +1840,8 @@
       });
     }
 
-    function isHoliday(date) {
-      const d = new Date(date + 'T12:00:00');
-      return d.getDay() === 0 || redDays.has(date);
-    }
-
-    function isDaytimeDay(date) {
-      const d = new Date(date + 'T12:00:00');
-      return isHoliday(date) || d.getDay() === 6;
-    }
-
-    function getTimes(date) {
-      return isDaytimeDay(date)
-        ? ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00']
-        : ['17:00', '18:00', '19:00'];
+    function getTimes() {
+      return ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
     }
 
     async function fetchBookings() {
@@ -1867,16 +1855,14 @@
 
     function findNextSlots(bookings) {
       const slots = [];
-      for (let dayOffset = 0; dayOffset < 28 && slots.length < 4; dayOffset += 1) {
+      for (let dayOffset = 2; dayOffset < 28 && slots.length < 4; dayOffset += 1) {
         const date = new Date(todayDate);
         date.setDate(todayDate.getDate() + dayOffset);
         const dateString = formatDate(date.getFullYear(), date.getMonth(), date.getDate());
-        const bookedTimes = bookings
-          .filter((booking) => booking.date === dateString)
-          .map((booking) => booking.time);
+        const dayIsBooked = bookings.some((booking) => booking.date === dateString);
 
-        getTimes(dateString).forEach((time) => {
-          if (!bookedTimes.includes(time) && slots.length < 4) {
+        getTimes().forEach((time) => {
+          if (!dayIsBooked && slots.length < 4) {
             slots.push({ date: dateString, time });
           }
         });

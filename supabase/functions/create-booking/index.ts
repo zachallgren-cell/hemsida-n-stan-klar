@@ -72,6 +72,36 @@ function isSuspiciouslyFastSubmission(startedAt: string | undefined) {
   return Number.isFinite(startedTime) && startedTime > 0 && Date.now() - startedTime < 1200;
 }
 
+function isBookableTime(value: string) {
+  return ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'].includes(value);
+}
+
+function getStockholmDateString(date = new Date()) {
+  const parts = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'Europe/Stockholm',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).formatToParts(date);
+
+  const year = parts.find((part) => part.type === 'year')?.value || '';
+  const month = parts.find((part) => part.type === 'month')?.value || '';
+  const day = parts.find((part) => part.type === 'day')?.value || '';
+  return `${year}-${month}-${day}`;
+}
+
+function addDaysToDateString(dateString: string, days: number) {
+  const date = new Date(`${dateString}T12:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+function isBookableDate(value: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const minBookableDate = addDaysToDateString(getStockholmDateString(), 2);
+  return value >= minBookableDate;
+}
+
 function createRutFormToken() {
   const bytes = new Uint8Array(32);
   crypto.getRandomValues(bytes);
@@ -94,6 +124,14 @@ Deno.serve(async (req) => {
 
     if (!payload.name || !payload.email || !payload.phone || !payload.boatSize || !payload.date || !payload.time || !payload.location) {
       return jsonResponse({ error: 'Missing required booking fields' }, 400);
+    }
+
+    if (!isBookableTime(payload.time)) {
+      return jsonResponse({ error: 'Den valda tiden går inte att boka. Välj en tid mellan 10:00 och 17:00.' }, 400);
+    }
+
+    if (!isBookableDate(payload.date)) {
+      return jsonResponse({ error: 'Välj ett senare datum.' }, 400);
     }
 
     if (payload.website || isSuspiciouslyFastSubmission(payload.formStartedAt)) {
@@ -135,7 +173,7 @@ Deno.serve(async (req) => {
     }
 
     const existingBookingRes = await fetch(
-      `${supabaseUrl}/rest/v1/bookings?select=id&booking_date=eq.${encodeURIComponent(payload.date)}&booking_time=eq.${encodeURIComponent(payload.time)}&status=in.(pending,confirmed)&limit=1`,
+      `${supabaseUrl}/rest/v1/bookings?select=id&booking_date=eq.${encodeURIComponent(payload.date)}&status=in.(pending,confirmed)&limit=1`,
       {
         headers: {
           apikey: serviceRoleKey,
@@ -152,7 +190,7 @@ Deno.serve(async (req) => {
 
     const existingBookings = await existingBookingRes.json();
     if (Array.isArray(existingBookings) && existingBookings.length) {
-      return jsonResponse({ error: 'Den valda tiden är redan bokad. Välj en annan tid.' }, 409);
+      return jsonResponse({ error: 'Det valda datumet är redan bokat. Välj en annan dag.' }, 409);
     }
 
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
