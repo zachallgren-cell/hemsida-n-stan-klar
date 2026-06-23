@@ -149,7 +149,6 @@ Deno.serve(async (req) => {
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
     const notificationEmail = Deno.env.get('BOOKING_NOTIFICATION_EMAIL') || 'bokning@bergafonsterputs.se';
     const contactEmail = Deno.env.get('BOOKING_CONTACT_EMAIL') || 'info@bergafonsterputs.se';
-    const contactPhone = Deno.env.get('BOOKING_CONTACT_PHONE') || '073-388 12 16';
     const fromEmail = Deno.env.get('BOOKING_FROM_EMAIL');
     const rutFormUrl = Deno.env.get('BOOKING_RUT_FORM_URL') || '';
     const siteUrl = (Deno.env.get('PUBLIC_SITE_URL') || 'https://bergafonsterputs.se').replace(/\/+$/, '');
@@ -300,7 +299,6 @@ Deno.serve(async (req) => {
     const logoUrl = `${siteUrl}/logga-fonsterputs-transparent.png`;
     const safeLogoUrl = escapeHtml(logoUrl);
     const safeContactEmail = escapeHtml(contactEmail);
-    const safeContactPhone = escapeHtml(contactPhone);
     const priceAfterRutNumber = parsePriceNumber(payload.price);
     const priceBeforeRutNumber = priceAfterRutNumber === null ? null : priceAfterRutNumber * 2;
     const rutDeductionNumber = priceAfterRutNumber;
@@ -541,7 +539,7 @@ Deno.serve(async (req) => {
                         <td style="padding: 20px;">
                           <h2 style="margin: 0 0 10px; color: #0f2638; font-size: 18px;">Frågor?</h2>
                           <p style="margin: 0 0 12px; color: #536574; font-size: 14px; line-height: 1.7;">Svara direkt på detta mail om du har frågor eller vill ändra din bokning.</p>
-                          <p style="margin: 0; color: #0f2638; font-size: 14px; line-height: 1.8;"><strong>Telefon:</strong> ${safeContactPhone}<br><strong>E-post:</strong> <a href="mailto:${safeContactEmail}" style="color: #0f5475; text-decoration: underline;">${safeContactEmail}</a></p>
+                          <p style="margin: 0; color: #0f2638; font-size: 14px; line-height: 1.8;"><strong>E-post:</strong> <a href="mailto:${safeContactEmail}" style="color: #0f5475; text-decoration: underline;">${safeContactEmail}</a></p>
                         </td>
                       </tr>
                     </table>
