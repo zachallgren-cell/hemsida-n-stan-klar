@@ -238,6 +238,38 @@
       gap: 14px;
     }
 
+    .admin-tabs {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.64);
+      border: 1px solid rgba(15, 91, 150, 0.12);
+      width: fit-content;
+      max-width: 100%;
+    }
+
+    .admin-tab {
+      width: auto;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .admin-tab.is-active {
+      background: white;
+      color: var(--brand);
+      border-color: rgba(15, 91, 150, 0.18);
+      box-shadow: 0 10px 22px rgba(18, 67, 103, 0.08);
+    }
+
     .blocked-dates-list {
       display: grid;
       gap: 10px;
@@ -497,6 +529,8 @@
       .brand img { width: 88px; height: 88px; border-radius: 22px; }
       .hero h1 { font-size: 3rem; }
       .hero p { font-size: 1.08rem; }
+      .admin-tabs { width: 100%; border-radius: 22px; }
+      .admin-tab { flex: 1 1 150px; }
       .booking-top { flex-direction: column; }
       .badge-row { justify-content: flex-start; }
       .bookings-header { flex-direction: column; align-items: stretch; }
@@ -558,6 +592,11 @@
         <p class="status-message" id="loginMessage"></p>
       </aside>
 
+      <nav class="admin-tabs hidden" id="adminTabs" aria-label="Adminvyer">
+        <button type="button" class="admin-tab is-active" data-admin-view="bookings">Bokningar</button>
+        <button type="button" class="admin-tab" data-admin-view="blockedDates">Semesterdagar</button>
+      </nav>
+
       <section class="card panel hidden" id="blockedDatesPanel">
         <h2>Semesterdagar</h2>
         <p>Lägg in ett datum eller ett intervall som inte ska kunna bokas. De spärras både i kalendern och när bokningen skickas.</p>
@@ -605,6 +644,7 @@
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const loginPanel = document.getElementById('loginPanel');
+    const adminTabs = document.getElementById('adminTabs');
     const blockedDatesPanel = document.getElementById('blockedDatesPanel');
     const bookingsPanel = document.getElementById('bookingsPanel');
     const loginForm = document.getElementById('loginForm');
@@ -620,6 +660,7 @@
     const blockedDateMessage = document.getElementById('blockedDateMessage');
     const blockedDatesList = document.getElementById('blockedDatesList');
     const blockedDateEndInput = document.getElementById('blockedDateEndInput');
+    let activeAdminView = 'bookings';
 
     function setLoginMessage(text, type = '') {
       loginMessage.textContent = text;
@@ -629,6 +670,16 @@
     function setBlockedDateMessage(text, type = '') {
       blockedDateMessage.textContent = text;
       blockedDateMessage.className = `status-message ${type}`.trim();
+    }
+
+    function renderAdminView() {
+      const showBookings = activeAdminView === 'bookings';
+      bookingsPanel.classList.toggle('hidden', !showBookings);
+      blockedDatesPanel.classList.toggle('hidden', showBookings);
+
+      adminTabs.querySelectorAll('.admin-tab').forEach((button) => {
+        button.classList.toggle('is-active', button.dataset.adminView === activeAdminView);
+      });
     }
 
     function escapeHtml(value) {
@@ -1109,8 +1160,26 @@
       await refreshSession();
     });
 
+    adminTabs.addEventListener('click', async (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      if (!target.classList.contains('admin-tab')) return;
+
+      activeAdminView = target.dataset.adminView || 'bookings';
+      renderAdminView();
+
+      if (activeAdminView === 'blockedDates') {
+        await fetchBlockedDates();
+      }
+    });
+
     refreshButton.addEventListener('click', async () => {
-      await Promise.all([fetchBlockedDates(), fetchBookings()]);
+      if (activeAdminView === 'blockedDates') {
+        await fetchBlockedDates();
+        return;
+      }
+
+      await fetchBookings();
     });
 
     async function refreshSession() {
@@ -1119,12 +1188,16 @@
       const isLoggedIn = Boolean(session);
 
       loginPanel.classList.toggle('hidden', isLoggedIn);
-      blockedDatesPanel.classList.toggle('hidden', !isLoggedIn);
-      bookingsPanel.classList.toggle('hidden', !isLoggedIn);
+      adminTabs.classList.toggle('hidden', !isLoggedIn);
       logoutButton.classList.toggle('hidden', !isLoggedIn);
 
       if (isLoggedIn) {
-        await Promise.all([fetchBlockedDates(), fetchBookings()]);
+        renderAdminView();
+        await fetchBookings();
+      } else {
+        activeAdminView = 'bookings';
+        bookingsPanel.classList.add('hidden');
+        blockedDatesPanel.classList.add('hidden');
       }
     }
 
