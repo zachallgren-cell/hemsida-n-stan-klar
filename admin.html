@@ -230,12 +230,13 @@
       display: grid;
       gap: 14px;
       margin-top: 18px;
+      max-width: 860px;
     }
 
     .date-range-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
+      gap: 18px;
     }
 
     .admin-tabs {
@@ -391,9 +392,18 @@
       margin-bottom: 18px;
     }
 
-    #bookingsPanel {
+    #bookingsPanel,
+    #blockedDatesPanel {
       grid-column: 1 / -1;
       width: 100%;
+    }
+
+    #blockedDatesPanel {
+      padding: 32px;
+    }
+
+    #blockedDatesPanel .blocked-dates-list {
+      max-width: 980px;
     }
 
     .bookings-header h2 {
@@ -535,6 +545,8 @@
       .badge-row { justify-content: flex-start; }
       .bookings-header { flex-direction: column; align-items: stretch; }
       .date-range-grid { grid-template-columns: 1fr; }
+      .blocked-date-row { grid-template-columns: 1fr; align-items: stretch; }
+      .blocked-date-row .button { width: 100%; }
     }
   </style>
 </head>
