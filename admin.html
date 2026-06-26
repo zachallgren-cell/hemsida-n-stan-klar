@@ -226,6 +226,39 @@
       gap: 14px;
     }
 
+    .admin-form {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .blocked-dates-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .blocked-date-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 14px 16px;
+      border: 1px solid rgba(15, 91, 150, 0.12);
+      border-radius: 16px;
+      background: rgba(13, 91, 150, 0.04);
+    }
+
+    .blocked-date-row strong,
+    .blocked-date-row span {
+      display: block;
+    }
+
+    .blocked-date-row span {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
     label {
       display: grid;
       gap: 8px;
@@ -241,13 +274,19 @@
     }
 
     input,
-    select {
+    select,
+    textarea {
       width: 100%;
       padding: 14px 16px;
       border-radius: 14px;
       border: 1px solid rgba(76, 143, 189, 0.3);
       background: white;
       color: var(--ink);
+    }
+
+    textarea {
+      min-height: 94px;
+      resize: vertical;
     }
 
     .button {
@@ -486,6 +525,7 @@
         <h2>Det här kan ni göra här</h2>
         <ul>
           <li>Se alla bokningar på ett ställe</li>
+          <li>Lägga in semesterdagar som ej bokbara</li>
           <li>Markera bokning som bekräftad</li>
           <li>Markera jobb som klart och skicka betalning</li>
           <li>Markera bokning som betald efter inkommen betalning</li>
@@ -511,6 +551,24 @@
         <p class="status-message" id="loginMessage"></p>
       </aside>
 
+      <section class="card panel hidden" id="blockedDatesPanel">
+        <h2>Semesterdagar</h2>
+        <p>Lägg in datum som inte ska kunna bokas. De spärras både i kalendern och när bokningen skickas.</p>
+        <form class="admin-form" id="blockedDateForm">
+          <label>
+            Datum
+            <input type="date" id="blockedDateInput" required>
+          </label>
+          <label>
+            Intern orsak
+            <textarea id="blockedDateReason" placeholder="Till exempel semester, utbildning eller redan fullbokad dag."></textarea>
+          </label>
+          <button type="submit" class="button button-primary" id="blockedDateButton">Lägg till ej bokbar dag</button>
+        </form>
+        <p class="status-message" id="blockedDateMessage"></p>
+        <div class="blocked-dates-list" id="blockedDatesList"></div>
+      </section>
+
       <section class="card panel hidden" id="bookingsPanel">
         <div class="bookings-header">
           <div>
@@ -534,6 +592,7 @@
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const loginPanel = document.getElementById('loginPanel');
+    const blockedDatesPanel = document.getElementById('blockedDatesPanel');
     const bookingsPanel = document.getElementById('bookingsPanel');
     const loginForm = document.getElementById('loginForm');
     const loginButton = document.getElementById('loginButton');
@@ -541,10 +600,21 @@
     const logoutButton = document.getElementById('logoutButton');
     const refreshButton = document.getElementById('refreshButton');
     const bookingsList = document.getElementById('bookingsList');
+    const blockedDateForm = document.getElementById('blockedDateForm');
+    const blockedDateInput = document.getElementById('blockedDateInput');
+    const blockedDateReason = document.getElementById('blockedDateReason');
+    const blockedDateButton = document.getElementById('blockedDateButton');
+    const blockedDateMessage = document.getElementById('blockedDateMessage');
+    const blockedDatesList = document.getElementById('blockedDatesList');
 
     function setLoginMessage(text, type = '') {
       loginMessage.textContent = text;
       loginMessage.className = `status-message ${type}`.trim();
+    }
+
+    function setBlockedDateMessage(text, type = '') {
+      blockedDateMessage.textContent = text;
+      blockedDateMessage.className = `status-message ${type}`.trim();
     }
 
     function escapeHtml(value) {
@@ -712,6 +782,42 @@
       }).join('');
     }
 
+    function renderBlockedDates(blockedDates) {
+      if (!blockedDates.length) {
+        blockedDatesList.innerHTML = '<div class="empty-state">Inga semesterdagar eller spärrade datum är inlagda.</div>';
+        return;
+      }
+
+      blockedDatesList.innerHTML = blockedDates.map((blockedDate) => `
+        <div class="blocked-date-row" data-blocked-date-id="${blockedDate.id}">
+          <div>
+            <strong>${escapeHtml(formatDate(blockedDate.blocked_date))}</strong>
+            <span>${escapeHtml(blockedDate.reason || 'Ingen orsak angiven')}</span>
+          </div>
+          <button type="button" class="button button-danger action-delete-blocked-date">Ta bort</button>
+        </div>
+      `).join('');
+    }
+
+    async function fetchBlockedDates() {
+      blockedDatesList.innerHTML = '<div class="empty-state">Hämtar spärrade datum...</div>';
+
+      const { data, error } = await supabase
+        .from('booking_blocked_dates')
+        .select('*')
+        .order('blocked_date', { ascending: true });
+
+      if (error) {
+        const message = /permission denied|row-level security|policy|schema private|is_booking_admin/i.test(error.message)
+          ? 'Kunde inte hämta semesterdagar. Kontrollera admin-rättigheter och att senaste migrationen är körd.'
+          : `Kunde inte hämta semesterdagar: ${error.message}`;
+        blockedDatesList.innerHTML = `<div class="empty-state">${escapeHtml(message)}</div>`;
+        return;
+      }
+
+      renderBlockedDates(data || []);
+    }
+
     async function fetchBookings() {
       bookingsList.innerHTML = '<div class="empty-state">Hämtar bokningar...</div>';
 
@@ -770,6 +876,25 @@
       messageElement.textContent = 'Bokningen är borttagen.';
       messageElement.className = 'status-message success';
       await fetchBookings();
+    }
+
+    async function deleteBlockedDate(id, button) {
+      button.disabled = true;
+      setBlockedDateMessage('Tar bort spärrat datum...');
+
+      const { error } = await supabase
+        .from('booking_blocked_dates')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        setBlockedDateMessage(`Kunde inte ta bort datumet: ${error.message}`, 'error');
+        button.disabled = false;
+        return;
+      }
+
+      setBlockedDateMessage('Datumet är bokbart igen.', 'success');
+      await fetchBlockedDates();
     }
 
     async function completeBooking(id, paymentMethod, messageElement, button) {
@@ -861,6 +986,50 @@
       }
     });
 
+    blockedDateForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      setBlockedDateMessage('');
+      blockedDateButton.disabled = true;
+
+      const blockedDate = blockedDateInput.value;
+      const reason = blockedDateReason.value.trim() || 'Semester';
+      const { data: sessionData } = await supabase.auth.getSession();
+
+      const { error } = await supabase
+        .from('booking_blocked_dates')
+        .insert({
+          blocked_date: blockedDate,
+          reason,
+          created_by: sessionData.session?.user?.id || null
+        });
+
+      blockedDateButton.disabled = false;
+
+      if (error) {
+        const message = /duplicate key|unique/i.test(error.message)
+          ? 'Datumet är redan spärrat.'
+          : `Kunde inte lägga till datumet: ${error.message}`;
+        setBlockedDateMessage(message, 'error');
+        return;
+      }
+
+      blockedDateForm.reset();
+      setBlockedDateMessage('Datumet är nu ej bokbart.', 'success');
+      await fetchBlockedDates();
+    });
+
+    blockedDatesList.addEventListener('click', async (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      if (!target.classList.contains('action-delete-blocked-date')) return;
+
+      const row = target.closest('.blocked-date-row');
+      const id = Number(row?.dataset.blockedDateId);
+      if (!id) return;
+
+      await deleteBlockedDate(id, target);
+    });
+
     loginForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       setLoginMessage('');
@@ -888,7 +1057,7 @@
     });
 
     refreshButton.addEventListener('click', async () => {
-      await fetchBookings();
+      await Promise.all([fetchBlockedDates(), fetchBookings()]);
     });
 
     async function refreshSession() {
@@ -897,11 +1066,12 @@
       const isLoggedIn = Boolean(session);
 
       loginPanel.classList.toggle('hidden', isLoggedIn);
+      blockedDatesPanel.classList.toggle('hidden', !isLoggedIn);
       bookingsPanel.classList.toggle('hidden', !isLoggedIn);
       logoutButton.classList.toggle('hidden', !isLoggedIn);
 
       if (isLoggedIn) {
-        await fetchBookings();
+        await Promise.all([fetchBlockedDates(), fetchBookings()]);
       }
     }
 

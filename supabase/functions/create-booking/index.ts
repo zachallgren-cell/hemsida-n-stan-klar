@@ -102,6 +102,16 @@ function isBookableDate(value: string) {
   return value >= minBookableDate;
 }
 
+async function fetchSupabaseRows(url: string, serviceRoleKey: string) {
+  return await fetch(url, {
+    headers: {
+      apikey: serviceRoleKey,
+      Authorization: `Bearer ${serviceRoleKey}`,
+      'Content-Type': 'application/json'
+    }
+  });
+}
+
 function createRutFormToken() {
   const bytes = new Uint8Array(32);
   crypto.getRandomValues(bytes);
@@ -171,15 +181,24 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'Email secrets are missing' }, 500);
     }
 
-    const existingBookingRes = await fetch(
+    const blockedDateRes = await fetchSupabaseRows(
+      `${supabaseUrl}/rest/v1/booking_blocked_dates?select=id&blocked_date=eq.${encodeURIComponent(payload.date)}&limit=1`,
+      serviceRoleKey
+    );
+
+    if (!blockedDateRes.ok) {
+      console.error('Could not check blocked booking dates', await blockedDateRes.text());
+      return jsonResponse({ error: 'Could not check booking availability' }, 500);
+    }
+
+    const blockedDates = await blockedDateRes.json();
+    if (Array.isArray(blockedDates) && blockedDates.length) {
+      return jsonResponse({ error: 'Det valda datumet är inte bokbart. Välj en annan dag.' }, 409);
+    }
+
+    const existingBookingRes = await fetchSupabaseRows(
       `${supabaseUrl}/rest/v1/bookings?select=id&booking_date=eq.${encodeURIComponent(payload.date)}&status=in.(pending,confirmed)&limit=1`,
-      {
-        headers: {
-          apikey: serviceRoleKey,
-          Authorization: `Bearer ${serviceRoleKey}`,
-          'Content-Type': 'application/json'
-        }
-      }
+      serviceRoleKey
     );
 
     if (!existingBookingRes.ok) {
