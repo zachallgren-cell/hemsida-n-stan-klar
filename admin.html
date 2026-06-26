@@ -232,6 +232,12 @@
       margin-top: 18px;
     }
 
+    .date-range-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
     .blocked-dates-list {
       display: grid;
       gap: 10px;
@@ -494,6 +500,7 @@
       .booking-top { flex-direction: column; }
       .badge-row { justify-content: flex-start; }
       .bookings-header { flex-direction: column; align-items: stretch; }
+      .date-range-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -553,17 +560,23 @@
 
       <section class="card panel hidden" id="blockedDatesPanel">
         <h2>Semesterdagar</h2>
-        <p>Lägg in datum som inte ska kunna bokas. De spärras både i kalendern och när bokningen skickas.</p>
+        <p>Lägg in ett datum eller ett intervall som inte ska kunna bokas. De spärras både i kalendern och när bokningen skickas.</p>
         <form class="admin-form" id="blockedDateForm">
-          <label>
-            Datum
-            <input type="date" id="blockedDateInput" required>
-          </label>
+          <div class="date-range-grid">
+            <label>
+              Från datum
+              <input type="date" id="blockedDateInput" required>
+            </label>
+            <label>
+              Till datum
+              <input type="date" id="blockedDateEndInput">
+            </label>
+          </div>
           <label>
             Intern orsak
             <textarea id="blockedDateReason" placeholder="Till exempel semester, utbildning eller redan fullbokad dag."></textarea>
           </label>
-          <button type="submit" class="button button-primary" id="blockedDateButton">Lägg till ej bokbar dag</button>
+          <button type="submit" class="button button-primary" id="blockedDateButton">Lägg till ej bokbara dagar</button>
         </form>
         <p class="status-message" id="blockedDateMessage"></p>
         <div class="blocked-dates-list" id="blockedDatesList"></div>
@@ -606,6 +619,7 @@
     const blockedDateButton = document.getElementById('blockedDateButton');
     const blockedDateMessage = document.getElementById('blockedDateMessage');
     const blockedDatesList = document.getElementById('blockedDatesList');
+    const blockedDateEndInput = document.getElementById('blockedDateEndInput');
 
     function setLoginMessage(text, type = '') {
       loginMessage.textContent = text;
@@ -634,6 +648,28 @@
         month: 'long',
         year: 'numeric'
       });
+    }
+
+    function addDaysToDateString(dateString, days) {
+      const date = new Date(`${dateString}T12:00:00Z`);
+      date.setUTCDate(date.getUTCDate() + days);
+      return date.toISOString().slice(0, 10);
+    }
+
+    function getDateRange(startDate, endDate) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate) || !/^\d{4}-\d{2}-\d{2}$/.test(endDate)) {
+        return [];
+      }
+
+      const dates = [];
+      let currentDate = startDate;
+
+      while (currentDate <= endDate) {
+        dates.push(currentDate);
+        currentDate = addDaysToDateString(currentDate, 1);
+      }
+
+      return dates;
     }
 
     function getBadgeClass(value) {
@@ -992,29 +1028,46 @@
       blockedDateButton.disabled = true;
 
       const blockedDate = blockedDateInput.value;
+      const blockedDateEnd = blockedDateEndInput.value || blockedDate;
       const reason = blockedDateReason.value.trim() || 'Semester';
       const { data: sessionData } = await supabase.auth.getSession();
+      const dates = getDateRange(blockedDate, blockedDateEnd);
+
+      if (!dates.length) {
+        setBlockedDateMessage('Välj ett giltigt datumintervall.', 'error');
+        blockedDateButton.disabled = false;
+        return;
+      }
+
+      if (blockedDateEnd < blockedDate) {
+        setBlockedDateMessage('Till datum måste vara samma dag eller senare än från datum.', 'error');
+        blockedDateButton.disabled = false;
+        return;
+      }
+
+      if (dates.length > 370) {
+        setBlockedDateMessage('Välj ett kortare intervall, max 370 dagar åt gången.', 'error');
+        blockedDateButton.disabled = false;
+        return;
+      }
 
       const { error } = await supabase
         .from('booking_blocked_dates')
-        .insert({
-          blocked_date: blockedDate,
+        .upsert(dates.map((date) => ({
+          blocked_date: date,
           reason,
           created_by: sessionData.session?.user?.id || null
-        });
+        })), { onConflict: 'blocked_date' });
 
       blockedDateButton.disabled = false;
 
       if (error) {
-        const message = /duplicate key|unique/i.test(error.message)
-          ? 'Datumet är redan spärrat.'
-          : `Kunde inte lägga till datumet: ${error.message}`;
-        setBlockedDateMessage(message, 'error');
+        setBlockedDateMessage(`Kunde inte lägga till datumet: ${error.message}`, 'error');
         return;
       }
 
       blockedDateForm.reset();
-      setBlockedDateMessage('Datumet är nu ej bokbart.', 'success');
+      setBlockedDateMessage(dates.length === 1 ? 'Datumet är nu ej bokbart.' : `${dates.length} dagar är nu ej bokbara.`, 'success');
       await fetchBlockedDates();
     });
 
