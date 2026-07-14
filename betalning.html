@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-  <link rel="stylesheet" href="cookie-consent.css" />
-  <script src="cookie-consent.js" defer></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="referrer" content="no-referrer" />
   <title>Berga Fönsterputs | Tack för bokningen</title>
   <meta name="description" content="Tack för din bokning hos Berga Fönsterputs. Betalning sker tryggt efter utförd fönsterputs." />
   <meta name="robots" content="noindex, nofollow" />
@@ -33,6 +32,22 @@
     }
 
     * { box-sizing: border-box; }
+
+    .skip-link {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 9999;
+      padding: 11px 15px;
+      border-radius: 10px;
+      background: #fff;
+      color: var(--primary-dark);
+      font-weight: 900;
+      transform: translateY(-160%);
+    }
+
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #ffb347; outline-offset: 3px; }
 
     body {
       margin: 0;
@@ -669,9 +684,18 @@
         margin-top: -108px;
       }
     }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
   </style>
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Hoppa till innehållet</a>
   <header>
     <div class="container">
       <div class="topbar">
@@ -689,22 +713,22 @@
       </div>
 
       <div class="hero">
-        <h1>Tack för din bokning</h1>
-        <p id="heroIntroText">Din bokning är registrerad. Vi putsar först och skickar belopp, referens och Swishuppgifter i klartmejlet när jobbet är utfört.</p>
+        <h1>Bekräfta bokningen via mejlet</h1>
+        <p id="heroIntroText">Vi har skickat en personlig bekräftelselänk till din e-post. Dagen reserveras först när du öppnar länken och bekräftar.</p>
       </div>
     </div>
   </header>
   <button type="button" class="topbar-show-button" id="topbarShowButton">Visa meny</button>
 
-  <main class="container">
+  <main class="container" id="main-content">
     <div class="grid">
       <section class="card">
         <h2 class="section-title">Din bokning</h2>
         <p class="section-subtitle" id="bookingIntroSubtitle">Kontrollera uppgifterna i din bokning.</p>
 
         <div class="summary-box">
-          <p><strong>Bokningen är mottagen</strong></p>
-          <p id="bookingSummaryText">Din tid är nu reserverad och betalningen sker efter att jobbet är klart.</p>
+          <p><strong>Bokningsförfrågan är mottagen</strong></p>
+          <p id="bookingSummaryText">Kontrollera uppgifterna och bekräfta sedan via länken i mejlet. Länken gäller i 24 timmar.</p>
           <div class="summary-grid">
             <div class="summary-item">
               <strong>Namn</strong>
@@ -728,14 +752,14 @@
             <strong>Valt paket</strong>
             <span id="bookingPackage">Ej valt ännu</span>
           </div>
-          <div class="price"><span id="bookingPrice">599 kr</span><small id="bookingDiscount" hidden></small></div>
+          <div class="price"><span id="bookingPrice">949 kr</span><small id="bookingDiscount" hidden></small></div>
         </div>
 
         <div class="next-step-box">
           <h3>Det här händer nu</h3>
           <ul>
-            <li id="nextStepChoiceText">Vi utför fönsterputsen enligt bokningen och stämmer av om något behöver justeras.</li>
-            <li>Vi får in bokningen direkt och hör av oss om något behöver stämmas av.</li>
+            <li id="nextStepChoiceText">Öppna bekräftelsemejlet och klicka på knappen för att reservera dagen.</li>
+            <li>När bokningen är bekräftad får du en kalenderfil och en säker länk för om- eller avbokning.</li>
             <li id="nextStepInvoiceText">När jobbet är klart skickar vi ett klartmejl med exakt belopp, referens och Swishuppgifter.</li>
           </ul>
         </div>
@@ -744,9 +768,9 @@
 
       <section class="card">
         <h2 class="section-title">Nästa steg</h2>
-        <p class="section-subtitle">Du betalar först när fönsterputsen är utförd.</p>
+        <p class="section-subtitle">Bekräfta först. Du betalar efter att fönsterputsen är utförd.</p>
         <div class="payment-trust-row">
-          <span class="trust-pill">Bokningen är mottagen</span>
+          <span class="trust-pill">Bekräftelselänk via mejl</span>
           <span class="trust-pill">Smidig betalning med Swish</span>
           <span class="trust-pill">Swishuppgifter i klartmejlet</span>
           <span class="trust-pill">Betala efter putsning</span>
@@ -761,7 +785,7 @@
           </div>
         </div>
 
-        <div class="status-box" id="statusBox">
+        <div class="status-box" id="statusBox" role="status" aria-live="polite" aria-atomic="true">
           <strong>✅ Bokning mottagen!</strong>
           <span id="statusText">Klart.</span>
           <div style="margin-top:14px;">
@@ -784,6 +808,7 @@
         <a href="index.html#bokning">Boka tid</a>
         <a href="om-oss.html">Om oss</a>
         <a href="integritet.html">Integritet</a>
+        <a href="villkor.html">Villkor</a>
       </div>
       <p>© 2026 Berga Fönsterputs. Alla rättigheter förbehållna.</p>
     </div>
@@ -808,27 +833,29 @@
     const nextStepChoiceText = document.getElementById('nextStepChoiceText');
     const nextStepInvoiceText = document.getElementById('nextStepInvoiceText');
 
-    const params = new URLSearchParams(window.location.search);
     let storedConfirmation = {};
 
     try {
       const parsedConfirmation = JSON.parse(sessionStorage.getItem('bergaBookingConfirmation') || '{}');
-      const queryBookingId = params.get('bookingId') || '';
-      if (!queryBookingId || !parsedConfirmation.bookingId || String(parsedConfirmation.bookingId) === queryBookingId) {
-        storedConfirmation = parsedConfirmation;
-      }
+      storedConfirmation = parsedConfirmation && typeof parsedConfirmation === 'object'
+        ? parsedConfirmation
+        : {};
+      sessionStorage.removeItem('bergaBookingConfirmation');
     } catch {
       storedConfirmation = {};
+    }
+
+    if (window.location.search || window.location.hash) {
+      window.history.replaceState({}, document.title, window.location.pathname);
     }
 
     const confirmationValue = (key, fallback = '') => {
       const storedValue = storedConfirmation && typeof storedConfirmation === 'object'
         ? storedConfirmation[key]
         : '';
-      return storedValue ?? params.get(key) ?? fallback;
+      return storedValue ?? fallback;
     };
 
-    const bookingId = String(confirmationValue('bookingId', params.get('bookingId') || ''));
     const name = String(confirmationValue('name', 'Ej angivet'));
     const date = String(confirmationValue('date', 'Ej valt'));
     const time = String(confirmationValue('time', 'Ej vald'));
@@ -839,7 +866,7 @@
     const transportType = String(confirmationValue('transportType', 'Fastland'));
     const seaMiles = String(confirmationValue('seaMiles'));
     const coordinates = String(confirmationValue('coordinates'));
-    const price = String(confirmationValue('price', '599'));
+    const price = String(confirmationValue('price', '949'));
     const discountCode = String(confirmationValue('discountCode'));
     const discountAmount = String(confirmationValue('discountAmount', '0'));
     const originalPrice = String(confirmationValue('originalPrice'));
@@ -906,10 +933,16 @@
       bookingDiscount.textContent = `Rabattkod ${discountCode}: −${discountAmount} kr${originalPrice ? ` (ordinarie ${originalPrice} kr)` : ''}`;
     }
 
-    setStatus('Tack! Vi har tagit emot bokningen. Swishuppgifterna kommer i klartmejlet när fönsterputsen är utförd.');
+    const hasBookingSummary = Boolean(storedConfirmation.name && storedConfirmation.date);
+    setStatus(
+      hasBookingSummary
+        ? 'Öppna bekräftelsemejlet inom 24 timmar för att reservera dagen. Swishuppgifterna kommer i klartmejlet när fönsterputsen är utförd.'
+        : 'Av integritetsskäl visas bokningsuppgifter bara direkt efter att formuläret skickats. Kontrollera din inkorg och bekräfta via mejlet.',
+      'Bekräftelsemejl skickat'
+    );
 
     payLaterButton.addEventListener('click', () => {
-      setStatus('Vi hör av oss när fönsterputsen är slutförd och skickar Swishuppgifterna i klartmejlet.', 'Bokning mottagen');
+      setStatus('Bekräfta först via mejlet. När fönsterputsen sedan är slutförd skickar vi Swishuppgifterna i klartmejlet.', 'Nästa steg');
       statusBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
 
@@ -920,7 +953,7 @@
       const optionStack = document.querySelector('.option-stack');
 
       if (heroIntroText) {
-        heroIntroText.textContent = 'Din bokning är registrerad. Eftersom båttransporten ute i skärgården är längre än 16 sjömil återkommer vi med offert innan något ska betalas.';
+        heroIntroText.textContent = 'Förfrågan är mottagen. Båttransport över 15 sjömil behöver planeras och prissättas via offert.';
       }
 
       if (bookingIntroSubtitle) {
@@ -928,7 +961,7 @@
       }
 
       if (bookingSummaryText) {
-        bookingSummaryText.textContent = 'Din tid är nu reserverad. Dubbelkolla gärna uppgifterna medan vi räknar på offert.';
+        bookingSummaryText.textContent = 'Ingen tid reserveras för offertförfrågan. Vi återkommer när vi har kontrollerat upplägget.';
       }
 
       if (nextStepChoiceText) {
@@ -944,7 +977,7 @@
       }
 
       if (paymentSectionSubtitle) {
-        paymentSectionSubtitle.textContent = 'Båttransport över 16 sjömil hanteras via offert innan betalning.';
+        paymentSectionSubtitle.textContent = 'Båttransport över 15 sjömil hanteras via offert innan betalning.';
       }
 
       if (paymentTrustRow) {

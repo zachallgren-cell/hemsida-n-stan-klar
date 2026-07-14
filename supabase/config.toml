@@ -3,6 +3,9 @@ project_id = "xeyippgcoqfskcmqzazx"
 [functions.create-booking]
 verify_jwt = false
 
+[functions.request-photo-quote]
+verify_jwt = false
+
 [functions.booked-slots]
 verify_jwt = false
 
@@ -20,3 +23,9 @@ verify_jwt = false
 
 [functions.admin-rut-details]
 verify_jwt = true
+
+[functions.manage-booking]
+verify_jwt = false
+
+[functions.send-booking-reminders]
+verify_jwt = false

@@ -5,11 +5,11 @@
   <script src="cookie-consent.js" defer></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Boka fönsterputs direkt | Berga Fönsterputs</title>
-  <meta name="description" content="Kom från Google och boka fönsterputs direkt hos Berga Fönsterputs. Välj ledig tid, fyll i formuläret och se pris innan bokning." />
+  <title>Fönsterputs från 949 kr efter RUT | Boka online</title>
+  <meta name="description" content="Boka fönsterputs i Åkersberga, Täby, Vaxholm, Stockholm och skärgården. Från 949 kr efter RUT. Välj tid, se priset och bekräfta via mejl." />
   <link rel="canonical" href="https://bergafonsterputs.se/boka-google.html" />
-  <meta property="og:title" content="Boka fönsterputs direkt | Berga Fönsterputs" />
-  <meta property="og:description" content="Välj ledig tid direkt, fyll i uppgifterna och se livepris innan du skickar bokningen." />
+  <meta property="og:title" content="Fönsterputs från 949 kr efter RUT | Berga Fönsterputs" />
+  <meta property="og:description" content="Välj en preliminärt ledig tid, se priset och bekräfta bokningen via mejl." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://bergafonsterputs.se/boka-google.html" />
   <meta property="og:image" content="https://bergafonsterputs.se/social-preview.jpg" />
@@ -33,15 +33,17 @@
       "image": "https://bergafonsterputs.se/social-preview.jpg",
       "email": "info@bergafonsterputs.se",
       "priceRange": "Från 949 kr",
-      "areaServed": ["Åkersberga", "Österåker", "Vaxholm", "Ljusterö", "Stockholms skärgård", "Stockholm"],
+      "areaServed": ["Åkersberga", "Österåker", "Täby", "Vaxholm", "Ljusterö", "Stockholms skärgård", "Stockholm"],
       "makesOffer": {
         "@type": "Offer",
+        "price": "949",
+        "priceCurrency": "SEK",
+        "description": "Fönsterputs från 949 kr efter RUT-avdrag",
         "itemOffered": {
           "@type": "Service",
           "name": "Fönsterputs",
           "serviceType": "Fönsterputs för bostäder"
-        },
-        "priceCurrency": "SEK"
+        }
       },
       "potentialAction": {
         "@type": "ReserveAction",
@@ -80,6 +82,20 @@
     a { color: inherit; text-decoration: none; }
     button { font: inherit; }
     .container { width: min(92%, var(--max-width)); margin: 0 auto; }
+    .skip-link {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 1000;
+      padding: 11px 15px;
+      border-radius: 10px;
+      background: #ffffff;
+      color: var(--primary-dark);
+      font-weight: 900;
+      transform: translateY(-160%);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #ffb347; outline-offset: 3px; }
 
     header {
       background:
@@ -131,6 +147,59 @@
       font-size: 0.95rem;
     }
     nav a.is-active { background: rgba(255,255,255,0.22); }
+    .landing-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(250px, 0.55fr);
+      gap: 26px;
+      align-items: center;
+      padding: 54px 4px 46px;
+      position: relative;
+      z-index: 1;
+    }
+    .landing-eyebrow {
+      display: inline-flex;
+      margin-bottom: 12px;
+      padding: 7px 11px;
+      border: 1px solid rgba(255,255,255,0.28);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.12);
+      font-size: 0.88rem;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .landing-hero h1 {
+      max-width: 820px;
+      margin: 0;
+      font-size: clamp(2.35rem, 6vw, 4.65rem);
+      line-height: 0.98;
+      letter-spacing: -0.04em;
+    }
+    .landing-hero-copy > p {
+      max-width: 730px;
+      margin: 20px 0 0;
+      color: rgba(255,255,255,0.9);
+      font-size: clamp(1.02rem, 2vw, 1.2rem);
+      font-weight: 700;
+    }
+    .landing-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+    .price-card {
+      padding: 24px;
+      border: 1px solid rgba(255,255,255,0.27);
+      border-radius: 24px;
+      background: rgba(255,255,255,0.94);
+      color: var(--text);
+      box-shadow: 0 20px 44px rgba(4,25,36,0.24);
+    }
+    .price-card span { display: block; color: var(--muted); font-weight: 800; }
+    .price-card strong {
+      display: block;
+      margin: 2px 0;
+      color: var(--primary-dark);
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      line-height: 1;
+    }
+    .price-card small { display: block; margin-top: 10px; color: var(--muted); font-weight: 700; }
     .btn {
       display: inline-block;
       padding: 14px 22px;
@@ -379,6 +448,36 @@
       cursor: not-allowed;
     }
     .calendar-day.booked { text-decoration: line-through; }
+    .calendar-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 56px;
+      margin: 8px 0 14px;
+      padding: 13px 15px;
+      border: 1px solid #bfddeb;
+      border-radius: 14px;
+      background: #f7fcff;
+      color: var(--primary-dark);
+      font-weight: 800;
+    }
+    .calendar-status[data-state="error"] {
+      border-color: #e5b3b3;
+      background: #fff6f6;
+      color: #8b2525;
+    }
+    .calendar-retry {
+      flex: 0 0 auto;
+      min-height: 42px;
+      padding: 9px 14px;
+      border: 1px solid currentColor;
+      border-radius: 999px;
+      background: #ffffff;
+      color: inherit;
+      font-weight: 900;
+      cursor: pointer;
+    }
     .selected-date-box {
       margin-top: 14px;
       padding: 14px 15px;
@@ -550,6 +649,7 @@
 
     @media (max-width: 860px) {
       header { padding-bottom: 22px; }
+      .landing-hero,
       .booking-layout,
       .quick-grid,
       .booking-intro,
@@ -571,10 +671,22 @@
       .calendar-grid { gap: 5px; }
       .calendar-day,
       .calendar-empty { border-radius: 10px; }
+      .landing-hero { padding: 38px 0 28px; }
+      .calendar-status { align-items: flex-start; flex-direction: column; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
     }
   </style>
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Hoppa till innehållet</a>
   <header>
     <div class="container">
       <div class="topbar">
@@ -582,17 +694,35 @@
           <img src="logga-fonsterputs-transparent.png" alt="Berga Fönsterputs logga">
           <span>Berga Fönsterputs</span>
         </a>
-        <nav>
+        <nav aria-label="Huvudnavigation">
           <a href="index.html">Startsida</a>
           <a href="var-tjanst.html">Vår tjänst</a>
           <a href="#boka" class="is-active">Boka direkt</a>
           <a href="index.html#kontakt">Kontakt</a>
         </nav>
       </div>
+
+      <div class="landing-hero">
+        <div class="landing-hero-copy">
+          <span class="landing-eyebrow">Fönsterputs i norra Stockholm</span>
+          <h1>Se priset och välj en ledig tid direkt.</h1>
+          <p>För villor och radhus i Åkersberga, Täby, Vaxholm och närområden. Bokningen bekräftas med en personlig länk i mejlet innan dagen reserveras.</p>
+          <div class="landing-actions">
+            <a class="btn btn-primary" href="#boka">Se lediga tider</a>
+            <a class="btn btn-secondary" href="offert.html">Osäker på antal? Få offert</a>
+          </div>
+        </div>
+        <aside class="price-card" aria-label="Frånpris">
+          <span>Utvändig fönsterputs</span>
+          <strong>949 kr</strong>
+          <span>efter RUT</span>
+          <small>Upp till 15 fönster och 150 kr material ingår. Exakt livepris visas i formuläret.</small>
+        </aside>
+      </div>
     </div>
   </header>
 
-  <main class="container">
+  <main class="container" id="main-content">
     <section class="section card">
       <div class="quick-grid">
         <div class="quick-item">
@@ -600,8 +730,8 @@
           <span>Du ser priset innan bokningen skickas.</span>
         </div>
         <div class="quick-item">
-          <strong>Trygg planering</strong>
-          <span>Kalendern visar bara tider som faktiskt går att boka.</span>
+          <strong>Kontrollerad kalender</strong>
+          <span>Ledigheten hämtas från bokningssystemet och stängs vid anslutningsfel.</span>
         </div>
         <div class="quick-item">
           <strong>Betala efteråt</strong>
@@ -625,7 +755,7 @@
         </div>
         <div class="booking-intro-card">
           <strong>3. Fyll i detaljer</strong>
-          <span>Där lämnar du uppgifter, ser priset och skickar bokningen.</span>
+          <span>Där ser du priset och bekräftar sedan bokningen via mejlet.</span>
         </div>
       </div>
 
@@ -635,7 +765,7 @@
           <li>Fönstren behöver vara säkert åtkomliga.</li>
           <li>Vid invändig puts behöver fönsterbrädan vara fri.</li>
           <li>För skärgårdsjobb väljer du båttransport i formuläret.</li>
-          <li>RUT-uppgifter lämnas via säkert formulär efter bokningen.</li>
+          <li>RUT-uppgifter lämnas via ett engångsformulär efter mejlbekräftelsen.</li>
         </ul>
       </div>
 
@@ -664,6 +794,11 @@
             <button type="button" class="calendar-nav" id="nextMonth" aria-label="Nästa månad">→</button>
           </div>
 
+          <div class="calendar-status" id="calendarStatus" data-state="loading" role="status" aria-live="polite">
+            <span id="calendarStatusText">Kontrollerar lediga dagar…</span>
+            <button type="button" class="calendar-retry" id="retryCalendarButton" hidden>Försök igen</button>
+          </div>
+
           <div class="calendar-weekdays">
             <div>Mån</div>
             <div>Tis</div>
@@ -674,7 +809,7 @@
             <div>Sön</div>
           </div>
 
-          <div class="calendar-grid" id="calendarGrid"></div>
+          <div class="calendar-grid" id="calendarGrid" aria-busy="true"></div>
           <div class="selected-date-box" id="selectedDateBox">Inget datum valt ännu</div>
           <div class="calendar-legend" aria-hidden="true">
             <span>Vit = ledig dag</span>
@@ -702,7 +837,11 @@
           </div>
           <div class="support-card">
             <strong>Områden vi jobbar i</strong>
-            <p>Vi hjälper kunder i Österåker, Åkersberga, Vaxholm, Ljusterö, Stockholm och ute i skärgården.</p>
+            <p>Vi hjälper kunder i Österåker, Åkersberga, Täby, Vaxholm, Ljusterö, Stockholm och ute i skärgården.</p>
+            <div class="support-links">
+              <a href="fonsterputs-taby.html">Läs om fönsterputs i Täby</a>
+              <a href="offert.html">Offert med foton</a>
+            </div>
           </div>
           <div class="support-card">
             <strong>Vill du fråga först?</strong>
@@ -727,7 +866,7 @@
       <div class="faq-grid">
         <div class="faq-item">
           <strong>Hur snabbt går det att boka?</strong>
-          <p>Du väljer först datum och tid här. Sedan öppnas formuläret med tiden förifylld så att du snabbt kan fylla i resten.</p>
+          <p>Du väljer datum och tid här och fyller sedan i formuläret. Dagen reserveras när du bekräftar via länken i mejlet inom 24 timmar.</p>
         </div>
         <div class="faq-item">
           <strong>När betalar jag?</strong>
@@ -758,6 +897,8 @@
         <a href="om-oss.html">Om oss</a>
         <a href="index.html#kontakt">Kontakt</a>
         <a href="integritet.html">Integritet</a>
+        <a href="villkor.html">Villkor</a>
+        <a href="offert.html">Offert</a>
       </div>
       <p>© 2026 Berga Fönsterputs. Alla rättigheter förbehållna.</p>
     </div>
@@ -771,24 +912,32 @@
     const prevMonthButton = document.getElementById('prevMonth');
     const nextMonthButton = document.getElementById('nextMonth');
     const continueBookingButton = document.getElementById('continueBookingButton');
+    const calendarStatus = document.getElementById('calendarStatus');
+    const calendarStatusText = document.getElementById('calendarStatusText');
+    const retryCalendarButton = document.getElementById('retryCalendarButton');
 
     const SUPABASE_URL = 'https://xeyippgcoqfskcmqzazx.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_MUKxAwv0vNXDrcgumq81fQ_Uvx4eOuq';
     const BOOKED_SLOTS_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/booked-slots`;
+    const BOOKABLE_TIMES = ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
+    const monthNames = ['januari', 'februari', 'mars', 'april', 'maj', 'juni', 'juli', 'augusti', 'september', 'oktober', 'november', 'december'];
     const todayDate = new Date();
     todayDate.setHours(12, 0, 0, 0);
-    const bookingYear = todayDate.getFullYear();
-    const todayString = formatDate(bookingYear, todayDate.getMonth(), todayDate.getDate());
+    const todayString = formatDate(todayDate.getFullYear(), todayDate.getMonth(), todayDate.getDate());
     const minBookableDate = new Date(todayDate);
     minBookableDate.setDate(todayDate.getDate() + 2);
     const minBookableString = formatDate(minBookableDate.getFullYear(), minBookableDate.getMonth(), minBookableDate.getDate());
-    const monthNames = ['januari', 'februari', 'mars', 'april', 'maj', 'juni', 'juli', 'augusti', 'september', 'oktober', 'november', 'december'];
+    const firstCalendarMonth = new Date(todayDate.getFullYear(), todayDate.getMonth(), 1, 12);
+    const lastCalendarMonth = new Date(todayDate.getFullYear(), todayDate.getMonth() + 11, 1, 12);
+    const lastBookableDate = new Date(lastCalendarMonth.getFullYear(), lastCalendarMonth.getMonth() + 1, 0, 12);
+    const lastBookableString = formatDate(lastBookableDate.getFullYear(), lastBookableDate.getMonth(), lastBookableDate.getDate());
 
-    let currentMonth = todayDate.getMonth();
+    let currentCalendarMonth = new Date(firstCalendarMonth);
     let selectedDate = '';
     let selectedTime = '';
     let bookingsCache = [];
     let blockedDatesCache = [];
+    let calendarReady = false;
 
     function getHeaders() {
       return {
@@ -798,21 +947,71 @@
       };
     }
 
+    function setCalendarState(state, message) {
+      calendarStatus.dataset.state = state;
+      calendarStatusText.textContent = message;
+      retryCalendarButton.hidden = state !== 'error';
+      calendarGrid.setAttribute('aria-busy', state === 'loading' ? 'true' : 'false');
+    }
+
+    function normalizeBookingData(data) {
+      if (!data || !Array.isArray(data.bookings) || !Array.isArray(data.blockedDates)) {
+        throw new Error('Ogiltigt kalendersvar');
+      }
+
+      const bookings = data.bookings.map((booking) => ({
+        date: typeof booking?.date === 'string' ? booking.date : '',
+        time: typeof booking?.time === 'string' ? booking.time.slice(0, 5) : ''
+      }));
+      const blockedDates = data.blockedDates.map((blockedDate) => ({
+        date: typeof blockedDate?.date === 'string' ? blockedDate.date : '',
+        reason: typeof blockedDate?.reason === 'string' ? blockedDate.reason.slice(0, 160) : ''
+      }));
+
+      if (bookings.some((booking) => !/^\d{4}-\d{2}-\d{2}$/.test(booking.date) || !BOOKABLE_TIMES.includes(booking.time))) {
+        throw new Error('Ogiltig bokningsdata');
+      }
+      if (blockedDates.some((blockedDate) => !/^\d{4}-\d{2}-\d{2}$/.test(blockedDate.date))) {
+        throw new Error('Ogiltig blockeringsdata');
+      }
+
+      return { bookings, blockedDates };
+    }
+
     async function fetchBookings() {
+      calendarReady = false;
+      selectedDate = '';
+      selectedTime = '';
+      bookingsCache = [];
+      blockedDatesCache = [];
+      setCalendarState('loading', 'Kontrollerar lediga dagar…');
+      renderCalendar();
+      renderTimes();
+      updateSelectedDateBox();
+
+      const controller = new AbortController();
+      const timeoutId = window.setTimeout(() => controller.abort(), 10_000);
       try {
-        const response = await fetch(BOOKED_SLOTS_FUNCTION_URL, { headers: getHeaders() });
-        if (!response.ok) {
-          bookingsCache = [];
-          blockedDatesCache = [];
-          return;
-        }
+        const response = await fetch(BOOKED_SLOTS_FUNCTION_URL, {
+          headers: getHeaders(),
+          cache: 'no-store',
+          signal: controller.signal
+        });
+        if (!response.ok) throw new Error('Kalendern kunde inte hämtas');
         const data = await response.json();
-        bookingsCache = Array.isArray(data?.bookings) ? data.bookings : [];
-        blockedDatesCache = Array.isArray(data?.blockedDates) ? data.blockedDates : [];
-      } catch (error) {
-        console.error(error);
-        bookingsCache = [];
-        blockedDatesCache = [];
+        const normalized = normalizeBookingData(data);
+        bookingsCache = normalized.bookings;
+        blockedDatesCache = normalized.blockedDates;
+        calendarReady = true;
+        setCalendarState('ready', 'Kalendern är uppdaterad. Välj en vit dag.');
+        applyInitialBookingSelection();
+      } catch {
+        setCalendarState('error', 'Vi kan inte kontrollera lediga dagar just nu. Ingen tid visas som ledig förrän anslutningen fungerar.');
+      } finally {
+        window.clearTimeout(timeoutId);
+        renderCalendar();
+        renderTimes();
+        updateSelectedDateBox();
       }
     }
 
@@ -828,10 +1027,6 @@
         month: 'long',
         year: 'numeric'
       });
-    }
-
-    function getTimes() {
-      return ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
     }
 
     function getBookedTimes(date) {
@@ -851,6 +1046,13 @@
     }
 
     function updateSelectedDateBox() {
+      if (!calendarReady) {
+        selectedDateBox.textContent = 'Tillgängligheten måste kontrolleras innan du kan välja en tid.';
+        continueBookingButton.disabled = true;
+        continueBookingButton.textContent = 'Kalendern är inte redo';
+        return;
+      }
+
       if (!selectedDate) {
         selectedDateBox.textContent = 'Inget datum valt ännu';
         continueBookingButton.disabled = true;
@@ -880,6 +1082,7 @@
     }
 
     function selectBookingTime(time) {
+      if (!calendarReady || !BOOKABLE_TIMES.includes(time)) return;
       selectedTime = time;
       updateSelectedDateBox();
       syncBookingUrl();
@@ -887,10 +1090,11 @@
     }
 
     function goToBookingPage() {
-      if (!selectedDate || !selectedTime) {
+      if (!calendarReady || !selectedDate || !selectedTime) {
         updateSelectedDateBox();
         return;
       }
+      trackConsentEvent('begin_booking');
       const params = new URLSearchParams({ date: selectedDate, time: selectedTime });
       window.location.href = `bokning.html?${params.toString()}`;
     }
@@ -903,15 +1107,16 @@
 
       const dateObject = new Date(`${initialDate}T12:00:00`);
       const isValidDate = !Number.isNaN(dateObject.getTime())
-        && dateObject.getFullYear() === bookingYear
-        && initialDate >= todayString;
+        && formatDate(dateObject.getFullYear(), dateObject.getMonth(), dateObject.getDate()) === initialDate
+        && initialDate >= minBookableString
+        && initialDate <= lastBookableString;
 
       if (!isValidDate || isFullyBooked(initialDate) || isBlockedDate(initialDate)) return;
 
       selectedDate = initialDate;
-      currentMonth = dateObject.getMonth();
+      currentCalendarMonth = new Date(dateObject.getFullYear(), dateObject.getMonth(), 1, 12);
 
-      if (initialTime && getTimes().includes(initialTime) && !getBookedTimes(initialDate).includes(initialTime)) {
+      if (initialTime && BOOKABLE_TIMES.includes(initialTime) && !getBookedTimes(initialDate).includes(initialTime)) {
         selectedTime = initialTime;
       }
 
@@ -920,13 +1125,13 @@
 
     function renderTimes() {
       timeSlots.innerHTML = '';
-      if (!selectedDate) return;
+      if (!calendarReady || !selectedDate) return;
 
       const booked = getBookedTimes(selectedDate);
       const dayIsBooked = booked.length > 0;
       const blockedDate = getBlockedDate(selectedDate);
 
-      getTimes().forEach((time) => {
+      BOOKABLE_TIMES.forEach((time) => {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'time-slot';
@@ -946,6 +1151,9 @@
 
         if (selectedTime === time) {
           button.classList.add('selected');
+          button.setAttribute('aria-pressed', 'true');
+        } else {
+          button.setAttribute('aria-pressed', 'false');
         }
 
         timeSlots.appendChild(button);
@@ -954,12 +1162,14 @@
 
     function renderCalendar() {
       calendarGrid.innerHTML = '';
-      calendarTitle.textContent = `${monthNames[currentMonth]} ${bookingYear}`;
-      prevMonthButton.disabled = currentMonth === todayDate.getMonth();
-      nextMonthButton.disabled = currentMonth === 11;
+      const year = currentCalendarMonth.getFullYear();
+      const month = currentCalendarMonth.getMonth();
+      calendarTitle.textContent = `${monthNames[month]} ${year}`;
+      prevMonthButton.disabled = !calendarReady || currentCalendarMonth <= firstCalendarMonth;
+      nextMonthButton.disabled = !calendarReady || currentCalendarMonth >= lastCalendarMonth;
 
-      const first = new Date(bookingYear, currentMonth, 1);
-      const days = new Date(bookingYear, currentMonth + 1, 0).getDate();
+      const first = new Date(year, month, 1);
+      const days = new Date(year, month + 1, 0).getDate();
       const offset = (first.getDay() + 6) % 7;
 
       for (let i = 0; i < offset; i += 1) {
@@ -969,7 +1179,7 @@
       }
 
       for (let day = 1; day <= days; day += 1) {
-        const date = formatDate(bookingYear, currentMonth, day);
+        const date = formatDate(year, month, day);
         const button = document.createElement('button');
         button.type = 'button';
         button.textContent = day;
@@ -978,14 +1188,17 @@
         const bookedCount = getBookedTimes(date).length;
         const past = date < todayString;
         const tooSoon = !past && date < minBookableString;
+        const tooLate = date > lastBookableString;
         const blocked = isBlockedDate(date);
         const full = isFullyBooked(date);
 
         if (bookedCount > 0 || blocked) button.classList.add('booked');
         if (selectedDate === date) button.classList.add('selected');
         if (date === todayString) button.classList.add('today');
+        button.setAttribute('aria-pressed', selectedDate === date ? 'true' : 'false');
+        if (date === todayString) button.setAttribute('aria-current', 'date');
 
-        if (past) {
+        if (!calendarReady || past || tooLate) {
           button.classList.add('past');
           button.disabled = true;
         }
@@ -1000,7 +1213,7 @@
           button.disabled = true;
         }
 
-        if (!past && !tooSoon && !full) {
+        if (calendarReady && !past && !tooSoon && !tooLate && !full) {
           button.onclick = () => {
             selectedDate = date;
             selectedTime = '';
@@ -1010,33 +1223,78 @@
           };
         }
 
+        const stateLabel = !calendarReady
+          ? 'tillgänglighet ej kontrollerad'
+          : blocked ? 'ej bokbar' : full ? 'bokad' : tooSoon || past || tooLate ? 'inte valbar' : 'ledig';
+        button.setAttribute('aria-label', `${formatDateForDisplay(date)}: ${stateLabel}`);
+
         calendarGrid.appendChild(button);
       }
     }
 
     prevMonthButton.addEventListener('click', () => {
-      if (currentMonth > todayDate.getMonth()) {
-        currentMonth -= 1;
+      if (calendarReady && currentCalendarMonth > firstCalendarMonth) {
+        currentCalendarMonth = new Date(currentCalendarMonth.getFullYear(), currentCalendarMonth.getMonth() - 1, 1, 12);
         renderCalendar();
       }
     });
 
     nextMonthButton.addEventListener('click', () => {
-      if (currentMonth < 11) {
-        currentMonth += 1;
+      if (calendarReady && currentCalendarMonth < lastCalendarMonth) {
+        currentCalendarMonth = new Date(currentCalendarMonth.getFullYear(), currentCalendarMonth.getMonth() + 1, 1, 12);
         renderCalendar();
       }
     });
 
-    continueBookingButton.addEventListener('click', goToBookingPage);
+    function consentAccepted() {
+      try {
+        return localStorage.getItem('berga_cookie_consent') === 'accepted';
+      } catch {
+        return false;
+      }
+    }
 
-    (async () => {
-      await fetchBookings();
-      applyInitialBookingSelection();
-      renderCalendar();
-      renderTimes();
-      updateSelectedDateBox();
-    })();
+    function captureCampaignAttribution() {
+      try {
+        if (!consentAccepted()) {
+          sessionStorage.removeItem('bergaCampaignAttribution');
+          return;
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const values = {
+          utmSource: (params.get('utm_source') || '').slice(0, 160),
+          utmMedium: (params.get('utm_medium') || '').slice(0, 160),
+          utmCampaign: (params.get('utm_campaign') || '').slice(0, 160),
+          utmContent: (params.get('utm_content') || '').slice(0, 160),
+          utmTerm: (params.get('utm_term') || '').slice(0, 160),
+          landingPage: window.location.pathname.slice(0, 160)
+        };
+        if (values.utmSource || values.utmMedium || values.utmCampaign || values.utmContent || values.utmTerm) {
+          sessionStorage.setItem('bergaCampaignAttribution', JSON.stringify(values));
+        }
+      } catch {
+        // Campaign measurement must never block booking.
+      }
+    }
+
+    function trackConsentEvent(name) {
+      if (!consentAccepted() || typeof window.gtag !== 'function') return;
+      window.gtag('event', name, { page_type: 'google_landing' });
+    }
+
+    window.addEventListener('berga:consent-change', (event) => {
+      if (event.detail?.value === 'accepted') captureCampaignAttribution();
+      else {
+        try { sessionStorage.removeItem('bergaCampaignAttribution'); } catch { /* no-op */ }
+      }
+    });
+
+    continueBookingButton.addEventListener('click', goToBookingPage);
+    retryCalendarButton.addEventListener('click', fetchBookings);
+    captureCampaignAttribution();
+
+    fetchBookings();
   </script>
 </body>
 </html>

@@ -4,15 +4,16 @@ Webbplatsens aktiva betalningsflöde använder Swish Företag. Fortnox används 
 
 ## Kundflöde
 
-1. Kunden bokar och väljer om RUT ska användas.
-2. `create-booking` räknar om priset på servern, sparar bokningen och skickar bokningsmejlet.
-3. Vid RUT innehåller bokningsmejlet en tidsbegränsad engångslänk till `rut.html`.
+1. Kunden bokar och väljer om RUT ska användas. `create-booking` räknar om priset på servern och skapar en reservation som måste bekräftas via mejl inom 24 timmar.
+2. Kunden bekräftar via `hantera-bokning.html`. Först då blockeras datumet och ett slutligt bokningsmejl skickas.
+3. Vid RUT innehåller det slutliga mejlet en tidsbegränsad engångslänk till `rut.html`.
 4. `submit-rut` validerar och AES-256-GCM-krypterar personnumret. Klartext sparas aldrig i `bookings`, mejl eller loggar.
-5. När arbetet är utfört klickar admin **Markera arbete utfört**. För ett RUT-jobb kan personnumret därefter visas kortvarigt så att den manuella fakturan kan skapas.
-6. Admin fyller i fakturareferens, faktisk arbetstid och slutliga kostnader och klickar **Klart + skicka Swish**.
-7. `complete-booking` skickar ett klartmejl med Swish Företag `123 677 43 84`, mottagare `Zac Hallgren`, exakt belopp, fakturareferens, mobilknapp och tydliga manuella betalningsuppgifter.
-8. Betalningen kontrolleras manuellt i Swish Företag och markeras därefter som betald i admin. Först då kan RUT markeras som ansökt.
-9. Den krypterade arbetskopian gallras manuellt när RUT-ärendet inte längre behöver den och automatiskt senast 180 dagar efter det senare av mottagandet och arbetsdagen, dock högst två år efter mottagandet.
+5. Kunden kan via sin fragmentbaserade hanteringslänk boka om, avboka, lägga till kalenderfil, boka samma igen och välja en frivillig påminnelse efter 8 eller 12 veckor.
+6. När arbetet är utfört klickar admin **Markera arbete utfört**. För ett RUT-jobb kan personnumret därefter visas kortvarigt så att den manuella fakturan kan skapas.
+7. Admin fyller i fakturareferens, faktisk arbetstid och slutliga kostnader och klickar **Klart + skicka Swish**.
+8. `complete-booking` skickar ett klartmejl med Swish Företag `123 677 43 84`, mottagare `Zac Hallgren`, exakt belopp, fakturareferens, mobilknapp och tydliga manuella betalningsuppgifter.
+9. Betalningen kontrolleras manuellt i Swish Företag och markeras därefter som betald i admin. Först då kan RUT markeras som ansökt.
+10. Den krypterade arbetskopian gallras manuellt när RUT-ärendet inte längre behöver den och automatiskt senast 180 dagar efter det senare av mottagandet och arbetsdagen, dock högst två år efter mottagandet.
 
 Fakturan skapas och skickas utanför webbplatsen. `invoice_reference` kopplar Swishbetalningen och RUT-underlaget till den manuella fakturan.
 
@@ -25,6 +26,9 @@ Fakturan skapas och skickas utanför webbplatsen. `invoice_reference` kopplar Sw
 - `submit-rut` – validerar, krypterar och lagrar personnummer med en förbrukad engångstoken.
 - `admin-rut-details` – adminskyddad visning, ny engångslänk, betalningskontroll, RUT-status och gallring.
 - `complete-booking` – skickar klartmejlet med Swishuppgifterna.
+- `manage-booking` – bekräftelse, ombokning, avbokning och frivillig återkommande inbjudan med hashad kundtoken.
+- `send-booking-reminders` – idempotenta 24-timmarspåminnelser och frivilliga inbjudningar efter 8 eller 12 veckor.
+- `request-photo-quote` – tar emot högst tre validerade bilder och vidarebefordrar dem som mejlbilagor utan permanent bildlagring.
 
 `stripe-webhook` finns kvar i källhistoriken för äldre Stripe-betalningar men ingår inte i det nya flödet och ska inte deployas på nytt.
 
@@ -36,7 +40,7 @@ Kör alla migrationer, inklusive:
 supabase db push
 ```
 
-Migrationerna `20260715000000_secure_manual_rut.sql`, `20260715010000_restrict_rut_link_reissue.sql` och `20260715020000_finalize_rut_security.sql`:
+Migrationerna `20260715000000_secure_manual_rut.sql`, `20260715010000_restrict_rut_link_reissue.sql`, `20260715020000_finalize_rut_security.sql` och `20260715030000_complete_booking_platform.sql`:
 
 - hash-lagrar RUT-token och sätter 30 dagars giltighetstid
 - skapar den låsta tabellen `rut_submissions`
@@ -47,6 +51,8 @@ Migrationerna `20260715000000_secure_manual_rut.sql`, `20260715010000_restrict_r
 - lägger till statusfält för manuell RUT-ansökan
 - återkallar äldre RUT-länkar som hade token i frågesträngen; admin kan skicka en ny fragmentbaserad länk
 - spärrar direkta adminuppdateringar av betalnings-, RUT- och tokenfält; statusändringar går via kontrollerade serverfunktioner
+- låter bara mejlbekräftade bokningar blockera ett datum och förhindrar dubbla aktiva bokningar
+- skapar hashade kundlänkar, säkra om-/avbokningar, rate limiting och automatiska påminnelsejobb
 
 `rut_submissions` saknar åtkomst för `anon` och `authenticated`. Endast serverfunktioner med service role får läsa eller ändra tabellen.
 
@@ -87,6 +93,9 @@ supabase functions deploy rut-booking-details
 supabase functions deploy submit-rut
 supabase functions deploy admin-rut-details
 supabase functions deploy complete-booking
+supabase functions deploy manage-booking
+supabase functions deploy send-booking-reminders
+supabase functions deploy request-photo-quote
 ```
 
 Kontrollera efter migreringen att cron-jobbet skapades:
@@ -96,7 +105,9 @@ select jobname, schedule, active
 from cron.job
 where jobname in (
   'purge-expired-rut-submissions',
-  'purge-old-rut-access-logs'
+  'purge-old-rut-access-logs',
+  'purge-booking-workflow-ephemera',
+  'send-booking-reminders'
 );
 ```
 

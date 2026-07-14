@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <link rel="stylesheet" href="cookie-consent.css" />
+  <script src="cookie-consent.js" defer></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bokningsvillkor | Berga Fönsterputs</title>
+  <meta name="description" content="Bokningsvillkor för fönsterputs hos Berga Fönsterputs, med information om pris, RUT, offert, ombokning, avbokning, faktura och Swish." />
+  <link rel="canonical" href="https://bergafonsterputs.se/villkor.html" />
+  <meta property="og:title" content="Bokningsvillkor | Berga Fönsterputs" />
+  <meta property="og:description" content="Villkor för bokning, pris, RUT, offert, ombokning och betalning hos Berga Fönsterputs." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://bergafonsterputs.se/villkor.html" />
+  <meta property="og:image" content="https://bergafonsterputs.se/social-preview.jpg" />
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
+  <link rel="shortcut icon" href="/favicon-48.png" />
+  <link rel="apple-touch-icon" sizes="192x192" href="/favicon-192.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <style>
+    :root {
+      --primary: #0b6fa4;
+      --primary-dark: #084f74;
+      --cta: #ffb347;
+      --bg: #cfe8f5;
+      --surface: rgba(255, 255, 255, 0.97);
+      --text: #173042;
+      --muted: #5f7280;
+      --white: #ffffff;
+      --border: #c6dfec;
+      --shadow: 0 16px 38px rgba(11, 111, 164, 0.14);
+      --radius: 22px;
+      --max-width: 1180px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 24px;
+    }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background: linear-gradient(to bottom, #e2f2fb, var(--bg));
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      line-height: 1.65;
+    }
+
+    a { color: inherit; }
+
+    a:focus-visible,
+    button:focus-visible {
+      outline: 3px solid var(--cta);
+      outline-offset: 3px;
+    }
+
+    .skip-link {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 100;
+      padding: 10px 14px;
+      border-radius: 10px;
+      color: var(--text);
+      background: #ffffff;
+      font-weight: 800;
+      transform: translateY(-160%);
+      transition: transform 0.2s ease;
+    }
+
+    .skip-link:focus { transform: translateY(0); }
+
+    .container {
+      width: min(92%, var(--max-width));
+      margin: 0 auto;
+    }
+
+    header {
+      position: relative;
+      overflow: hidden;
+      padding: 18px 0 112px;
+      color: var(--white);
+      background:
+        linear-gradient(135deg, rgba(8, 82, 120, 0.78), rgba(6, 58, 88, 0.74)),
+        linear-gradient(90deg, rgba(255,255,255,0.45) 0 1.2%, transparent 1.2% 48.8%, rgba(255,255,255,0.45) 48.8% 50.2%, transparent 50.2% 98.8%, rgba(255,255,255,0.45) 98.8% 100%),
+        linear-gradient(180deg, rgba(255,255,255,0.42) 0 1.5%, transparent 1.5% 48.5%, rgba(255,255,255,0.42) 48.5% 50%, transparent 50% 98.5%, rgba(255,255,255,0.42) 98.5% 100%),
+        linear-gradient(180deg, #effbff 0%, #8fd8f4 56%, #2f7ba7 100%);
+    }
+
+    header::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(128deg, transparent 16%, rgba(255,255,255,0.13) 27%, rgba(255,255,255,0.34) 33%, transparent 45%),
+        linear-gradient(to bottom, transparent 62%, rgba(5, 53, 78, 0.18) 88%, rgba(207, 232, 245, 0.16) 100%);
+    }
+
+    .topbar,
+    .hero {
+      position: relative;
+      z-index: 1;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 12px 16px;
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 26px;
+      background: rgba(8, 56, 82, 0.36);
+      box-shadow: 0 18px 34px rgba(4, 25, 36, 0.16);
+      backdrop-filter: blur(14px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      color: #ffffff;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .brand-logo {
+      width: 68px;
+      height: 68px;
+      padding: 6px;
+      flex: 0 0 auto;
+      border-radius: 18px;
+      background: #ffffff;
+      box-shadow: 0 10px 24px rgba(4, 25, 36, 0.16);
+    }
+
+    .brand-logo img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .brand-name {
+      display: grid;
+      line-height: 1.15;
+    }
+
+    .brand-name small {
+      margin-top: 4px;
+      color: rgba(255,255,255,0.8);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .site-nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 6px;
+      padding: 5px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+    }
+
+    .site-nav a {
+      padding: 9px 12px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      color: rgba(255,255,255,0.95);
+      font-size: 0.92rem;
+      font-weight: 800;
+      line-height: 1;
+      text-decoration: none;
+    }
+
+    .site-nav a:hover,
+    .site-nav a[aria-current="page"] {
+      border-color: rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.14);
+    }
+
+    .hero {
+      max-width: 800px;
+      padding-top: 72px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      margin: 0 0 12px;
+      padding: 7px 12px;
+      border: 1px solid rgba(255,255,255,0.24);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.1);
+      font-size: 0.83rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      max-width: 740px;
+      margin: 0 0 16px;
+      font-size: clamp(2.35rem, 6vw, 4.8rem);
+      line-height: 1.02;
+      letter-spacing: -0.035em;
+    }
+
+    .hero p {
+      max-width: 740px;
+      margin: 0;
+      color: rgba(255,255,255,0.92);
+      font-size: clamp(1rem, 2vw, 1.18rem);
+    }
+
+    .updated {
+      display: inline-block;
+      margin-top: 18px;
+      color: rgba(255,255,255,0.82);
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    main {
+      position: relative;
+      z-index: 2;
+      margin-top: -58px;
+      padding-bottom: 72px;
+    }
+
+    .terms-layout {
+      display: grid;
+      grid-template-columns: minmax(220px, 0.3fr) minmax(0, 1fr);
+      align-items: start;
+      gap: 24px;
+    }
+
+    .contents,
+    .terms-card {
+      border: 1px solid rgba(198, 223, 236, 0.95);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .contents {
+      position: sticky;
+      top: 20px;
+      padding: 22px;
+    }
+
+    .contents h2 {
+      margin: 0 0 12px;
+      font-size: 1.05rem;
+    }
+
+    .contents ol {
+      display: grid;
+      gap: 7px;
+      margin: 0;
+      padding-left: 22px;
+    }
+
+    .contents a {
+      color: var(--primary-dark);
+      font-weight: 700;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    .terms-content {
+      display: grid;
+      gap: 22px;
+      min-width: 0;
+    }
+
+    .terms-card {
+      padding: clamp(24px, 4vw, 40px);
+      scroll-margin-top: 24px;
+    }
+
+    .terms-card h2 {
+      margin: 0 0 14px;
+      color: var(--primary-dark);
+      font-size: clamp(1.45rem, 3vw, 2rem);
+      line-height: 1.2;
+    }
+
+    .terms-card h3 {
+      margin: 26px 0 8px;
+      color: #16425c;
+      font-size: 1.12rem;
+    }
+
+    .terms-card p { margin: 0 0 14px; }
+    .terms-card p:last-child { margin-bottom: 0; }
+
+    .terms-card ul {
+      margin: 12px 0 0;
+      padding-left: 22px;
+    }
+
+    .terms-card li + li { margin-top: 7px; }
+
+    .summary-card { border-top: 5px solid var(--cta); }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .summary-item {
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: #f2f9fc;
+    }
+
+    .summary-item strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--primary-dark);
+    }
+
+    .summary-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .notice {
+      margin-top: 20px;
+      padding: 18px 20px;
+      border: 1px solid #afd6e7;
+      border-left: 5px solid var(--primary);
+      border-radius: 14px;
+      background: #edf8fc;
+    }
+
+    .notice strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--primary-dark);
+    }
+
+    .notice-warning {
+      border-color: #ffd08b;
+      border-left-color: #e78b14;
+      background: #fff8ec;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin: 20px 0 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: terms-step;
+    }
+
+    .steps li {
+      position: relative;
+      min-height: 112px;
+      margin: 0;
+      padding: 18px 18px 18px 58px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: #f7fbfd;
+      counter-increment: terms-step;
+    }
+
+    .steps li::before {
+      content: counter(terms-step);
+      position: absolute;
+      top: 18px;
+      left: 16px;
+      display: grid;
+      width: 30px;
+      height: 30px;
+      place-items: center;
+      border-radius: 50%;
+      color: #ffffff;
+      background: var(--primary);
+      font-weight: 900;
+    }
+
+    .external-links {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .external-links a {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 13px 15px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      color: var(--primary-dark);
+      background: #f2f9fc;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .external-links a:hover { background: #e8f5fa; }
+
+    .contact-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-top: 18px;
+      padding: 20px;
+      border-radius: 16px;
+      color: #ffffff;
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+    }
+
+    .contact-box p { margin: 0; }
+
+    .contact-box a {
+      display: inline-block;
+      flex: 0 0 auto;
+      padding: 11px 16px;
+      border-radius: 999px;
+      color: var(--text);
+      background: linear-gradient(to right, #ffb347, #f1992d);
+      font-weight: 900;
+      text-decoration: none;
+    }
+
+    footer {
+      padding: 38px 0;
+      color: rgba(255,255,255,0.9);
+      background: linear-gradient(to bottom, #082c3d, #061f2c);
+    }
+
+    footer p { margin: 6px 0; }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .footer-links a {
+      color: rgba(255,255,255,0.94);
+      font-weight: 700;
+      text-underline-offset: 4px;
+    }
+
+    @media (max-width: 900px) {
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .site-nav { justify-content: flex-start; }
+      .terms-layout { grid-template-columns: 1fr; }
+
+      .contents {
+        position: static;
+        padding: 18px 22px;
+      }
+
+      .contents ol {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 7px 26px;
+      }
+    }
+
+    @media (max-width: 680px) {
+      header { padding-bottom: 94px; }
+      .container { width: min(94%, var(--max-width)); }
+
+      .topbar {
+        gap: 12px;
+        padding: 10px;
+        border-radius: 20px;
+      }
+
+      .brand-logo {
+        width: 58px;
+        height: 58px;
+        border-radius: 15px;
+      }
+
+      .brand-name small { display: none; }
+
+      .site-nav {
+        width: 100%;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        overflow-x: auto;
+        border-radius: 15px;
+        scrollbar-width: thin;
+      }
+
+      .site-nav a {
+        padding: 9px 10px;
+        font-size: 0.82rem;
+        white-space: nowrap;
+      }
+
+      .hero { padding-top: 52px; }
+      .hero h1 { font-size: clamp(2.25rem, 12vw, 3.25rem); }
+
+      main {
+        margin-top: -46px;
+        padding-bottom: 52px;
+      }
+
+      .contents ol,
+      .summary-grid,
+      .steps {
+        grid-template-columns: 1fr;
+      }
+
+      .terms-card { padding: 23px 19px; }
+
+      .contact-box {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      * { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Hoppa till innehållet</a>
+
+  <header id="top">
+    <div class="container">
+      <div class="topbar">
+        <a class="brand" href="index.html" aria-label="Berga Fönsterputs startsida">
+          <span class="brand-logo">
+            <img src="logga-fonsterputs-transparent.png" alt="" />
+          </span>
+          <span class="brand-name">
+            Berga Fönsterputs
+            <small>Personlig och lokal service</small>
+          </span>
+        </a>
+        <nav class="site-nav" aria-label="Huvudmeny">
+          <a href="index.html">Startsida</a>
+          <a href="var-tjanst.html">Vår tjänst</a>
+          <a href="om-oss.html">Om oss</a>
+          <a href="index.html#bokning">Boka</a>
+          <a href="index.html#kontakt">Kontakt</a>
+        </nav>
+      </div>
+
+      <div class="hero">
+        <p class="eyebrow">Tydligt före bokning</p>
+        <h1>Bokningsvillkor för fönsterputs</h1>
+        <p>Här ser du vad som gäller för bokning, pris, RUT, skärgårdsjobb, ändringar och betalning hos Berga Fönsterputs.</p>
+        <span class="updated">Senast uppdaterad: 14 juli 2026</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" id="main-content">
+    <div class="terms-layout">
+      <aside class="contents" aria-label="Innehåll på sidan">
+        <h2>På den här sidan</h2>
+        <ol>
+          <li><a href="#sammanfattning">Kort sammanfattning</a></li>
+          <li><a href="#bokning">Bokning och avtal</a></li>
+          <li><a href="#pris">Pris och offert</a></li>
+          <li><a href="#rut">RUT-avdrag</a></li>
+          <li><a href="#kundens-ansvar">Kundens ansvar</a></li>
+          <li><a href="#andringar">Om- och avbokning</a></li>
+          <li><a href="#angerratt">Ångerrätt</a></li>
+          <li><a href="#utforande">Utförande och fel</a></li>
+          <li><a href="#betalning">Faktura och Swish</a></li>
+          <li><a href="#integritet">Integritet och kontakt</a></li>
+        </ol>
+      </aside>
+
+      <article class="terms-content">
+        <section class="terms-card summary-card" id="sammanfattning">
+          <h2>Kort sammanfattning</h2>
+          <p>Villkoren gäller när en privatperson bokar fönsterputs av Berga Fönsterputs via hemsidan eller efter annan skriftlig överenskommelse.</p>
+          <div class="summary-grid">
+            <div class="summary-item">
+              <strong>Din bokning bekräftas</strong>
+              <span>Du bekräftar via den personliga länken i mejlet inom 24 timmar. Först därefter reserveras dagen.</span>
+            </div>
+            <div class="summary-item">
+              <strong>Priset bygger på dina val</strong>
+              <span>Fönster, putsning, bostad, transport och RUT-val påverkar priset.</span>
+            </div>
+            <div class="summary-item">
+              <strong>16+ sjömil ger offert</strong>
+              <span>Längre båttransport prissätts separat och kräver att du godkänner offerten.</span>
+            </div>
+            <div class="summary-item">
+              <strong>Faktura först, Swish efter jobbet</strong>
+              <span>Vi skapar fakturan manuellt och skickar Swishuppgifterna i klartmejlet.</span>
+            </div>
+          </div>
+          <div class="notice">
+            <strong>Tvingande konsumenträtt gäller alltid</strong>
+            De här villkoren begränsar inte de rättigheter som du har enligt tvingande svensk konsumentlagstiftning.
+          </div>
+        </section>
+
+        <section class="terms-card" id="bokning">
+          <h2>Bokning och avtal</h2>
+          <p>När du skickar formuläret lämnar du en bokningsförfrågan utifrån de uppgifter och val som du har angett. Du får ett automatiskt mejl med en personlig bekräftelselänk som gäller i 24 timmar. Dagen blockeras inte för andra förrän du har öppnat länken och bekräftat.</p>
+          <p>När bekräftelsen lyckas visas den på skärmen och du får en kalenderfil samt en säker länk för att hantera bokningen. Om något behöver kontrolleras, exempelvis åtkomst, transport eller omfattning, kontaktar vi dig innan arbetet påbörjas.</p>
+          <p>Kontrollera bekräftelsen och meddela oss så snart som möjligt om namn, adress, datum, tid, antal fönster eller andra uppgifter är fel.</p>
+          <div class="notice">
+            <strong>Offertjobb är ett undantag</strong>
+            Om bokningen kräver offert blir priset bindande först när du har godkänt offerten.
+          </div>
+        </section>
+
+        <section class="terms-card" id="pris">
+          <h2>Pris, omfattning och offert</h2>
+          <p>Priser till privatperson anges inklusive moms om inget annat tydligt framgår. Startpriset är 949 kr efter RUT för utvändig puts av upp till 15 fönster, inklusive 150 kr material, enligt den aktuella prislistan. Livepriset och bokningssammanställningen bygger på de uppgifter som du lämnar om bland annat bostad, antal och typ av fönster, invändig eller utvändig putsning samt transport.</p>
+          <ul>
+            <li>Ett uttryckligen angivet fast pris gäller för den avtalade omfattningen.</li>
+            <li>Om priset anges som ungefärligt gäller reglerna om ungefärlig prisuppgift i konsumenttjänstlagen.</li>
+            <li>Om förutsättningarna på plats avviker tydligt från bokningen pausar vi och stämmer av ändrad omfattning eller pris innan extra arbete utförs, så långt lagen medger.</li>
+            <li>Material, transport och andra kostnader redovisas separat när det behövs.</li>
+          </ul>
+
+          <h3>Skärgårdsjobb och 16+ sjömil</h3>
+          <p>Vid båttransport räknas kortare resor enligt den prisinformation som visas i bokningen. Är transporten 16 sjömil eller längre från den angivna utgångspunkten hanteras jobbet via offert. Du får då ett exakt eller tydligt beräknat pris att ta ställning till innan arbetet utförs.</p>
+          <p>Offerten gäller för den omfattning och under den giltighetstid som framgår av offerten. Ändringar som du begär efter godkännandet kan kräva en uppdaterad offert.</p>
+        </section>
+
+        <section class="terms-card" id="rut">
+          <h2>RUT-avdrag</h2>
+          <p>Om du väljer RUT visas ett pris som förutsätter att arbetet och du som köpare uppfyller Skatteverkets villkor. Endast arbetskostnaden kan ge rätt till RUT-avdrag. Material, båttransport, resor och andra kostnader betalas utan RUT-avdrag.</p>
+          <ul>
+            <li>Du lämnar personnummer genom det separata, säkra RUT-formuläret och ansvarar för att uppgifterna är korrekta.</li>
+            <li>Du ansvarar för dina personliga förutsättningar, exempelvis att du har tillräckligt skatteutrymme och rätt anknytning till bostaden.</li>
+            <li>Berga Fönsterputs ansvarar för att särredovisa kostnaderna och lämna in ansökan utifrån det utförda och betalda arbetet.</li>
+            <li>Om Skatteverket helt eller delvis avslår avdraget ska du betala motsvarande återstående belopp efter korrigerad eller kompletterande faktura.</li>
+          </ul>
+          <p>Väljer du att inte använda RUT beräknas och faktureras hela arbetskostnaden. Att RUT väljs i bokningen är ingen garanti för att Skatteverket beviljar avdraget.</p>
+          <div class="external-links">
+            <a href="https://www.skatteverket.se/privat/fastigheterochbostad/rotarbeteochrutarbete/safungerarrutavdraget.4.d5e04db14b6fef2c866097.html" target="_blank" rel="noopener noreferrer">
+              Läs om RUT hos Skatteverket <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+        </section>
+
+        <section class="terms-card" id="kundens-ansvar">
+          <h2>Kundens ansvar inför besöket</h2>
+          <p>För att arbetet ska kunna utföras säkert och enligt bokningen behöver du hjälpa till med rätt förutsättningar.</p>
+          <ul>
+            <li>Lämna korrekta kontakt-, adress- och bokningsuppgifter och se till att vi får tillträde vid avtalad tid.</li>
+            <li>Informera i förväg om höga eller svåråtkomliga fönster, skadade glas eller karmar, känsliga ytor, säkerhetsrisker och andra förhållanden som påverkar arbetet.</li>
+            <li>Se till att arbetsområdet är åtkomligt och säkert. Vid invändig putsning behöver fönsterbrädor och området närmast fönstren vara undanplockade.</li>
+            <li>Håll barn och husdjur borta från arbetsområdet när det behövs för säkerheten.</li>
+            <li>Vid skärgårdsjobb: lämna riktiga koordinater eller platsuppgifter och informera om brygga, tillträde och andra transportförutsättningar.</li>
+          </ul>
+          <p>Om tjänsten inte kan utföras på grund av en omständighet på din sida försöker vi i första hand boka om. Eventuell ersättning begränsas till vad som följer av avtalet och tillämplig lag, exempelvis utfört arbete eller styrkta kostnader.</p>
+        </section>
+
+        <section class="terms-card" id="andringar">
+          <h2>Ombokning och avbokning</h2>
+          <ol class="steps">
+            <li><strong>Öppna den säkra länken.</strong><br />Använd länken i bokningsbekräftelsen för att begära ombokning eller avbokning.</li>
+            <li><strong>Välj ändring.</strong><br />Följ instruktionerna och kontrollera att rätt bokning visas innan du skickar.</li>
+            <li><strong>Invänta bekräftelse.</strong><br />Den tidigare tiden gäller tills ändringen har bekräftats på skärmen eller via e-post.</li>
+            <li><strong>Kontakta oss vid problem.</strong><br />Om länken saknas eller inte fungerar, mejla oss och ange bokningsreferensen.</li>
+          </ol>
+          <p>Den säkra länken är personlig och ska inte delas med någon som inte får ändra bokningen.</p>
+
+          <h3>Påminnelse var 8:e eller 12:e vecka</h3>
+          <p>Om du väljer ett återkommande intervall skickas en ny bokningsinbjudan efter det valda intervallet. Det är en påminnelse, inte en automatisk beställning: ingen ny dag reserveras och inget nytt arbete beställs förrän du själv väljer och bekräftar en ny ledig tid.</p>
+
+          <h3>Avbeställning</h3>
+          <p>Du får avbeställa tjänsten innan den har slutförts. Beroende på när avbeställningen sker kan Berga Fönsterputs enligt konsumenttjänstlagen ha rätt till ersättning för redan utfört arbete och vissa kostnader eller förluster som avbeställningen orsakar. Någon fast avbokningsavgift tas inte ut om den inte har avtalats tydligt i förväg.</p>
+
+          <h3>Om vi behöver boka om</h3>
+          <p>Vi kan behöva föreslå en ny tid vid exempelvis sjukdom, osäkra arbetsförhållanden, väder eller transportförhållanden som gör arbetet olämpligt eller riskfyllt. Vi kontaktar dig så snart vi kan och försöker hitta en ny tid. Du betalar inte för en del av tjänsten som inte har utförts.</p>
+        </section>
+
+        <section class="terms-card" id="angerratt">
+          <h2>Ångerrätt vid distansavtal</h2>
+          <p>När du som privatperson ingår ett avtal på distans kan du normalt ha 14 dagars ångerrätt enligt distansavtalslagen. Ångerfristen räknas från den dag avtalet ingås.</p>
+          <p>Om du vill att arbetet ska börja under ångerfristen kan vi be dig att uttryckligen begära detta. Om du sedan använder ångerrätten efter att arbetet har påbörjats kan du behöva betala en proportionell del för det som redan har utförts. När tjänsten har fullgjorts helt kan ångerrätten upphöra endast under de förutsättningar som följer av lagen, bland annat efter nödvändigt samtycke och bekräftelse.</p>
+          <p>Du kan meddela att du ångrar avtalet genom den säkra länken eller genom ett tydligt mejl till oss. Ange bokningsreferens, men skicka inte personnummer via vanlig e-post.</p>
+          <div class="external-links">
+            <a href="https://www.konsumentverket.se/lagar/lagen-om-distansavtal-och-avtal-utanfor-affarslokaler-konsument/" target="_blank" rel="noopener noreferrer">
+              Läs om distansavtalslagen hos Konsumentverket <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+        </section>
+
+        <section class="terms-card" id="utforande">
+          <h2>Utförande, försening och fel</h2>
+          <p>Berga Fönsterputs ska utföra tjänsten fackmässigt och med omsorg utifrån den omfattning som ni har avtalat om. Om ett hinder eller behov av tillägg upptäcks under arbetet samråder vi med dig så långt det är möjligt och lagen kräver.</p>
+          <p>Om du anser att tjänsten är felaktig eller försenad ska du kontakta oss så snart som möjligt och beskriva vad som har hänt. Vi ska få skälig möjlighet att undersöka och, när det är aktuellt, avhjälpa felet. Dina rättigheter vid fel eller dröjsmål följer av tvingande konsumentlagstiftning och påverkas inte av de här villkoren.</p>
+          <div class="external-links">
+            <a href="https://www.konsumentverket.se/lagar/konsumenttjanstlagen/" target="_blank" rel="noopener noreferrer">
+              Läs om konsumenttjänstlagen hos Konsumentverket <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+        </section>
+
+        <section class="terms-card" id="betalning">
+          <h2>Manuell faktura och betalning med Swish</h2>
+          <p>Berga Fönsterputs skapar fakturan manuellt utifrån det utförda arbetet, avtalat pris, eventuellt RUT-avdrag samt material- och transportkostnader. Fakturan är betalningsunderlaget.</p>
+          <p>När arbetet är markerat som utfört skickas ett klartmejl med:</p>
+          <ul>
+            <li>det exakta beloppet att betala,</li>
+            <li>Berga Fönsterputs Swish Företagsnummer och mottagarnamn,</li>
+            <li>fakturanummer eller annan betalningsreferens, och</li>
+            <li>instruktion för att öppna Swish eller skriva in uppgifterna manuellt.</li>
+          </ul>
+          <p>Betala enligt fakturans förfallodag och använd exakt den referens som anges. Kontrollera mottagarnamnet innan du godkänner betalningen. Skriv inte personnummer i Swish-meddelandet.</p>
+          <div class="notice notice-warning">
+            <strong>Om uppgifterna skiljer sig</strong>
+            Stoppa betalningen och kontakta oss om belopp, mottagare eller referens i klartmejlet inte stämmer med fakturan. Betalningen räknas som mottagen när den har registrerats på företagets konto.
+          </div>
+        </section>
+
+        <section class="terms-card" id="integritet">
+          <h2>Integritet, säkra länkar och kontakt</h2>
+          <p>Vi behandlar bokningsuppgifter för att administrera och utföra tjänsten, hantera betalning och – när du har valt det – administrera RUT. Personnummer lämnas i det särskilda RUT-formuläret och ska inte skickas via vanlig e-post eller i ett Swish-meddelande.</p>
+          <p>Läs mer om uppgifter, lagring, mottagare och dina rättigheter i vår <a href="integritet.html"><strong>integritetspolicy</strong></a>.</p>
+          <p>Frågor om bokningen, villkoren, ombokning, avbokning eller reklamation skickas till:</p>
+          <div class="contact-box">
+            <p><strong>Berga Fönsterputs</strong><br />Bokning och kundservice</p>
+            <a href="mailto:info@bergafonsterputs.se">info@bergafonsterputs.se</a>
+          </div>
+
+          <h3>Ändringar i villkoren</h3>
+          <p>Den version som gällde när din bokning bekräftades tillämpas normalt på den bokningen. Villkoren kan uppdateras för framtida bokningar när tjänsten, arbetssättet eller reglerna förändras.</p>
+        </section>
+      </article>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p><strong>Berga Fönsterputs</strong></p>
+      <p>E-post: <a href="mailto:info@bergafonsterputs.se">info@bergafonsterputs.se</a></p>
+      <div class="footer-links">
+        <a href="index.html">Startsida</a>
+        <a href="var-tjanst.html">Vår tjänst</a>
+        <a href="index.html#bokning">Boka tid</a>
+        <a href="index.html#kontakt">Kontakt</a>
+        <a href="integritet.html">Integritet</a>
+        <a href="#top" aria-current="page">Bokningsvillkor</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

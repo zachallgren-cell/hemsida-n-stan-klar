@@ -329,7 +329,7 @@
           <input type="text" id="website" tabindex="-1" autocomplete="off">
         </div>
 
-        <div class="security-note" id="bookingLinkStatus">Kontrollerar din säkra bokningslänk…</div>
+        <div class="security-note" id="bookingLinkStatus" role="status" aria-live="polite" aria-atomic="true">Kontrollerar din säkra bokningslänk…</div>
 
         <div>
           <label for="socialSecurityNumber">Personnummer</label>
@@ -343,7 +343,7 @@
         </div>
 
         <button type="submit" class="submit-btn" id="submitButton">Skicka RUT-underlag</button>
-        <div class="status-message" id="rutStatus"></div>
+        <div class="status-message" id="rutStatus" role="status" aria-live="polite" aria-atomic="true"></div>
       </form>
     </section>
   </main>
@@ -352,7 +352,7 @@
     <div class="container">
       <p><strong>Berga Fönsterputs</strong></p>
       <p>E-post: info@bergafonsterputs.se</p>
-      <p><a href="integritet.html">Integritet</a></p>
+      <p><a href="integritet.html">Integritet</a> · <a href="villkor.html">Villkor</a></p>
     </div>
   </footer>
 
@@ -369,6 +369,7 @@
     const bookingIdInput = document.getElementById('bookingId');
     const bookingLinkStatus = document.getElementById('bookingLinkStatus');
     const personalNumberInput = document.getElementById('socialSecurityNumber');
+    const linkStorageKey = 'bergaRutLink';
     const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
     let secureLinkIsValid = false;
 
@@ -378,15 +379,31 @@
         .find(Boolean) || '';
     }
 
-    const bookingId = getLinkValue(['bookingId', 'booking']);
-    const token = getLinkValue(['token']);
+    let storedLink = {};
+    try {
+      storedLink = JSON.parse(sessionStorage.getItem(linkStorageKey) || '{}');
+    } catch {
+      storedLink = {};
+    }
+
+    const fragmentBookingId = getLinkValue(['bookingId', 'booking']);
+    const fragmentToken = getLinkValue(['token']);
+    const bookingId = fragmentBookingId || String(storedLink.bookingId || '');
+    const token = fragmentToken || String(storedLink.token || '');
 
     if (bookingIdInput) bookingIdInput.value = bookingId;
 
-    if (bookingId && token) {
-      const safeHash = new URLSearchParams({ bookingId, token });
-      window.history.replaceState(null, '', `${window.location.pathname}#${safeHash.toString()}`);
+    if (fragmentBookingId && fragmentToken) {
+      try {
+        sessionStorage.setItem(linkStorageKey, JSON.stringify({
+          bookingId: fragmentBookingId,
+          token: fragmentToken
+        }));
+      } catch {
+        // The link can still be used for this page view if session storage is unavailable.
+      }
     }
+    window.history.replaceState(null, '', window.location.pathname);
 
     function setStatus(message, type = 'error') {
       rutStatus.textContent = message;
@@ -423,13 +440,18 @@
         const body = await res.json().catch(() => null);
 
         if (!res.ok || body?.error) {
-          throw new Error(body?.error || 'Kunde inte verifiera bokningslänken.');
+          const linkError = new Error(body?.error || 'Kunde inte verifiera bokningslänken.');
+          linkError.status = res.status;
+          throw linkError;
         }
 
         secureLinkIsValid = true;
         bookingLinkStatus.textContent = 'Säker bokningslänk verifierad. Du kan nu lämna personnumret.';
         submitButton.disabled = false;
       } catch (error) {
+        if (error?.status === 403 || error?.status === 404 || error?.status === 410) {
+          try { sessionStorage.removeItem(linkStorageKey); } catch { /* no-op */ }
+        }
         bookingLinkStatus.textContent = 'Bokningslänken kunde inte verifieras.';
         setStatus(error instanceof Error ? error.message : 'Bokningslänken är ogiltig eller har gått ut.');
       }
@@ -488,6 +510,7 @@
         rutForm.reset();
         submissionSucceeded = true;
         secureLinkIsValid = false;
+        try { sessionStorage.removeItem(linkStorageKey); } catch { /* no-op */ }
         window.history.replaceState(null, '', window.location.pathname);
         bookingLinkStatus.textContent = 'RUT-underlaget är mottaget och den här engångslänken är nu förbrukad.';
         setStatus('Tack! Personnumret är mottaget och krypterat.', 'success');

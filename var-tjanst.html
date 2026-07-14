@@ -45,6 +45,22 @@
 
     html { scroll-behavior: smooth; }
 
+    .skip-link {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 9999;
+      padding: 11px 15px;
+      border-radius: 10px;
+      background: #fff;
+      color: var(--primary-dark);
+      font-weight: 900;
+      transform: translateY(-160%);
+    }
+
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #ffb347; outline-offset: 3px; }
+
     body {
       margin: 0;
       font-family: "Trebuchet MS", "Segoe UI", sans-serif;
@@ -458,6 +474,26 @@
     .slot-status {
       color: var(--muted);
       font-weight: 800;
+    }
+
+    .slot-status.is-error {
+      color: #7a2133;
+    }
+
+    .slot-retry {
+      display: inline-flex;
+      margin-top: 12px;
+      border: 1px solid currentColor;
+      border-radius: 999px;
+      background: #ffffff;
+      color: inherit;
+      padding: 9px 13px;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .slot-retry:hover {
+      box-shadow: 0 8px 18px rgba(17, 57, 74, 0.12);
     }
 
     .simulator {
@@ -1468,9 +1504,19 @@
       }
 
     }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
   </style>
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Hoppa till innehållet</a>
   <header id="top">
     <div class="container">
       <div class="topbar">
@@ -1482,7 +1528,7 @@
           </div>
         </a>
         <div class="topbar-actions">
-          <nav>
+          <nav aria-label="Huvudnavigation">
             <a href="index.html">Startsida</a>
             <a href="var-tjanst.html" class="is-active">Vår tjänst</a>
             <a href="om-oss.html">Om oss</a>
@@ -1517,7 +1563,7 @@
   </header>
   <button type="button" class="topbar-show-button" id="topbarShowButton">Visa meny</button>
 
-  <main class="container">
+  <main class="container" id="main-content">
     <section class="section reveal">
       <div class="card">
         <h2 class="section-title">Vår tjänst</h2>
@@ -1528,7 +1574,7 @@
             <span class="badge">Fönsterputs</span>
             <h3>Renare fönster utan krångel</h3>
             <p>Noggrann puts av fönster för ett rent, fräscht och ljusare intryck hemma eller på platsen där du behöver hjälp.</p>
-            <div class="price">Från 599 kr</div>
+            <div class="price">Från 949 kr med RUT</div>
             <ul>
               <li>Utvändig och invändig fönsterputs enligt bokning</li>
               <li>Puts av glasytor för bättre klarhet</li>
@@ -1544,7 +1590,7 @@
             <ul>
               <li>Vi arbetar lokalt i Åkersberga, Täby, Vaxholm, närområden och ute i skärgården</li>
               <li>Bokningsbara tider 10-17 alla dagar</li>
-              <li>Smidig kontakt via mejl, telefon och sociala medier</li>
+              <li>Smidig kontakt via mejl och sociala medier</li>
             </ul>
             <div class="hero-buttons">
               <a href="index.html#bokning" class="btn btn-primary">Boka fönsterputs</a>
@@ -1558,7 +1604,7 @@
       <div class="card">
         <h2 class="section-title">Nästa lediga tider</h2>
         <p class="section-subtitle">Hämtas från samma bokningssystem som startsidan. Välj en tid här så öppnas bokningsformuläret med tid och livepris på bokningssidan.</p>
-        <div class="slot-grid" id="availableSlots">
+        <div class="slot-grid" id="availableSlots" data-state="loading" role="status" aria-live="polite" aria-busy="true">
           <div class="slot-status">Hämtar lediga tider...</div>
         </div>
         <div class="hero-buttons">
@@ -1711,28 +1757,28 @@
           <div class="quiz-question" data-question="area">
             <h3>1. Var finns fönstren?</h3>
             <div class="quiz-options">
-              <button type="button" class="quiz-option" data-score="2">Åkersberga eller nära</button>
-              <button type="button" class="quiz-option" data-score="1">Täby/Vaxholm/skärgården</button>
-              <button type="button" class="quiz-option" data-score="0">Annat område</button>
+              <button type="button" class="quiz-option" data-score="2" aria-pressed="false">Åkersberga eller nära</button>
+              <button type="button" class="quiz-option" data-score="1" aria-pressed="false">Täby/Vaxholm/skärgården</button>
+              <button type="button" class="quiz-option" data-score="0" aria-pressed="false">Annat område</button>
             </div>
           </div>
           <div class="quiz-question" data-question="need">
             <h3>2. Vad vill du helst slippa?</h3>
             <div class="quiz-options">
-              <button type="button" class="quiz-option" data-score="2">Putsa själv</button>
-              <button type="button" class="quiz-option" data-score="2">Svåråtkomliga fönster</button>
-              <button type="button" class="quiz-option" data-score="1">Planering</button>
+              <button type="button" class="quiz-option" data-score="2" aria-pressed="false">Putsa själv</button>
+              <button type="button" class="quiz-option" data-score="2" aria-pressed="false">Svåråtkomliga fönster</button>
+              <button type="button" class="quiz-option" data-score="1" aria-pressed="false">Planering</button>
             </div>
           </div>
           <div class="quiz-question" data-question="payment">
             <h3>3. Hur vill du betala?</h3>
             <div class="quiz-options">
-              <button type="button" class="quiz-option" data-score="2">Efter putsning</button>
-              <button type="button" class="quiz-option" data-score="2">Swish efter putsning</button>
-              <button type="button" class="quiz-option" data-score="1">Vill fråga först</button>
+              <button type="button" class="quiz-option" data-score="2" aria-pressed="false">Efter putsning</button>
+              <button type="button" class="quiz-option" data-score="2" aria-pressed="false">Swish efter putsning</button>
+              <button type="button" class="quiz-option" data-score="1" aria-pressed="false">Vill fråga först</button>
             </div>
           </div>
-          <div class="quiz-result" id="quizResult"></div>
+          <div class="quiz-result" id="quizResult" role="status" aria-live="polite" aria-atomic="true"></div>
         </div>
       </div>
     </section>
@@ -1750,6 +1796,7 @@
         <a href="index.html#bokning">Boka tid</a>
         <a href="index.html#kontakt">Kontakt</a>
         <a href="integritet.html">Integritet</a>
+        <a href="villkor.html">Villkor</a>
       </div>
       <p>© 2026 Berga Fönsterputs. Alla rättigheter förbehållna.</p>
     </div>
@@ -1781,14 +1828,7 @@
 
     const todayDate = new Date();
     todayDate.setHours(12, 0, 0, 0);
-    const bookingYear = todayDate.getFullYear();
-    const redDays = bookingYear === 2026
-      ? new Set([
-          '2026-01-01', '2026-01-06', '2026-04-03', '2026-04-05', '2026-04-06',
-          '2026-05-01', '2026-05-14', '2026-05-24', '2026-06-06', '2026-06-20',
-          '2026-11-01', '2026-12-25', '2026-12-26'
-        ])
-      : new Set();
+    let slotsAvailabilityState = 'loading';
 
     const areaInfo = {
       osteraker: {
@@ -1840,7 +1880,8 @@
       return dateObject.toLocaleDateString('sv-SE', {
         weekday: 'long',
         day: 'numeric',
-        month: 'long'
+        month: 'long',
+        year: 'numeric'
       });
     }
 
@@ -1848,25 +1889,54 @@
       return ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
     }
 
-    async function fetchBookings() {
-      const res = await fetch(BOOKED_SLOTS_FUNCTION_URL, {
-        headers: getHeaders()
-      });
-      if (!res.ok) return [];
-      const data = await res.json();
-      return Array.isArray(data?.bookings) ? data.bookings : [];
+    function setSlotsAvailabilityState(nextState) {
+      slotsAvailabilityState = nextState;
+      availableSlots.dataset.state = nextState;
+      availableSlots.setAttribute('aria-busy', nextState === 'loading' ? 'true' : 'false');
     }
 
-    function findNextSlots(bookings) {
+    async function fetchAvailability() {
+      const controller = new AbortController();
+      const timeoutId = window.setTimeout(() => controller.abort(), 10_000);
+      let res;
+      try {
+        res = await fetch(BOOKED_SLOTS_FUNCTION_URL, {
+          headers: getHeaders(),
+          cache: 'no-store',
+          signal: controller.signal
+        });
+      } finally {
+        window.clearTimeout(timeoutId);
+      }
+
+      if (!res.ok) {
+        throw new Error(`Kunde inte hämta tillgänglighet (${res.status}).`);
+      }
+
+      const data = await res.json();
+      if (!Array.isArray(data?.bookings) || !Array.isArray(data?.blockedDates)) {
+        throw new Error('Tillgänglighetssvaret har ett oväntat format.');
+      }
+
+      return {
+        bookings: data.bookings,
+        blockedDates: data.blockedDates
+      };
+    }
+
+    function findNextSlots(bookings, blockedDates) {
       const slots = [];
+      const bookedDateValues = new Set(bookings.map((booking) => booking.date));
+      const blockedDateValues = new Set(blockedDates.map((blockedDate) => blockedDate.date));
+
       for (let dayOffset = 2; dayOffset < 28 && slots.length < 4; dayOffset += 1) {
         const date = new Date(todayDate);
         date.setDate(todayDate.getDate() + dayOffset);
         const dateString = formatDate(date.getFullYear(), date.getMonth(), date.getDate());
-        const dayIsBooked = bookings.some((booking) => booking.date === dateString);
+        const dayIsUnavailable = bookedDateValues.has(dateString) || blockedDateValues.has(dateString);
 
         getTimes().forEach((time) => {
-          if (!dayIsBooked && slots.length < 4) {
+          if (!dayIsUnavailable && slots.length < 4) {
             slots.push({ date: dateString, time });
           }
         });
@@ -1875,21 +1945,39 @@
     }
 
     async function renderAvailableSlots() {
+      setSlotsAvailabilityState('loading');
+      availableSlots.innerHTML = '<div class="slot-status">Hämtar och kontrollerar lediga tider…</div>';
+
       try {
-        const bookings = await fetchBookings();
-        const slots = findNextSlots(bookings);
+        const availability = await fetchAvailability();
+        const slots = findNextSlots(availability.bookings, availability.blockedDates);
+        setSlotsAvailabilityState('ready');
         availableSlots.innerHTML = slots.length
           ? slots.map((slot) => `
-              <a class="slot-card" href="bokning.html?date=${encodeURIComponent(slot.date)}&time=${encodeURIComponent(slot.time)}">
+              <a class="slot-card" href="bokning.html?date=${encodeURIComponent(slot.date)}&time=${encodeURIComponent(slot.time)}" aria-label="Boka ${formatDateForDisplay(slot.date)} klockan ${slot.time}">
                 <strong>${formatDateForDisplay(slot.date)}</strong>
                 <span>${slot.time}</span>
               </a>
             `).join('')
-          : '<div class="slot-status">Just nu hittar vi inga lediga tider. Hör av dig så hjälper vi dig.</div>';
+          : '<div class="slot-status">Just nu hittar vi inga lediga tider de närmaste fyra veckorna. Hör av dig så hjälper vi dig.</div>';
       } catch (error) {
-        availableSlots.innerHTML = '<div class="slot-status">Kunde inte hämta tider just nu. Testa igen eller boka direkt på startsidan.</div>';
+        console.error(error);
+        setSlotsAvailabilityState('error');
+        availableSlots.innerHTML = `
+          <div class="slot-status is-error">
+            Tillgängligheten kunde inte kontrolleras. Inga tider visas förrän anslutningen fungerar igen.
+            <br>
+            <button type="button" class="slot-retry" data-retry-slots>Försök igen</button>
+          </div>
+        `;
       }
     }
+
+    availableSlots.addEventListener('click', (event) => {
+      const retryButton = event.target.closest('[data-retry-slots]');
+      if (!retryButton || slotsAvailabilityState !== 'error') return;
+      renderAvailableSlots();
+    });
 
     let isCleaning = false;
     let cleanPercent = 0;
@@ -2060,8 +2148,12 @@
     quiz.querySelectorAll('.quiz-option').forEach((option) => {
       option.addEventListener('click', () => {
         const question = option.closest('.quiz-question');
-        question.querySelectorAll('.quiz-option').forEach((otherOption) => otherOption.classList.remove('is-selected'));
+        question.querySelectorAll('.quiz-option').forEach((otherOption) => {
+          otherOption.classList.remove('is-selected');
+          otherOption.setAttribute('aria-pressed', 'false');
+        });
         option.classList.add('is-selected');
+        option.setAttribute('aria-pressed', 'true');
         quizAnswers[question.dataset.question] = Number(option.dataset.score);
 
         if (Object.keys(quizAnswers).length === 3) {

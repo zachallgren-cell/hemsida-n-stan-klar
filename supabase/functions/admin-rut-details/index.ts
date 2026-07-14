@@ -356,6 +356,7 @@ function getManagementError(code: unknown) {
   const messages: Record<string, string> = {
     not_allowed: 'Adminbehörigheten kunde inte verifieras.',
     booking_not_found: 'Bokningen finns inte.',
+    customer_confirmation_required: 'Kunden måste först bekräfta bokningen via länken i mejlet.',
     not_rut_booking: 'Bokningen är inte registrerad för RUT-avdrag.',
     work_pending: 'Markera arbetet som slutfört innan Swishbetalningen registreras.',
     work_or_payment_pending: 'Arbetet måste vara slutfört och Swishbetalningen verifierad innan RUT markeras som ansökt.',

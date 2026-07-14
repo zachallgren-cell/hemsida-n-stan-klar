@@ -3,5 +3,7 @@ Allow: /
 Disallow: /admin.html
 Disallow: /bokning.html
 Disallow: /betalning.html
+Disallow: /rut.html
+Disallow: /hantera-bokning.html
 
 Sitemap: https://bergafonsterputs.se/sitemap.xml

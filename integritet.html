@@ -716,9 +716,15 @@
               <tbody>
                 <tr>
                   <td data-label="Situation"><strong>Bokning och tjänst</strong></td>
-                  <td data-label="Uppgifter">Namn, e-post, telefon, adress eller plats, bokad dag och tid, bostads- och fönsteruppgifter, tillval, transportbehov, koordinater, meddelande, pris och rabatt.</td>
-                  <td data-label="Ändamål">Räkna pris, ta emot och bekräfta bokningen, planera besöket, utföra arbetet och hantera frågor eller ändringar.</td>
+                  <td data-label="Uppgifter">Namn, e-post, telefon, adress eller plats, postnummer, bokad dag och tid, bostads- och fönsteruppgifter, tillval, transportbehov, koordinater, önskat påminnelseintervall, meddelande, pris och rabatt.</td>
+                  <td data-label="Ändamål">Kontrollera serviceområde, räkna pris, ta emot och bekräfta bokningen, skicka påminnelser, planera besöket, utföra arbetet och hantera frågor eller ändringar.</td>
                   <td data-label="Rättslig grund">Avtal eller åtgärder på din begäran före avtal. Berättigat intresse kan användas för nödvändig administration, säkerhet och för att hantera eller försvara krav.</td>
+                </tr>
+                <tr>
+                  <td data-label="Situation"><strong>Offert med foton</strong></td>
+                  <td data-label="Uppgifter">Namn, e-post, telefon, postnummer, beskrivning och upp till tre bilder som du själv bifogar.</td>
+                  <td data-label="Ändamål">Bedöma fönster och förutsättningar samt lämna eller följa upp en offert.</td>
+                  <td data-label="Rättslig grund">Åtgärder på din begäran före avtal och berättigat intresse av att kunna svara på offertförfrågan.</td>
                 </tr>
                 <tr>
                   <td data-label="Situation"><strong>Kontakt</strong></td>
@@ -740,7 +746,7 @@
                 </tr>
                 <tr>
                   <td data-label="Situation"><strong>Webbplats och säkerhet</strong></td>
-                  <td data-label="Uppgifter">Cookieval, tekniska händelser och begränsade logguppgifter som tidpunkt, begärans status samt nätverks- eller enhetsinformation när tjänsterna skapar sådana loggar.</td>
+                  <td data-label="Uppgifter">Cookieval, kampanjparametrar efter samtycke, tekniska händelser och begränsade logguppgifter som tidpunkt, begärans status samt nätverks- eller enhetsinformation när tjänsterna skapar sådana loggar.</td>
                   <td data-label="Ändamål">Få webbplatsen att fungera, skydda formulär och tjänster mot missbruk, felsöka och förbättra säkerheten.</td>
                   <td data-label="Rättslig grund">Berättigat intresse av en säker och fungerande tjänst. Analysdata används först efter ditt samtycke till analyscookies.</td>
                 </tr>
@@ -752,7 +758,7 @@
           <p>När du markerar rutan i RUT-formuläret bekräftar du att du har läst informationen, vill lämna underlaget för den bokning som visas och att uppgifterna är riktiga. Rutan är inte den enda rättsliga grunden för behandlingen. Den fortsatta hanteringen behövs normalt för avtal och, när regler kräver det, rättslig förpliktelse.</p>
 
           <h3>Cookies och besöksanalys</h3>
-          <p>Ditt cookieval sparas lokalt i webbläsaren. Google Analytics laddas endast om du accepterar analyscookies. Du kan ändra valet via knappen <strong>Cookieinställningar</strong> på webbplatsen. Ett återkallat samtycke påverkar inte behandling som redan skett innan återkallelsen.</p>
+          <p>Ditt cookieval sparas lokalt i webbläsaren. Google Analytics, kampanjmätning och den externa Google-omdömeswidgeten laddas eller sparas endast om du accepterar analyscookies. Du kan ändra valet via knappen <strong>Cookieinställningar</strong> på webbplatsen. Ett återkallat samtycke påverkar inte behandling som redan skett innan återkallelsen.</p>
 
           <h3>Automatiska beräkningar</h3>
           <p>Webbplatsen räknar automatiskt fram ett pris utifrån dina val och kontrollerar beräkningen på servern. Vi använder inte denna prisberäkning för beslut som enbart fattas automatiskt och har rättsliga eller liknande betydande följder för dig.</p>
@@ -767,6 +773,7 @@
             <li>Personnumret sparas som en krypterad arbetskopia. Åtkomst till visning kräver administrativ behörighet och åtkomsthändelser loggas.</li>
             <li>Token förbrukas efter inlämning. Arbetskopian kan gallras när RUT-ärendet är klart och omfattas alltid av den bortre tidsgränsen nedan.</li>
           </ol>
+          <p>Även länken för att bekräfta, boka om eller avboka är personlig. Den hemliga delen ligger efter <code>#</code> i länken, tas bort från adressfältet när sidan öppnas och sparas bara som ett hashvärde på servern.</p>
           <div class="notice">
             <strong>Skicka inte personnummer via vanlig e-post.</strong>
             Använd bara det separata RUT-formuläret från bekräftelsemejlet. Kontakta oss om länken saknas, har gått ut eller verkar felaktig.
@@ -785,7 +792,7 @@
           <ul>
             <li><strong>GitHub Pages</strong> för att leverera den publika webbplatsen.</li>
             <li><strong>Supabase</strong> för bokningsdatabas, serverfunktioner och tillhörande teknisk drift.</li>
-            <li><strong>Resend</strong> för att leverera boknings-, RUT- och klartmejl. RUT-underlaget fylls i i det separata formuläret och ska inte skickas i vanlig e-post.</li>
+            <li><strong>Resend</strong> för att leverera boknings-, påminnelse-, offert-, RUT- och klartmejl. Bilder i en offertförfrågan skickas som e-postbilagor men skrivs inte till webbplatsens databas. RUT-underlaget fylls i i det separata formuläret och ska inte skickas i vanlig e-post.</li>
             <li><strong>Google Analytics</strong> för begränsad besöksanalys, men bara när du har accepterat analyscookies.</li>
             <li><strong>Skatteverket</strong> när du har begärt RUT och uppgifterna behövs för ansökan, komplettering eller kontroll.</li>
             <li><strong>Banker och tjänster kopplade till Swish</strong> för att genomföra och redovisa betalningen.</li>
@@ -821,6 +828,14 @@
                 <tr>
                   <td data-label="Typ"><strong>Bokning, arbete och Swishbetalning</strong></td>
                   <td data-label="Lagring">Sparas så länge det behövs för att fullgöra och följa upp tjänsten. Uppgifter som utgör bokförings-, skatte- eller annat rättsligt underlag sparas därefter enligt de krav som gäller för underlaget. Den exakta tiden kan därför variera.</td>
+                </tr>
+                <tr>
+                  <td data-label="Typ"><strong>Obekräftad bokning och säkerhetsbegränsning</strong></td>
+                  <td data-label="Lagring">Bekräftelselänken gäller i 24 timmar. Därefter markeras bokningen som utgången och blockerar inte kalendern. Tekniska formulärbegränsningar gallras automatiskt efter två dagar.</td>
+                </tr>
+                <tr>
+                  <td data-label="Typ"><strong>Offertbilder</strong></td>
+                  <td data-label="Lagring">Bilderna skrivs inte till webbplatsens databas. De skickas till vår offertinkorg via e-postleverantören och tas bort ur inkorgen när de inte längre behövs för offerten eller ett efterföljande kundärende.</td>
                 </tr>
                 <tr>
                   <td data-label="Typ"><strong>Kontaktärenden</strong></td>
@@ -891,6 +906,7 @@
         <a href="index.html#bokning">Boka tid</a>
         <a href="index.html#kontakt">Kontakt</a>
         <a href="#top" aria-current="page">Integritet</a>
+        <a href="villkor.html">Villkor</a>
       </div>
     </div>
   </footer>

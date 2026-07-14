@@ -36,6 +36,22 @@
 
     html { scroll-behavior: smooth; }
 
+    .skip-link {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 9999;
+      padding: 11px 15px;
+      border-radius: 10px;
+      background: #fff;
+      color: var(--primary-dark);
+      font-weight: 900;
+      transform: translateY(-160%);
+    }
+
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #ffb347; outline-offset: 3px; }
+
     body {
       margin: 0;
       font-family: "Trebuchet MS", "Segoe UI", sans-serif;
@@ -488,6 +504,7 @@
       background: #f3fbff;
       color: var(--primary-dark);
       font-size: 0.88rem;
+      font-family: inherit;
       font-weight: 800;
       cursor: help;
     }
@@ -1154,16 +1171,26 @@
         font-weight: 900;
       }
     }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
   </style>
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Hoppa till innehållet</a>
   <header>
     <div class="container">
       <div class="topbar">
         <a href="index.html" class="brand" aria-label="Berga Fönsterputs startsida">
           <img src="logga-fonsterputs-transparent.png" alt="Berga Fönsterputs logotyp">
         </a>
-        <nav>
+        <nav aria-label="Huvudnavigation">
           <a href="index.html">Startsida</a>
           <a href="var-tjanst.html">Vår tjänst</a>
           <a href="om-oss.html">Om oss</a>
@@ -1180,7 +1207,7 @@
     </div>
   </header>
 
-  <main class="container">
+  <main class="container" id="main-content">
     <section class="card">
       <div class="selected-booking">
         <strong>Vald tid</strong>
@@ -1232,22 +1259,39 @@
           <div class="form-row">
             <div>
               <label for="name">Namn</label>
-              <input type="text" id="name" placeholder="Ditt namn" required>
+              <input type="text" id="name" placeholder="Ditt namn" autocomplete="name" maxlength="100" required>
             </div>
             <div>
               <label for="phone">Telefonnummer</label>
-              <input type="tel" id="phone" placeholder="073-123 45 67" required>
+              <input type="tel" id="phone" placeholder="073-123 45 67" autocomplete="tel" inputmode="tel" maxlength="24" required>
             </div>
           </div>
 
           <div class="form-row">
             <div>
               <label for="email">E-postadress</label>
-              <input type="email" id="email" placeholder="dinmail@exempel.se" required>
+              <input type="email" id="email" placeholder="dinmail@exempel.se" autocomplete="email" maxlength="254" required>
             </div>
             <div>
               <label for="location">Adress där jobbet ska utföras</label>
-              <input type="text" id="location" placeholder="Till exempel din adress i Åkersberga" required>
+              <input type="text" id="location" placeholder="Till exempel din adress i Åkersberga" autocomplete="street-address" maxlength="240" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div>
+              <label for="postalCode">Postnummer</label>
+              <input type="text" id="postalCode" placeholder="184 30" autocomplete="postal-code" inputmode="numeric" pattern="[0-9 ]{5,6}" maxlength="6" required aria-describedby="postalCodeStatus">
+              <p class="field-note" id="postalCodeStatus" aria-live="polite">Direktbokning gäller postnummer i Stockholmsområdet (1xx xx). Övriga områden hanteras via offert.</p>
+            </div>
+            <div>
+              <label for="recurrenceWeeks">Hur ofta vill du ha putsning?</label>
+              <select id="recurrenceWeeks">
+                <option value="">Engångsbesök</option>
+                <option value="8">Påminn mig var 8:e vecka</option>
+                <option value="12">Påminn mig var 12:e vecka</option>
+              </select>
+              <p class="field-note">Du får en ny bokningsinbjudan och väljer själv en ledig tid. Ingen ny tid reserveras automatiskt.</p>
             </div>
           </div>
 
@@ -1274,12 +1318,12 @@
               <p class="field-note">Om du vill använda RUT-avdrag skickar vi ett säkert RUT-formulär i bekräftelsemejlet. Där fyller du i uppgifter som personnummer och andra personuppgifter.</p>
               <div class="rut-help-row">
                 <div class="field-help">
-                  <span class="field-help-trigger" tabindex="0">Vad är RUT-avdrag?</span>
-                  <div class="field-help-tooltip">RUT-avdrag gör att du som privatperson kan få 50% avdrag på arbetskostnaden för fönsterputs. RUT-uppgifterna fylls i ett säkert formulär efter bokningen.</div>
+                  <button type="button" class="field-help-trigger" aria-describedby="rutHelpText">Vad är RUT-avdrag?</button>
+                  <div class="field-help-tooltip" id="rutHelpText" role="tooltip">RUT-avdrag gör att du som privatperson kan få 50% avdrag på arbetskostnaden för fönsterputs. RUT-uppgifterna fylls i ett säkert formulär efter bokningen.</div>
                 </div>
                 <div class="field-help">
-                  <span class="field-help-trigger" tabindex="0">Vad händer utan RUT?</span>
-                  <div class="field-help-tooltip">Du kan boka som vanligt. Då visas och sparas hela arbetskostnaden utan RUT-avdrag, medan material och eventuell transport fortfarande ligger separat.</div>
+                  <button type="button" class="field-help-trigger" aria-describedby="noRutHelpText">Vad händer utan RUT?</button>
+                  <div class="field-help-tooltip" id="noRutHelpText" role="tooltip">Du kan boka som vanligt. Då visas och sparas hela arbetskostnaden utan RUT-avdrag, medan material och eventuell transport fortfarande ligger separat.</div>
                 </div>
               </div>
             </div>
@@ -1303,6 +1347,12 @@
                 <button type="button" class="stepper-btn" id="windowCountIncrease" aria-label="Öka antal fönster">+</button>
               </div>
             </div>
+          </div>
+
+          <div class="rut-notice">
+            <strong>Osäker på hur många fönster du har?</strong>
+            <p class="field-note">Räkna varje separat öppningsbar fönsterdel eller fast glasparti som ett fönster. Spröjs ändrar inte antalet, men anges separat eftersom arbetet tar längre tid.</p>
+            <a class="btn btn-secondary" href="offert.html">Se bildguiden och skicka foton för offert</a>
           </div>
 
           <div class="form-row">
@@ -1340,10 +1390,10 @@
               </div>
               <div>
                 <label for="coordinates">Koordinater</label>
-                <input type="text" id="coordinates" placeholder="Skriv koordinater eller exakt plats där vi ska lägga till">
+                <input type="text" id="coordinates" maxlength="240" placeholder="Skriv koordinater eller exakt plats där vi ska lägga till">
               </div>
             </div>
-            <p class="booking-note">Vid båttransport tillkommer startavgift 799 kr och 125 kr per sjömil från Svinnige marina.</p>
+            <p class="booking-note">0–15 sjömil: startavgift 799 kr och 125 kr per sjömil från Svinnige marina. Över 15 sjömil hanteras via offert.</p>
           </div>
 
           <div class="form-section-label">
@@ -1356,17 +1406,17 @@
 
           <div>
             <label for="message">Övrig information</label>
-            <textarea id="message" rows="4" placeholder="Skriv gärna extra detaljer om bostaden, parkering, portkod eller annat som är bra för oss att veta"></textarea>
+            <textarea id="message" rows="4" maxlength="2000" placeholder="Skriv gärna extra detaljer om bostaden, parkering, portkod eller annat som är bra för oss att veta"></textarea>
           </div>
 
           <div class="consent-box">
             <input type="checkbox" id="consent" required>
-            <label for="consent">Jag har läst <a href="integritet.html" target="_blank" rel="noopener noreferrer">integritetsinformationen</a> och bekräftar att uppgifterna får användas för bokningen. Eventuellt personnummer lämnas separat i det säkra RUT-formuläret.</label>
+            <label for="consent">Jag har läst <a href="integritet.html" target="_blank" rel="noopener noreferrer">integritetsinformationen</a> och <a href="villkor.html" target="_blank" rel="noopener noreferrer">bokningsvillkoren</a> och accepterar att uppgifterna används för bokningen. Eventuellt personnummer lämnas separat i det säkra RUT-formuläret.</label>
           </div>
 
-          <button type="submit" class="submit-btn">Skicka bokning</button>
-          <p class="booking-note">Bokningen sparas som väntande först. På nästa sida får du en bekräftelse. Swishuppgifterna skickas i klartmejlet när jobbet är utfört.</p>
-          <div class="status-message" id="bookingStatus"></div>
+          <button type="submit" class="submit-btn" id="submitBookingButton">Skicka bokning</button>
+          <p class="booking-note">Efter att du skickat får du ett mejl där du bekräftar bokningen. Dagen reserveras först efter bekräftelsen. Swishuppgifterna skickas i klartmejlet när jobbet är utfört.</p>
+          <div class="status-message" id="bookingStatus" role="status" aria-live="polite" aria-atomic="true"></div>
         </form>
 
         <aside class="side-panel">
@@ -1433,7 +1483,7 @@
 
           <div class="booking-packages" id="bookingPackages">
             <button type="button" class="booking-packages-header" id="bookingPackagesToggle" aria-expanded="false" aria-controls="bookingPackagesContent">
-              <h3>Våra paket</h3>
+              <h2>Våra paket</h2>
               <span>Klicka för prislista</span>
             </button>
             <div class="booking-packages-content" id="bookingPackagesContent">
@@ -1484,6 +1534,7 @@
         <a href="index.html#bokning">Boka tid</a>
         <a href="index.html#kontakt">Kontakt</a>
         <a href="integritet.html">Integritet</a>
+        <a href="villkor.html">Villkor</a>
       </div>
       <p>© 2026 Berga Fönsterputs. Alla rättigheter förbehållna.</p>
     </div>
@@ -1497,6 +1548,10 @@
     const bookingStatus = document.getElementById('bookingStatus');
     const formStartedAtInput = document.getElementById('formStartedAt');
     const websiteInput = document.getElementById('website');
+    const postalCodeInput = document.getElementById('postalCode');
+    const postalCodeStatus = document.getElementById('postalCodeStatus');
+    const recurrenceWeeksInput = document.getElementById('recurrenceWeeks');
+    const submitBookingButton = document.getElementById('submitBookingButton');
     const housingTypeInput = document.getElementById('boatSize');
     const windowCountInput = document.getElementById('windowCount');
     const windowCountDecreaseButton = document.getElementById('windowCountDecrease');
@@ -1534,6 +1589,7 @@
     const BOOKING_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/create-booking`;
     const VALIDATE_DISCOUNT_URL = `${SUPABASE_URL}/functions/v1/validate-discount`;
     let appliedDiscount = null;
+    let rebookedFromBookingId = '';
     const todayDate = new Date();
     todayDate.setHours(12, 0, 0, 0);
     const bookingYear = todayDate.getFullYear();
@@ -1576,6 +1632,99 @@
     function clearStatus() {
       bookingStatus.textContent = '';
       bookingStatus.className = 'status-message';
+    }
+
+    function normalizePostalCode(value) {
+      return String(value || '').replace(/\D/g, '');
+    }
+
+    function updatePostalCodeStatus() {
+      const postalCode = normalizePostalCode(postalCodeInput?.value);
+      if (!postalCode) {
+        postalCodeStatus.textContent = 'Direktbokning gäller postnummer i Stockholmsområdet (1xx xx). Övriga områden hanteras via offert.';
+        postalCodeStatus.style.color = '';
+        return false;
+      }
+
+      const directBooking = /^1\d{4}$/.test(postalCode);
+      postalCodeStatus.innerHTML = directBooking
+        ? 'Postnumret ligger inom området för direktbokning.'
+        : 'Detta postnummer behöver stämmas av. <a href="offert.html">Skicka en offertförfrågan i stället.</a>';
+      postalCodeStatus.style.color = directBooking ? 'var(--success)' : 'var(--error)';
+      return directBooking;
+    }
+
+    function getCampaignAttribution() {
+      try {
+        if (localStorage.getItem('berga_cookie_consent') !== 'accepted') return {};
+        const stored = JSON.parse(sessionStorage.getItem('bergaCampaignAttribution') || '{}');
+        if (!stored || typeof stored !== 'object') return {};
+        return {
+          utmSource: String(stored.utmSource || '').slice(0, 160),
+          utmMedium: String(stored.utmMedium || '').slice(0, 160),
+          utmCampaign: String(stored.utmCampaign || '').slice(0, 160),
+          utmContent: String(stored.utmContent || '').slice(0, 160),
+          utmTerm: String(stored.utmTerm || '').slice(0, 160),
+          landingPage: String(stored.landingPage || '').slice(0, 160)
+        };
+      } catch {
+        return {};
+      }
+    }
+
+    function applyRebookPrefill() {
+      let prefill;
+
+      try {
+        prefill = JSON.parse(sessionStorage.getItem('bergaRebookPrefill') || 'null');
+        sessionStorage.removeItem('bergaRebookPrefill');
+      } catch {
+        prefill = null;
+      }
+
+      if (!prefill || typeof prefill !== 'object') return;
+
+      const setValue = (id, value, maxLength = 240) => {
+        const element = document.getElementById(id);
+        if (!element || typeof value !== 'string') return;
+        element.value = value.slice(0, maxLength);
+      };
+      const setSelect = (element, value) => {
+        const normalized = String(value || '');
+        if (element && Array.from(element.options).some((option) => option.value === normalized)) {
+          element.value = normalized;
+        }
+      };
+
+      setValue('name', prefill.name, 100);
+      setValue('email', prefill.email, 254);
+      setValue('phone', prefill.phone, 24);
+      setValue('location', prefill.location, 240);
+      setValue('postalCode', String(prefill.postalCode || '').replace(/\D/g, '').slice(0, 5), 5);
+      setSelect(housingTypeInput, prefill.housingType);
+      setSelect(rutChoiceInput, prefill.rutChoice);
+      setSelect(document.getElementById('serviceScope'), prefill.serviceScope);
+      setSelect(transportTypeInput, prefill.transportType);
+      setSelect(recurrenceWeeksInput, prefill.recurrenceWeeks);
+      const sourceBookingId = String(prefill.rebookedFromBookingId || '');
+      rebookedFromBookingId = /^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$/.test(sourceBookingId)
+        ? sourceBookingId
+        : '';
+
+      const regularCount = Number(prefill.regularWindowCount);
+      const muntinsCount = Number(prefill.muntinsCount);
+      if (Number.isInteger(regularCount) && regularCount >= 0) {
+        setWindowCountValue(Math.min(regularCount, MAX_TOTAL_WINDOWS));
+      }
+      if (Number.isInteger(muntinsCount) && muntinsCount >= 0) {
+        setMuntinsCountValue(Math.min(muntinsCount, MAX_TOTAL_WINDOWS - getWindowCountValue()), false);
+      }
+
+      setValue('seaMiles', String(prefill.seaMiles || '').replace(/\D/g, '').slice(0, 3), 3);
+      setValue('coordinates', prefill.coordinates, 160);
+      updateTransportFields();
+      updatePostalCodeStatus();
+      setStatus('Uppgifterna från din förra bokning är ifyllda. Kontrollera dem och välj en ledig tid.', 'success');
     }
 
     function applySelectedTime() {
@@ -1661,6 +1810,13 @@
       if (!rawValue) return { label: '', price: 0, isQuote: false };
       const parsedMiles = Number(rawValue);
       const safeMiles = Number.isFinite(parsedMiles) ? Math.max(0, parsedMiles) : 0;
+      if (safeMiles > 15) {
+        return {
+          label: `${safeMiles} sjömil`,
+          price: 0,
+          isQuote: true
+        };
+      }
       return {
         label: `${safeMiles} sjömil`,
         price: ISLAND_START_PRICE + (safeMiles * ISLAND_PRICE_PER_SEA_MILE),
@@ -1793,6 +1949,19 @@
 
     function updateLivePrice() {
       const estimate = calculateEstimatedPrice();
+
+      if (estimate.isQuote) {
+        livePriceValue.textContent = 'Offert';
+        livePriceLabel.textContent = 'för båttransport över 15 sjömil';
+        livePriceText.innerHTML = 'Längre skärgårdsjobb behöver planeras manuellt. <a href="offert.html">Skicka en kostnadsfri offertförfrågan</a>.';
+        laborCostValue.textContent = 'Fastställs i offert';
+        materialCostValue.textContent = 'Fastställs i offert';
+        transportCostValue.textContent = 'Fastställs i offert';
+        rutDeductionValue.textContent = 'Fastställs i offert';
+        discountBreakdownRow.hidden = true;
+        return;
+      }
+
       const discountedPrice = calculateDiscountedPrice(estimate);
       renderPriceBreakdown(estimate, discountedPrice);
       if (appliedDiscount) {
@@ -1872,6 +2041,12 @@
         return;
       }
 
+      if (estimate.isQuote) {
+        discountCodeStatus.textContent = 'Rabattkod kan användas först när ett fast bokningspris finns.';
+        discountCodeStatus.classList.add('error');
+        return;
+      }
+
       if (!estimate.rutChoiceSelected || !estimate.housingTypeLabel || !estimate.windowCount || !estimate.serviceScopeValue || !estimate.transportType) {
         discountCodeStatus.textContent = 'Välj RUT, bostad, antal fönster, putsning och transport först.';
         discountCodeStatus.classList.add('error');
@@ -1926,6 +2101,7 @@
         Boolean(document.getElementById('phone')?.value.trim()),
         Boolean(document.getElementById('email')?.value.trim()),
         Boolean(document.getElementById('location')?.value.trim()),
+        /^1\d{4}$/.test(normalizePostalCode(postalCodeInput?.value)),
         Boolean(rutChoiceInput?.value),
         Boolean(getHousingTypeLabel()),
         getWindowCountValue() > 0,
@@ -2009,6 +2185,15 @@
         booking_time: booking.time,
         time: booking.time,
         location: booking.location,
+        postalCode: booking.postalCode,
+        recurrenceWeeks: booking.recurrenceWeeks || null,
+        rebookedFromBookingId: booking.rebookedFromBookingId || null,
+        utmSource: booking.attribution.utmSource || null,
+        utmMedium: booking.attribution.utmMedium || null,
+        utmCampaign: booking.attribution.utmCampaign || null,
+        utmContent: booking.attribution.utmContent || null,
+        utmTerm: booking.attribution.utmTerm || null,
+        landingPage: booking.attribution.landingPage || null,
         consent_accepted: booking.consentAccepted,
         consentAccepted: booking.consentAccepted,
         message: booking.fullMessage || null,
@@ -2029,15 +2214,11 @@
       const responseBody = await res.json().catch(() => null);
 
       if (!res.ok) {
-        if (responseBody?.error === 'Booking saved but email failed') {
-          return responseBody;
-        }
-
-        throw new Error(responseBody?.details || responseBody?.error || 'Kunde inte spara bokningen.');
+        throw new Error(responseBody?.error || 'Kunde inte spara bokningen.');
       }
 
       if (responseBody?.error) {
-        throw new Error(responseBody.details || responseBody.error);
+        throw new Error(responseBody.error);
       }
 
       return responseBody;
@@ -2049,6 +2230,10 @@
     seaMilesInput.addEventListener('change', updateLivePrice);
     seaMilesInput.addEventListener('input', updateLivePrice);
     rutChoiceInput.addEventListener('change', updateLivePrice);
+    postalCodeInput.addEventListener('input', () => {
+      updatePostalCodeStatus();
+      updateBookingProgress();
+    });
     applyDiscountButton.addEventListener('click', applyDiscountCode);
     discountCodeInput.addEventListener('input', () => {
       const typedCode = discountCodeInput.value.trim().toUpperCase();
@@ -2097,6 +2282,12 @@
         return;
       }
 
+      if (!updatePostalCodeStatus()) {
+        setStatus('Postnumret ligger utanför direktbokningen. Skicka en offertförfrågan så återkommer vi om området.');
+        postalCodeInput.focus();
+        return;
+      }
+
       if (transportTypeInput.value === 'Båttransport behövs') {
         if (!seaMilesInput.value) {
           setStatus('Välj ungefär antal sjömil från Svinnige marina innan du bokar.');
@@ -2115,6 +2306,10 @@
       }
 
       const estimate = calculateEstimatedPrice();
+      if (estimate.isQuote) {
+        setStatus('Båttransport över 15 sjömil behöver offert. Använd offertformuläret så planerar vi jobbet med dig.');
+        return;
+      }
       const discountedPrice = calculateDiscountedPrice(estimate);
       const discountAmount = discountedPrice.discountAmount;
       const booking = {
@@ -2132,8 +2327,12 @@
         date: dateInput.value,
         time: timeInput.value,
         location: document.getElementById('location').value.trim(),
+        postalCode: normalizePostalCode(postalCodeInput.value),
+        recurrenceWeeks: recurrenceWeeksInput.value || null,
+        rebookedFromBookingId,
+        attribution: getCampaignAttribution(),
         message: document.getElementById('message').value.trim(),
-        price: estimate.isQuote ? 'Pris enligt offert' : discountedPrice.customerPrice,
+        price: discountedPrice.customerPrice,
         discountCode: appliedDiscount?.code || '',
         consentAccepted: document.getElementById('consent').checked
       };
@@ -2146,6 +2345,8 @@
         `Fönster med spröjs: ${estimate.muntinsCount}`,
         `Putsning: ${booking.serviceScope}`,
         `Transport: ${booking.transportType}`,
+        `Postnummer: ${booking.postalCode}`,
+        `Återkommande önskemål: ${booking.recurrenceWeeks ? `var ${booking.recurrenceWeeks}:e vecka` : 'engångsbesök'}`,
         `Arbetskostnad före RUT efter rabatt: ${discountedPrice.laborCostBeforeRut} kr`,
         `Material (ej RUT): ${estimate.materialCost} kr`,
         `Transport/resa (ej RUT): ${estimate.transportCost} kr`,
@@ -2170,7 +2371,10 @@
       booking.fullMessage = messageParts.filter(Boolean).join('\n\n');
 
       try {
-        setStatus('Sparar bokningen...', 'success');
+        submitBookingButton.disabled = true;
+        submitBookingButton.setAttribute('aria-busy', 'true');
+        submitBookingButton.textContent = 'Skickar bekräftelsemejl...';
+        setStatus('Sparar bokningen och skickar ditt bekräftelsemejl...', 'success');
         const createdBooking = await createBooking(booking);
 
         const confirmationSummary = {
@@ -2185,6 +2389,9 @@
           transportType: booking.transportType,
           seaMiles: booking.seaMiles,
           coordinates: booking.coordinates,
+          postalCode: booking.postalCode,
+          recurrenceWeeks: booking.recurrenceWeeks,
+          requiresEmailConfirmation: Boolean(createdBooking?.requiresEmailConfirmation ?? true),
           price: String(createdBooking?.price ?? booking.price),
           discountCode: createdBooking?.discountCode || booking.discountCode,
           discountAmount: String(createdBooking?.discountAmount || 0),
@@ -2203,16 +2410,13 @@
           console.warn('Kunde inte spara bokningssammanfattningen i sessionen:', storageError);
         }
 
-        const confirmationParams = new URLSearchParams();
-        if (createdBooking?.bookingId) {
-          confirmationParams.set('bookingId', String(createdBooking.bookingId));
-        }
-        window.location.href = confirmationParams.toString()
-          ? `betalning.html?${confirmationParams.toString()}`
-          : 'betalning.html';
+        window.location.href = 'betalning.html';
       } catch (error) {
         console.error('Bokningsfel:', error);
         setStatus(error instanceof Error ? error.message : 'Kunde inte spara bokningen. Kontrollera uppgifterna eller försök igen.');
+        submitBookingButton.disabled = false;
+        submitBookingButton.removeAttribute('aria-busy');
+        submitBookingButton.textContent = 'Skicka bokning';
       }
     });
 
@@ -2220,6 +2424,8 @@
     formStartedAtInput.value = String(Date.now());
     updateTransportFields();
     setWindowCountValue(0);
+    applyRebookPrefill();
+    updatePostalCodeStatus();
     updateLivePrice();
     updateBookingProgress();
   </script>

@@ -8,7 +8,8 @@ function jsonResponse(body: unknown, status = 200) {
     status,
     headers: {
       ...corsHeaders,
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store, max-age=0'
     }
   });
 }

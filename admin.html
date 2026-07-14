@@ -6,7 +6,7 @@
   <title>Admin | Berga Fönsterputs</title>
   <meta name="robots" content="noindex, nofollow">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-KZNkM6jJVp8o/p/WCg9KPl6eq5db9sHh+MMzDZVmVfU='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-i4MHdFkbGTHCsOj2XZB39L5Zs/AOnLUMUtB1AeKNaig='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
   <link rel="shortcut icon" href="/favicon-48.png" />
@@ -504,6 +504,8 @@
     .badge.completed { background: var(--success-soft); color: var(--success); border-color: rgba(23, 128, 92, 0.18); }
     .badge.paid { background: rgba(16, 156, 110, 0.15); color: #0e7a56; border-color: rgba(16, 156, 110, 0.18); }
     .badge.unpaid { background: rgba(94, 116, 136, 0.12); color: var(--muted); border-color: rgba(94, 116, 136, 0.16); }
+    .badge.cancelled,
+    .badge.expired { background: rgba(173, 52, 62, 0.08); color: var(--danger); border-color: rgba(173, 52, 62, 0.18); }
 
     .booking-grid {
       display: grid;
@@ -998,9 +1000,24 @@
       const normalized = String(value || '').toLowerCase();
       if (normalized === 'confirmed') return 'confirmed';
       if (normalized === 'completed') return 'completed';
+      if (normalized === 'cancelled') return 'cancelled';
+      if (normalized === 'expired') return 'expired';
       if (normalized === 'paid') return 'paid';
       if (normalized === 'unpaid') return 'unpaid';
       return 'pending';
+    }
+
+    function formatBookingStatus(value) {
+      const normalized = String(value || 'pending').toLowerCase();
+      const labels = {
+        awaiting_confirmation: 'Väntar på kundens mejlbekräftelse',
+        pending: 'Kundbekräftad',
+        confirmed: 'Bekräftad av admin',
+        completed: 'Slutförd',
+        cancelled: 'Avbokad',
+        expired: 'Bekräftelselänk utgången'
+      };
+      return labels[normalized] || normalized;
     }
 
     function parseWindowCount(value) {
@@ -1139,6 +1156,9 @@
         const rutWorkflowStatusKey = String(booking.rut_application_status || 'not_ready').toLowerCase();
         const paymentIsPaid = String(booking.payment_status || '').toLowerCase() === 'paid';
         const workIsCompleted = Boolean(booking.completed_at);
+        const bookingStatus = String(booking.status || '').toLowerCase();
+        const bookingCanBeWorked = ['pending', 'confirmed'].includes(bookingStatus);
+        const bookingCanBeAdminConfirmed = bookingStatus === 'pending' && Boolean(booking.email_confirmed_at);
         const hasRutSubmission = booking.rut_submission_available === true;
         const canResendRut = !hasRutSubmission && !['submitted', 'approved'].includes(rutWorkflowStatusKey);
         const completionReference = booking.invoice_reference || booking.swish_reference || '';
@@ -1164,7 +1184,7 @@
                 </div>
               </div>
               <div class="badge-row">
-                <span class="badge ${getBadgeClass(booking.status)}">${escapeHtml(booking.status || 'pending')}</span>
+                <span class="badge ${getBadgeClass(booking.status)}">${escapeHtml(formatBookingStatus(booking.status))}</span>
                 <span class="badge ${getBadgeClass(booking.payment_status)}">${escapeHtml(booking.payment_status || 'unpaid')}</span>
                 ${usesRut ? `<span class="badge pending">RUT: ${escapeHtml(rutWorkflowStatus)}</span>` : ''}
               </div>
@@ -1174,6 +1194,9 @@
               <div class="detail"><strong>Datum</strong><span>${escapeHtml(formatDate(booking.booking_date))}</span></div>
               <div class="detail"><strong>Tid</strong><span>${escapeHtml(booking.booking_time || 'Ej valt')}</span></div>
               <div class="detail"><strong>Adress</strong><span>${escapeHtml(booking.address || 'Ej angiven')}</span></div>
+              <div class="detail"><strong>Postnummer</strong><span>${escapeHtml(booking.postal_code || 'Ej angivet')}</span></div>
+              <div class="detail"><strong>Mejlbekräftelse</strong><span>${escapeHtml(booking.email_confirmed_at ? `Bekräftad ${new Date(booking.email_confirmed_at).toLocaleString('sv-SE')}` : 'Inte bekräftad')}</span></div>
+              <div class="detail"><strong>Återkommande önskemål</strong><span>${escapeHtml(booking.recurrence_weeks ? `Var ${booking.recurrence_weeks}:e vecka` : 'Engångsbesök')}</span></div>
               <div class="detail"><strong>Kund att Swisha</strong><span>${escapeHtml(priceParts.isQuote ? 'Pris enligt offert' : formatMoney(priceParts.customerToPay))}</span></div>
               <div class="detail"><strong>Pris utan RUT</strong><span>${escapeHtml(formatMoney(priceParts.priceBeforeRut))}</span></div>
               <div class="detail"><strong>Arbetskostnad före RUT</strong><span>${escapeHtml(formatMoney(priceParts.laborBeforeRut))}</span></div>
@@ -1213,8 +1236,8 @@
             </div>
 
             <div class="completion-row">
-              <button type="button" class="button button-secondary action-confirm">Bekräfta</button>
-              <button type="button" class="button button-secondary action-work-completed" ${workIsCompleted ? 'disabled' : ''}>${workIsCompleted ? 'Arbete utfört' : 'Markera arbete utfört'}</button>
+              <button type="button" class="button button-secondary action-confirm" ${bookingCanBeAdminConfirmed ? '' : 'disabled'}>${bookingStatus === 'confirmed' ? 'Adminbekräftad' : bookingCanBeAdminConfirmed ? 'Bekräfta som admin' : 'Kundbekräftelse krävs'}</button>
+              <button type="button" class="button button-secondary action-work-completed" ${workIsCompleted || !bookingCanBeWorked ? 'disabled' : ''}>${workIsCompleted ? 'Arbete utfört' : bookingCanBeWorked ? 'Markera arbete utfört' : 'Kundbekräftelse krävs'}</button>
               <button type="button" class="button button-success action-complete" ${!workIsCompleted || booking.payment_email_sent ? 'disabled' : ''}>${booking.payment_email_sent ? 'Klartmejl skickat' : workIsCompleted ? 'Klart + skicka Swish' : 'Markera arbete utfört först'}</button>
               <button type="button" class="button button-secondary action-paid" ${paymentIsPaid || !workIsCompleted ? 'disabled' : ''}>${paymentIsPaid ? 'Swish betald' : workIsCompleted ? 'Markera Swish betald' : 'Slutför jobbet först'}</button>
               <button type="button" class="button button-danger action-delete">Ta bort</button>
@@ -1691,7 +1714,7 @@
         target.setAttribute('disabled', 'disabled');
         try {
           await callAdminRutDetails('confirm', id);
-          messageElement.textContent = 'Bokningen är nu markerad som confirmed.';
+          messageElement.textContent = 'Bokningen är nu bekräftad av admin.';
           messageElement.className = 'status-message success';
           await fetchBookings();
         } catch (error) {

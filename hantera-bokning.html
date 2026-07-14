@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src https://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'none'; upgrade-insecure-requests">
+  <title>Hantera bokning | Berga Fönsterputs</title>
+  <style>
+    :root {
+      --ink: #102d3e;
+      --ink-soft: #526a78;
+      --navy: #12384c;
+      --navy-deep: #0a2636;
+      --paper: #ffffff;
+      --mist: #edf3f6;
+      --line: #d9e5eb;
+      --orange: #f2a33a;
+      --orange-dark: #d98720;
+      --green: #237a45;
+      --green-soft: #e9f7ef;
+      --amber: #9a6400;
+      --amber-soft: #fff6e4;
+      --red: #a73c35;
+      --red-soft: #fff0ed;
+      --shadow: 0 20px 52px rgba(8, 38, 54, 0.14);
+      --radius: 22px;
+      --max: 1060px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 8% 2%, rgba(242, 163, 58, 0.16), transparent 30rem),
+        linear-gradient(180deg, var(--navy-deep) 0 330px, var(--mist) 330px 100%);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+
+    button, input, select { font: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    [hidden] { display: none !important; }
+
+    .container {
+      width: min(calc(100% - 32px), var(--max));
+      margin-inline: auto;
+    }
+
+    header { padding: 22px 0 100px; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 22px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 850;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 72px;
+      height: 72px;
+      place-items: center;
+      overflow: hidden;
+      border-radius: 18px;
+      background: #fff;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+    }
+
+    .brand-mark img { width: 65px; height: auto; display: block; }
+    .brand-copy small { display: block; color: #bfd0da; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; }
+
+    .home-link {
+      color: #fff;
+      text-decoration: none;
+      padding: 10px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 999px;
+      font-weight: 750;
+    }
+
+    .home-link:hover, .home-link:focus-visible { background: rgba(255, 255, 255, 0.1); }
+
+    .hero { max-width: 730px; padding-top: 68px; }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      color: #ffd69d;
+      font-size: 0.78rem;
+      font-weight: 850;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before { content: ""; width: 28px; height: 2px; background: var(--orange); }
+
+    h1 {
+      margin: 0;
+      max-width: 760px;
+      color: #fff;
+      font-size: clamp(2.35rem, 7vw, 4.5rem);
+      line-height: 0.98;
+      letter-spacing: -0.055em;
+    }
+
+    .hero p {
+      margin: 20px 0 0;
+      max-width: 680px;
+      color: #c9d8df;
+      font-size: clamp(1rem, 2.3vw, 1.14rem);
+    }
+
+    main { margin-top: -62px; padding-bottom: 72px; }
+
+    .panel {
+      border: 1px solid rgba(217, 229, 235, 0.85);
+      border-radius: var(--radius);
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+
+    .state-panel { padding: clamp(24px, 5vw, 46px); text-align: center; }
+
+    .spinner {
+      width: 42px;
+      height: 42px;
+      margin: 0 auto 18px;
+      border: 4px solid #dbe7ed;
+      border-top-color: var(--orange-dark);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .state-panel h2 { margin: 0 0 8px; font-size: clamp(1.4rem, 4vw, 2rem); }
+    .state-panel p { margin: 0 auto; max-width: 620px; color: var(--ink-soft); }
+
+    .status-card {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 22px;
+      align-items: center;
+      padding: clamp(24px, 5vw, 40px);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .status-card h2 { margin: 6px 0 8px; font-size: clamp(1.55rem, 4vw, 2.45rem); line-height: 1.12; letter-spacing: -0.035em; }
+    .status-card p { margin: 0; max-width: 650px; color: var(--ink-soft); }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: max-content;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--amber-soft);
+      color: var(--amber);
+      font-size: 0.78rem;
+      font-weight: 850;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .status-pill::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+    .status-pill.success { background: var(--green-soft); color: var(--green); }
+    .status-pill.danger { background: var(--red-soft); color: var(--red); }
+    .status-pill.neutral { background: #edf2f5; color: #536875; }
+
+    .date-badge {
+      min-width: 170px;
+      padding: 18px;
+      border-radius: 18px;
+      background: var(--navy);
+      color: #fff;
+      text-align: center;
+    }
+
+    .date-badge strong { display: block; font-size: 1.1rem; }
+    .date-badge span { display: block; margin-top: 4px; color: #cbdbe3; }
+
+    .content { padding: clamp(22px, 5vw, 40px); }
+
+    .section-heading { margin: 0 0 18px; font-size: 1.25rem; letter-spacing: -0.02em; }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1px;
+      overflow: hidden;
+      margin: 0;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: var(--line);
+    }
+
+    .detail { min-width: 0; padding: 16px 18px; background: #f9fbfc; }
+    .detail dt { margin: 0 0 4px; color: #6d7f89; font-size: 0.76rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+    .detail dd { margin: 0; overflow-wrap: anywhere; color: var(--ink); font-weight: 720; }
+    .detail.wide { grid-column: 1 / -1; }
+
+    .notice {
+      margin: 0 0 22px;
+      padding: 14px 16px;
+      border: 1px solid #cde5d5;
+      border-radius: 14px;
+      background: var(--green-soft);
+      color: #185f37;
+      font-weight: 700;
+    }
+
+    .notice.error { border-color: #efc3bd; background: var(--red-soft); color: var(--red); }
+    .notice.warning { border-color: #efd4a2; background: var(--amber-soft); color: #785000; }
+
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 28px;
+    }
+
+    .action-card {
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+    }
+
+    .action-card.primary { border-color: #f0cd96; background: #fffaf1; }
+    .action-card.wide { grid-column: 1 / -1; }
+    .action-card h3 { margin: 0 0 7px; font-size: 1.12rem; }
+    .action-card p { margin: 0 0 17px; color: var(--ink-soft); font-size: 0.94rem; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field { display: grid; gap: 6px; }
+    label { color: var(--ink); font-size: 0.83rem; font-weight: 800; }
+
+    input, select {
+      width: 100%;
+      min-height: 48px;
+      border: 1px solid #bacbd4;
+      border-radius: 12px;
+      background: #fff;
+      color: var(--ink);
+      padding: 10px 12px;
+    }
+
+    input:focus, select:focus { outline: 3px solid rgba(242, 163, 58, 0.25); border-color: var(--orange-dark); }
+
+    .button-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+
+    .btn {
+      display: inline-flex;
+      min-height: 46px;
+      align-items: center;
+      justify-content: center;
+      border: 0;
+      border-radius: 999px;
+      padding: 11px 18px;
+      background: var(--orange);
+      color: var(--ink);
+      font-weight: 850;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+    }
+
+    .btn:hover:not(:disabled), .btn:focus-visible:not(:disabled) { transform: translateY(-1px); box-shadow: 0 9px 22px rgba(217, 135, 32, 0.22); background: #f5ae4f; }
+    .btn.secondary { border: 1px solid #b8cbd4; background: #fff; color: var(--ink); }
+    .btn.secondary:hover:not(:disabled) { background: #f4f8fa; box-shadow: none; }
+    .btn.danger { border: 1px solid #e4b6af; background: #fff; color: var(--red); }
+    .btn.danger:hover:not(:disabled) { background: var(--red-soft); box-shadow: none; }
+    .btn:disabled { opacity: 0.58; cursor: wait; }
+
+    .security-note {
+      display: flex;
+      gap: 11px;
+      align-items: flex-start;
+      margin-top: 22px;
+      padding: 15px 16px;
+      border-radius: 14px;
+      background: #edf4f7;
+      color: #4c6572;
+      font-size: 0.86rem;
+    }
+
+    .security-icon {
+      flex: 0 0 auto;
+      display: grid;
+      width: 25px;
+      height: 25px;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--navy);
+      color: #fff;
+      font-weight: 900;
+    }
+
+    footer { padding: 30px 0 38px; background: var(--navy); color: #cbd9e0; }
+    footer .container { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 14px; }
+    footer p { margin: 0; }
+    footer a { color: #fff; }
+
+    @media (max-width: 760px) {
+      body { background: linear-gradient(180deg, var(--navy-deep) 0 350px, var(--mist) 350px 100%); }
+      header { padding-bottom: 84px; }
+      .brand-copy { display: none; }
+      .brand-mark { width: 62px; height: 62px; }
+      .brand-mark img { width: 57px; }
+      .hero { padding-top: 48px; }
+      main { margin-top: -48px; }
+      .status-card { grid-template-columns: 1fr; }
+      .date-badge { min-width: 0; width: 100%; text-align: left; }
+      .details-grid, .action-grid, .form-row { grid-template-columns: 1fr; }
+      .detail.wide, .action-card.wide { grid-column: auto; }
+      .button-row .btn { width: 100%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="topbar">
+        <a class="brand" href="index.html" aria-label="Berga Fönsterputs startsida">
+          <span class="brand-mark"><img src="logga-fonsterputs-transparent.png" alt=""></span>
+          <span class="brand-copy">Berga Fönsterputs<small>Lokalt & personligt</small></span>
+        </a>
+        <a class="home-link" href="index.html">Till startsidan</a>
+      </div>
+      <div class="hero">
+        <div class="eyebrow">Säker bokningshantering</div>
+        <h1>Din bokning, på dina villkor.</h1>
+        <p>Se bokningsstatus, bekräfta din tid, boka om eller avboka. Du kan också välja hur ofta du vill få en ny bokningsinbjudan.</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="panel state-panel" id="loadingPanel" aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
+      <h2>Hämtar din bokning…</h2>
+      <p>Den säkra länken kontrolleras. Det tar vanligtvis bara ett ögonblick.</p>
+    </section>
+
+    <section class="panel state-panel" id="errorPanel" hidden>
+      <h2 id="errorTitle">Länken kunde inte öppnas</h2>
+      <p id="errorText">Länken är ogiltig eller har gått ut. Kontakta oss om du behöver hjälp med bokningen.</p>
+      <div class="button-row" style="justify-content:center;">
+        <a class="btn" href="mailto:info@bergafonsterputs.se">Kontakta oss</a>
+        <a class="btn secondary" href="index.html#bokning">Boka en ny tid</a>
+      </div>
+    </section>
+
+    <section class="panel" id="bookingPanel" hidden>
+      <div class="status-card">
+        <div>
+          <div class="status-pill" id="statusPill">Kontrollerar</div>
+          <h2 id="statusTitle">Bokningsstatus</h2>
+          <p id="statusDescription"></p>
+        </div>
+        <div class="date-badge">
+          <strong id="dateBadge">–</strong>
+          <span id="timeBadge">–</span>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="notice" id="actionNotice" role="status" aria-live="polite" hidden></div>
+
+        <h2 class="section-heading">Bokningsdetaljer</h2>
+        <dl class="details-grid">
+          <div class="detail"><dt>Boknings-ID</dt><dd id="detailId">–</dd></div>
+          <div class="detail"><dt>Pris</dt><dd id="detailPrice">–</dd></div>
+          <div class="detail"><dt>Namn</dt><dd id="detailName">–</dd></div>
+          <div class="detail"><dt>Kontakt</dt><dd id="detailContact">–</dd></div>
+          <div class="detail wide"><dt>Adress</dt><dd id="detailAddress">–</dd></div>
+          <div class="detail"><dt>Bostad</dt><dd id="detailHousing">–</dd></div>
+          <div class="detail"><dt>Tjänst</dt><dd id="detailService">–</dd></div>
+          <div class="detail"><dt>Fönster</dt><dd id="detailWindows">–</dd></div>
+          <div class="detail"><dt>Transport</dt><dd id="detailTransport">–</dd></div>
+          <div class="detail"><dt>RUT-val</dt><dd id="detailRut">–</dd></div>
+          <div class="detail"><dt>Återkommande</dt><dd id="detailRecurrence">–</dd></div>
+        </dl>
+
+        <div class="action-grid">
+          <article class="action-card primary wide" id="confirmCard" hidden>
+            <h3 id="confirmCardTitle">Bekräfta bokningen</h3>
+            <p id="confirmCardText">Tiden reserveras först när du bekräftar. Därefter får du ett bekräftelsemejl och en kalenderfil. Har du valt RUT finns den säkra RUT-länken i samma mejl.</p>
+            <button class="btn" type="button" id="confirmButton">Bekräfta min bokning</button>
+          </article>
+
+          <article class="action-card" id="rescheduleCard" hidden>
+            <h3>Boka om</h3>
+            <p>Välj ett nytt ledigt datum och en tid. Du får en uppdaterad kalenderfil via e-post.</p>
+            <form id="rescheduleForm">
+              <div class="form-row">
+                <div class="field">
+                  <label for="newDate">Nytt datum</label>
+                  <input type="date" id="newDate" required>
+                </div>
+                <div class="field">
+                  <label for="newTime">Ny tid</label>
+                  <select id="newTime" required>
+                    <option value="10:00">10:00</option>
+                    <option value="11:00">11:00</option>
+                    <option value="12:00">12:00</option>
+                    <option value="13:00">13:00</option>
+                    <option value="14:00">14:00</option>
+                    <option value="15:00">15:00</option>
+                    <option value="16:00">16:00</option>
+                    <option value="17:00">17:00</option>
+                  </select>
+                </div>
+              </div>
+              <div class="button-row"><button class="btn" type="submit">Boka om tiden</button></div>
+            </form>
+          </article>
+
+          <article class="action-card" id="recurrenceCard" hidden>
+            <h3>Återkommande putsning</h3>
+            <p>Du får en ny bokningsinbjudan efter vald period. Ingen ny tid bokas automatiskt.</p>
+            <form id="recurrenceForm">
+              <div class="field">
+                <label for="recurrenceWeeks">Intervall</label>
+                <select id="recurrenceWeeks">
+                  <option value="8">Var 8:e vecka</option>
+                  <option value="12">Var 12:e vecka</option>
+                  <option value="stop">Stoppa återkommande putsning</option>
+                </select>
+              </div>
+              <div class="button-row"><button class="btn" type="submit">Spara intervall</button></div>
+            </form>
+          </article>
+
+          <article class="action-card wide">
+            <h3>Ta med bokningen</h3>
+            <p>Ladda ner kalenderfilen eller använd uppgifterna som förifyllning när du väljer en ny tid.</p>
+            <div class="button-row">
+              <button class="btn secondary" type="button" id="calendarButton">Ladda ner kalenderfil</button>
+              <button class="btn secondary" type="button" id="rebookButton">Boka samma igen</button>
+            </div>
+          </article>
+
+          <article class="action-card wide" id="cancelCard" hidden>
+            <h3>Behöver du avboka?</h3>
+            <p>Avbokningen genomförs direkt. Om tiden redan är bekräftad får du ett avbokningsmejl och en annullerad kalenderfil.</p>
+            <button class="btn danger" type="button" id="cancelButton">Avboka bokningen</button>
+          </article>
+        </div>
+
+        <div class="security-note">
+          <span class="security-icon" aria-hidden="true">✓</span>
+          <span>Länktoken har tagits bort från adressfältet och skickas endast direkt till vår bokningstjänst. Sidan använder inga analys- eller cookie-script.</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p><strong>Berga Fönsterputs</strong> · info@bergafonsterputs.se</p>
+      <p><a href="integritet.html">Integritet</a> · <a href="villkor.html">Villkor</a></p>
+    </div>
+  </footer>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const ENDPOINT = 'https://xeyippgcoqfskcmqzazx.supabase.co/functions/v1/manage-booking';
+      const BOOKABLE_TIMES = ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
+      const linkStorageKey = 'bergaManagementLink';
+      const fragment = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+      let storedLink = {};
+      try {
+        storedLink = JSON.parse(sessionStorage.getItem(linkStorageKey) || '{}');
+      } catch {
+        storedLink = {};
+      }
+      const fragmentBookingId = fragment.get('bookingId') || '';
+      const fragmentToken = fragment.get('token') || '';
+      const bookingId = fragmentBookingId || String(storedLink.bookingId || '');
+      const managementToken = fragmentToken || String(storedLink.token || '');
+      const requestedAction = fragment.get('action') || String(storedLink.requestedAction || '');
+
+      if (fragmentBookingId && fragmentToken) {
+        try {
+          sessionStorage.setItem(linkStorageKey, JSON.stringify({
+            bookingId: fragmentBookingId,
+            token: fragmentToken,
+            requestedAction
+          }));
+        } catch {
+          // The link still works for this page view if session storage is unavailable.
+        }
+      }
+
+      window.history.replaceState(null, '', window.location.pathname);
+
+      const loadingPanel = document.getElementById('loadingPanel');
+      const errorPanel = document.getElementById('errorPanel');
+      const bookingPanel = document.getElementById('bookingPanel');
+      const errorText = document.getElementById('errorText');
+      const statusPill = document.getElementById('statusPill');
+      const statusTitle = document.getElementById('statusTitle');
+      const statusDescription = document.getElementById('statusDescription');
+      const dateBadge = document.getElementById('dateBadge');
+      const timeBadge = document.getElementById('timeBadge');
+      const actionNotice = document.getElementById('actionNotice');
+      const confirmCard = document.getElementById('confirmCard');
+      const confirmCardTitle = document.getElementById('confirmCardTitle');
+      const confirmCardText = document.getElementById('confirmCardText');
+      const rescheduleCard = document.getElementById('rescheduleCard');
+      const recurrenceCard = document.getElementById('recurrenceCard');
+      const cancelCard = document.getElementById('cancelCard');
+      const confirmButton = document.getElementById('confirmButton');
+      const cancelButton = document.getElementById('cancelButton');
+      const calendarButton = document.getElementById('calendarButton');
+      const rebookButton = document.getElementById('rebookButton');
+      const rescheduleForm = document.getElementById('rescheduleForm');
+      const recurrenceForm = document.getElementById('recurrenceForm');
+      const newDateInput = document.getElementById('newDate');
+      const newTimeSelect = document.getElementById('newTime');
+      const recurrenceSelect = document.getElementById('recurrenceWeeks');
+      let currentBooking = null;
+
+      const statusCopy = {
+        awaiting_confirmation: {
+          pill: 'Väntar på bekräftelse',
+          title: 'Bekräfta för att reservera tiden',
+          description: 'Bokningen är mottagen, men dagen blir reserverad först när du bekräftar.',
+          className: ''
+        },
+        pending: {
+          pill: 'Bekräftad',
+          title: 'Din tid är reserverad',
+          description: 'Vi har tagit emot din bekräftelse och återkommer om något behöver stämmas av.',
+          className: 'success'
+        },
+        confirmed: {
+          pill: 'Bokad',
+          title: 'Allt är klart inför besöket',
+          description: 'Bokningen är bekräftad och ligger i vår planering.',
+          className: 'success'
+        },
+        completed: {
+          pill: 'Utförd',
+          title: 'Tack för att vi fick hjälpa dig',
+          description: 'Besöket är markerat som utfört. Du kan boka samma upplägg igen nedan.',
+          className: 'success'
+        },
+        cancelled: {
+          pill: 'Avbokad',
+          title: 'Bokningen är avbokad',
+          description: 'Tiden är inte längre aktiv. Du kan använda samma uppgifter för en ny bokning.',
+          className: 'danger'
+        },
+        expired: {
+          pill: 'Utgången',
+          title: 'Bekräftelsetiden har gått ut',
+          description: 'Den obekräftade tiden är inte längre reserverbar. Välj en ny tid i kalendern.',
+          className: 'danger'
+        }
+      };
+
+      function setText(id, value, fallback = 'Ej angivet') {
+        const element = document.getElementById(id);
+        if (element) element.textContent = value || fallback;
+      }
+
+      function formatDate(dateString) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dateString || ''))) return dateString || 'Ej angivet';
+        const date = new Date(`${dateString}T12:00:00Z`);
+        if (Number.isNaN(date.getTime())) return dateString;
+        return new Intl.DateTimeFormat('sv-SE', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+          timeZone: 'Europe/Stockholm'
+        }).format(date);
+      }
+
+      function formatPrice(value) {
+        const number = Number(value);
+        return Number.isFinite(number)
+          ? `${Math.round(number).toLocaleString('sv-SE')} kr`
+          : String(value || 'Ej angivet');
+      }
+
+      function stockholmToday() {
+        const parts = new Intl.DateTimeFormat('sv-SE', {
+          timeZone: 'Europe/Stockholm',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        }).formatToParts(new Date());
+        const part = (type) => parts.find((item) => item.type === type)?.value || '';
+        return `${part('year')}-${part('month')}-${part('day')}`;
+      }
+
+      function addDays(dateString, days) {
+        const date = new Date(`${dateString}T12:00:00Z`);
+        date.setUTCDate(date.getUTCDate() + days);
+        return date.toISOString().slice(0, 10);
+      }
+
+      function showFatal(message) {
+        loadingPanel.hidden = true;
+        bookingPanel.hidden = true;
+        errorPanel.hidden = false;
+        errorText.textContent = message || 'Länken är ogiltig eller har gått ut. Kontakta oss om du behöver hjälp med bokningen.';
+      }
+
+      function showNotice(message, type = 'success') {
+        actionNotice.textContent = message;
+        actionNotice.className = `notice${type === 'success' ? '' : ` ${type}`}`;
+        actionNotice.hidden = false;
+        actionNotice.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      function setBusy(isBusy) {
+        bookingPanel.querySelectorAll('button, input, select').forEach((element) => {
+          element.disabled = isBusy;
+        });
+      }
+
+      async function request(action, extra = {}) {
+        const response = await fetch(ENDPOINT, {
+          method: 'POST',
+          mode: 'cors',
+          credentials: 'omit',
+          cache: 'no-store',
+          referrerPolicy: 'no-referrer',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action, bookingId, token: managementToken, ...extra })
+        });
+        let data = null;
+        try {
+          data = await response.json();
+        } catch {
+          data = null;
+        }
+        if (!response.ok || !data?.ok) {
+          const requestError = new Error(data?.error || 'Bokningen kunde inte hanteras just nu. Försök igen.');
+          requestError.status = response.status;
+          throw requestError;
+        }
+        return data;
+      }
+
+      function recurrenceLabel(weeks) {
+        return weeks === 8 ? 'Var 8:e vecka' : weeks === 12 ? 'Var 12:e vecka' : 'Ingen aktiv inbjudan';
+      }
+
+      function renderBooking(booking) {
+        currentBooking = booking;
+        const copy = statusCopy[booking.status] || statusCopy.pending;
+        statusPill.textContent = copy.pill;
+        statusPill.className = `status-pill${copy.className ? ` ${copy.className}` : ''}`;
+        statusTitle.textContent = copy.title;
+        statusDescription.textContent = copy.description;
+        dateBadge.textContent = formatDate(booking.bookingDate);
+        timeBadge.textContent = booking.bookingTime ? `Klockan ${booking.bookingTime}` : 'Tid ej angiven';
+
+        setText('detailId', booking.id);
+        setText('detailPrice', formatPrice(booking.price));
+        setText('detailName', booking.customerName);
+        setText('detailContact', [booking.email, booking.phone].filter(Boolean).join(' · '));
+        setText('detailAddress', [booking.address, booking.postalCode].filter(Boolean).join(', '));
+        setText('detailHousing', booking.housingType);
+        setText('detailService', booking.serviceScope);
+        setText('detailWindows', [booking.windowCount, booking.addons].filter(Boolean).join(' · '));
+        setText('detailTransport', [booking.transportType, booking.seaMiles ? `${booking.seaMiles} sjömil` : ''].filter(Boolean).join(' · '));
+        setText('detailRut', booking.rutChoice);
+        setText('detailRecurrence', recurrenceLabel(booking.recurrenceWeeks));
+
+        const capabilities = booking.capabilities || {};
+        const isConfirmationRetry = booking.status !== 'awaiting_confirmation'
+          && capabilities.canConfirm
+          && booking.confirmationReceiptSent === false;
+        confirmCardTitle.textContent = isConfirmationRetry ? 'Skicka bekräftelsemejlet igen' : 'Bekräfta bokningen';
+        confirmCardText.textContent = isConfirmationRetry
+          ? 'Tiden är reserverad, men bekräftelsemejlet kunde inte levereras. Försök igen för att få kalenderfilen och eventuell säker RUT-länk.'
+          : 'Tiden reserveras först när du bekräftar. Därefter får du ett bekräftelsemejl och en kalenderfil. Har du valt RUT finns den säkra RUT-länken i samma mejl.';
+        confirmButton.textContent = isConfirmationRetry ? 'Skicka mejlet igen' : 'Bekräfta min bokning';
+        confirmCard.hidden = !capabilities.canConfirm;
+        rescheduleCard.hidden = !capabilities.canReschedule;
+        recurrenceCard.hidden = !capabilities.canSetRecurrence;
+        cancelCard.hidden = !capabilities.canCancel;
+        calendarButton.hidden = !capabilities.canDownloadCalendar;
+        rebookButton.hidden = capabilities.canRebook === false;
+
+        const minimumDate = addDays(stockholmToday(), 2);
+        const maximumDate = addDays(stockholmToday(), 365);
+        newDateInput.min = minimumDate;
+        newDateInput.max = maximumDate;
+        newDateInput.value = booking.bookingDate >= minimumDate && booking.bookingDate <= maximumDate
+          ? booking.bookingDate
+          : minimumDate;
+        newTimeSelect.value = BOOKABLE_TIMES.includes(booking.bookingTime) ? booking.bookingTime : '10:00';
+        recurrenceSelect.value = booking.recurrenceWeeks === 8 || booking.recurrenceWeeks === 12
+          ? String(booking.recurrenceWeeks)
+          : 'stop';
+
+        loadingPanel.hidden = true;
+        errorPanel.hidden = true;
+        bookingPanel.hidden = false;
+
+        if (requestedAction === 'confirm' && capabilities.canConfirm) {
+          window.setTimeout(() => confirmButton.focus(), 0);
+        }
+      }
+
+      function notificationMessage(data, successMessage) {
+        if (data.notification?.customerEmailSent === false) {
+          return {
+            message: `${successMessage} Mejlet kunde inte skickas just nu. Kontakta oss om du behöver länken eller kalenderfilen.`,
+            type: 'warning'
+          };
+        }
+        if (data.notification?.rutLinkPrepared === false) {
+          return {
+            message: `${successMessage} RUT-länken kunde inte skapas automatiskt. Kontakta oss så hjälper vi dig.`,
+            type: 'warning'
+          };
+        }
+        return { message: successMessage, type: 'success' };
+      }
+
+      async function runAction(action, extra, progressMessage, successMessage) {
+        setBusy(true);
+        showNotice(progressMessage, 'warning');
+        try {
+          const data = await request(action, extra);
+          if (data.booking) renderBooking(data.booking);
+          const result = notificationMessage(data, successMessage);
+          showNotice(result.message, result.type);
+        } catch (error) {
+          showNotice(error instanceof Error ? error.message : 'Något gick fel. Försök igen.', 'error');
+        } finally {
+          setBusy(false);
+        }
+      }
+
+      function icsEscape(value) {
+        return String(value || '')
+          .replaceAll('\\', '\\\\')
+          .replaceAll('\r\n', '\\n')
+          .replaceAll('\n', '\\n')
+          .replaceAll(',', '\\,')
+          .replaceAll(';', '\\;');
+      }
+
+      function utcStamp() {
+        return new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+      }
+
+      function downloadCalendar() {
+        const booking = currentBooking;
+        if (!booking || !/^\d{4}-\d{2}-\d{2}$/.test(booking.bookingDate) || !BOOKABLE_TIMES.includes(booking.bookingTime)) {
+          showNotice('Kalenderfilen kunde inte skapas för den här bokningen.', 'error');
+          return;
+        }
+        const date = booking.bookingDate.replaceAll('-', '');
+        const hour = Number(booking.bookingTime.slice(0, 2));
+        const cancelled = booking.status === 'cancelled';
+        const lines = [
+          'BEGIN:VCALENDAR',
+          'VERSION:2.0',
+          'PRODID:-//Berga Fönsterputs//Bokning//SV',
+          `METHOD:${cancelled ? 'CANCEL' : 'PUBLISH'}`,
+          'CALSCALE:GREGORIAN',
+          'BEGIN:VEVENT',
+          `UID:booking-${booking.id}@bergafonsterputs.se`,
+          `DTSTAMP:${utcStamp()}`,
+          `SEQUENCE:${Number(booking.calendarSequence) || 0}`,
+          `DTSTART;TZID=Europe/Stockholm:${date}T${String(hour).padStart(2, '0')}0000`,
+          `DTEND;TZID=Europe/Stockholm:${date}T${String(hour + 1).padStart(2, '0')}0000`,
+          `STATUS:${cancelled ? 'CANCELLED' : 'CONFIRMED'}`,
+          `SUMMARY:${icsEscape('Fönsterputs – Berga Fönsterputs')}`,
+          `LOCATION:${icsEscape(booking.address)}`,
+          `DESCRIPTION:${icsEscape(`Boknings-ID: ${booking.id}. Kontakt: info@bergafonsterputs.se`)}`,
+          'END:VEVENT',
+          'END:VCALENDAR'
+        ];
+        const blob = new Blob([`${lines.join('\r\n')}\r\n`], { type: 'text/calendar;charset=utf-8' });
+        const link = document.createElement('a');
+        const objectUrl = URL.createObjectURL(blob);
+        link.href = objectUrl;
+        link.download = `berga-fonsterputs-${booking.id}.ics`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1_000);
+      }
+
+      function rebook() {
+        if (!currentBooking) return;
+        const prefill = {
+          name: currentBooking.customerName || '',
+          email: currentBooking.email || '',
+          phone: currentBooking.phone || '',
+          location: currentBooking.address || '',
+          postalCode: currentBooking.postalCode || '',
+          housingType: currentBooking.housingType || '',
+          rutChoice: currentBooking.rutChoice || '',
+          regularWindowCount: Number(currentBooking.regularWindowCount) || 0,
+          muntinsCount: Number(currentBooking.muntinsCount) || 0,
+          serviceScope: currentBooking.serviceScope || '',
+          transportType: currentBooking.transportType || '',
+          seaMiles: currentBooking.seaMiles || '',
+          coordinates: currentBooking.coordinates || '',
+          recurrenceWeeks: currentBooking.recurrenceWeeks === 8 || currentBooking.recurrenceWeeks === 12
+            ? currentBooking.recurrenceWeeks
+            : null,
+          rebookedFromBookingId: currentBooking.id || ''
+        };
+        try {
+          sessionStorage.setItem('bergaRebookPrefill', JSON.stringify(prefill));
+          window.location.assign('index.html#bokning');
+        } catch {
+          showNotice('Förifyllningen kunde inte sparas i webbläsaren. Försök igen eller boka manuellt.', 'error');
+        }
+      }
+
+      confirmButton.addEventListener('click', () => {
+        const isRetry = currentBooking?.status !== 'awaiting_confirmation';
+        runAction(
+          'confirm',
+          {},
+          isRetry ? 'Skickar bekräftelsemejlet igen…' : 'Bekräftar bokningen…',
+          isRetry
+            ? 'Bekräftelsemejlet med kalenderfil har skickats.'
+            : 'Bokningen är bekräftad. Ett bekräftelsemejl med kalenderfil har skickats.'
+        );
+      });
+
+      rescheduleForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        if (!newDateInput.checkValidity() || !newTimeSelect.checkValidity()) {
+          rescheduleForm.reportValidity();
+          return;
+        }
+        runAction(
+          'reschedule',
+          { newDate: newDateInput.value, newTime: newTimeSelect.value },
+          'Bokar om tiden…',
+          'Bokningen är ombokad. Ett ändringsmejl med uppdaterad kalenderfil har skickats.'
+        );
+      });
+
+      recurrenceForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const recurrenceWeeks = recurrenceSelect.value === 'stop' ? null : Number(recurrenceSelect.value);
+        const message = recurrenceWeeks
+          ? `Du får en ny bokningsinbjudan efter ${recurrenceWeeks} veckor.`
+          : 'Återkommande bokningsinbjudningar är stoppade.';
+        runAction('set_recurrence', { recurrenceWeeks }, 'Sparar ditt val…', message);
+      });
+
+      cancelButton.addEventListener('click', () => {
+        if (!window.confirm('Vill du avboka bokningen? Åtgärden genomförs direkt.')) return;
+        runAction('cancel', {}, 'Avbokar bokningen…', 'Bokningen är avbokad. Ett avbokningsmejl har skickats.');
+      });
+
+      calendarButton.addEventListener('click', downloadCalendar);
+      rebookButton.addEventListener('click', rebook);
+
+      async function initialize() {
+        if (!/^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$/.test(bookingId)
+          || !/^[0-9a-fA-F]{64}$/.test(managementToken)) {
+          try { sessionStorage.removeItem(linkStorageKey); } catch { /* no-op */ }
+          showFatal('Den säkra bokningslänken saknas eller är ogiltig. Öppna länken från ditt senaste bokningsmejl.');
+          return;
+        }
+        try {
+          const data = await request('details');
+          renderBooking(data.booking);
+        } catch (error) {
+          if (error?.status === 403 || error?.status === 410) {
+            try { sessionStorage.removeItem(linkStorageKey); } catch { /* no-op */ }
+          }
+          showFatal(error instanceof Error ? error.message : 'Bokningen kunde inte hämtas. Försök igen senare.');
+        }
+      }
+
+      initialize();
+    })();
+  </script>
+</body>
+</html>

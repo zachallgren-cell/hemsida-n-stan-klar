@@ -37,6 +37,7 @@
       "areaServed": [
         "Åkersberga",
         "Österåker",
+        "Täby",
         "Vaxholm",
         "Ljusterö",
         "Stockholms skärgård",
@@ -49,6 +50,7 @@
           "name": "Fönsterputs",
           "serviceType": "Fönsterputs för bostäder"
         },
+        "price": "949",
         "priceCurrency": "SEK"
       },
       "sameAs": [
@@ -84,6 +86,22 @@
     html {
       scroll-behavior: smooth;
     }
+
+    .skip-link {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 9999;
+      padding: 11px 15px;
+      border-radius: 10px;
+      background: #fff;
+      color: var(--primary-dark);
+      font-weight: 900;
+      transform: translateY(-160%);
+    }
+
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #ffb347; outline-offset: 3px; }
 
     body {
       font-family: "Trebuchet MS", "Segoe UI", sans-serif;
@@ -475,6 +493,42 @@
 
     .hero-card h3 {
       margin: 0 0 12px;
+    }
+
+    .hero-photo-card.hero-card {
+      display: grid;
+      min-height: 500px;
+      margin: 0;
+      padding: 0;
+      isolation: isolate;
+    }
+
+    .hero-photo-card.hero-card::after {
+      inset: auto 0 0;
+      width: auto;
+      height: 52%;
+      border-radius: 0;
+      background: linear-gradient(to top, rgba(5, 53, 78, 0.94), rgba(5, 53, 78, 0));
+      pointer-events: none;
+    }
+
+    .hero-photo-card img {
+      width: 100%;
+      height: 100%;
+      min-height: 500px;
+      object-fit: cover;
+      object-position: center 72%;
+    }
+
+    .hero-photo-card figcaption {
+      position: absolute;
+      z-index: 1;
+      right: 22px;
+      bottom: 22px;
+      left: 22px;
+      color: #fff;
+      font-weight: 800;
+      line-height: 1.45;
     }
 
     .hero-list {
@@ -1056,6 +1110,25 @@
       box-shadow: var(--shadow);
     }
 
+    .review-fallback {
+      display: grid;
+      gap: 8px;
+      justify-items: start;
+    }
+
+    .review-fallback h2,
+    .review-fallback p {
+      margin: 0;
+    }
+
+    .review-fallback p {
+      color: var(--muted);
+    }
+
+    .reviews-widget-target:not([hidden]) {
+      margin-top: 18px;
+    }
+
     .steps {
       counter-reset: step;
     }
@@ -1377,6 +1450,47 @@
       opacity: 0.4;
       cursor: not-allowed;
       transform: none;
+    }
+
+    .calendar-day.availability-unavailable {
+      opacity: 0.48;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .calendar-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 14px 0;
+      padding: 12px 14px;
+      border: 1px solid rgba(177, 213, 230, 0.95);
+      border-radius: 14px;
+      background: #f4fbff;
+      color: #31586d;
+      font-weight: 800;
+    }
+
+    .calendar-status[data-state="error"] {
+      border-color: #ddb0ba;
+      background: #fff3f5;
+      color: #7a2133;
+    }
+
+    .calendar-retry {
+      flex: 0 0 auto;
+      border: 1px solid currentColor;
+      border-radius: 999px;
+      background: #ffffff;
+      color: inherit;
+      padding: 9px 13px;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .calendar-retry:hover {
+      box-shadow: 0 8px 18px rgba(17, 57, 74, 0.12);
     }
 
     .selected-date-box {
@@ -2075,6 +2189,17 @@
         display: none;
       }
 
+      .hero .hero-photo-card {
+        display: grid;
+        min-height: 250px;
+        height: 250px;
+        margin-top: 18px;
+      }
+
+      .hero-photo-card img {
+        min-height: 250px;
+      }
+
       .mobile-hero-copy {
         color: rgba(255,255,255,0.94);
         font-size: 1rem;
@@ -2379,9 +2504,19 @@
       }
 
     }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
   </style>
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Hoppa till innehållet</a>
   <header id="top">
     <div class="container">
       <div class="topbar">
@@ -2394,7 +2529,7 @@
         </a>
 
         <div class="topbar-actions">
-          <nav>
+          <nav aria-label="Huvudnavigation">
             <a href="var-tjanst.html">Vår tjänst</a>
             <a href="om-oss.html">Om oss</a>
             <a href="#sa-funkar-det">Så funkar det</a>
@@ -2409,7 +2544,7 @@
         <div>
           <div class="hero-highlight">Fönsterputs i Åkersberga, Stockholm och skärgården</div>
           <h1>Skinande rena fönster utan krångel.</h1>
-          <p class="hero-desktop-copy">Vi kommer hem till dig på fastlandet eller ute i skärgården, putsar noggrant och ser till att du är nöjd. Bokningen är enkel från första klick till färdig puts.</p>
+          <p class="hero-desktop-copy">Vi kommer hem till dig på fastlandet eller ute i skärgården och putsar fönstren noggrant. Bokningen är enkel från första klick till färdig puts.</p>
           <p class="mobile-hero-copy mobile-only">Se pris, välj tid och boka fönsterputs direkt. Vi jobbar lokalt i Åkersberga, Vaxholm, Ljusterö och ute i skärgården.</p>
           <ul class="mobile-hero-points mobile-only">
             <li>Livepris innan bokning</li>
@@ -2437,23 +2572,17 @@
           </div>
         </div>
 
-        <div class="hero-card">
-          <h3>Det här får du hos oss</h3>
-          <ul class="hero-list">
-            <li>Du får ett tydligt pris direkt på hemsidan innan du bokar</li>
-            <li>Puts av glas, karmar och lättare smuts runt fönster</li>
-            <li>Bokningsbara tider 10-17 alla dagar</li>
-            <li>Vi planerar även jobb ute i skärgården med båttransport</li>
-            <li>Trygg kontakt via mejl, telefon och sociala medier</li>
-          </ul>
-        </div>
+        <figure class="hero-card hero-photo-card">
+          <img src="om-oss-fonsterputs-arbete-1.jpeg" alt="Fönsterputsare från Berga Fönsterputs arbetar med en fönsterraka" width="1500" height="2000" fetchpriority="high" decoding="async">
+          <figcaption>Lokalt utförd fönsterputs med tydligt pris och personlig kontakt via mejl.</figcaption>
+        </figure>
       </div>
     </div>
   </header>
 
   <button type="button" class="topbar-show-button" id="topbarShowButton">Visa meny</button>
 
-  <main class="container">
+  <main class="container" id="main-content">
     <section class="section reveal">
       <div class="trust-strip">
         <div class="trust-item">
@@ -2469,27 +2598,14 @@
 
     <section class="section reveal">
       <div class="reviews-widget-shell">
-        <script src="https://elfsightcdn.com/platform.js" async></script>
-        <div class="elfsight-app-f0060957-77d5-48f9-997b-998d69d7faf1" data-elfsight-app-lazy></div>
-      </div>
-    </section>
-
-    <section class="section reveal">
-      <div class="area-box">
-        <h2>Vi kommer hem till dig</h2>
-        <p>Vi arbetar främst i Österåker, Vaxholm, Täby och ute i skärgården. Du får ändå gärna höra av dig även om du bor utanför de områdena, så ser vi om vi kan hjälpa dig.</p>
-      </div>
-    </section>
-
-    <section class="section reveal">
-      <div class="requirements-box">
-        <h3>Viktigt inför bokning</h3>
-        <p>För att vi ska kunna utföra fönsterputsen på plats behöver några grundförutsättningar vara uppfyllda.</p>
-        <ul>
-          <li>Fönstren behöver vara åtkomliga på ett säkert sätt.</li>
-          <li>Det behöver finnas möjlighet att komma nära fönstren där arbetet ska göras.</li>
-          <li>Berätta gärna om höga fönster, många våningar eller särskilda förutsättningar i bokningen.</li>
-        </ul>
+        <div class="review-fallback">
+          <h2>Omdömen på Google</h2>
+          <p>Du kan alltid öppna vår Google-sida. Omdömeswidgeten laddas bara om du godkänner analyscookies.</p>
+          <a class="btn btn-primary" href="https://g.page/r/CWdR_FURV7DOEBM" target="_blank" rel="noopener noreferrer">Se Google-profilen</a>
+        </div>
+        <div class="reviews-widget-target" id="reviewsWidgetTarget" hidden>
+          <div class="elfsight-app-f0060957-77d5-48f9-997b-998d69d7faf1" data-elfsight-app-lazy></div>
+        </div>
       </div>
     </section>
 
@@ -2557,7 +2673,7 @@
           </div>
           <div class="step">
             <h3>Slutför bokningen</h3>
-            <p>Du skickas vidare till bekräftelsesidan. När jobbet är utfört får du belopp, referens och Swishuppgifter i klartmejlet.</p>
+            <p>Bekräfta bokningen via mejlet inom 24 timmar. När jobbet är utfört får du belopp, referens och Swishuppgifter i klartmejlet.</p>
           </div>
         </div>
       </div>
@@ -2573,36 +2689,12 @@
     </section>
 
     <section class="section reveal">
-      <div class="service-area">
-        <div class="card">
-          <h2 class="section-title">Passar dig som vill</h2>
-          <p class="section-subtitle">Tjänsten passar dig som vill få rena fönster utan att lägga tid på jobbet själv.</p>
-          <ul class="service-list">
-            <li>Få renare fönster inför vår, sommar eller visning</li>
-            <li>Fräscha upp hemmet inför försäljning eller besök</li>
-            <li>Slippa lägga helgen på fönsterputs själv</li>
-            <li>Få hjälp på plats där fönstren finns</li>
-          </ul>
-        </div>
-
-        <div class="cta-panel">
-          <h2 class="section-title">Redo att boka fönsterputs?</h2>
-          <p>Välj en tid som passar dig och gå vidare till bokningssidan. Vi fokuserar på bra pris, flexibilitet och personlig service där vi kommer hem till dig, även ute i skärgården.</p>
-          <div class="hero-buttons">
-            <a href="#bokning" class="btn btn-primary">Boka fönsterputs</a>
-            <a href="om-oss.html" class="btn btn-secondary">Lär känna oss</a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section reveal">
       <div class="card">
         <h2 class="section-title">Fönsterputs i ditt område</h2>
         <p class="section-subtitle">Vi utgår lokalt och hjälper kunder i Österåker, Täby, Vaxholm och ute i skärgården.</p>
         <div class="area-link-grid">
           <a class="area-link" href="fonsterputs-akersberga.html">Österåker<span>Lokal fönsterputs med enkel onlinebokning.</span></a>
-          <a class="area-link" href="#bokning">Täby<span>Smidig fönsterputs för villor, radhus och privatpersoner.</span></a>
+          <a class="area-link" href="fonsterputs-taby.html">Täby<span>Smidig fönsterputs för villor, radhus och privatpersoner.</span></a>
           <a class="area-link" href="fonsterputs-vaxholm.html">Vaxholm<span>Fönsterputs för villor, radhus och kustnära boenden.</span></a>
           <a class="area-link" href="fonsterputs-skargarden.html">Skärgården<span>Vi planerar skärgårdsjobb med tydlig transportkostnad.</span></a>
         </div>
@@ -2640,7 +2732,7 @@
             <li>Fönstren ska vara säkert åtkomliga.</li>
             <li>Invändig puts: töm fönsterbrädan.</li>
             <li>RUT fylls i senare via säkert formulär.</li>
-            <li>Pris utan RUT? Kontakta oss.</li>
+            <li>Priset räknas automatiskt även om du väljer utan RUT.</li>
           </ul>
         </div>
 
@@ -2650,7 +2742,7 @@
               <div class="calendar-brand-copy">
                 <span class="calendar-kicker">Berga Fönsterputs</span>
                 <h3>Välj datum</h3>
-                <p class="booking-note">Kalendern visar framtida bokningsbara datum från och med idag. Varje dag kan bokas en gång.</p>
+                <p class="booking-note">Kalendern visar 12 månader framåt med minst två dagars framförhållning. Varje dag kan bokas en gång.</p>
               </div>
               <div class="calendar-logo" aria-hidden="true">
                 <img src="logga-fonsterputs-transparent.png" alt="">
@@ -2664,9 +2756,14 @@
             </div>
 
             <div class="calendar-header">
-              <button type="button" class="calendar-nav" id="prevMonth">←</button>
-              <div class="calendar-title" id="calendarTitle">Laddar kalender...</div>
-              <button type="button" class="calendar-nav" id="nextMonth">→</button>
+              <button type="button" class="calendar-nav" id="prevMonth" aria-label="Visa föregående månad" aria-controls="calendarGrid">←</button>
+              <div class="calendar-title" id="calendarTitle" aria-live="polite">Laddar kalender...</div>
+              <button type="button" class="calendar-nav" id="nextMonth" aria-label="Visa nästa månad" aria-controls="calendarGrid">→</button>
+            </div>
+
+            <div class="calendar-status" id="calendarStatus" data-state="loading" role="status" aria-live="polite">
+              <span id="calendarStatusText">Hämtar tillgängliga tider…</span>
+              <button type="button" class="calendar-retry" id="retryCalendarButton" hidden>Försök igen</button>
             </div>
 
             <div class="calendar-weekdays">
@@ -2679,8 +2776,8 @@
               <div>Sön</div>
             </div>
 
-            <div class="calendar-grid" id="calendarGrid"></div>
-            <div class="selected-date-box" id="selectedDateBox">Inget datum valt ännu</div>
+            <div class="calendar-grid" id="calendarGrid" aria-busy="true"></div>
+            <div class="selected-date-box" id="selectedDateBox" aria-live="polite">Kontrollerar tillgängligheten…</div>
 
             <div class="time-picker">
               <h4>Välj tid</h4>
@@ -2702,16 +2799,16 @@
 
         <div class="faq-grid">
           <div class="faq-item">
-            <button type="button" class="faq-question">Vad ingår i fönsterputsen?</button>
-            <div class="faq-answer"><div class="faq-answer-inner">Vi putsar fönstren noggrant enligt bokningen och stämmer av om det finns svåråtkomliga fönster, många rutor eller särskilda önskemål.</div></div>
+            <button type="button" class="faq-question" id="faqQuestionIncluded" aria-expanded="false" aria-controls="faqAnswerIncluded">Vad ingår i fönsterputsen?</button>
+            <div class="faq-answer" id="faqAnswerIncluded" role="region" aria-labelledby="faqQuestionIncluded" aria-hidden="true"><div class="faq-answer-inner">Vi putsar fönstren noggrant enligt bokningen och stämmer av om det finns svåråtkomliga fönster, många rutor eller särskilda önskemål.</div></div>
           </div>
           <div class="faq-item">
-            <button type="button" class="faq-question">Vad krävs för att boka?</button>
-            <div class="faq-answer"><div class="faq-answer-inner">Fönstren behöver gå att komma åt på ett säkert sätt. Skriv gärna adress, ungefärligt antal fönster och om det finns höga eller svåråtkomliga rutor. Om jobbet är ute i skärgården väljer du båttransport i bokningen.</div></div>
+            <button type="button" class="faq-question" id="faqQuestionRequirements" aria-expanded="false" aria-controls="faqAnswerRequirements">Vad krävs för att boka?</button>
+            <div class="faq-answer" id="faqAnswerRequirements" role="region" aria-labelledby="faqQuestionRequirements" aria-hidden="true"><div class="faq-answer-inner">Fönstren behöver gå att komma åt på ett säkert sätt. Skriv gärna adress, ungefärligt antal fönster och om det finns höga eller svåråtkomliga rutor. Om jobbet är ute i skärgården väljer du båttransport i bokningen.</div></div>
           </div>
           <div class="faq-item">
-            <button type="button" class="faq-question">Hur betalar jag?</button>
-            <div class="faq-answer"><div class="faq-answer-inner">Du betalar efter att arbetet är slutfört. När vi markerar jobbet som klart får du exakt belopp, referens och Swishuppgifter direkt i klartmejlet.</div></div>
+            <button type="button" class="faq-question" id="faqQuestionPayment" aria-expanded="false" aria-controls="faqAnswerPayment">Hur betalar jag?</button>
+            <div class="faq-answer" id="faqAnswerPayment" role="region" aria-labelledby="faqQuestionPayment" aria-hidden="true"><div class="faq-answer-inner">Du betalar efter att arbetet är slutfört. När vi markerar jobbet som klart får du exakt belopp, referens och Swishuppgifter direkt i klartmejlet.</div></div>
           </div>
         </div>
       </div>
@@ -2731,12 +2828,39 @@
         <a href="#bokning">Boka tid</a>
         <a href="#kontakt">Kontakt</a>
         <a href="integritet.html">Integritet</a>
+        <a href="villkor.html">Villkor</a>
+        <a href="offert.html">Offert med foton</a>
       </div>
       <p>© 2026 Berga Fönsterputs. Alla rättigheter förbehållna.</p>
     </div>
   </footer>
 
   <script>
+    const reviewsWidgetTarget = document.getElementById('reviewsWidgetTarget');
+    let reviewsWidgetLoaded = false;
+
+    function loadReviewsWidgetIfAllowed() {
+      if (reviewsWidgetLoaded || !reviewsWidgetTarget) return;
+
+      try {
+        if (localStorage.getItem('berga_cookie_consent') !== 'accepted') return;
+      } catch {
+        return;
+      }
+
+      reviewsWidgetLoaded = true;
+      reviewsWidgetTarget.hidden = false;
+      const script = document.createElement('script');
+      script.src = 'https://elfsightcdn.com/platform.js';
+      script.async = true;
+      document.head.appendChild(script);
+    }
+
+    window.addEventListener('berga:consent-change', (event) => {
+      if (event.detail?.value === 'accepted') loadReviewsWidgetIfAllowed();
+    });
+    loadReviewsWidgetIfAllowed();
+
     const calendarGrid = document.getElementById('calendarGrid');
     const calendarTitle = document.getElementById('calendarTitle');
     const selectedDateBox = document.getElementById('selectedDateBox');
@@ -2744,6 +2868,9 @@
     const prevMonthButton = document.getElementById('prevMonth');
     const nextMonthButton = document.getElementById('nextMonth');
     const continueBookingButton = document.getElementById('continueBookingButton');
+    const calendarStatus = document.getElementById('calendarStatus');
+    const calendarStatusText = document.getElementById('calendarStatusText');
+    const retryCalendarButton = document.getElementById('retryCalendarButton');
     const pageHeader = document.querySelector('header');
     const bookingSection = document.getElementById('bokning');
     const topbarToggleButton = document.getElementById('topbarToggleButton');
@@ -2763,25 +2890,22 @@
     const BOOKED_SLOTS_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/booked-slots`;
     const todayDate = new Date();
     todayDate.setHours(12, 0, 0, 0);
-    const bookingYear = todayDate.getFullYear();
-    const todayString = formatDate(bookingYear, todayDate.getMonth(), todayDate.getDate());
+    const todayString = formatDate(todayDate.getFullYear(), todayDate.getMonth(), todayDate.getDate());
     const minBookableDate = new Date(todayDate);
     minBookableDate.setDate(todayDate.getDate() + 2);
     const minBookableString = formatDate(minBookableDate.getFullYear(), minBookableDate.getMonth(), minBookableDate.getDate());
+    const firstCalendarMonth = new Date(todayDate.getFullYear(), todayDate.getMonth(), 1, 12);
+    const lastCalendarMonth = new Date(todayDate.getFullYear(), todayDate.getMonth() + 11, 1, 12);
+    const lastBookableDate = new Date(lastCalendarMonth.getFullYear(), lastCalendarMonth.getMonth() + 1, 0, 12);
+    const lastBookableString = formatDate(lastBookableDate.getFullYear(), lastBookableDate.getMonth(), lastBookableDate.getDate());
     const monthNames = ['januari', 'februari', 'mars', 'april', 'maj', 'juni', 'juli', 'augusti', 'september', 'oktober', 'november', 'december'];
-    const redDays = bookingYear === 2026
-      ? new Set([
-          '2026-01-01', '2026-01-06', '2026-04-03', '2026-04-05', '2026-04-06',
-          '2026-05-01', '2026-05-14', '2026-05-24', '2026-06-06', '2026-06-20',
-          '2026-11-01', '2026-12-25', '2026-12-26'
-        ])
-      : new Set();
 
-    let currentMonth = todayDate.getMonth();
+    let currentCalendarMonth = new Date(firstCalendarMonth);
     let selectedDate = '';
     let selectedTime = '';
     let bookingsCache = [];
     let blockedDatesCache = [];
+    let availabilityState = 'loading';
 
     function getHeaders() {
       return {
@@ -2791,26 +2915,74 @@
       };
     }
 
+    function setAvailabilityState(nextState) {
+      availabilityState = nextState;
+      calendarStatus.dataset.state = nextState;
+      calendarGrid.setAttribute('aria-busy', nextState === 'loading' ? 'true' : 'false');
+      retryCalendarButton.hidden = nextState !== 'error';
+
+      if (nextState === 'loading') {
+        calendarStatusText.textContent = 'Hämtar tillgängliga tider…';
+      } else if (nextState === 'error') {
+        calendarStatusText.textContent = 'Tillgängligheten kunde inte kontrolleras. Kalendern är därför låst.';
+      } else {
+        calendarStatusText.textContent = 'Tillgängligheten är uppdaterad. Välj ett ledigt datum.';
+      }
+    }
+
     async function fetchBookings() {
+      const controller = new AbortController();
+      const timeoutId = window.setTimeout(() => controller.abort(), 10_000);
+      let res;
       try {
-        const res = await fetch(BOOKED_SLOTS_FUNCTION_URL, {
-          headers: getHeaders()
+        res = await fetch(BOOKED_SLOTS_FUNCTION_URL, {
+          headers: getHeaders(),
+          cache: 'no-store',
+          signal: controller.signal
         });
+      } finally {
+        window.clearTimeout(timeoutId);
+      }
 
-        if (!res.ok) {
-          bookingsCache = [];
-          blockedDatesCache = [];
-          return;
-        }
+      if (!res.ok) {
+        throw new Error(`Kunde inte hämta tillgänglighet (${res.status}).`);
+      }
 
-        const data = await res.json();
-        bookingsCache = Array.isArray(data?.bookings) ? data.bookings : [];
-        blockedDatesCache = Array.isArray(data?.blockedDates) ? data.blockedDates : [];
+      const data = await res.json();
+      if (!Array.isArray(data?.bookings) || !Array.isArray(data?.blockedDates)) {
+        throw new Error('Tillgänglighetssvaret har ett oväntat format.');
+      }
+
+      return {
+        bookings: data.bookings,
+        blockedDates: data.blockedDates
+      };
+    }
+
+    async function loadAvailability() {
+      setAvailabilityState('loading');
+      selectedDate = '';
+      selectedTime = '';
+      renderCalendar();
+      renderTimes();
+      updateSelectedDateBox();
+
+      try {
+        const availability = await fetchBookings();
+        bookingsCache = availability.bookings;
+        blockedDatesCache = availability.blockedDates;
+        setAvailabilityState('ready');
+        applyInitialBookingSelection();
       } catch (error) {
         console.error(error);
         bookingsCache = [];
         blockedDatesCache = [];
+        setAvailabilityState('error');
       }
+
+      renderCalendar();
+      renderTimes();
+      updateSelectedDateBox();
     }
 
     function formatDate(year, month, day) {
@@ -2827,6 +2999,18 @@
       });
     }
 
+    function formatMonthForDisplay(dateObject) {
+      return dateObject.toLocaleDateString('sv-SE', {
+        month: 'long',
+        year: 'numeric'
+      });
+    }
+
+    function isSameCalendarMonth(left, right) {
+      return left.getFullYear() === right.getFullYear()
+        && left.getMonth() === right.getMonth();
+    }
+
     function getBookedTimes(date) {
       return bookingsCache.filter((b) => b.date === date).map((b) => b.time);
     }
@@ -2840,6 +3024,20 @@
     }
 
     function updateSelectedDateBox() {
+      if (availabilityState === 'loading') {
+        selectedDateBox.textContent = 'Kontrollerar tillgängligheten…';
+        continueBookingButton.disabled = true;
+        continueBookingButton.textContent = 'Hämtar tider…';
+        return;
+      }
+
+      if (availabilityState === 'error') {
+        selectedDateBox.textContent = 'Kalendern är låst tills tillgängligheten kan kontrolleras.';
+        continueBookingButton.disabled = true;
+        continueBookingButton.textContent = 'Tillgänglighet saknas';
+        return;
+      }
+
       if (!selectedDate) {
         selectedDateBox.textContent = 'Inget datum valt ännu';
         if (continueBookingButton) {
@@ -2876,6 +3074,7 @@
     }
 
     function selectBookingTime(time) {
+      if (availabilityState !== 'ready') return;
       selectedTime = time;
       updateSelectedDateBox();
       syncBookingUrl();
@@ -2883,7 +3082,7 @@
     }
 
     function goToBookingPage() {
-      if (!selectedDate || !selectedTime) {
+      if (availabilityState !== 'ready' || !selectedDate || !selectedTime) {
         updateSelectedDateBox();
         return;
       }
@@ -2904,13 +3103,14 @@
 
       const dateObject = new Date(`${initialDate}T12:00:00`);
       const isValidDate = !Number.isNaN(dateObject.getTime())
-        && dateObject.getFullYear() === bookingYear
-        && initialDate >= todayString;
+        && formatDate(dateObject.getFullYear(), dateObject.getMonth(), dateObject.getDate()) === initialDate
+        && initialDate >= minBookableString
+        && initialDate <= lastBookableString;
 
       if (!isValidDate || isFullyBooked(initialDate) || isBlockedDate(initialDate)) return;
 
       selectedDate = initialDate;
-      currentMonth = dateObject.getMonth();
+      currentCalendarMonth = new Date(dateObject.getFullYear(), dateObject.getMonth(), 1, 12);
 
       if (initialTime && getTimes(initialDate).includes(initialTime) && !getBookedTimes(initialDate).includes(initialTime)) {
         selectedTime = initialTime;
@@ -2994,7 +3194,7 @@
     function renderTimes() {
       timeSlots.innerHTML = '';
 
-      if (!selectedDate) {
+      if (availabilityState !== 'ready' || !selectedDate) {
         return;
       }
 
@@ -3007,16 +3207,20 @@
         btn.type = 'button';
         btn.className = 'time-slot';
         btn.textContent = time;
+        btn.setAttribute('aria-pressed', selectedTime === time ? 'true' : 'false');
 
         if (blockedDate) {
           btn.classList.add('booked');
           btn.disabled = true;
           btn.textContent = `${time} • ej bokbar`;
+          btn.setAttribute('aria-label', `${formatDateForDisplay(selectedDate)} klockan ${time}, ej bokbar`);
         } else if (dayIsBooked) {
           btn.classList.add('booked');
           btn.disabled = true;
           btn.textContent = booked.includes(time) ? `${time} • bokad` : `${time} • ej ledig`;
+          btn.setAttribute('aria-label', `${formatDateForDisplay(selectedDate)} klockan ${time}, ej ledig`);
         } else {
+          btn.setAttribute('aria-label', `${formatDateForDisplay(selectedDate)} klockan ${time}, ledig`);
           btn.onclick = () => selectBookingTime(time);
         }
 
@@ -3030,12 +3234,20 @@
 
     function renderCalendar() {
       calendarGrid.innerHTML = '';
-      calendarTitle.textContent = `${monthNames[currentMonth]} ${bookingYear}`;
-      prevMonthButton.disabled = currentMonth === todayDate.getMonth();
-      nextMonthButton.disabled = currentMonth === 11;
+      const viewYear = currentCalendarMonth.getFullYear();
+      const viewMonth = currentCalendarMonth.getMonth();
+      const previousMonth = new Date(viewYear, viewMonth - 1, 1, 12);
+      const nextMonth = new Date(viewYear, viewMonth + 1, 1, 12);
+      const availabilityReady = availabilityState === 'ready';
 
-      const first = new Date(bookingYear, currentMonth, 1);
-      const days = new Date(bookingYear, currentMonth + 1, 0).getDate();
+      calendarTitle.textContent = `${monthNames[viewMonth]} ${viewYear}`;
+      prevMonthButton.disabled = !availabilityReady || isSameCalendarMonth(currentCalendarMonth, firstCalendarMonth);
+      nextMonthButton.disabled = !availabilityReady || isSameCalendarMonth(currentCalendarMonth, lastCalendarMonth);
+      prevMonthButton.setAttribute('aria-label', `Visa ${formatMonthForDisplay(previousMonth)}`);
+      nextMonthButton.setAttribute('aria-label', `Visa ${formatMonthForDisplay(nextMonth)}`);
+
+      const first = new Date(viewYear, viewMonth, 1, 12);
+      const days = new Date(viewYear, viewMonth + 1, 0, 12).getDate();
       const offset = (first.getDay() + 6) % 7;
 
       for (let i = 0; i < offset; i++) {
@@ -3045,28 +3257,53 @@
       }
 
       for (let day = 1; day <= days; day++) {
-        const date = formatDate(bookingYear, currentMonth, day);
+        const date = formatDate(viewYear, viewMonth, day);
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.textContent = day;
         btn.className = 'calendar-day';
 
-        const bookedCount = getBookedTimes(date).length;
+        const bookedCount = availabilityReady ? getBookedTimes(date).length : 0;
         const past = date < todayString;
         const tooSoon = !past && date < minBookableString;
-        const blocked = isBlockedDate(date);
-        const full = isFullyBooked(date);
+        const blocked = availabilityReady && isBlockedDate(date);
+        const full = availabilityReady && isFullyBooked(date);
+        const selected = availabilityReady && selectedDate === date;
+        let availabilityLabel = 'ledig';
+
+        if (!availabilityReady) {
+          availabilityLabel = availabilityState === 'loading'
+            ? 'tillgänglighet kontrolleras'
+            : 'tillgänglighet saknas';
+        } else if (past) {
+          availabilityLabel = 'passerat datum';
+        } else if (tooSoon) {
+          availabilityLabel = 'kan inte bokas med så kort framförhållning';
+        } else if (blocked) {
+          availabilityLabel = 'ej bokbar';
+        } else if (full) {
+          availabilityLabel = 'fullbokad';
+        }
+
+        btn.setAttribute('aria-label', `${formatDateForDisplay(date)}, ${availabilityLabel}`);
+        btn.setAttribute('aria-pressed', selected ? 'true' : 'false');
 
         if (bookedCount > 0 || blocked) {
           btn.classList.add('booked');
         }
 
-        if (selectedDate === date) {
+        if (selected) {
           btn.classList.add('selected');
         }
 
         if (date === todayString) {
           btn.classList.add('today');
+          btn.setAttribute('aria-current', 'date');
+        }
+
+        if (!availabilityReady) {
+          btn.classList.add('availability-unavailable');
+          btn.disabled = true;
         }
 
         if (past) {
@@ -3084,7 +3321,7 @@
           btn.disabled = true;
         }
 
-        if (!past && !tooSoon && !full) {
+        if (availabilityReady && !past && !tooSoon && !full) {
           btn.onclick = () => {
             selectedDate = date;
             selectedTime = '';
@@ -3099,20 +3336,31 @@
     }
 
     prevMonthButton.addEventListener('click', () => {
-      if (currentMonth > todayDate.getMonth()) {
-        currentMonth -= 1;
+      if (availabilityState === 'ready' && !isSameCalendarMonth(currentCalendarMonth, firstCalendarMonth)) {
+        currentCalendarMonth = new Date(
+          currentCalendarMonth.getFullYear(),
+          currentCalendarMonth.getMonth() - 1,
+          1,
+          12
+        );
         renderCalendar();
       }
     });
 
     nextMonthButton.addEventListener('click', () => {
-      if (currentMonth < 11) {
-        currentMonth += 1;
+      if (availabilityState === 'ready' && !isSameCalendarMonth(currentCalendarMonth, lastCalendarMonth)) {
+        currentCalendarMonth = new Date(
+          currentCalendarMonth.getFullYear(),
+          currentCalendarMonth.getMonth() + 1,
+          1,
+          12
+        );
         renderCalendar();
       }
     });
 
     continueBookingButton?.addEventListener('click', goToBookingPage);
+    retryCalendarButton?.addEventListener('click', loadAvailability);
 
     window.addEventListener('scroll', updateTopbarState, { passive: true });
     window.addEventListener('resize', updateTopbarState);
@@ -3194,15 +3442,22 @@
           const answerInner = answer.querySelector('.faq-answer-inner');
 
           faqItems.forEach((otherItem) => {
+            const otherQuestion = otherItem.querySelector('.faq-question');
             const otherAnswer = otherItem.querySelector('.faq-answer');
             otherItem.classList.remove('is-open');
+            if (otherQuestion) {
+              otherQuestion.setAttribute('aria-expanded', 'false');
+            }
             if (otherAnswer) {
               otherAnswer.style.maxHeight = '0px';
+              otherAnswer.setAttribute('aria-hidden', 'true');
             }
           });
 
           if (!isOpen) {
             item.classList.add('is-open');
+            question.setAttribute('aria-expanded', 'true');
+            answer.setAttribute('aria-hidden', 'false');
             const contentHeight = answerInner ? answerInner.scrollHeight : answer.scrollHeight;
             answer.style.maxHeight = `${contentHeight + 40}px`;
           }
@@ -3222,10 +3477,7 @@
     });
 
     (async () => {
-      await fetchBookings();
-      applyInitialBookingSelection();
-      renderCalendar();
-      renderTimes();
+      await loadAvailability();
       updateCompareSlider();
       updateTopbarToggleLabels();
       updateTopbarState();

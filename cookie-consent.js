@@ -2,6 +2,7 @@
   const consentKey = 'berga_cookie_consent';
   const analyticsId = 'G-B78CWM4L6V';
   let analyticsLoaded = false;
+  let modalReturnFocus = null;
 
   function getConsent() {
     try {
@@ -29,8 +30,17 @@
       });
     }
 
+    window.dispatchEvent(new CustomEvent('berga:consent-change', {
+      detail: { value }
+    }));
+
+    const modalWasOpen = Boolean(document.getElementById('cookieConsentBackdrop'));
     closeConsentUi();
-    renderSettingsButton();
+    const settingsButton = renderSettingsButton();
+
+    if (modalWasOpen) {
+      settingsButton?.focus({ preventScroll: true });
+    }
   }
 
   function loadAnalytics() {
@@ -60,7 +70,34 @@
 
   function closeConsentUi() {
     document.getElementById('cookieConsentBanner')?.remove();
-    document.getElementById('cookieConsentBackdrop')?.remove();
+    closeCookieModal(false);
+  }
+
+  function closeCookieModal(restoreFocus = true) {
+    const backdrop = document.getElementById('cookieConsentBackdrop');
+    if (!backdrop) return;
+
+    backdrop.remove();
+
+    const returnTarget = modalReturnFocus;
+    modalReturnFocus = null;
+
+    if (restoreFocus && returnTarget?.isConnected) {
+      returnTarget.focus({ preventScroll: true });
+    }
+  }
+
+  function getModalFocusableElements(dialog) {
+    return Array.from(dialog.querySelectorAll([
+      'a[href]',
+      'button:not([disabled])',
+      'input:not([disabled])',
+      'select:not([disabled])',
+      'textarea:not([disabled])',
+      '[tabindex]:not([tabindex="-1"])'
+    ].join(','))).filter((element) => {
+      return !element.hasAttribute('hidden') && element.getAttribute('aria-hidden') !== 'true';
+    });
   }
 
   function renderBanner() {
@@ -88,15 +125,23 @@
   }
 
   function renderModal() {
-    if (document.getElementById('cookieConsentBackdrop')) return;
+    const existingDialog = document.querySelector('#cookieConsentBackdrop .cookie-consent-modal');
+    if (existingDialog) {
+      existingDialog.focus({ preventScroll: true });
+      return;
+    }
+
+    modalReturnFocus = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
 
     const backdrop = document.createElement('div');
     backdrop.className = 'cookie-backdrop';
     backdrop.id = 'cookieConsentBackdrop';
     backdrop.innerHTML = `
-      <div class="cookie-consent-modal" role="dialog" aria-modal="true" aria-labelledby="cookieModalTitle">
+      <div class="cookie-consent-modal" role="dialog" aria-modal="true" aria-labelledby="cookieModalTitle" aria-describedby="cookieModalDescription" tabindex="-1">
         <h2 id="cookieModalTitle">Vad är cookies?</h2>
-        <p>Cookies är små textfiler som sparas på din enhet när du besöker en hemsida. De används för att få hemsidan att fungera korrekt, förbättra användarupplevelsen och analysera trafik.</p>
+        <p id="cookieModalDescription">Cookies är små textfiler som sparas på din enhet när du besöker en hemsida. De används för att få hemsidan att fungera korrekt, förbättra användarupplevelsen och analysera trafik.</p>
 
         <h3>Vilka cookies eller liknande teknik använder vi?</h3>
         <h3>Nödvändiga cookies eller liknande teknik</h3>
@@ -125,13 +170,47 @@
     document.body.appendChild(backdrop);
     bindConsentButtons(backdrop);
 
-    backdrop.addEventListener('click', (event) => {
-      if (event.target === backdrop) backdrop.remove();
+    const dialog = backdrop.querySelector('.cookie-consent-modal');
+
+    backdrop.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeCookieModal();
+        return;
+      }
+
+      if (event.key !== 'Tab' || !dialog) return;
+
+      const focusableElements = getModalFocusableElements(dialog);
+      if (!focusableElements.length) {
+        event.preventDefault();
+        dialog.focus({ preventScroll: true });
+        return;
+      }
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+      const activeElement = document.activeElement;
+
+      if (event.shiftKey && (activeElement === dialog || activeElement === firstElement || !dialog.contains(activeElement))) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (!event.shiftKey && (activeElement === lastElement || !dialog.contains(activeElement))) {
+        event.preventDefault();
+        firstElement.focus();
+      }
     });
+
+    backdrop.addEventListener('click', (event) => {
+      if (event.target === backdrop) closeCookieModal();
+    });
+
+    dialog?.focus({ preventScroll: true });
   }
 
   function renderSettingsButton() {
-    if (document.getElementById('cookieSettingsButton')) return;
+    const existingButton = document.getElementById('cookieSettingsButton');
+    if (existingButton) return existingButton;
 
     const button = document.createElement('button');
     button.type = 'button';
@@ -140,6 +219,7 @@
     button.textContent = 'Cookieinställningar';
     button.addEventListener('click', renderModal);
     document.body.appendChild(button);
+    return button;
   }
 
   function bindConsentButtons(root) {
@@ -154,7 +234,7 @@
     });
     root.querySelectorAll('[data-cookie-close]').forEach((button) => {
       button.addEventListener('click', () => {
-        document.getElementById('cookieConsentBackdrop')?.remove();
+        closeCookieModal();
       });
     });
   }

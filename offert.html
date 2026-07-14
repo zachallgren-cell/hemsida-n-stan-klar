@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
+  <title>Be om offert med bilder | Berga Fönsterputs</title>
+  <meta name="description" content="Osäker på hur många fönster du har? Skicka en beskrivning och upp till tre bilder till Berga Fönsterputs för en personlig offertbedömning.">
+  <link rel="canonical" href="https://bergafonsterputs.se/offert.html">
+  <meta property="og:title" content="Be om offert med bilder | Berga Fönsterputs">
+  <meta property="og:description" content="Skicka en beskrivning och upp till tre fönsterbilder för en personlig offertbedömning.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://bergafonsterputs.se/offert.html">
+  <meta property="og:image" content="https://bergafonsterputs.se/social-preview.jpg">
+  <meta property="og:image:alt" content="Berga Fönsterputs arbetar med fönsterputs hos kund">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <style>
+    :root {
+      --primary: #0b6fa4;
+      --primary-dark: #084f74;
+      --primary-soft: #e7f5fc;
+      --cta: #ffb347;
+      --cta-dark: #f1992d;
+      --bg: #cfe8f5;
+      --surface: rgba(255, 255, 255, 0.98);
+      --text: #173042;
+      --muted: #5f7280;
+      --border: #c6dfec;
+      --success: #187448;
+      --error: #a33131;
+      --white: #ffffff;
+      --shadow: 0 18px 44px rgba(11, 111, 164, 0.14);
+      --radius: 22px;
+      --max-width: 1180px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 8% 8%, rgba(255, 255, 255, 0.75), transparent 30%),
+        linear-gradient(to bottom, #e7f5fc, var(--bg));
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      line-height: 1.6;
+    }
+    a { color: inherit; }
+    button, input, textarea { font: inherit; }
+    img { max-width: 100%; }
+    .container { width: min(92%, var(--max-width)); margin: 0 auto; }
+
+    header {
+      color: var(--white);
+      background:
+        linear-gradient(135deg, rgba(8, 82, 120, 0.92), rgba(6, 58, 88, 0.82)),
+        url("om-oss-fonsterputs-arbete-2.jpeg") center 38% / cover;
+      padding: 18px 0 96px;
+      position: relative;
+      overflow: hidden;
+    }
+    header::after {
+      content: "";
+      position: absolute;
+      inset: auto -10% -130px;
+      height: 210px;
+      background: var(--bg);
+      border-radius: 50% 50% 0 0;
+      opacity: 0.34;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--white);
+      text-decoration: none;
+      font-weight: 900;
+    }
+    .brand img {
+      width: 76px;
+      height: 76px;
+      object-fit: contain;
+      padding: 7px;
+      border-radius: 19px;
+      background: var(--white);
+    }
+    nav { display: flex; gap: 9px; flex-wrap: wrap; }
+    nav a {
+      color: var(--white);
+      text-decoration: none;
+      padding: 10px 13px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      font-weight: 800;
+    }
+    nav a:hover, nav a:focus-visible { background: rgba(255, 255, 255, 0.22); }
+    .hero {
+      position: relative;
+      z-index: 1;
+      max-width: 780px;
+      padding-top: 72px;
+    }
+    .eyebrow {
+      display: inline-flex;
+      padding: 7px 11px;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-size: 0.78rem;
+    }
+    .hero h1 {
+      margin: 16px 0 14px;
+      max-width: 700px;
+      font-size: clamp(2.35rem, 6vw, 4.7rem);
+      line-height: 1.02;
+      letter-spacing: -0.035em;
+    }
+    .hero p {
+      max-width: 690px;
+      margin: 0;
+      color: rgba(255, 255, 255, 0.93);
+      font-size: clamp(1rem, 2vw, 1.17rem);
+    }
+    .hero-points {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 23px;
+    }
+    .hero-points span {
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: rgba(6, 45, 66, 0.54);
+      font-weight: 800;
+      font-size: 0.9rem;
+    }
+
+    main { position: relative; z-index: 2; margin-top: -54px; padding-bottom: 58px; }
+    .intro-card,
+    .guide-card,
+    .form-card,
+    .terms-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+    .intro-card {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1px;
+      overflow: hidden;
+    }
+    .intro-item { padding: 22px; background: rgba(255, 255, 255, 0.92); }
+    .intro-item + .intro-item { border-left: 1px solid var(--border); }
+    .intro-item strong { display: block; color: var(--primary-dark); margin-bottom: 5px; }
+    .intro-item span { color: var(--muted); font-size: 0.94rem; }
+    .section { margin-top: 28px; }
+    .section-heading { max-width: 780px; margin-bottom: 18px; }
+    .section-heading h2 {
+      margin: 0 0 8px;
+      color: var(--primary-dark);
+      font-size: clamp(1.65rem, 4vw, 2.35rem);
+      line-height: 1.15;
+    }
+    .section-heading p { margin: 0; color: var(--muted); }
+
+    .guide-card { padding: 28px; }
+    .guide-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .guide-step {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: #f8fcfe;
+      padding: 18px;
+    }
+    .guide-step-number {
+      display: inline-grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      color: var(--white);
+      background: var(--primary);
+      font-weight: 900;
+    }
+    .guide-step h3 { margin: 13px 0 7px; color: var(--primary-dark); }
+    .guide-step p { margin: 0; color: var(--muted); font-size: 0.94rem; }
+    .window-demo {
+      display: grid;
+      gap: 5px;
+      width: 100%;
+      aspect-ratio: 1.7;
+      margin: 16px 0 13px;
+      padding: 7px;
+      border: 5px solid #406478;
+      border-radius: 6px;
+      background: #d9f2ff;
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.8);
+    }
+    .window-demo.two { grid-template-columns: repeat(2, 1fr); }
+    .window-demo.four { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); }
+    .window-pane {
+      display: grid;
+      place-items: center;
+      border: 2px solid #6b8797;
+      background: linear-gradient(145deg, rgba(255,255,255,.8), rgba(136,207,237,.45));
+      color: var(--primary-dark);
+      font-weight: 900;
+      font-size: 0.82rem;
+    }
+    .window-pane.muntins {
+      background:
+        linear-gradient(90deg, transparent 47%, #6b8797 47% 53%, transparent 53%),
+        linear-gradient(transparent 47%, #6b8797 47% 53%, transparent 53%),
+        linear-gradient(145deg, rgba(255,255,255,.8), rgba(136,207,237,.45));
+    }
+    .guide-note {
+      margin: 18px 0 0;
+      padding: 15px 17px;
+      border-left: 4px solid var(--cta);
+      border-radius: 12px;
+      background: #fff8ec;
+      color: #5f4a2a;
+    }
+
+    .content-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+      gap: 22px;
+      align-items: start;
+    }
+    .form-card { padding: 30px; }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 17px;
+    }
+    .field-wide { grid-column: 1 / -1; }
+    label {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--primary-dark);
+      font-weight: 900;
+    }
+    input,
+    textarea {
+      width: 100%;
+      border: 1px solid #afcfdc;
+      border-radius: 13px;
+      background: var(--white);
+      color: var(--text);
+      padding: 13px 14px;
+      outline: none;
+      transition: border-color .18s ease, box-shadow .18s ease;
+    }
+    textarea { min-height: 150px; resize: vertical; }
+    input:focus,
+    textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(11, 111, 164, 0.13);
+    }
+    .field-note {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+    .upload-box {
+      padding: 18px;
+      border: 2px dashed #9bc8db;
+      border-radius: 16px;
+      background: var(--primary-soft);
+    }
+    .upload-box input {
+      padding: 10px;
+      border-style: solid;
+      background: var(--white);
+    }
+    .file-list {
+      display: grid;
+      gap: 7px;
+      margin-top: 11px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .file-list span {
+      display: block;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.85);
+    }
+    .privacy-warning {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #fff8ec;
+      color: #634d2b;
+      font-size: 0.9rem;
+    }
+    .consent-row {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 11px;
+      align-items: start;
+      padding: 15px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #f8fcfe;
+    }
+    .consent-row input { width: 20px; height: 20px; margin-top: 2px; }
+    .consent-row label { margin: 0; color: var(--text); font-weight: 700; }
+    .consent-row a { color: var(--primary-dark); }
+    .submit-button {
+      width: 100%;
+      border: 0;
+      border-radius: 14px;
+      padding: 15px 18px;
+      color: var(--text);
+      background: linear-gradient(to right, var(--cta), var(--cta-dark));
+      box-shadow: 0 10px 22px rgba(241, 153, 45, 0.24);
+      cursor: pointer;
+      font-weight: 900;
+    }
+    .submit-button:hover { filter: brightness(1.03); }
+    .submit-button:disabled { cursor: wait; opacity: 0.66; }
+    .status {
+      display: none;
+      margin-top: 14px;
+      padding: 13px 15px;
+      border-radius: 12px;
+      font-weight: 800;
+    }
+    .status.is-visible { display: block; }
+    .status.success { color: var(--success); background: #eaf7ef; border: 1px solid #b9dfc7; }
+    .status.error { color: var(--error); background: #fff0f0; border: 1px solid #ecc2c2; }
+    .sidebar { display: grid; gap: 16px; }
+    .side-card {
+      padding: 21px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: rgba(255,255,255,.93);
+      box-shadow: var(--shadow);
+    }
+    .side-card h3 { margin: 0 0 8px; color: var(--primary-dark); }
+    .side-card p { margin: 0; color: var(--muted); }
+    .side-card ul { margin: 12px 0 0; padding-left: 20px; color: var(--muted); }
+    .terms-card {
+      margin-top: 24px;
+      padding: 27px;
+      scroll-margin-top: 20px;
+    }
+    .terms-card h2 { margin: 0 0 9px; color: var(--primary-dark); }
+    .terms-card ul { margin: 13px 0 0; padding-left: 20px; color: var(--muted); }
+
+    .honeypot {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      overflow: hidden !important;
+      clip: rect(1px, 1px, 1px, 1px) !important;
+      white-space: nowrap !important;
+    }
+
+    footer { padding: 34px 0; color: rgba(255,255,255,.9); background: #082c3d; }
+    footer p { margin: 6px 0; }
+    .footer-links { display: flex; flex-wrap: wrap; gap: 13px; margin-top: 13px; }
+    .footer-links a { color: var(--white); }
+
+    @media (max-width: 900px) {
+      .guide-grid, .content-layout { grid-template-columns: 1fr; }
+      .sidebar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 680px) {
+      header { padding-bottom: 78px; }
+      .hero { padding-top: 46px; }
+      .intro-card, .form-grid, .sidebar { grid-template-columns: 1fr; }
+      .intro-item + .intro-item { border-left: 0; border-top: 1px solid var(--border); }
+      .field-wide { grid-column: auto; }
+      .guide-card, .form-card, .terms-card { padding: 20px; }
+      nav { width: 100%; }
+      nav a { flex: 1 1 auto; text-align: center; }
+    }
+    @media (max-width: 420px) {
+      .brand img { width: 62px; height: 62px; }
+      .brand { font-size: 0.94rem; }
+      .hero h1 { font-size: 2.25rem; }
+      .hero-points span { width: 100%; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="topbar">
+        <a class="brand" href="index.html" aria-label="Berga Fönsterputs startsida">
+          <img src="logga-fonsterputs-transparent.png" alt="">
+          <span>Berga Fönsterputs</span>
+        </a>
+        <nav aria-label="Huvudnavigation">
+          <a href="index.html">Startsida</a>
+          <a href="var-tjanst.html">Vår tjänst</a>
+          <a href="index.html#bokning">Boka med livepris</a>
+          <a href="index.html#kontakt">Kontakt</a>
+        </nav>
+      </div>
+      <section class="hero">
+        <span class="eyebrow">Personlig offertbedömning</span>
+        <h1>Osäker på hur många fönster du har?</h1>
+        <p>Beskriv jobbet och bifoga upp till tre bilder. Då kan vi bedöma omfattningen bättre innan du bokar.</p>
+        <div class="hero-points" aria-label="Offertformulärets viktigaste egenskaper">
+          <span>Högst 3 bilder</span>
+          <span>JPEG, PNG eller WebP</span>
+          <span>Skickas som mejlbilagor</span>
+        </div>
+      </section>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="intro-card" aria-label="Så fungerar offertförfrågan">
+      <div class="intro-item">
+        <strong>1. Ta översiktsbilder</strong>
+        <span>Fotografera gärna hela fönsterpartiet och sådant som påverkar åtkomsten.</span>
+      </div>
+      <div class="intro-item">
+        <strong>2. Beskriv jobbet</strong>
+        <span>Ange adress, postnummer, önskad putsning och sådant vi bör känna till.</span>
+      </div>
+      <div class="intro-item">
+        <strong>3. Vi återkommer</strong>
+        <span>Förfrågan är inte en bokning. Pris och omfattning bekräftas först.</span>
+      </div>
+    </section>
+
+    <section class="section guide-card" aria-labelledby="countGuideTitle">
+      <div class="section-heading">
+        <h2 id="countGuideTitle">Så uppskattar du antalet fönster</h2>
+        <p>Du behöver inte räkna perfekt för en offertförfrågan. Använd guiden som tumregel och låt bilderna visa resten.</p>
+      </div>
+      <div class="guide-grid">
+        <article class="guide-step">
+          <span class="guide-step-number">1</span>
+          <div class="window-demo two" aria-hidden="true">
+            <span class="window-pane">1</span>
+            <span class="window-pane">2</span>
+          </div>
+          <h3>Räkna glasdelarna</h3>
+          <p>Räkna varje separat öppningsbar fönsterdel eller fast glasparti som en del när du uppskattar omfattningen.</p>
+        </article>
+        <article class="guide-step">
+          <span class="guide-step-number">2</span>
+          <div class="window-demo four" aria-hidden="true">
+            <span class="window-pane">1</span>
+            <span class="window-pane">2</span>
+            <span class="window-pane">3</span>
+            <span class="window-pane">4</span>
+          </div>
+          <h3>Flera delar räknas var för sig</h3>
+          <p>Ett större parti kan bestå av flera glasdelar. Skriv gärna ett ungefärligt totalantal i beskrivningen.</p>
+        </article>
+        <article class="guide-step">
+          <span class="guide-step-number">3</span>
+          <div class="window-demo two" aria-hidden="true">
+            <span class="window-pane muntins">Spröjs</span>
+            <span class="window-pane">Utan</span>
+          </div>
+          <h3>Visa spröjs och åtkomst</h3>
+          <p>Ta närbild på spröjs och visa om något fönster sitter högt, trångt eller på annat sätt är svårt att nå.</p>
+        </article>
+      </div>
+      <p class="guide-note"><strong>Tips:</strong> En översiktsbild per fasad är ofta mer användbar än flera närbilder. Vi bekräftar alltid bedömningen innan pris eller arbete bestäms.</p>
+    </section>
+
+    <section class="section" aria-labelledby="quoteFormTitle">
+      <div class="section-heading">
+        <h2 id="quoteFormTitle">Skicka offertförfrågan</h2>
+        <p>Fält markerade med * behöver fyllas i. Bilder är frivilliga men gör ofta bedömningen enklare.</p>
+      </div>
+
+      <div class="content-layout">
+        <form class="form-card" id="quoteForm" enctype="multipart/form-data">
+          <div class="form-grid">
+            <div>
+              <label for="name">Namn *</label>
+              <input id="name" name="name" type="text" minlength="2" maxlength="100" autocomplete="name" required>
+            </div>
+            <div>
+              <label for="phone">Telefonnummer *</label>
+              <input id="phone" name="phone" type="tel" maxlength="30" autocomplete="tel" placeholder="073-123 45 67" required>
+            </div>
+            <div>
+              <label for="email">E-postadress *</label>
+              <input id="email" name="email" type="email" maxlength="254" autocomplete="email" required>
+            </div>
+            <div>
+              <label for="postalCode">Postnummer *</label>
+              <input id="postalCode" name="postalCode" type="text" inputmode="numeric" pattern="[0-9]{3}\s?[0-9]{2}" maxlength="6" autocomplete="postal-code" placeholder="123 45" required>
+            </div>
+            <div class="field-wide">
+              <label for="address">Adress där jobbet ska utföras *</label>
+              <input id="address" name="address" type="text" minlength="5" maxlength="240" autocomplete="street-address" required>
+            </div>
+            <div class="field-wide">
+              <label for="description">Beskriv fönstren och jobbet *</label>
+              <textarea id="description" name="description" minlength="10" maxlength="2500" placeholder="Skriv gärna ungefärligt antal glasdelar, om du vill ha utvändig eller invändig + utvändig puts, om det finns spröjs samt om något sitter högt eller är svårt att nå." required></textarea>
+              <p class="field-note">Skriv inte personnummer, portkod eller andra känsliga uppgifter här.</p>
+            </div>
+            <div class="field-wide upload-box">
+              <label for="photos">Bilder, högst 3</label>
+              <input id="photos" name="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple aria-describedby="photoHelp photoList">
+              <p class="field-note" id="photoHelp">JPEG, PNG eller WebP. Högst 5 MB per bild och 15 MB totalt.</p>
+              <div class="file-list" id="photoList" aria-live="polite">
+                <span>Inga bilder valda.</span>
+              </div>
+              <p class="privacy-warning">Undvik personer, registreringsskyltar, dokument och annat privat i bilden. Bilderna skickas direkt som mejlbilagor och sparas inte permanent av formuläret.</p>
+            </div>
+
+            <div class="field-wide consent-row">
+              <input id="consent" name="consent" type="checkbox" value="accepted" required>
+              <label for="consent">Jag har läst <a href="integritet.html" target="_blank" rel="noopener noreferrer">integritetsinformationen</a>, <a href="villkor.html" target="_blank" rel="noopener noreferrer">bokningsvillkoren</a> och <a href="#offertvillkor">villkoren för offertförfrågan</a>, och godkänner att uppgifterna och eventuella bilder används för att bedöma min förfrågan. *</label>
+            </div>
+
+            <div class="honeypot" aria-hidden="true">
+              <label for="website">Webbplats</label>
+              <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
+            </div>
+            <input id="formStartedAt" name="formStartedAt" type="hidden">
+            <input id="requestId" name="requestId" type="hidden">
+
+            <div class="field-wide">
+              <button class="submit-button" id="submitButton" type="submit">Skicka offertförfrågan</button>
+              <div class="status" id="formStatus" role="status" aria-live="polite"></div>
+            </div>
+          </div>
+        </form>
+
+        <aside class="sidebar">
+          <section class="side-card">
+            <h3>Det här hjälper oss</h3>
+            <ul>
+              <li>En översikt över varje sida av bostaden</li>
+              <li>Närbild om fönstren har spröjs</li>
+              <li>Information om höjd och åtkomst</li>
+              <li>Om du önskar utvändig eller även invändig puts</li>
+            </ul>
+          </section>
+          <section class="side-card">
+            <h3>Vill du boka direkt?</h3>
+            <p>Om du redan vet ungefärligt antal kan du välja en ledig tid och se livepriset i det vanliga bokningsflödet.</p>
+            <p><a href="index.html#bokning"><strong>Gå till bokningen →</strong></a></p>
+          </section>
+        </aside>
+      </div>
+    </section>
+
+    <section class="terms-card" id="offertvillkor" aria-labelledby="termsTitle">
+      <h2 id="termsTitle">Särskilt för offertförfrågan</h2>
+      <ul>
+        <li>En inskickad förfrågan är inte en bokning och reserverar inget datum eller klockslag.</li>
+        <li>Pris, omfattning, åtkomst och eventuella tillägg behöver bekräftas innan ett arbete planeras.</li>
+        <li>Du ansvarar för att du får dela bilderna och för att inte skicka onödiga eller känsliga personuppgifter.</li>
+        <li>Formuläret skickar bilderna som mejlbilagor till Berga Fönsterputs och skapar ingen permanent bildlagring på webbplatsen.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p><strong>Berga Fönsterputs</strong></p>
+      <p>Personlig och lokal fönsterputs i Åkersberga, Täby, Vaxholm och skärgården.</p>
+      <p>E-post: <a href="mailto:info@bergafonsterputs.se">info@bergafonsterputs.se</a></p>
+      <div class="footer-links">
+        <a href="index.html">Startsida</a>
+        <a href="var-tjanst.html">Vår tjänst</a>
+        <a href="index.html#bokning">Boka tid</a>
+        <a href="integritet.html">Integritet</a>
+        <a href="villkor.html">Villkor</a>
+        <a href="villkor.html">Bokningsvillkor</a>
+        <a href="#offertvillkor">Offertvillkor</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const SUPABASE_URL = 'https://xeyippgcoqfskcmqzazx.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_MUKxAwv0vNXDrcgumq81fQ_Uvx4eOuq';
+    const QUOTE_FUNCTION_URL = SUPABASE_URL + '/functions/v1/request-photo-quote';
+    const MAX_FILES = 3;
+    const MAX_FILE_BYTES = 5 * 1024 * 1024;
+    const MAX_TOTAL_BYTES = 15 * 1024 * 1024;
+    const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+
+    const quoteForm = document.getElementById('quoteForm');
+    const photosInput = document.getElementById('photos');
+    const photoList = document.getElementById('photoList');
+    const formStatus = document.getElementById('formStatus');
+    const submitButton = document.getElementById('submitButton');
+    const formStartedAtInput = document.getElementById('formStartedAt');
+    const requestIdInput = document.getElementById('requestId');
+
+    function createRequestId() {
+      if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+        return window.crypto.randomUUID();
+      }
+      const values = new Uint8Array(16);
+      window.crypto.getRandomValues(values);
+      values[6] = (values[6] & 0x0f) | 0x40;
+      values[8] = (values[8] & 0x3f) | 0x80;
+      const hex = Array.from(values, function (value) {
+        return value.toString(16).padStart(2, '0');
+      }).join('');
+      return [
+        hex.slice(0, 8),
+        hex.slice(8, 12),
+        hex.slice(12, 16),
+        hex.slice(16, 20),
+        hex.slice(20)
+      ].join('-');
+    }
+
+    function resetRequestGuards() {
+      formStartedAtInput.value = String(Date.now());
+      requestIdInput.value = createRequestId();
+    }
+
+    function setStatus(message, type) {
+      formStatus.textContent = message;
+      formStatus.className = 'status is-visible ' + type;
+    }
+
+    function clearStatus() {
+      formStatus.textContent = '';
+      formStatus.className = 'status';
+    }
+
+    function selectedFiles() {
+      return Array.from(photosInput.files || []);
+    }
+
+    function validateFiles(files) {
+      if (files.length > MAX_FILES) {
+        return 'Du kan välja högst tre bilder.';
+      }
+
+      let totalBytes = 0;
+      for (const file of files) {
+        if (!ALLOWED_TYPES.has(file.type)) {
+          return 'Alla bilder måste vara JPEG, PNG eller WebP.';
+        }
+        if (file.size <= 0 || file.size > MAX_FILE_BYTES) {
+          return 'Varje bild måste vara större än 0 byte och högst 5 MB.';
+        }
+        totalBytes += file.size;
+      }
+
+      if (totalBytes > MAX_TOTAL_BYTES) {
+        return 'Bilderna får tillsammans vara högst 15 MB.';
+      }
+      return '';
+    }
+
+    function renderFileList() {
+      const files = selectedFiles();
+      if (!files.length) {
+        photoList.innerHTML = '<span>Inga bilder valda.</span>';
+        clearStatus();
+        return;
+      }
+
+      const error = validateFiles(files);
+      photoList.replaceChildren();
+      files.forEach(function (file, index) {
+        const row = document.createElement('span');
+        row.textContent = (index + 1) + '. ' + file.name + ' · ' + (file.size / 1024 / 1024).toFixed(1) + ' MB';
+        photoList.appendChild(row);
+      });
+
+      if (error) {
+        setStatus(error, 'error');
+      } else {
+        clearStatus();
+      }
+    }
+
+    photosInput.addEventListener('change', renderFileList);
+
+    quoteForm.addEventListener('submit', async function (event) {
+      event.preventDefault();
+      clearStatus();
+
+      if (!quoteForm.reportValidity()) return;
+
+      const files = selectedFiles();
+      const fileError = validateFiles(files);
+      if (fileError) {
+        setStatus(fileError, 'error');
+        return;
+      }
+
+      submitButton.disabled = true;
+      submitButton.textContent = 'Skickar förfrågan…';
+      setStatus('Bilder och uppgifter kontrolleras och skickas säkert.', 'success');
+
+      try {
+        const response = await fetch(QUOTE_FUNCTION_URL, {
+          method: 'POST',
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: 'Bearer ' + SUPABASE_ANON_KEY
+          },
+          body: new FormData(quoteForm)
+        });
+
+        const body = await response.json().catch(function () { return {}; });
+        if (!response.ok || body.error) {
+          throw new Error(body.error || 'Offertförfrågan kunde inte skickas.');
+        }
+
+        const receiptMessage = body.receiptSent
+          ? ' Ett kvitto har skickats till din e-post.'
+          : ' Förfrågan är mottagen, men e-postkvittot kunde inte levereras.';
+        setStatus('Tack! Din offertförfrågan är skickad.' + receiptMessage, 'success');
+        quoteForm.reset();
+        photoList.innerHTML = '<span>Inga bilder valda.</span>';
+        resetRequestGuards();
+      } catch (error) {
+        setStatus(error instanceof Error ? error.message : 'Något gick fel. Försök igen senare.', 'error');
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Skicka offertförfrågan';
+      }
+    });
+
+    resetRequestGuards();
+  </script>
+</body>
+</html>

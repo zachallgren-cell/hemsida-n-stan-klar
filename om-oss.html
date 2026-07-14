@@ -44,6 +44,22 @@
 
     html { scroll-behavior: smooth; }
 
+    .skip-link {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 9999;
+      padding: 11px 15px;
+      border-radius: 10px;
+      background: #fff;
+      color: var(--primary-dark);
+      font-weight: 900;
+      transform: translateY(-160%);
+    }
+
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #ffb347; outline-offset: 3px; }
+
     body {
       margin: 0;
       font-family: "Trebuchet MS", "Segoe UI", sans-serif;
@@ -1477,9 +1493,19 @@
       }
 
     }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
   </style>
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Hoppa till innehållet</a>
   <header id="top">
     <div class="container">
       <div class="topbar">
@@ -1491,7 +1517,7 @@
           </div>
         </a>
         <div class="topbar-actions">
-          <nav>
+          <nav aria-label="Huvudnavigation">
             <a href="index.html">Startsida</a>
             <a href="var-tjanst.html">Vår tjänst</a>
             <a href="om-oss.html" class="is-active">Om oss</a>
@@ -1521,7 +1547,7 @@
   </header>
   <button type="button" class="topbar-show-button" id="topbarShowButton">Visa meny</button>
 
-  <main class="container">
+  <main class="container" id="main-content">
     <section class="card reveal">
       <div class="team-gallery">
         <div class="team-photo work-photo">
@@ -1529,7 +1555,7 @@
         </div>
         <div class="team-note">
           <div>
-            <h3>Mer än bara puts</h3>
+            <h2>Mer än bara puts</h2>
             <p>För oss handlar det inte bara om att göra fönster rena. Det handlar också om att bygga något eget och ge människor i närområdet och skärgården en tjänst som känns enkel, personlig och trygg.</p>
             <p style="margin-top:14px;"><strong>Vi som driver Berga Fönsterputs:</strong> Zac och Martin.</p>
           </div>
@@ -1725,6 +1751,7 @@
         <a href="index.html#bokning">Boka tid</a>
         <a href="index.html#kontakt">Kontakt</a>
         <a href="integritet.html">Integritet</a>
+        <a href="villkor.html">Villkor</a>
       </div>
     </div>
   </footer>

@@ -613,7 +613,7 @@ Deno.serve(async (req) => {
                       <tr>
                         <td align="center" style="padding: 4px; color: #ffffff; font-size: 12px; font-weight: 700;">Tryggt &amp; säkert</td>
                         <td align="center" style="padding: 4px; color: #ffffff; font-size: 12px; font-weight: 700;">Skinande resultat</td>
-                        <td align="center" style="padding: 4px; color: #ffffff; font-size: 12px; font-weight: 700;">100% nöjd kund</td>
+                        <td align="center" style="padding: 4px; color: #ffffff; font-size: 12px; font-weight: 700;">Personlig service</td>
                       </tr>
                     </table>
                   </td>
