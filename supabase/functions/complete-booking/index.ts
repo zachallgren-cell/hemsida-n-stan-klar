@@ -1,33 +1,37 @@
+import {
+  InvalidJsonBodyError,
+  readJsonWithLimit,
+  RequestBodyTooLargeError
+} from '../_shared/read-json.ts';
+
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type'
+  'Access-Control-Allow-Origin': 'https://bergafonsterputs.se',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  Vary: 'Origin'
 };
 
 type CompleteBookingPayload = {
   bookingId: number;
   paymentMethod?: string;
+  swishAmount?: number | string;
+  invoiceReference?: string;
+  actualWorkHours?: number | string;
+  laborCostBeforeRut?: number | string;
+  materialCost?: number | string;
+  transportCost?: number | string;
+  rutDeduction?: number | string;
 };
 
-type StripeProduct = {
-  id: string;
-  default_price?: string | { id?: string };
-};
+const SWISH_NUMBER = '1236774384';
+const SWISH_NUMBER_DISPLAY = '123 677 43 84';
+const SWISH_RECIPIENT_NAME = 'Zac Hallgren';
+const DEFAULT_MATERIAL_COST_ORE = 15000;
+const ISLAND_START_PRICE_ORE = 79900;
+const ISLAND_PRICE_PER_SEA_MILE_ORE = 12500;
+const MAX_PAYMENT_AMOUNT_ORE = 100000000;
 
-type StripeCheckoutSession = {
-  id: string;
-  url?: string | null;
-  expires_at?: number | null;
-  payment_intent?: string | null;
-};
-
-type StripeCheckoutDetails = {
-  productId: string;
-  priceId: string;
-  sessionId: string;
-  paymentIntentId: string | null;
-  url: string;
-  expiresAt: string | null;
-};
+class ValidationError extends Error {}
 
 type AdminCheckResult = {
   ok: true;
@@ -59,12 +63,26 @@ function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 }
 
-function parsePriceToOre(value: number | string | undefined) {
+function getJwtAssuranceLevel(authHeader: string) {
+  try {
+    const token = authHeader.replace(/^bearer\s+/i, '');
+    const payloadPart = token.split('.')[1] || '';
+    const normalized = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
+    const payload = JSON.parse(atob(normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=')));
+    return String(payload?.aal || 'aal1');
+  } catch {
+    return 'invalid';
+  }
+}
+
+function parseMoneyToOre(value: number | string | undefined, allowZero = false) {
   if (typeof value === 'number') {
-    return Number.isFinite(value) && value > 0 ? Math.round(value * 100) : null;
+    return Number.isFinite(value) && (allowZero ? value >= 0 : value > 0)
+      ? Math.round(value * 100)
+      : null;
   }
 
-  const rawValue = String(value || '').trim();
+  const rawValue = String(value ?? '').trim();
   if (!rawValue || /offert|kontakta/i.test(rawValue)) {
     return null;
   }
@@ -81,11 +99,99 @@ function parsePriceToOre(value: number | string | undefined) {
 
   const parsed = Number(normalized);
 
-  return Number.isFinite(parsed) && parsed > 0 ? Math.round(parsed * 100) : null;
+  return Number.isFinite(parsed) && (allowZero ? parsed >= 0 : parsed > 0)
+    ? Math.round(parsed * 100)
+    : null;
+}
+
+function hasOwnValue(value: unknown) {
+  return value !== undefined && value !== null && String(value).trim() !== '';
+}
+
+function parseOptionalMoney(value: number | string | undefined, fieldLabel: string) {
+  if (!hasOwnValue(value)) {
+    return null;
+  }
+
+  const parsed = parseMoneyToOre(value, true);
+  if (parsed === null || parsed > MAX_PAYMENT_AMOUNT_ORE) {
+    throw new ValidationError(`${fieldLabel} måste vara ett giltigt belopp mellan 0 och 1 000 000 kr.`);
+  }
+
+  return parsed;
 }
 
 function formatSekFromOre(valueOre: number | null) {
-  return valueOre === null ? '' : `${Math.round(valueOre / 100).toLocaleString('sv-SE')} kr`;
+  if (valueOre === null) {
+    return '';
+  }
+
+  const hasOre = valueOre % 100 !== 0;
+  return `${(valueOre / 100).toLocaleString('sv-SE', {
+    minimumFractionDigits: hasOre ? 2 : 0,
+    maximumFractionDigits: 2
+  })} kr`;
+}
+
+function formatSwishAmount(valueOre: number) {
+  return (valueOre / 100).toFixed(2);
+}
+
+function getDefaultTransportCostOre(booking: Record<string, unknown>) {
+  if (String(booking.transport_type || '') !== 'Båttransport behövs') {
+    return 0;
+  }
+
+  const rawSeaMiles = String(booking.sea_miles ?? '').trim().replace(',', '.');
+  const seaMiles = Number(rawSeaMiles);
+
+  if (!Number.isFinite(seaMiles) || seaMiles < 0 || seaMiles > 1000) {
+    throw new ValidationError('Bokningens antal sjömil är ogiltigt. Rätta bokningen innan klartmejlet skickas.');
+  }
+
+  return Math.round(ISLAND_START_PRICE_ORE + (seaMiles * ISLAND_PRICE_PER_SEA_MILE_ORE));
+}
+
+function usesRutDeduction(booking: Record<string, unknown>) {
+  const choice = String(booking.rut_choice || '').trim();
+  return /^Ja\b/i.test(choice);
+}
+
+function normalizeInvoiceReference(value: unknown) {
+  const reference = String(value ?? '').trim();
+
+  if (!reference) {
+    throw new ValidationError('Fyll i fakturanumret eller referensen från den manuellt skapade fakturan.');
+  }
+
+  if (reference.length > 35 || !/^[A-Za-zÅÄÖåäö0-9 .:;,!?()\-”]+$/u.test(reference)) {
+    throw new ValidationError('Fakturareferensen får vara högst 35 tecken och bara innehålla bokstäver, siffror, mellanslag och enkel skiljeteckensättning.');
+  }
+
+  return reference;
+}
+
+function parseActualWorkHours(value: number | string | undefined) {
+  if (!hasOwnValue(value)) {
+    return null;
+  }
+
+  const hours = Number(String(value).trim().replace(',', '.'));
+  if (!Number.isFinite(hours) || hours <= 0 || hours > 1000 || Math.abs(Math.round(hours * 100) - (hours * 100)) > 1e-8) {
+    throw new ValidationError('Faktisk arbetstid måste vara mellan 0,01 och 1 000 timmar och ha högst två decimaler.');
+  }
+
+  return hours;
+}
+
+function buildSwishUrl(amountOre: number, reference: string) {
+  const url = new URL('https://app.swish.nu/1/p/sw/');
+  url.searchParams.set('sw', SWISH_NUMBER);
+  url.searchParams.set('amt', formatSwishAmount(amountOre));
+  url.searchParams.set('cur', 'SEK');
+  url.searchParams.set('msg', reference);
+  url.searchParams.set('src', 'qr');
+  return url.toString();
 }
 
 function hasDisplayValue(value: unknown) {
@@ -129,27 +235,12 @@ function splitAddons(value: unknown) {
     .filter(Boolean);
 }
 
-async function stripePost<T>(stripeSecretKey: string, path: string, params: URLSearchParams): Promise<T> {
-  const response = await fetch(`https://api.stripe.com${path}`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${stripeSecretKey}`,
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    body: params
-  });
-
-  const body = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    const errorMessage = body?.error?.message || `Stripe request failed with ${response.status}`;
-    throw new Error(errorMessage);
-  }
-
-  return body as T;
-}
-
-async function requireBookingAdmin(req: Request, supabaseUrl: string, serviceRoleKey: string): Promise<AdminCheckResult> {
+async function requireBookingAdmin(
+  req: Request,
+  supabaseUrl: string,
+  serviceRoleKey: string,
+  bookingId: number
+): Promise<AdminCheckResult> {
   const authHeader = req.headers.get('authorization') || '';
 
   if (!authHeader.toLowerCase().startsWith('bearer ')) {
@@ -174,116 +265,37 @@ async function requireBookingAdmin(req: Request, supabaseUrl: string, serviceRol
     return { ok: false, response: jsonResponse({ error: 'Admin session is missing user id' }, 401) };
   }
 
-  const adminRes = await fetch(`${supabaseUrl}/rest/v1/admin_users?select=user_id&user_id=eq.${encodeURIComponent(userId)}&limit=1`, {
+  if (getJwtAssuranceLevel(authHeader) !== 'aal2') {
+    return {
+      ok: false,
+      response: jsonResponse({ error: 'Tvåstegsverifiering krävs för att skicka klartmejlet.', code: 'mfa_required' }, 403)
+    };
+  }
+
+  // Use the user's JWT for one RLS-protected read. private.is_booking_admin()
+  // enforces the allowlist, AAL2 and a currently verified factor before any
+  // service-role fetch, email or mutation is allowed below.
+  const publicApiKey = Deno.env.get('SUPABASE_ANON_KEY') || serviceRoleKey;
+  const adminRes = await fetch(`${supabaseUrl}/rest/v1/bookings?select=id&id=eq.${bookingId}&limit=1`, {
     headers: {
-      apikey: serviceRoleKey,
-      Authorization: `Bearer ${serviceRoleKey}`,
+      apikey: publicApiKey,
+      Authorization: authHeader,
       'Content-Type': 'application/json'
     }
   });
 
   if (!adminRes.ok) {
-    console.error('Could not verify admin user', await adminRes.text());
-    return { ok: false, response: jsonResponse({ error: 'Admin permission could not be verified' }, 500) };
+    console.error('Could not verify AAL2 booking admin', { status: adminRes.status });
+    return { ok: false, response: jsonResponse({ error: 'Admin permission could not be verified' }, 403) };
   }
 
   const [adminUser] = await adminRes.json();
 
   if (!adminUser) {
-    return { ok: false, response: jsonResponse({ error: 'Admin permission is required' }, 403) };
+    return { ok: false, response: jsonResponse({ error: 'Tvåstegsverifierad adminbehörighet krävs.' }, 403) };
   }
 
   return { ok: true };
-}
-
-function buildPaymentReturnUrl(siteUrl: string, booking: Record<string, unknown>, stripeStatus: string) {
-  const params = new URLSearchParams({
-    bookingId: String(booking.id || ''),
-    stripe: stripeStatus,
-    name: String(booking.customer_name || ''),
-    date: String(booking.booking_date || ''),
-    time: String(booking.booking_time || ''),
-    housingType: String(booking.housing_type || ''),
-    windowCount: String(booking.window_count || ''),
-    serviceScope: String(booking.service_scope || ''),
-    addons: String(booking.addons || ''),
-    transportType: String(booking.transport_type || 'Fastland'),
-    seaMiles: String(booking.sea_miles || ''),
-    coordinates: String(booking.coordinates || ''),
-    price: String(booking.price || '')
-  });
-
-  return `${siteUrl}/betalning.html?${params.toString()}`;
-}
-
-function hasUsableStripeCheckout(booking: Record<string, unknown>) {
-  const checkoutUrl = String(booking.stripe_payment_url || '');
-  const expiresAt = String(booking.stripe_checkout_expires_at || '');
-
-  if (!checkoutUrl || !expiresAt) {
-    return false;
-  }
-
-  const expiryTime = new Date(expiresAt).getTime();
-  return Number.isFinite(expiryTime) && expiryTime > Date.now() + 5 * 60 * 1000;
-}
-
-async function createStripeCheckout(
-  stripeSecretKey: string,
-  siteUrl: string,
-  booking: Record<string, unknown>
-): Promise<StripeCheckoutDetails | null> {
-  const unitAmount = parsePriceToOre(booking.price as number | string | undefined);
-
-  if (!unitAmount) {
-    return null;
-  }
-
-  const productParams = new URLSearchParams();
-  productParams.set('name', `Berga Fönsterputs - ${String(booking.booking_date || '')} ${String(booking.booking_time || '')}`);
-  productParams.set('default_price_data[currency]', 'sek');
-  productParams.set('default_price_data[unit_amount]', String(unitAmount));
-  productParams.set('metadata[booking_id]', String(booking.id || ''));
-  productParams.set('metadata[service]', 'Fönsterputs');
-
-  const product = await stripePost<StripeProduct>(stripeSecretKey, '/v1/products', productParams);
-  const defaultPrice = typeof product.default_price === 'string'
-    ? product.default_price
-    : product.default_price?.id;
-
-  if (!defaultPrice) {
-    throw new Error('Stripe product saknar default_price.');
-  }
-
-  const sessionParams = new URLSearchParams();
-  sessionParams.set('line_items[0][price]', defaultPrice);
-  sessionParams.set('line_items[0][quantity]', '1');
-  sessionParams.set('mode', 'payment');
-  sessionParams.set('success_url', buildPaymentReturnUrl(siteUrl, booking, 'success'));
-  sessionParams.set('cancel_url', buildPaymentReturnUrl(siteUrl, booking, 'cancelled'));
-  sessionParams.set('client_reference_id', String(booking.id || ''));
-  sessionParams.set('metadata[booking_id]', String(booking.id || ''));
-  sessionParams.set('metadata[booking_date]', String(booking.booking_date || ''));
-  sessionParams.set('metadata[booking_time]', String(booking.booking_time || ''));
-
-  if (isValidEmail(String(booking.email || ''))) {
-    sessionParams.set('customer_email', String(booking.email).trim());
-  }
-
-  const session = await stripePost<StripeCheckoutSession>(stripeSecretKey, '/v1/checkout/sessions', sessionParams);
-
-  if (!session.url) {
-    throw new Error('Stripe Checkout-session saknar betalningslänk.');
-  }
-
-  return {
-    productId: product.id,
-    priceId: defaultPrice,
-    sessionId: session.id,
-    paymentIntentId: typeof session.payment_intent === 'string' ? session.payment_intent : null,
-    url: session.url,
-    expiresAt: session.expires_at ? new Date(session.expires_at * 1000).toISOString() : null
-  };
 }
 
 Deno.serve(async (req) => {
@@ -296,10 +308,27 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const payload = (await req.json()) as CompleteBookingPayload;
+    const contentLength = Number(req.headers.get('content-length') || '0');
+    if (Number.isFinite(contentLength) && contentLength > 16_384) {
+      return jsonResponse({ error: 'För stor begäran.' }, 413);
+    }
 
-    if (!payload.bookingId) {
-      return jsonResponse({ error: 'Missing bookingId' }, 400);
+    let payload: CompleteBookingPayload;
+    try {
+      payload = await readJsonWithLimit<CompleteBookingPayload>(req, 16_384);
+    } catch (error) {
+      if (error instanceof RequestBodyTooLargeError) {
+        return jsonResponse({ error: 'För stor begäran.' }, 413);
+      }
+      if (error instanceof InvalidJsonBodyError) {
+        return jsonResponse({ error: 'Begäran innehåller inte giltig JSON.' }, 400);
+      }
+      throw error;
+    }
+    const bookingId = Number(payload.bookingId);
+
+    if (!Number.isSafeInteger(bookingId) || bookingId <= 0) {
+      return jsonResponse({ error: 'bookingId must be a positive integer' }, 400);
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
@@ -308,23 +337,18 @@ Deno.serve(async (req) => {
     const contactEmail = Deno.env.get('BOOKING_CONTACT_EMAIL') || 'info@bergafonsterputs.se';
     const fromEmail = Deno.env.get('BOOKING_FROM_EMAIL');
     const reviewUrl = Deno.env.get('BOOKING_REVIEW_URL') || 'https://g.page/r/CWdR_FURV7DOEBM/review';
-    const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY') || '';
     const siteUrl = (Deno.env.get('PUBLIC_SITE_URL') || 'https://bergafonsterputs.se').replace(/\/+$/, '');
 
     if (!supabaseUrl || !serviceRoleKey) {
       return jsonResponse({ error: 'Supabase secrets are missing' }, 500);
     }
 
-    const adminCheck = await requireBookingAdmin(req, supabaseUrl, serviceRoleKey);
+    const adminCheck = await requireBookingAdmin(req, supabaseUrl, serviceRoleKey, bookingId);
     if (!adminCheck.ok) {
       return adminCheck.response;
     }
 
-    if (!resendApiKey || !fromEmail) {
-      return jsonResponse({ error: 'Email secrets are missing' }, 500);
-    }
-
-    const bookingRes = await fetch(`${supabaseUrl}/rest/v1/bookings?id=eq.${payload.bookingId}&select=*`, {
+    const bookingRes = await fetch(`${supabaseUrl}/rest/v1/bookings?id=eq.${bookingId}&select=*`, {
       headers: {
         apikey: serviceRoleKey,
         Authorization: `Bearer ${serviceRoleKey}`,
@@ -344,80 +368,140 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'Booking not found' }, 404);
     }
 
+    if (!booking.completed_at) {
+      return jsonResponse({ error: 'Markera arbetet som utfört innan klartmejlet skickas.' }, 409);
+    }
+
     if (!isValidEmail(booking.email || '')) {
       return jsonResponse({ error: 'Customer email is invalid for completion mail' }, 400);
     }
 
-    const paymentMethod = payload.paymentMethod || booking.payment_method || 'Stripe Checkout';
-    const completedAt = new Date().toISOString();
-    const isAlreadyPaid = String(booking.payment_status || '').toLowerCase() === 'paid' || Boolean(booking.stripe_paid_at);
-    let stripePaymentUrl = '';
-    let stripeCheckout: StripeCheckoutDetails | null = null;
-
-    if (paymentMethod !== 'Faktura via e-post' && !isAlreadyPaid) {
-      if (hasUsableStripeCheckout(booking)) {
-        stripePaymentUrl = String(booking.stripe_payment_url || '');
-      } else {
-        if (!stripeSecretKey) {
-          return jsonResponse({ error: 'Stripe secret is missing' }, 500);
-        }
-
-        stripeCheckout = await createStripeCheckout(stripeSecretKey, siteUrl, booking);
-        if (!stripeCheckout) {
-          return jsonResponse({ error: 'Stripe-länk kunde inte skapas eftersom bokningen saknar ett fast pris. Välj Faktura via e-post eller sätt ett fast pris på bokningen först.' }, 400);
-        }
-
-        stripePaymentUrl = stripeCheckout?.url || '';
-      }
-    }
-
-    if (stripeCheckout) {
-      const stripeUpdateRes = await fetch(`${supabaseUrl}/rest/v1/bookings?id=eq.${payload.bookingId}`, {
-        method: 'PATCH',
-        headers: {
-          apikey: serviceRoleKey,
-          Authorization: `Bearer ${serviceRoleKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          payment_provider: 'stripe',
-          stripe_product_id: stripeCheckout.productId,
-          stripe_price_id: stripeCheckout.priceId,
-          stripe_checkout_session_id: stripeCheckout.sessionId,
-          stripe_payment_intent_id: stripeCheckout.paymentIntentId,
-          stripe_payment_url: stripeCheckout.url,
-          stripe_checkout_expires_at: stripeCheckout.expiresAt
-        })
+    if (booking.payment_email_sent) {
+      return jsonResponse({
+        success: true,
+        alreadySent: true,
+        bookingId: booking.id,
+        paymentMethod: booking.payment_method || 'Swish Företag',
+        swishAmount: booking.swish_amount ?? booking.price ?? null,
+        swishReference: booking.swish_reference || booking.invoice_reference || `BFP-${booking.id}`,
+        actualWorkHours: booking.actual_work_hours ?? null,
+        laborCostBeforeRut: booking.labor_cost_before_rut ?? null,
+        materialCost: booking.material_cost ?? null,
+        transportCost: booking.transport_cost ?? null,
+        rutDeduction: booking.rut_deduction ?? null,
+        priceBeforeRut: booking.price_before_rut ?? null,
+        rutRequestedAmount: booking.rut_requested_amount ?? booking.rut_deduction ?? null,
+        discountAmount: booking.discount_amount ?? 0,
+        rutDiscountReviewRequired: Number(booking.discount_amount || 0) > 0,
+        paymentAlreadyPaid: String(booking.payment_status || '').toLowerCase() === 'paid' || Boolean(booking.paid_at) || Boolean(booking.stripe_paid_at)
       });
-
-      if (!stripeUpdateRes.ok) {
-        const errorText = await stripeUpdateRes.text();
-        console.error('Could not save Stripe checkout details', errorText);
-        return jsonResponse({ error: 'Could not save Stripe checkout details', details: errorText }, 500);
-      }
     }
+
+    if (!resendApiKey || !fromEmail) {
+      return jsonResponse({ error: 'Email secrets are missing' }, 500);
+    }
+
+    const paymentMethod = 'Swish Företag';
+    const emailSentAt = new Date().toISOString();
+    const isAlreadyPaid = String(booking.payment_status || '').toLowerCase() === 'paid'
+      || Boolean(booking.paid_at)
+      || Boolean(booking.stripe_paid_at);
+    const storedSwishAmount = hasOwnValue(booking.swish_amount)
+      ? booking.swish_amount as number | string
+      : booking.price as number | string | undefined;
+    const swishAmountInput = hasOwnValue(payload.swishAmount) ? payload.swishAmount : storedSwishAmount;
+    const swishAmountOre = parseMoneyToOre(swishAmountInput);
+    const discountAmountOre = parseMoneyToOre(booking.discount_amount as number | string | undefined, true) ?? 0;
+
+    if (swishAmountOre === null || swishAmountOre > MAX_PAYMENT_AMOUNT_ORE) {
+      throw new ValidationError('Swishbeloppet måste vara ett fast belopp mellan 0,01 och 1 000 000 kr.');
+    }
+
+    if (discountAmountOre > MAX_PAYMENT_AMOUNT_ORE) {
+      throw new ValidationError('Bokningens sparade rabatt är ogiltig. Kontrollera bokningen innan mejlet skickas.');
+    }
+
+    const invoiceReference = normalizeInvoiceReference(
+      hasOwnValue(payload.invoiceReference)
+        ? payload.invoiceReference
+        : booking.invoice_reference || booking.swish_reference
+    );
+    const actualWorkHours = parseActualWorkHours(
+      hasOwnValue(payload.actualWorkHours) ? payload.actualWorkHours : booking.actual_work_hours as number | string | undefined
+    );
+    const suppliedMaterialCostOre = parseOptionalMoney(
+      hasOwnValue(payload.materialCost) ? payload.materialCost : booking.material_cost as number | string | undefined,
+      'Materialkostnaden'
+    );
+    const suppliedTransportCostOre = parseOptionalMoney(
+      hasOwnValue(payload.transportCost) ? payload.transportCost : booking.transport_cost as number | string | undefined,
+      'Transportkostnaden'
+    );
+    const suppliedLaborCostOre = parseOptionalMoney(
+      hasOwnValue(payload.laborCostBeforeRut) ? payload.laborCostBeforeRut : booking.labor_cost_before_rut as number | string | undefined,
+      'Arbetskostnaden'
+    );
+    const suppliedRutDeductionOre = parseOptionalMoney(
+      hasOwnValue(payload.rutDeduction) ? payload.rutDeduction : booking.rut_deduction as number | string | undefined,
+      'RUT-avdraget'
+    );
+    const materialCostOre = suppliedMaterialCostOre ?? DEFAULT_MATERIAL_COST_ORE;
+    const transportCostOre = suppliedTransportCostOre ?? getDefaultTransportCostOre(booking);
+    const hasRut = usesRutDeduction(booking);
+    let laborCostBeforeRutOre = suppliedLaborCostOre;
+    let rutDeductionOre = suppliedRutDeductionOre;
+
+    if (laborCostBeforeRutOre === null && rutDeductionOre === null) {
+      const customerLaborShareOre = swishAmountOre - materialCostOre - transportCostOre;
+      if (customerLaborShareOre < 0) {
+        throw new ValidationError('Swishbeloppet är lägre än material och transport. Kontrollera beloppen innan mejlet skickas.');
+      }
+
+      laborCostBeforeRutOre = hasRut ? customerLaborShareOre * 2 : customerLaborShareOre;
+      rutDeductionOre = hasRut ? customerLaborShareOre : 0;
+    } else if (laborCostBeforeRutOre === null) {
+      laborCostBeforeRutOre = swishAmountOre - materialCostOre - transportCostOre + (rutDeductionOre || 0);
+    } else if (rutDeductionOre === null) {
+      rutDeductionOre = laborCostBeforeRutOre + materialCostOre + transportCostOre - swishAmountOre;
+    }
+
+    if (laborCostBeforeRutOre === null || rutDeductionOre === null) {
+      throw new ValidationError('Det gick inte att räkna fram ett komplett betalningsunderlag.');
+    }
+
+    if (laborCostBeforeRutOre < 0 || rutDeductionOre < 0) {
+      throw new ValidationError('Arbetskostnad, RUT, material och transport ger inte ett giltigt Swishbelopp.');
+    }
+
+    if (!hasRut && rutDeductionOre > 0) {
+      throw new ValidationError('Bokningen är markerad utan RUT men ett RUT-avdrag har angetts.');
+    }
+
+    if (rutDeductionOre > Math.floor(laborCostBeforeRutOre / 2)) {
+      throw new ValidationError('RUT-avdraget får inte vara större än 50 procent av arbetskostnaden.');
+    }
+
+    const calculatedSwishAmountOre = laborCostBeforeRutOre + materialCostOre + transportCostOre - rutDeductionOre;
+    if (Math.abs(calculatedSwishAmountOre - swishAmountOre) > 100) {
+      throw new ValidationError(`Beloppen stämmer inte. Arbete efter rabatt + material + transport - RUT blir ${formatSekFromOre(calculatedSwishAmountOre)}, men Swishbeloppet är ${formatSekFromOre(swishAmountOre)}.`);
+    }
+
+    if (rutDeductionOre > 0 && actualWorkHours === null) {
+      throw new ValidationError('Ange faktisk arbetstid innan klartmejlet skickas. Den behövs för den manuella RUT-ansökan.');
+    }
+
+    const swishUrl = buildSwishUrl(swishAmountOre, invoiceReference);
 
     const logoUrl = `${siteUrl}/logga-fonsterputs-transparent.png`;
     const safeLogoUrl = escapeHtml(logoUrl);
     const safeContactEmail = escapeHtml(contactEmail);
-    const safeStripePaymentUrl = escapeHtml(stripePaymentUrl);
     const safeReviewUrl = escapeHtml(reviewUrl);
-    const materialFeeOre = 15000;
-    const priceAfterRutOre = parsePriceToOre(booking.price as number | string | undefined);
-    const discountAmountOre = parsePriceToOre(booking.discount_amount as number | string | undefined) || 0;
-    const originalPriceAfterRutOre = parsePriceToOre(booking.original_price as number | string | undefined)
-      ?? (priceAfterRutOre === null ? null : priceAfterRutOre + discountAmountOre);
-    const rutDeductionOre = originalPriceAfterRutOre === null
-      ? null
-      : Math.max(0, originalPriceAfterRutOre - materialFeeOre);
-    const priceBeforeRutOre = originalPriceAfterRutOre === null || rutDeductionOre === null
-      ? null
-      : originalPriceAfterRutOre + rutDeductionOre - discountAmountOre;
+    const safeSwishUrl = escapeHtml(swishUrl);
+    const safeInvoiceReference = escapeHtml(invoiceReference);
+    const priceBeforeRutOre = laborCostBeforeRutOre + materialCostOre + transportCostOre;
     const priceBeforeRutDisplay = formatSekFromOre(priceBeforeRutOre);
-    const rutDeductionDisplay = rutDeductionOre === null ? '' : `-${formatSekFromOre(rutDeductionOre)}`;
-    const priceAfterRutDisplay = priceAfterRutOre === null
-      ? escapeDisplayValue(booking.price)
-      : formatSekFromOre(priceAfterRutOre);
+    const rutDeductionDisplay = `-${formatSekFromOre(rutDeductionOre)}`;
+    const priceAfterRutDisplay = formatSekFromOre(swishAmountOre);
     const windowWorkItem = /^\d+$/.test(String(booking.window_count || '').trim())
       ? `${String(booking.window_count).trim()} glaspartier`
       : booking.window_count;
@@ -429,50 +513,63 @@ Deno.serve(async (req) => {
       buildDetailRow('Typ av bostad', booking.housing_type),
       ...(booking.transport_type ? [buildDetailRow('Transport', booking.transport_type)] : []),
       ...(booking.sea_miles ? [buildDetailRow('Sjömil', booking.sea_miles)] : []),
-      ...(booking.coordinates ? [buildDetailRow('Koordinater', booking.coordinates)] : [])
+      ...(booking.coordinates ? [buildDetailRow('Koordinater', booking.coordinates)] : []),
+      ...(actualWorkHours !== null ? [buildDetailRow('Faktisk arbetstid', `${actualWorkHours.toLocaleString('sv-SE')} timmar`)] : [])
     ].join('');
     const workRows = [
       windowWorkItem,
       ...splitAddons(booking.addons)
     ].map(buildWorkRow).join('');
-    const priceRows = priceBeforeRutDisplay && rutDeductionDisplay
-      ? `
+    const priceRows = `
         <tr>
-          <td style="padding: 9px 0; color: #5b6b7a; font-size: 14px;">Pris före RUT</td>
-          <td align="right" style="padding: 9px 0; color: #0f2638; font-size: 15px; font-weight: 700;">${priceBeforeRutDisplay}</td>
-        </tr>
-        <tr>
-          <td style="padding: 9px 0; color: #5b6b7a; font-size: 14px;">RUT-avdrag (50%)</td>
-          <td align="right" style="padding: 9px 0; color: #287a45; font-size: 15px; font-weight: 700;">${rutDeductionDisplay}</td>
+          <td style="padding: 9px 0; color: #5b6b7a; font-size: 14px;">Arbetskostnad före RUT${discountAmountOre > 0 ? ' (efter rabatt)' : ''}</td>
+          <td align="right" style="padding: 9px 0; color: #0f2638; font-size: 15px; font-weight: 700;">${formatSekFromOre(laborCostBeforeRutOre)}</td>
         </tr>
         <tr>
           <td style="padding: 9px 0; color: #5b6b7a; font-size: 14px;">Material (ej RUT)</td>
-          <td align="right" style="padding: 9px 0; color: #0f2638; font-size: 15px; font-weight: 700;">${formatSekFromOre(materialFeeOre)}</td>
+          <td align="right" style="padding: 9px 0; color: #0f2638; font-size: 15px; font-weight: 700;">${formatSekFromOre(materialCostOre)}</td>
         </tr>
-      `
-      : '';
-    const stripePaymentSection = paymentMethod === 'Faktura via e-post'
+        ${transportCostOre > 0 ? `<tr>
+          <td style="padding: 9px 0; color: #5b6b7a; font-size: 14px;">Transport (ej RUT)</td>
+          <td align="right" style="padding: 9px 0; color: #0f2638; font-size: 15px; font-weight: 700;">${formatSekFromOre(transportCostOre)}</td>
+        </tr>` : ''}
+        <tr>
+          <td style="padding: 9px 0; border-top: 1px solid #d7e7dd; color: #5b6b7a; font-size: 14px;">Summa före RUT</td>
+          <td align="right" style="padding: 9px 0; border-top: 1px solid #d7e7dd; color: #0f2638; font-size: 15px; font-weight: 700;">${priceBeforeRutDisplay}</td>
+        </tr>
+        ${rutDeductionOre > 0 ? `<tr>
+          <td style="padding: 9px 0; color: #5b6b7a; font-size: 14px;">RUT-avdrag (50%)</td>
+          <td align="right" style="padding: 9px 0; color: #287a45; font-size: 15px; font-weight: 700;">${rutDeductionDisplay}</td>
+        </tr>` : ''}
+        ${discountAmountOre > 0 ? `<tr>
+          <td colspan="2" style="padding: 10px 0 4px; color: #5b6b7a; font-size: 12px; line-height: 1.5;">Din rabatt på ${formatSekFromOre(discountAmountOre)} är redan inräknad i arbetskostnaden och RUT-beloppet ovan.</td>
+        </tr>` : ''}
+      `;
+    const swishPaymentSection = isAlreadyPaid
       ? `
-        <p style="margin: 0; color: #d8e1e8; font-size: 14px; line-height: 1.7;">Vi skickar faktura via e-post inom 3-7 dagar.</p>
+        <p style="margin: 0; color: #d8e1e8; font-size: 14px; line-height: 1.7;">Betalningen är redan registrerad som mottagen. Tack!</p>
       `
-      : isAlreadyPaid
-        ? `
-          <p style="margin: 0; color: #d8e1e8; font-size: 14px; line-height: 1.7;">Betalningen är redan mottagen via Stripe. Tack!</p>
-        `
-        : stripePaymentUrl
-          ? `
-            <p style="margin: 0 0 14px; color: #d8e1e8; font-size: 14px; line-height: 1.7;">Betala enkelt online med kort via Stripe.</p>
-            <table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse: collapse; width: 100%;">
-              <tr>
-                <td align="center" style="background: #ffffff; border-radius: 999px;">
-                  <a href="${safeStripePaymentUrl}" style="display: block; padding: 14px 20px; color: #0f2638; font-size: 13px; font-weight: 800; letter-spacing: .04em; text-decoration: none;">BETALA MED KORT</a>
-                </td>
-              </tr>
-            </table>
-          `
-          : `
-            <p style="margin: 0; color: #d8e1e8; font-size: 14px; line-height: 1.7;">Vi skickar en betalningslänk via Stripe när den är redo.</p>
-          `;
+      : `
+        <p style="margin: 0 0 14px; color: #d8e1e8; font-size: 14px; line-height: 1.7;">Swisha exakt <strong style="color: #ffffff;">${priceAfterRutDisplay}</strong> till företagsnumret nedan. Knappen öppnar Swish med belopp och referens ifyllt på mobilen.</p>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+          <tr>
+            <td align="center" style="background: #ffffff; border-radius: 999px;">
+              <a href="${safeSwishUrl}" style="display: block; padding: 14px 20px; color: #0f2638; font-size: 13px; font-weight: 800; letter-spacing: .04em; text-decoration: none;">SWISHA ${priceAfterRutDisplay}</a>
+            </td>
+          </tr>
+        </table>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top: 16px; border-collapse: collapse; background: #ffffff; border-radius: 12px;">
+          <tr>
+            <td style="padding: 16px; color: #0f2638; font-size: 14px; line-height: 1.8;">
+              <strong>Swish:</strong> ${SWISH_NUMBER_DISPLAY}<br>
+              <strong>Mottagare:</strong> ${SWISH_RECIPIENT_NAME}<br>
+              <strong>Belopp:</strong> ${priceAfterRutDisplay}<br>
+              <strong>Meddelande:</strong> ${safeInvoiceReference}
+            </td>
+          </tr>
+        </table>
+        <p style="margin: 14px 0 0; color: #d8e1e8; font-size: 12px; line-height: 1.6;">Kontrollera alltid att <strong style="color: #ffffff;">${SWISH_RECIPIENT_NAME}</strong> visas som mottagare innan du godkänner betalningen. Om knappen inte fungerar kan du skriva in uppgifterna ovan manuellt.</p>
+      `;
     const reviewSection = reviewUrl
       ? `
         <tr>
@@ -533,17 +630,10 @@ Deno.serve(async (req) => {
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
                       <tr>
                         <td style="padding: 22px; background: #0f2638; border-radius: 14px;">
-                          <h2 style="margin: 0 0 10px; color: #ffffff; font-size: 20px;">Betala enkelt</h2>
-                          <p style="margin: 0 0 16px; color: #d8e1e8; font-size: 14px; line-height: 1.7;">Fönsterputsningen är klar. Här betalar du smidigt med kort eller Swish.</p>
-                          ${stripePaymentSection}
-                          <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top: 14px; border-collapse: collapse;">
-                            <tr>
-                              <td style="padding: 8px 12px; background: #ffffff; color: #0f2638; font-size: 13px; font-weight: 700; border-radius: 999px;">Swish 0733-881216</td>
-                              <td style="width: 8px;"></td>
-                              <td style="padding: 8px 12px; background: #ffffff; color: #0f2638; font-size: 13px; font-weight: 700; border-radius: 999px;">Meddelande: Bokning ${escapeHtml(String(booking.id || ''))}</td>
-                            </tr>
-                          </table>
-                          <p style="margin: 14px 0 0; color: #d8e1e8; font-size: 13px; line-height: 1.6;">Betalning sker gärna inom 3 dagar.</p>
+                          <h2 style="margin: 0 0 10px; color: #ffffff; font-size: 20px;">Betala med Swish</h2>
+                          <p style="margin: 0 0 16px; color: #d8e1e8; font-size: 14px; line-height: 1.7;">Fönsterputsningen är klar och betalningsuppgifterna finns direkt i detta mejl.</p>
+                          ${swishPaymentSection}
+                          ${!isAlreadyPaid ? '<p style="margin: 14px 0 0; color: #d8e1e8; font-size: 13px; line-height: 1.6;">Betala enligt fakturans villkor.</p>' : ''}
                         </td>
                       </tr>
                     </table>
@@ -559,7 +649,7 @@ Deno.serve(async (req) => {
                           ${priceAfterRutDisplay ? `
                           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top: 12px; border-collapse: collapse; background: #247a43; border-radius: 12px;">
                             <tr>
-                              <td style="padding: 18px 18px; color: #ffffff; font-size: 15px; font-weight: 700;">Att betala</td>
+                              <td style="padding: 18px 18px; color: #ffffff; font-size: 15px; font-weight: 700;">${isAlreadyPaid ? 'Betalt' : 'Att betala'}</td>
                               <td align="right" style="padding: 18px 18px; color: #ffffff; font-size: 26px; line-height: 1.1; font-weight: 800;">${priceAfterRutDisplay}</td>
                             </tr>
                           </table>
@@ -613,18 +703,46 @@ Deno.serve(async (req) => {
         </table>
       </div>
     `;
+    const emailText = [
+      `Hej ${String(booking.customer_name || '').trim()},`,
+      '',
+      'Fönsterputsningen är klar. Tack för att du valde Berga Fönsterputs!',
+      '',
+      ...(isAlreadyPaid ? [
+        'Betalningen är redan registrerad som mottagen. Tack!'
+      ] : [
+        `Swisha exakt ${formatSekFromOre(swishAmountOre)} till ${SWISH_NUMBER_DISPLAY}.`,
+        `Mottagare: ${SWISH_RECIPIENT_NAME}`,
+        `Meddelande: ${invoiceReference}`,
+        `Öppna Swish: ${swishUrl}`,
+        'Kontrollera att Zac Hallgren visas som mottagare innan du godkänner betalningen.',
+        'Betala enligt fakturans villkor.'
+      ]),
+      '',
+      `Arbetskostnad före RUT${discountAmountOre > 0 ? ' (efter rabatt)' : ''}: ${formatSekFromOre(laborCostBeforeRutOre)}`,
+      ...(rutDeductionOre > 0 ? [`RUT-avdrag: -${formatSekFromOre(rutDeductionOre)}`] : []),
+      `Material: ${formatSekFromOre(materialCostOre)}`,
+      ...(transportCostOre > 0 ? [`Transport: ${formatSekFromOre(transportCostOre)}`] : []),
+      ...(discountAmountOre > 0 ? [`Rabatten på ${formatSekFromOre(discountAmountOre)} är redan inräknad i arbetskostnaden och RUT-beloppet.`] : []),
+      `${isAlreadyPaid ? 'Betalt' : 'Att betala'}: ${formatSekFromOre(swishAmountOre)}`,
+      '',
+      `Frågor? Svara på mejlet eller kontakta ${contactEmail}.`
+    ].join('\n');
+    const idempotencyReference = invoiceReference.replace(/[^A-Za-z0-9-]/g, '-').slice(0, 35);
 
     const emailRes = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${resendApiKey}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Idempotency-Key': `complete-booking-swish-${booking.id}-${swishAmountOre}-${idempotencyReference}`
       },
       body: JSON.stringify({
         from: fromEmail,
         to: [booking.email.trim()],
         subject: `Fönsterputsningen är klar - ${booking.customer_name || 'Berga Fönsterputs'}`,
         html: emailHtml,
+        text: emailText,
         reply_to: contactEmail
       })
     });
@@ -635,7 +753,7 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'Completion email failed', details: errorText }, 502);
     }
 
-    const completionUpdateRes = await fetch(`${supabaseUrl}/rest/v1/bookings?id=eq.${payload.bookingId}`, {
+    const completionUpdateRes = await fetch(`${supabaseUrl}/rest/v1/bookings?id=eq.${bookingId}`, {
       method: 'PATCH',
       headers: {
         apikey: serviceRoleKey,
@@ -643,29 +761,53 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        status: 'completed',
         payment_method: paymentMethod,
-        completed_at: completedAt,
+        payment_provider: 'swish',
         payment_email_sent: true,
-        payment_email_sent_at: completedAt
+        payment_email_sent_at: emailSentAt,
+        swish_amount: swishAmountOre / 100,
+        invoice_reference: invoiceReference,
+        actual_work_hours: actualWorkHours,
+        labor_cost_before_rut: laborCostBeforeRutOre / 100,
+        material_cost: materialCostOre / 100,
+        transport_cost: transportCostOre / 100,
+        rut_deduction: rutDeductionOre / 100,
+        price_before_rut: priceBeforeRutOre / 100,
+        rut_requested_amount: rutDeductionOre / 100,
+        swish_reference: invoiceReference,
+        swish_sent_at: emailSentAt
       })
     });
 
     if (!completionUpdateRes.ok) {
       const errorText = await completionUpdateRes.text();
-      console.error('Completion email sent, but booking could not be marked completed', errorText);
-      return jsonResponse({ error: 'Completion email sent, but booking could not be marked completed', details: errorText }, 500);
+      console.error('Completion email sent, but payment details could not be saved', errorText);
+      return jsonResponse({ error: 'Klartmejlet skickades, men betalningsuppgifterna kunde inte sparas. Skicka inte mejlet igen innan bokningen har kontrollerats.', details: errorText }, 500);
     }
 
     return jsonResponse({
       success: true,
+      alreadySent: false,
       bookingId: booking.id,
       paymentMethod,
-      stripePaymentUrl: stripePaymentUrl || null,
+      swishNumber: SWISH_NUMBER_DISPLAY,
+      swishRecipientName: SWISH_RECIPIENT_NAME,
+      swishAmount: swishAmountOre / 100,
+      swishReference: invoiceReference,
+      actualWorkHours,
+      laborCostBeforeRut: laborCostBeforeRutOre / 100,
+      materialCost: materialCostOre / 100,
+      transportCost: transportCostOre / 100,
+      rutDeduction: rutDeductionOre / 100,
+      priceBeforeRut: priceBeforeRutOre / 100,
+      rutRequestedAmount: rutDeductionOre / 100,
+      discountAmount: discountAmountOre / 100,
+      rutDiscountReviewRequired: discountAmountOre > 0,
       paymentAlreadyPaid: isAlreadyPaid
     });
   } catch (error) {
     console.error('Unhandled complete-booking error', error);
-    return jsonResponse({ error: error instanceof Error ? error.message : 'Unknown error' }, 500);
+    const status = error instanceof ValidationError ? 400 : 500;
+    return jsonResponse({ error: error instanceof Error ? error.message : 'Unknown error' }, status);
   }
 });

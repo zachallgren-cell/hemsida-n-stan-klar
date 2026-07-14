@@ -292,6 +292,32 @@
       white-space: nowrap;
     }
 
+    .price-breakdown {
+      grid-column: 1 / -1;
+      display: grid;
+      gap: 8px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(177, 213, 230, 0.9);
+    }
+
+    .price-breakdown-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .price-breakdown-row strong {
+      color: var(--primary-dark);
+      white-space: nowrap;
+    }
+
+    .price-breakdown-row.is-deduction strong {
+      color: var(--success);
+    }
+
     form {
       display: grid;
       gap: 16px;
@@ -1253,11 +1279,11 @@
                 </div>
                 <div class="field-help">
                   <span class="field-help-trigger" tabindex="0">Vad händer utan RUT?</span>
-                  <div class="field-help-tooltip">Priset på hemsidan visas efter RUT. Om du vill boka utan RUT-avdrag kontaktar du oss, så stämmer vi av priset innan bokning.</div>
+                  <div class="field-help-tooltip">Du kan boka som vanligt. Då visas och sparas hela arbetskostnaden utan RUT-avdrag, medan material och eventuell transport fortfarande ligger separat.</div>
                 </div>
               </div>
             </div>
-            <p class="field-note">Har du redan använt ditt RUT-avdrag, eller vill boka utan RUT, kontakta oss innan eller efter bokningen så hjälper vi dig.</p>
+            <p class="field-note">Priset räknas om direkt efter ditt val. Endast arbetskostnaden omfattas av RUT; material och eventuell båttransport gör det inte.</p>
           </div>
 
           <div class="form-row">
@@ -1335,11 +1361,11 @@
 
           <div class="consent-box">
             <input type="checkbox" id="consent" required>
-            <label for="consent">Jag godkänner att mina personuppgifter används för bokningen och att eventuell RUT-hantering sker via säkert formulär.</label>
+            <label for="consent">Jag har läst <a href="integritet.html" target="_blank" rel="noopener noreferrer">integritetsinformationen</a> och bekräftar att uppgifterna får användas för bokningen. Eventuellt personnummer lämnas separat i det säkra RUT-formuläret.</label>
           </div>
 
           <button type="submit" class="submit-btn">Skicka bokning</button>
-          <p class="booking-note">Bokningen sparas som väntande först. På nästa sida får du en bekräftelse. Betalningslänken skickas i klartmejlet när jobbet är utfört.</p>
+          <p class="booking-note">Bokningen sparas som väntande först. På nästa sida får du en bekräftelse. Swishuppgifterna skickas i klartmejlet när jobbet är utfört.</p>
           <div class="status-message" id="bookingStatus"></div>
         </form>
 
@@ -1351,7 +1377,29 @@
             </div>
             <div class="live-price-value">
               <strong id="livePriceValue">949 kr</strong>
-              <span>efter RUT-avdrag</span>
+              <span id="livePriceLabel">med RUT-avdrag</span>
+            </div>
+            <div class="price-breakdown" aria-live="polite">
+              <div class="price-breakdown-row">
+                <span id="laborCostLabel">Arbetskostnad före RUT</span>
+                <strong id="laborCostValue">1 598 kr</strong>
+              </div>
+              <div class="price-breakdown-row">
+                <span>Material (ej RUT)</span>
+                <strong id="materialCostValue">150 kr</strong>
+              </div>
+              <div class="price-breakdown-row">
+                <span>Transport/resa (ej RUT)</span>
+                <strong id="transportCostValue">0 kr</strong>
+              </div>
+              <div class="price-breakdown-row is-deduction">
+                <span>RUT-avdrag</span>
+                <strong id="rutDeductionValue">−799 kr</strong>
+              </div>
+              <div class="price-breakdown-row is-deduction" id="discountBreakdownRow" hidden>
+                <span>Din rabatt på arbetsandelen (inräknad)</span>
+                <strong id="discountBreakdownValue">−0 kr</strong>
+              </div>
             </div>
             <div class="booking-progress-meter" aria-live="polite">
               <div class="booking-progress-copy">
@@ -1365,12 +1413,13 @@
           </div>
 
           <div class="discount-card">
-            <strong>Har du en rabattkod?</strong>
+            <strong>Har du en rabattkod på arbetet?</strong>
             <div class="discount-row">
               <input type="text" id="discountCode" placeholder="Ange rabattkod" maxlength="32" autocomplete="off" aria-label="Rabattkod">
               <button type="button" class="btn" id="applyDiscountButton">Använd</button>
             </div>
             <p class="discount-status" id="discountCodeStatus" aria-live="polite"></p>
+            <p class="field-note">Rabatten gäller din arbetsandel. Material och eventuell transport påverkas inte.</p>
           </div>
 
           <div class="booking-support-card">
@@ -1378,7 +1427,7 @@
             <ul>
               <li>Du ser priset innan du skickar.</li>
               <li>RUT-uppgifter tas i säkert formulär efteråt.</li>
-              <li>Betalning sker tryggt via Stripe när jobbet är klart.</li>
+              <li>Swishuppgifter skickas i klartmejlet när jobbet är klart.</li>
             </ul>
           </div>
 
@@ -1397,7 +1446,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr><td>Startavgift utvändig puts</td><td>949 kr inkl. 15 fönster</td></tr>
+                  <tr><td>Startavgift utvändig puts</td><td>949 kr inkl. 15 fönster och 150 kr material</td></tr>
                   <tr><td>Två våningar</td><td>+200 kr</td></tr>
                 </tbody>
               </table>
@@ -1434,6 +1483,7 @@
         <a href="om-oss.html">Om oss</a>
         <a href="index.html#bokning">Boka tid</a>
         <a href="index.html#kontakt">Kontakt</a>
+        <a href="integritet.html">Integritet</a>
       </div>
       <p>© 2026 Berga Fönsterputs. Alla rättigheter förbehållna.</p>
     </div>
@@ -1460,7 +1510,15 @@
     const seaMilesInput = document.getElementById('seaMiles');
     const coordinatesInput = document.getElementById('coordinates');
     const livePriceValue = document.getElementById('livePriceValue');
+    const livePriceLabel = document.getElementById('livePriceLabel');
     const livePriceText = document.getElementById('livePriceText');
+    const laborCostLabel = document.getElementById('laborCostLabel');
+    const laborCostValue = document.getElementById('laborCostValue');
+    const materialCostValue = document.getElementById('materialCostValue');
+    const transportCostValue = document.getElementById('transportCostValue');
+    const rutDeductionValue = document.getElementById('rutDeductionValue');
+    const discountBreakdownRow = document.getElementById('discountBreakdownRow');
+    const discountBreakdownValue = document.getElementById('discountBreakdownValue');
     const discountCodeInput = document.getElementById('discountCode');
     const applyDiscountButton = document.getElementById('applyDiscountButton');
     const discountCodeStatus = document.getElementById('discountCodeStatus');
@@ -1584,9 +1642,9 @@
     const ISLAND_START_PRICE = 799;
     const ISLAND_PRICE_PER_SEA_MILE = 125;
 
-    function getBasePrice(housingTypeLabel, windowCount) {
+    function getBaseLaborPriceAfterRut(housingTypeLabel) {
       const floorAddon = housingTypeLabel === 'Två våningar' ? TWO_FLOOR_ADDON : 0;
-      return BASE_LABOR_PRICE_AFTER_RUT + MATERIAL_FEE + floorAddon;
+      return BASE_LABOR_PRICE_AFTER_RUT + floorAddon;
     }
 
     function getInteriorAddon(housingTypeLabel, windowCount) {
@@ -1621,27 +1679,48 @@
       const extraRegularWindowCount = Math.max(0, regularWindowCount - includedRegularWindowCount);
       const extraMuntinsCount = Math.max(0, muntinsCount - includedMuntinsCount);
       const serviceScopeValue = document.getElementById('serviceScope')?.value || '';
-      const basePrice = getBasePrice(housingTypeLabel, windowCount);
-      const windowPrice = (extraRegularWindowCount * EXTRA_REGULAR_WINDOW_PRICE) + (extraMuntinsCount * EXTRA_MUNTINS_WINDOW_PRICE);
-      const interiorAddon = serviceScopeValue === 'Invändig + utvändig'
+      const baseLaborAfterRut = getBaseLaborPriceAfterRut(housingTypeLabel);
+      const windowLaborAfterRut = (extraRegularWindowCount * EXTRA_REGULAR_WINDOW_PRICE) + (extraMuntinsCount * EXTRA_MUNTINS_WINDOW_PRICE);
+      const interiorLaborAfterRut = serviceScopeValue === 'Invändig + utvändig'
         ? getInteriorAddon(housingTypeLabel, windowCount)
         : 0;
       const addons = getSelectedAddons();
-      const addonsPrice = addons.reduce((sum, addon) => sum + addon.price, 0);
+      const addonsLaborAfterRut = addons.reduce((sum, addon) => sum + addon.price, 0);
       const transportType = transportTypeInput?.value || '';
       const seaMilesAddon = transportType === 'Båttransport behövs'
         ? getSeaMilesAddon()
         : { label: '', price: 0, isQuote: false };
-      const priceAfterRut = seaMilesAddon.isQuote ? null : basePrice + windowPrice + interiorAddon + addonsPrice + seaMilesAddon.price;
-      const rutEligiblePriceAfterRut = priceAfterRut === null ? null : Math.max(0, priceAfterRut - MATERIAL_FEE);
-      const priceBeforeRut = priceAfterRut === null ? null : priceAfterRut + rutEligiblePriceAfterRut;
+      const rutChoiceValue = rutChoiceInput?.value || '';
+      const rutChoiceSelected = Boolean(rutChoiceValue);
+      const usesRut = /^Ja\b/i.test(rutChoiceValue.trim());
+      const rutChoiceUncertain = rutChoiceValue.includes('osäker');
+      const laborCostAfterRut = baseLaborAfterRut + windowLaborAfterRut + interiorLaborAfterRut + addonsLaborAfterRut;
+      const laborCostBeforeRut = laborCostAfterRut * 2;
+      const materialCost = MATERIAL_FEE;
+      const transportCost = seaMilesAddon.price;
+      const rutDeduction = usesRut ? laborCostAfterRut : 0;
+      const priceBeforeRut = seaMilesAddon.isQuote
+        ? null
+        : laborCostBeforeRut + materialCost + transportCost;
+      const customerPriceBeforeDiscount = priceBeforeRut === null
+        ? null
+        : priceBeforeRut - rutDeduction;
 
       return {
-        total: priceAfterRut,
+        total: customerPriceBeforeDiscount,
+        customerPriceBeforeDiscount,
         priceBeforeRut,
-        basePrice,
-        windowPrice,
-        interiorAddon,
+        laborCostAfterRut,
+        laborCostBeforeRut,
+        materialCost,
+        transportCost,
+        rutDeduction,
+        usesRut,
+        rutChoiceSelected,
+        rutChoiceUncertain,
+        baseLaborAfterRut,
+        windowLaborAfterRut,
+        interiorLaborAfterRut,
         muntinsCount,
         regularWindowCount,
         includedRegularWindowCount,
@@ -1650,7 +1729,7 @@
         extraMuntinsCount,
         extraRegularWindowCount,
         addons,
-        addonsPrice,
+        addonsLaborAfterRut,
         transportType,
         seaMilesAddon,
         isQuote: seaMilesAddon.isQuote,
@@ -1668,67 +1747,115 @@
       return Math.min(Math.max(amount, 0), Math.max(originalPrice - 1, 0));
     }
 
-    function getFinalPrice(originalPrice) {
-      return originalPrice - getDiscountAmount(originalPrice);
+    function getCustomerLaborPriceBeforeDiscount(estimate) {
+      return estimate.usesRut ? estimate.laborCostAfterRut : estimate.laborCostBeforeRut;
+    }
+
+    function calculateDiscountedPrice(estimate) {
+      const customerLaborBeforeDiscount = getCustomerLaborPriceBeforeDiscount(estimate);
+      const discountAmount = getDiscountAmount(customerLaborBeforeDiscount);
+      const customerLaborAfterDiscount = customerLaborBeforeDiscount - discountAmount;
+      const laborCostBeforeRut = estimate.usesRut
+        ? customerLaborAfterDiscount * 2
+        : customerLaborAfterDiscount;
+      const rutDeduction = estimate.usesRut ? customerLaborAfterDiscount : 0;
+      const priceBeforeRut = laborCostBeforeRut + estimate.materialCost + estimate.transportCost;
+      const customerPrice = customerLaborAfterDiscount + estimate.materialCost + estimate.transportCost;
+
+      return {
+        customerLaborBeforeDiscount,
+        customerLaborAfterDiscount,
+        discountAmount,
+        laborCostBeforeRut,
+        rutDeduction,
+        priceBeforeRut,
+        customerPrice
+      };
+    }
+
+    function formatSek(value) {
+      return `${Math.round(value).toLocaleString('sv-SE')} kr`;
+    }
+
+    function renderPriceBreakdown(estimate, discountedPrice) {
+      laborCostLabel.textContent = discountedPrice.discountAmount > 0
+        ? 'Arbetskostnad efter rabatt, före RUT'
+        : 'Arbetskostnad före RUT';
+      laborCostValue.textContent = formatSek(discountedPrice.laborCostBeforeRut);
+      materialCostValue.textContent = formatSek(estimate.materialCost);
+      transportCostValue.textContent = formatSek(estimate.transportCost);
+      rutDeductionValue.textContent = discountedPrice.rutDeduction > 0
+        ? `−${formatSek(discountedPrice.rutDeduction)}`
+        : formatSek(0);
+      discountBreakdownRow.hidden = discountedPrice.discountAmount <= 0;
+      discountBreakdownValue.textContent = `−${formatSek(discountedPrice.discountAmount)}`;
     }
 
     function updateLivePrice() {
       const estimate = calculateEstimatedPrice();
-
-      if ((rutChoiceInput?.value || '').includes('Nej')) {
-        livePriceValue.textContent = 'Kontakta oss';
-        livePriceText.textContent = 'Priset på hemsidan visas efter RUT. Vill du boka utan RUT-avdrag kontaktar du oss så stämmer vi av upplägget.';
-        return;
+      const discountedPrice = calculateDiscountedPrice(estimate);
+      renderPriceBreakdown(estimate, discountedPrice);
+      if (appliedDiscount) {
+        discountCodeStatus.textContent = `Rabattkod använd på arbetsandelen: −${discountedPrice.discountAmount} kr.`;
+        discountCodeStatus.className = 'discount-status success';
       }
 
       if (!estimate.housingTypeLabel) {
         livePriceValue.textContent = '949 kr';
-        livePriceText.textContent = 'Välj hustyp, antal fönster och putsning så uppdateras priset direkt.';
+        livePriceLabel.textContent = 'frånpris med RUT-avdrag';
+        livePriceText.textContent = 'Välj RUT, hustyp, antal fönster och putsning så uppdateras priset direkt.';
         return;
       }
 
       if (!estimate.windowCount) {
-        livePriceValue.textContent = `${getBasePrice(estimate.housingTypeLabel, 0)} kr`;
+        livePriceValue.textContent = formatSek(discountedPrice.customerPrice);
+        livePriceLabel.textContent = estimate.usesRut ? 'preliminärt med RUT-avdrag' : 'preliminärt utan RUT-avdrag';
         livePriceText.textContent = 'Fyll i antal fönster för att få rätt prisnivå.';
         return;
       }
 
       if (estimate.transportType === 'Båttransport behövs' && !estimate.seaMilesAddon.label) {
-        livePriceValue.textContent = `${estimate.basePrice + estimate.windowPrice + estimate.interiorAddon + estimate.addonsPrice} kr`;
+        livePriceValue.textContent = formatSek(discountedPrice.customerPrice);
+        livePriceLabel.textContent = estimate.usesRut ? 'preliminärt med RUT-avdrag' : 'preliminärt utan RUT-avdrag';
         livePriceText.textContent = 'Välj antal sjömil så räknar vi in startavgift och sjömilspris direkt.';
         return;
       }
 
-      const discountAmount = getDiscountAmount(estimate.total);
-      const finalPrice = getFinalPrice(estimate.total);
-      livePriceValue.textContent = `${finalPrice} kr`;
+      livePriceValue.textContent = formatSek(discountedPrice.customerPrice);
+      livePriceLabel.textContent = estimate.usesRut
+        ? 'att betala med RUT-avdrag'
+        : estimate.rutChoiceUncertain ? 'preliminärt utan RUT-avdrag' : 'att betala utan RUT-avdrag';
       const parts = [
-        `startavgift ${estimate.basePrice} kr`,
+        `arbetskostnad före RUT ${discountedPrice.laborCostBeforeRut} kr`,
+        `material ${estimate.materialCost} kr`,
         `${INCLUDED_WINDOWS} fönster ingår`
       ];
 
       if (estimate.extraWindowCount > 0) {
-        parts.push(`${estimate.extraRegularWindowCount} extra utan spröjs ${estimate.extraRegularWindowCount * EXTRA_REGULAR_WINDOW_PRICE} kr`);
-        parts.push(`${estimate.extraMuntinsCount} extra med spröjs ${estimate.extraMuntinsCount * EXTRA_MUNTINS_WINDOW_PRICE} kr`);
+        parts.push(`${estimate.extraRegularWindowCount} extra utan spröjs`);
+        parts.push(`${estimate.extraMuntinsCount} extra med spröjs`);
       }
 
-      if (estimate.interiorAddon > 0) {
-        parts.push(`invändigt ${estimate.interiorAddon} kr`);
+      if (estimate.interiorLaborAfterRut > 0) {
+        parts.push('invändig puts');
       }
 
       estimate.addons.forEach((addon) => {
         parts.push(`${addon.label.toLowerCase()} ${addon.price} kr`);
       });
 
-      if (estimate.seaMilesAddon.price > 0) {
-        parts.push(`skärgård ${estimate.seaMilesAddon.price} kr`);
+      if (estimate.transportCost > 0) {
+        parts.push(`transport ${estimate.transportCost} kr`);
       }
 
-      if (discountAmount > 0) {
-        parts.push(`rabattkod ${appliedDiscount.code} -${discountAmount} kr`);
+      if (discountedPrice.discountAmount > 0) {
+        parts.push(`rabattkod ${appliedDiscount.code} -${discountedPrice.discountAmount} kr på din arbetsandel`);
       }
 
-      livePriceText.textContent = `${parts.join(' + ')}. Pris efter RUT${discountAmount > 0 ? ` (ordinarie ${estimate.total} kr)` : ''}.`;
+      const rutText = estimate.usesRut
+        ? `RUT-avdrag −${discountedPrice.rutDeduction} kr`
+        : 'inget RUT-avdrag';
+      livePriceText.textContent = `${parts.join(' + ')}. ${rutText}${discountedPrice.discountAmount > 0 ? `, ordinarie kundpris ${estimate.customerPriceBeforeDiscount} kr` : ''}.`;
     }
 
     async function applyDiscountCode() {
@@ -1745,8 +1872,14 @@
         return;
       }
 
-      if (!estimate.housingTypeLabel || !estimate.windowCount || !estimate.serviceScopeValue) {
-        discountCodeStatus.textContent = 'Välj bostad, antal fönster och putsning först.';
+      if (!estimate.rutChoiceSelected || !estimate.housingTypeLabel || !estimate.windowCount || !estimate.serviceScopeValue || !estimate.transportType) {
+        discountCodeStatus.textContent = 'Välj RUT, bostad, antal fönster, putsning och transport först.';
+        discountCodeStatus.classList.add('error');
+        return;
+      }
+
+      if (estimate.transportType === 'Båttransport behövs' && !estimate.seaMilesAddon.label) {
+        discountCodeStatus.textContent = 'Ange antal sjömil innan du använder rabattkoden.';
         discountCodeStatus.classList.add('error');
         return;
       }
@@ -1755,10 +1888,11 @@
       applyDiscountButton.textContent = 'Kontrollerar...';
 
       try {
+        const discountBase = getCustomerLaborPriceBeforeDiscount(estimate);
         const response = await fetch(VALIDATE_DISCOUNT_URL, {
           method: 'POST',
           headers: getHeaders(),
-          body: JSON.stringify({ code, originalPrice: estimate.total })
+          body: JSON.stringify({ code, originalPrice: discountBase })
         });
         const body = await response.json().catch(() => ({}));
 
@@ -1771,7 +1905,7 @@
           discountType: body.discountType,
           discountValue: Number(body.discountValue)
         };
-        discountCodeStatus.textContent = `Rabattkod använd: −${getDiscountAmount(estimate.total)} kr.`;
+        discountCodeStatus.textContent = `Rabattkod använd på arbetsandelen: −${getDiscountAmount(discountBase)} kr.`;
         discountCodeStatus.classList.add('success');
         updateLivePrice();
       } catch (error) {
@@ -1975,13 +2109,14 @@
         }
       }
 
-      if ((rutChoiceInput.value || '').includes('Nej')) {
-        setStatus('Kontakta oss för bokning utan RUT-avdrag, så räknar vi fram rätt pris innan du går vidare.');
+      if (!rutChoiceInput.value) {
+        setStatus('Välj om du vill använda RUT-avdrag innan du bokar.');
         return;
       }
 
       const estimate = calculateEstimatedPrice();
-      const discountAmount = getDiscountAmount(estimate.total);
+      const discountedPrice = calculateDiscountedPrice(estimate);
+      const discountAmount = discountedPrice.discountAmount;
       const booking = {
         name: document.getElementById('name').value.trim(),
         email: document.getElementById('email').value.trim(),
@@ -1998,7 +2133,7 @@
         time: timeInput.value,
         location: document.getElementById('location').value.trim(),
         message: document.getElementById('message').value.trim(),
-        price: estimate.isQuote ? 'Pris enligt offert' : getFinalPrice(estimate.total),
+        price: estimate.isQuote ? 'Pris enligt offert' : discountedPrice.customerPrice,
         discountCode: appliedDiscount?.code || '',
         consentAccepted: document.getElementById('consent').checked
       };
@@ -2011,11 +2146,14 @@
         `Fönster med spröjs: ${estimate.muntinsCount}`,
         `Putsning: ${booking.serviceScope}`,
         `Transport: ${booking.transportType}`,
-        `Prisrad: startavgift ${estimate.basePrice} kr, extra fönster ${estimate.windowPrice} kr, invändigt ${estimate.interiorAddon} kr, skärgård ${estimate.seaMilesAddon.price} kr`,
-        `Ordinarie pris efter RUT: ${estimate.total} kr`,
+        `Arbetskostnad före RUT efter rabatt: ${discountedPrice.laborCostBeforeRut} kr`,
+        `Material (ej RUT): ${estimate.materialCost} kr`,
+        `Transport/resa (ej RUT): ${estimate.transportCost} kr`,
+        `Pris före RUT efter rabatt: ${discountedPrice.priceBeforeRut} kr`,
+        `RUT-avdrag: -${discountedPrice.rutDeduction} kr`,
+        `Ordinarie kundpris före rabatt: ${estimate.customerPriceBeforeDiscount} kr`,
         ...(booking.discountCode ? [`Rabattkod: ${booking.discountCode}`, `Rabatt: -${discountAmount} kr`] : []),
-        `Pris efter RUT och rabatt: ${booking.price} kr`,
-        `Pris före RUT: ${estimate.priceBeforeRut} kr`,
+        `Kundpris att betala: ${booking.price} kr`,
         `Önskat datum / helg: ${isHoliday(booking.date) ? `${formatDateForDisplay(booking.date)} (helg/röd dag)` : formatDateForDisplay(booking.date)}`
       ];
 
@@ -2035,7 +2173,8 @@
         setStatus('Sparar bokningen...', 'success');
         const createdBooking = await createBooking(booking);
 
-        const params = new URLSearchParams({
+        const confirmationSummary = {
+          bookingId: createdBooking?.bookingId || null,
           name: booking.name,
           date: booking.date,
           time: booking.time,
@@ -2049,14 +2188,28 @@
           price: String(createdBooking?.price ?? booking.price),
           discountCode: createdBooking?.discountCode || booking.discountCode,
           discountAmount: String(createdBooking?.discountAmount || 0),
-          originalPrice: String(createdBooking?.originalPrice ?? estimate.total)
-        });
+          originalPrice: String(createdBooking?.originalPrice ?? estimate.customerPriceBeforeDiscount),
+          laborCostBeforeRut: String(createdBooking?.laborCostBeforeRut ?? discountedPrice.laborCostBeforeRut),
+          materialCost: String(createdBooking?.materialCost ?? estimate.materialCost),
+          transportCost: String(createdBooking?.transportCost ?? estimate.transportCost),
+          rutDeduction: String(createdBooking?.rutDeduction ?? discountedPrice.rutDeduction),
+          priceBeforeRut: String(createdBooking?.priceBeforeRut ?? discountedPrice.priceBeforeRut),
+          usesRut: Boolean(createdBooking?.usesRut ?? estimate.usesRut)
+        };
 
-        if (createdBooking?.bookingId) {
-          params.set('bookingId', String(createdBooking.bookingId));
+        try {
+          sessionStorage.setItem('bergaBookingConfirmation', JSON.stringify(confirmationSummary));
+        } catch (storageError) {
+          console.warn('Kunde inte spara bokningssammanfattningen i sessionen:', storageError);
         }
 
-        window.location.href = `betalning.html?${params.toString()}`;
+        const confirmationParams = new URLSearchParams();
+        if (createdBooking?.bookingId) {
+          confirmationParams.set('bookingId', String(createdBooking.bookingId));
+        }
+        window.location.href = confirmationParams.toString()
+          ? `betalning.html?${confirmationParams.toString()}`
+          : 'betalning.html';
       } catch (error) {
         console.error('Bokningsfel:', error);
         setStatus(error instanceof Error ? error.message : 'Kunde inte spara bokningen. Kontrollera uppgifterna eller försök igen.');

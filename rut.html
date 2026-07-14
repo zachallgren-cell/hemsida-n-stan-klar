@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-  <link rel="stylesheet" href="cookie-consent.css" />
-  <script src="cookie-consent.js" defer></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Säkert RUT-formulär | Berga Fönsterputs</title>
   <meta name="description" content="Säkert formulär för RUT-underlag till Berga Fönsterputs." />
   <meta name="robots" content="noindex, nofollow" />
+  <meta name="referrer" content="no-referrer" />
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
   <style>
@@ -313,69 +312,34 @@
       <div class="hero">
         <div class="hero-label">Säkert RUT-underlag</div>
         <h1>Fyll i RUT-uppgifterna.</h1>
-        <p>Uppgifterna skickas via vår skyddade serverfunktion och sparas inte i hemsidans databas.</p>
+        <p>Personnumret skickas krypterat till en separat, skyddad RUT-inkorg och används bara för din RUT-ansökan.</p>
       </div>
     </div>
   </header>
 
   <main class="container">
     <section class="panel">
-      <div class="security-note">Personnummer skickas inte via e-post och sparas inte i hemsidans databas.</div>
+      <div class="security-note">Personnumret skickas aldrig via e-post. Det krypteras innan lagring, kan endast öppnas av behörig admin och gallras när RUT-ärendet är färdigt. <a href="integritet.html#rut">Läs hur RUT-uppgifterna hanteras.</a></div>
 
       <form id="rutForm">
         <input type="hidden" id="formStartedAt">
         <input type="hidden" id="bookingId">
-        <input type="hidden" id="referenceDocumentType">
-        <input type="hidden" id="referenceNumber">
         <div class="rut-trap" aria-hidden="true">
           <label for="website">Webbplats</label>
           <input type="text" id="website" tabindex="-1" autocomplete="off">
         </div>
 
-        <div class="form-row">
-          <div>
-            <label for="name">Namn</label>
-            <input type="text" id="name" autocomplete="name" required>
-            <p class="field-note" id="customerDetailsNote">Hämtas automatiskt från bokningen när länken innehåller boknings-ID.</p>
-          </div>
-          <div>
-            <label for="email">E-postadress</label>
-            <input type="email" id="email" autocomplete="email" required>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div>
-            <label for="phone">Telefonnummer</label>
-            <input type="tel" id="phone" autocomplete="tel" required>
-          </div>
-          <div>
-            <label for="socialSecurityNumber">Personnummer</label>
-            <input type="text" id="socialSecurityNumber" inputmode="numeric" autocomplete="off" placeholder="ÅÅÅÅMMDD-XXXX" required>
-            <p class="field-note">Används endast för RUT-underlaget.</p>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div>
-            <label for="askedAmount">Begärt RUT-belopp</label>
-            <input type="text" id="askedAmount" inputmode="numeric" placeholder="Till exempel 699" required>
-            <p class="field-note" id="askedAmountNote">Beloppet fylls i automatiskt från bokningen när länken innehåller RUT-belopp.</p>
-          </div>
-          <div>
-            <label for="propertyDesignation">Fastighetsbeteckning</label>
-            <input type="text" id="propertyDesignation" autocomplete="off" placeholder="Om du känner till den">
-          </div>
-        </div>
+        <div class="security-note" id="bookingLinkStatus">Kontrollerar din säkra bokningslänk…</div>
 
         <div>
-          <label for="residenceAssociationOrganisationNumber">Organisationsnummer för bostadsrättsförening</label>
-          <input type="text" id="residenceAssociationOrganisationNumber" inputmode="numeric" autocomplete="off" placeholder="Endast om det gäller bostadsrättsförening">
+          <label for="socialSecurityNumber">Personnummer</label>
+          <input type="text" id="socialSecurityNumber" inputmode="numeric" autocomplete="off" placeholder="ÅÅÅÅMMDD-XXXX" minlength="12" maxlength="13" required>
+          <p class="field-note">Ange personnumret för den person som ska använda RUT-avdraget.</p>
         </div>
 
         <div class="consent-box">
           <input type="checkbox" id="consent" required>
-          <label for="consent">Jag godkänner att Berga Fönsterputs använder uppgifterna för att hantera RUT-underlag i samband med min bokning.</label>
+          <label for="consent">Jag bekräftar att jag har läst <a href="integritet.html#rut" target="_blank" rel="noopener noreferrer">integritetsinformationen för RUT</a> och lämnar personnumret för RUT-hanteringen av min bokning.</label>
         </div>
 
         <button type="submit" class="submit-btn" id="submitButton">Skicka RUT-underlag</button>
@@ -388,6 +352,7 @@
     <div class="container">
       <p><strong>Berga Fönsterputs</strong></p>
       <p>E-post: info@bergafonsterputs.se</p>
+      <p><a href="integritet.html">Integritet</a></p>
     </div>
   </footer>
 
@@ -401,8 +366,27 @@
     const rutStatus = document.getElementById('rutStatus');
     const submitButton = document.getElementById('submitButton');
     const formStartedAtInput = document.getElementById('formStartedAt');
-    const customerDetailsNote = document.getElementById('customerDetailsNote');
-    const params = new URLSearchParams(window.location.search);
+    const bookingIdInput = document.getElementById('bookingId');
+    const bookingLinkStatus = document.getElementById('bookingLinkStatus');
+    const personalNumberInput = document.getElementById('socialSecurityNumber');
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    let secureLinkIsValid = false;
+
+    function getLinkValue(names) {
+      return names
+        .map((name) => hashParams.get(name))
+        .find(Boolean) || '';
+    }
+
+    const bookingId = getLinkValue(['bookingId', 'booking']);
+    const token = getLinkValue(['token']);
+
+    if (bookingIdInput) bookingIdInput.value = bookingId;
+
+    if (bookingId && token) {
+      const safeHash = new URLSearchParams({ bookingId, token });
+      window.history.replaceState(null, '', `${window.location.pathname}#${safeHash.toString()}`);
+    }
 
     function setStatus(message, type = 'error') {
       rutStatus.textContent = message;
@@ -422,135 +406,68 @@
       };
     }
 
-    function getQueryValue(names) {
-      return names.map((name) => params.get(name)).find(Boolean) || '';
-    }
-
-    function normalizeAmount(value) {
-      const match = String(value || '').replace(/\s/g, '').replace(',', '.').match(/\d+(\.\d+)?/);
-      if (!match) return '';
-      const parsed = Number(match[0]);
-      return Number.isFinite(parsed) ? String(Math.round(parsed)) : '';
-    }
-
-    function setFieldFromQuery(id, names) {
-      const input = document.getElementById(id);
-      const value = getQueryValue(names);
-      if (input && value) input.value = value;
-    }
-
-    function setCustomerField(id, value) {
-      const input = document.getElementById(id);
-      if (!input || !value) return;
-      input.value = value;
-      input.setAttribute('value', value);
-      input.readOnly = true;
-    }
-
-    function applyAskedAmountFromBooking() {
-      const askedAmountInput = document.getElementById('askedAmount');
-      const askedAmountNote = document.getElementById('askedAmountNote');
-      const amountFromBooking = normalizeAmount(getQueryValue(['rutAmount', 'amount', 'priceAfterRut', 'price']));
-
-      if (!askedAmountInput || !askedAmountNote) return;
-
-      if (amountFromBooking) {
-        askedAmountInput.value = amountFromBooking;
-        askedAmountInput.setAttribute('value', amountFromBooking);
-        askedAmountNote.textContent = `Automatiskt från bokningen: ${Number(amountFromBooking).toLocaleString('sv-SE')} kr.`;
-      } else {
-        askedAmountNote.textContent = 'Beloppet fylls i automatiskt från bokningslänken. Saknas det, skriv RUT-beloppet från bekräftelsen.';
-      }
-    }
-
-    function applyAskedAmountValue(value) {
-      const askedAmountInput = document.getElementById('askedAmount');
-      const askedAmountNote = document.getElementById('askedAmountNote');
-      const amount = normalizeAmount(value);
-
-      if (!askedAmountInput || !askedAmountNote || !amount) return;
-
-      askedAmountInput.value = amount;
-      askedAmountInput.setAttribute('value', amount);
-      askedAmountNote.textContent = `Automatiskt från bokningen: ${Number(amount).toLocaleString('sv-SE')} kr.`;
-    }
-
-    async function loadBookingDetails() {
-      const bookingId = document.getElementById('bookingId')?.value.trim();
-      const token = getQueryValue(['token']);
+    async function validateSecureLink() {
+      submitButton.disabled = true;
       if (!bookingId || !token) {
-        if (customerDetailsNote) {
-          customerDetailsNote.textContent = 'Använd den säkra RUT-länken från bokningsbekräftelsen för att fylla i formuläret.';
-          customerDetailsNote.classList.remove('is-success');
-        }
+        bookingLinkStatus.textContent = 'Länken saknar bokningsuppgifter. Öppna RUT-länken i ditt bokningsmejl.';
+        setStatus('Den säkra RUT-länken är ofullständig eller ogiltig.');
         return;
       }
 
       try {
-        const detailsUrl = new URL(RUT_BOOKING_DETAILS_URL);
-        detailsUrl.searchParams.set('bookingId', bookingId);
-        detailsUrl.searchParams.set('token', token);
-
-        const res = await fetch(detailsUrl.toString(), {
-          method: 'GET',
-          headers: getHeaders()
+        const res = await fetch(RUT_BOOKING_DETAILS_URL, {
+          method: 'POST',
+          headers: getHeaders(),
+          body: JSON.stringify({ bookingId, token })
         });
         const body = await res.json().catch(() => null);
 
         if (!res.ok || body?.error) {
-          throw new Error(body?.error || 'Kunde inte hämta bokningsuppgifter.');
+          throw new Error(body?.error || 'Kunde inte verifiera bokningslänken.');
         }
 
-        setCustomerField('name', body.name);
-        setCustomerField('email', body.email);
-        setCustomerField('phone', body.phone);
-
-        if (body.rutAmount) {
-          applyAskedAmountValue(body.rutAmount);
-        }
-
-        if (customerDetailsNote) {
-          customerDetailsNote.textContent = 'Kontaktuppgifter hämtade från bokningen.';
-          customerDetailsNote.classList.add('is-success');
-        }
+        secureLinkIsValid = true;
+        bookingLinkStatus.textContent = 'Säker bokningslänk verifierad. Du kan nu lämna personnumret.';
+        submitButton.disabled = false;
       } catch (error) {
-        if (customerDetailsNote) {
-          const detail = error instanceof Error && error.message ? ` (${error.message})` : '';
-          customerDetailsNote.textContent = `Kunde inte hämta kontaktuppgifter automatiskt${detail}. Fyll i dem manuellt.`;
-          customerDetailsNote.classList.remove('is-success');
-        }
+        bookingLinkStatus.textContent = 'Bokningslänken kunde inte verifieras.';
+        setStatus(error instanceof Error ? error.message : 'Bokningslänken är ogiltig eller har gått ut.');
       }
     }
 
-    setFieldFromQuery('bookingId', ['bookingId', 'booking']);
-    setFieldFromQuery('name', ['name']);
-    setFieldFromQuery('email', ['email']);
-    setFieldFromQuery('phone', ['phone']);
-    setFieldFromQuery('referenceDocumentType', ['referenceDocumentType', 'documentType']);
-    setFieldFromQuery('referenceNumber', ['referenceNumber', 'documentNumber']);
-    applyAskedAmountFromBooking();
-    loadBookingDetails();
-
     formStartedAtInput.value = String(Date.now());
+    validateSecureLink();
+
+    personalNumberInput.addEventListener('input', () => {
+      const digits = personalNumberInput.value.replace(/\D/g, '').slice(0, 12);
+      personalNumberInput.value = digits.length > 8
+        ? `${digits.slice(0, 8)}-${digits.slice(8)}`
+        : digits;
+    });
+
+    window.addEventListener('pagehide', () => {
+      personalNumberInput.value = '';
+      const consentInput = document.getElementById('consent');
+      if (consentInput instanceof HTMLInputElement) consentInput.checked = false;
+    });
 
     rutForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       clearStatus();
+
+      if (!secureLinkIsValid) {
+        setStatus('Bokningslänken måste verifieras innan uppgifterna kan skickas.');
+        return;
+      }
+
       submitButton.disabled = true;
       submitButton.textContent = 'Skickar...';
+      let submissionSucceeded = false;
 
       const payload = {
-        name: document.getElementById('name').value.trim(),
-        email: document.getElementById('email').value.trim(),
-        phone: document.getElementById('phone').value.trim(),
-        bookingId: document.getElementById('bookingId').value.trim() || null,
-        token: getQueryValue(['token']) || null,
-        referenceDocumentType: document.getElementById('referenceDocumentType').value.trim() || null,
-        referenceNumber: document.getElementById('referenceNumber').value.trim() || null,
-        socialSecurityNumber: document.getElementById('socialSecurityNumber').value.trim(),
-        askedAmount: document.getElementById('askedAmount').value.trim(),
-        propertyDesignation: document.getElementById('propertyDesignation').value.trim() || null,
-        residenceAssociationOrganisationNumber: document.getElementById('residenceAssociationOrganisationNumber').value.trim() || null,
+        bookingId,
+        token,
+        socialSecurityNumber: personalNumberInput.value.trim(),
         consentAccepted: document.getElementById('consent').checked,
         formStartedAt: formStartedAtInput.value,
         website: document.getElementById('website').value
@@ -569,12 +486,16 @@
         }
 
         rutForm.reset();
-        setStatus('Tack! RUT-underlaget är mottaget.', 'success');
+        submissionSucceeded = true;
+        secureLinkIsValid = false;
+        window.history.replaceState(null, '', window.location.pathname);
+        bookingLinkStatus.textContent = 'RUT-underlaget är mottaget och den här engångslänken är nu förbrukad.';
+        setStatus('Tack! Personnumret är mottaget och krypterat.', 'success');
       } catch (error) {
         setStatus(error instanceof Error ? error.message : 'Kunde inte skicka RUT-underlaget.');
       } finally {
-        submitButton.disabled = false;
-        submitButton.textContent = 'Skicka RUT-underlag';
+        submitButton.disabled = submissionSucceeded;
+        submitButton.textContent = submissionSucceeded ? 'RUT-underlag mottaget' : 'Skicka RUT-underlag';
       }
     });
   </script>

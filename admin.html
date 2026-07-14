@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin | Berga Fönsterputs</title>
   <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-KZNkM6jJVp8o/p/WCg9KPl6eq5db9sHh+MMzDZVmVfU='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
   <link rel="shortcut icon" href="/favicon-48.png" />
@@ -224,6 +226,33 @@
     .login-form {
       display: grid;
       gap: 14px;
+    }
+
+    .mfa-setup {
+      display: grid;
+      gap: 14px;
+      margin: 16px 0;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,0.7);
+    }
+
+    .mfa-qr {
+      width: min(220px, 100%);
+      height: auto;
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .mfa-secret {
+      display: block;
+      overflow-wrap: anywhere;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(15, 91, 150, 0.08);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-weight: 800;
     }
 
     .admin-form {
@@ -513,8 +542,73 @@
       margin-top: 8px;
     }
 
-    .completion-row select {
-      width: min(260px, 100%);
+    .completion-fields {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin: 18px 0 12px;
+      padding: 18px;
+      border: 1px solid rgba(15, 91, 150, 0.12);
+      border-radius: 18px;
+      background: rgba(15, 91, 150, 0.035);
+    }
+
+    .completion-fields label {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .completion-fields .field-wide {
+      grid-column: span 2;
+    }
+
+    .completion-help {
+      grid-column: 1 / -1;
+      margin: 0 !important;
+      font-size: 0.9rem;
+    }
+
+    .rut-panel {
+      margin-top: 14px;
+      padding: 18px;
+      border: 1px solid rgba(23, 128, 92, 0.2);
+      border-radius: 18px;
+      background: rgba(23, 128, 92, 0.055);
+    }
+
+    .rut-panel h4 {
+      margin: 0 0 8px;
+      font-size: 1.08rem;
+    }
+
+    .rut-panel p {
+      margin: 0 0 12px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .rut-sensitive-value {
+      display: inline-flex;
+      min-height: 46px;
+      align-items: center;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      border-radius: 12px;
+      background: #fff;
+      border: 1px solid rgba(23, 128, 92, 0.2);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 1.08rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+
+    .rut-sensitive-value.hidden {
+      display: none;
+    }
+
+    .button-small {
+      padding: 10px 14px;
+      font-size: 0.9rem;
     }
 
     .empty-state {
@@ -538,6 +632,14 @@
 
       .booking-grid {
         grid-template-columns: 1fr;
+      }
+
+      .completion-fields {
+        grid-template-columns: 1fr;
+      }
+
+      .completion-fields .field-wide {
+        grid-column: auto;
       }
     }
 
@@ -581,8 +683,8 @@
     <section class="hero">
       <div>
         <span class="pill">Admin för Berga Fönsterputs</span>
-        <h1>Hantera bokningar och skicka klartmail.</h1>
-        <p>Här kan ni logga in, se bokningar, bekräfta dem, markera jobbet som klart och automatiskt skicka betalningsinformation och recensionslänk till kunden.</p>
+        <h1>Hantera bokningar, Swish och RUT.</h1>
+        <p>Här kan ni se bokningar, skicka Swishuppgifter i klartmejlet, kontrollera betalningar och hämta RUT-underlaget när det är dags att ansöka.</p>
       </div>
       <div class="hero-card">
         <h2>Det här kan ni göra här</h2>
@@ -591,8 +693,9 @@
           <li>Skapa, pausa och följa upp rabattkoder</li>
           <li>Lägga in semesterdagar som ej bokbara</li>
           <li>Markera bokning som bekräftad</li>
-          <li>Markera jobb som klart och skicka betalning</li>
-          <li>Markera bokning som betald efter inkommen betalning</li>
+          <li>Markera jobb som klart och skicka Swishuppgifter</li>
+          <li>Markera bokning som betald efter kontroll i Swish Företag</li>
+          <li>Visa och gallra krypterade RUT-uppgifter</li>
         </ul>
       </div>
     </section>
@@ -613,6 +716,27 @@
           <button type="submit" class="button button-primary" id="loginButton">Logga in</button>
         </form>
         <p class="status-message" id="loginMessage"></p>
+      </aside>
+
+      <aside class="card panel hidden" id="mfaPanel">
+        <h2>Tvåstegsverifiering</h2>
+        <p id="mfaIntro">Admin innehåller känsliga kunduppgifter. Bekräfta därför inloggningen med en kod från din authenticator-app.</p>
+        <button type="button" class="button button-primary hidden" id="mfaEnrollButton">Aktivera tvåstegsverifiering</button>
+        <div class="mfa-setup hidden" id="mfaSetup">
+          <strong>Skanna koden i din authenticator-app</strong>
+          <img class="mfa-qr" id="mfaQr" alt="QR-kod för att registrera tvåstegsverifiering">
+          <span>Om du inte kan skanna, skriv in nyckeln manuellt:</span>
+          <code class="mfa-secret" id="mfaSecret"></code>
+          <small>Registrera gärna samma nyckel i en andra betrodd app eller enhet som reserv innan du går vidare.</small>
+        </div>
+        <form class="login-form hidden" id="mfaForm">
+          <label>
+            Sexsiffrig kod
+            <input type="text" id="mfaCode" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" placeholder="123456" required>
+          </label>
+          <button type="submit" class="button button-primary" id="mfaVerifyButton">Verifiera och öppna admin</button>
+        </form>
+        <p class="status-message" id="mfaMessage"></p>
       </aside>
 
       <nav class="admin-tabs hidden" id="adminTabs" aria-label="Adminvyer">
@@ -695,14 +819,24 @@
     </section>
   </main>
 
+  <script src="vendor/supabase-js-2.110.1.umd.min.js" integrity="sha384-baNpjjkY1KK3WRj5l8Fkp2P/pd/wQ4dXsejAvxqNeBEugKB7WLjHXreLejokZekT" crossorigin="anonymous"></script>
   <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    const { createClient } = window.supabase;
 
     const SUPABASE_URL = 'https://xeyippgcoqfskcmqzazx.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_MUKxAwv0vNXDrcgumq81fQ_Uvx4eOuq';
     const COMPLETE_BOOKING_URL = `${SUPABASE_URL}/functions/v1/complete-booking`;
+    const ADMIN_RUT_DETAILS_URL = `${SUPABASE_URL}/functions/v1/admin-rut-details`;
+    const SWISH_NUMBER_DISPLAY = '123 677 43 84';
+    const SWISH_RECIPIENT_NAME = 'Zac Hallgren';
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: true,
+        detectSessionInUrl: false
+      }
+    });
 
     const loginPanel = document.getElementById('loginPanel');
     const adminTabs = document.getElementById('adminTabs');
@@ -712,6 +846,16 @@
     const loginForm = document.getElementById('loginForm');
     const loginButton = document.getElementById('loginButton');
     const loginMessage = document.getElementById('loginMessage');
+    const mfaPanel = document.getElementById('mfaPanel');
+    const mfaIntro = document.getElementById('mfaIntro');
+    const mfaEnrollButton = document.getElementById('mfaEnrollButton');
+    const mfaSetup = document.getElementById('mfaSetup');
+    const mfaQr = document.getElementById('mfaQr');
+    const mfaSecret = document.getElementById('mfaSecret');
+    const mfaForm = document.getElementById('mfaForm');
+    const mfaCode = document.getElementById('mfaCode');
+    const mfaVerifyButton = document.getElementById('mfaVerifyButton');
+    const mfaMessage = document.getElementById('mfaMessage');
     const logoutButton = document.getElementById('logoutButton');
     const refreshButton = document.getElementById('refreshButton');
     const bookingsList = document.getElementById('bookingsList');
@@ -732,10 +876,52 @@
     const discountCodeMessage = document.getElementById('discountCodeMessage');
     const discountCodesList = document.getElementById('discountCodesList');
     let activeAdminView = 'bookings';
+    let verifiedMfaFactorId = '';
+    let pendingMfaFactorId = '';
 
     function setLoginMessage(text, type = '') {
       loginMessage.textContent = text;
       loginMessage.className = `status-message ${type}`.trim();
+    }
+
+    function setMfaMessage(text, type = '') {
+      mfaMessage.textContent = text;
+      mfaMessage.className = `status-message ${type}`.trim();
+    }
+
+    function clearMfaSetup() {
+      pendingMfaFactorId = '';
+      mfaCode.value = '';
+      mfaQr.removeAttribute('src');
+      mfaSecret.textContent = '';
+      mfaSetup.classList.add('hidden');
+      setMfaMessage('');
+    }
+
+    function getUniqueFactors(factorData) {
+      const factors = [...(factorData?.all || []), ...(factorData?.totp || [])];
+      return [...new Map(factors.map((factor) => [factor.id, factor])).values()];
+    }
+
+    async function prepareMfaPanel() {
+      const { data, error } = await supabase.auth.mfa.listFactors();
+      if (error) {
+        verifiedMfaFactorId = '';
+        mfaEnrollButton.classList.add('hidden');
+        mfaForm.classList.add('hidden');
+        setMfaMessage(`Kunde inte kontrollera tvåstegsverifieringen: ${error.message}`, 'error');
+        return;
+      }
+
+      const verifiedFactor = getUniqueFactors(data).find((factor) => factor.factor_type === 'totp' && factor.status === 'verified');
+      verifiedMfaFactorId = verifiedFactor?.id || '';
+      const needsEnrollment = !verifiedMfaFactorId && !pendingMfaFactorId;
+
+      mfaIntro.textContent = verifiedMfaFactorId
+        ? 'Ange den sexsiffriga koden från din authenticator-app för att öppna admin.'
+        : 'Registrera först en authenticator-app. Admin öppnas inte förrän den första koden har verifierats.';
+      mfaEnrollButton.classList.toggle('hidden', !needsEnrollment);
+      mfaForm.classList.toggle('hidden', needsEnrollment);
     }
 
     function setBlockedDateMessage(text, type = '') {
@@ -778,6 +964,12 @@
         month: 'long',
         year: 'numeric'
       });
+    }
+
+    function formatDateTime(value, fallback = 'Ej registrerat') {
+      if (!value) return fallback;
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? fallback : date.toLocaleString('sv-SE');
     }
 
     function addDaysToDateString(dateString, days) {
@@ -827,12 +1019,12 @@
     const ISLAND_START_PRICE = 799;
     const ISLAND_PRICE_PER_SEA_MILE = 125;
 
-    function getBasePrice(housingTypeLabel, windowCount) {
+    function getBaseLaborAfterRut(housingTypeLabel) {
       if (!housingTypeLabel) return null;
       const floorAddon = housingTypeLabel === 'Två våningar' || housingTypeLabel === 'Tvåplansvilla'
         ? TWO_FLOOR_ADDON
         : 0;
-      return BASE_LABOR_PRICE_AFTER_RUT + MATERIAL_FEE + floorAddon;
+      return BASE_LABOR_PRICE_AFTER_RUT + floorAddon;
     }
 
     function getInteriorAddon(housingTypeLabel, windowCount) {
@@ -860,33 +1052,38 @@
       return (extraRegularWindowCount * EXTRA_REGULAR_WINDOW_PRICE) + (extraMuntinsCount * EXTRA_MUNTINS_WINDOW_PRICE);
     }
 
-    function getBookingPrices(booking) {
-      const directPrice = booking.price || booking.total_price;
-      if (directPrice) {
-        const directText = String(directPrice).trim();
-        if (/offert/i.test(directText)) return { withRut: directText, withoutRut: directText };
+    function parsePriceNumber(value) {
+      if (typeof value === 'number' && Number.isFinite(value)) return Math.round(value);
+      const text = String(value ?? '').trim();
+      if (!text || /offert/i.test(text)) return null;
+      const parsed = Number(text.replace(/\s/g, '').replace(/[^\d,.-]/g, '').replace(',', '.'));
+      return Number.isFinite(parsed) ? Math.round(parsed) : null;
+    }
 
-        const priceWithRut = Number(directText.replace(/[^\d,.-]/g, '').replace(',', '.'));
-        if (Number.isFinite(priceWithRut)) {
-          const discountAmount = Number(booking.discount_amount || 0);
-          const originalPriceWithRut = Number(booking.original_price || priceWithRut + discountAmount);
-          const rutEligibleLabor = Math.max(0, originalPriceWithRut - MATERIAL_FEE);
-          const priceWithoutRut = originalPriceWithRut + rutEligibleLabor - discountAmount;
-          return {
-            withRut: `${Math.round(priceWithRut)} kr`,
-            withoutRut: `${Math.round(priceWithoutRut)} kr`
-          };
-        }
+    function formatMoney(value, fallback = 'Ej angivet') {
+      const parsed = parsePriceNumber(value);
+      return parsed === null ? fallback : `${parsed.toLocaleString('sv-SE')} kr`;
+    }
 
-        return { withRut: directText, withoutRut: 'Ej angivet' };
-      }
+    function isRutBooking(booking) {
+      return /^ja\b/i.test(String(booking.rut_choice || '').trim());
+    }
 
+    function formatRutWorkflowStatus(value) {
+      const statuses = {
+        not_ready: 'Inte redo',
+        ready: 'Klar att ansöka',
+        submitted: 'Ansökt',
+        approved: 'Godkänt',
+        rejected: 'Avslag'
+      };
+      return statuses[String(value || '').toLowerCase()] || String(value || 'Väntar på uppgifter');
+    }
+
+    function getBookingPriceParts(booking) {
       const housingType = booking.housing_type || '';
       const windowCount = parseWindowCount(booking.window_count);
-      const basePrice = getBasePrice(housingType, windowCount);
-
-      if (!basePrice) return { withRut: 'Ej angivet', withoutRut: 'Ej angivet' };
-
+      const baseLaborAfterRut = getBaseLaborAfterRut(housingType);
       const interiorAddon = booking.service_scope === 'Invändig + utvändig'
         ? getInteriorAddon(housingType, windowCount)
         : 0;
@@ -894,26 +1091,58 @@
       const seaMilesAddon = booking.transport_type === 'Båttransport behövs'
         ? getSeaMilesAddon(booking.sea_miles)
         : { price: 0, isQuote: false };
+      const legacyLaborBeforeRut = baseLaborAfterRut === null
+        ? null
+        : Math.round((baseLaborAfterRut + windowTypePrice + interiorAddon) * 2);
+      const discountAmount = parsePriceNumber(booking.discount_amount) ?? 0;
+      const legacyLaborAfterDiscount = legacyLaborBeforeRut === null
+        ? null
+        : Math.max(0, legacyLaborBeforeRut - (isRutBooking(booking) ? discountAmount * 2 : discountAmount));
+      const laborBeforeRut = parsePriceNumber(booking.labor_cost_before_rut) ?? legacyLaborAfterDiscount;
+      const materialCost = parsePriceNumber(booking.material_cost) ?? MATERIAL_FEE;
+      const transportCost = parsePriceNumber(booking.transport_cost) ?? seaMilesAddon.price;
+      const rutDeduction = parsePriceNumber(booking.rut_deduction)
+        ?? (laborBeforeRut === null ? 0 : Math.round(laborBeforeRut / 2));
+      const priceBeforeRut = parsePriceNumber(booking.price_before_rut)
+        ?? (laborBeforeRut === null ? null : laborBeforeRut + materialCost + transportCost);
+      const customerBeforeDiscount = parsePriceNumber(booking.customer_price_before_discount)
+        ?? parsePriceNumber(booking.original_price)
+        ?? (priceBeforeRut === null ? null : priceBeforeRut - (isRutBooking(booking) ? rutDeduction : 0));
+      const customerToPay = parsePriceNumber(booking.swish_amount)
+        ?? parsePriceNumber(booking.price)
+        ?? customerBeforeDiscount;
 
-      if (seaMilesAddon.isQuote) {
-        return { withRut: 'Pris enligt offert', withoutRut: 'Pris enligt offert' };
-      }
-
-      const priceWithRut = basePrice + windowTypePrice + interiorAddon + seaMilesAddon.price;
       return {
-        withRut: `${priceWithRut} kr`,
-        withoutRut: `${priceWithRut + Math.max(0, priceWithRut - MATERIAL_FEE)} kr`
+        laborBeforeRut,
+        materialCost,
+        transportCost,
+        rutDeduction: isRutBooking(booking) ? rutDeduction : 0,
+        priceBeforeRut,
+        customerBeforeDiscount,
+        customerToPay,
+        isQuote: seaMilesAddon.isQuote || /offert/i.test(String(booking.price || ''))
       };
     }
 
     function renderBookings(bookings) {
+      bookingsList.querySelectorAll('.booking-card').forEach((card) => hideRutNumber(card));
+
       if (!bookings.length) {
         bookingsList.innerHTML = '<div class="empty-state">Inga bokningar hittades ännu.</div>';
         return;
       }
 
       bookingsList.innerHTML = bookings.map((booking) => {
-        const bookingPrices = getBookingPrices(booking);
+        const priceParts = getBookingPriceParts(booking);
+        const usesRut = isRutBooking(booking);
+        const rutWorkflowStatus = formatRutWorkflowStatus(booking.rut_application_status || booking.rut_status || (usesRut ? 'not_ready' : 'Ej RUT'));
+        const rutWorkflowStatusKey = String(booking.rut_application_status || 'not_ready').toLowerCase();
+        const paymentIsPaid = String(booking.payment_status || '').toLowerCase() === 'paid';
+        const workIsCompleted = Boolean(booking.completed_at);
+        const hasRutSubmission = booking.rut_submission_available === true;
+        const canResendRut = !hasRutSubmission && !['submitted', 'approved'].includes(rutWorkflowStatusKey);
+        const completionReference = booking.invoice_reference || booking.swish_reference || '';
+        const completionAmount = priceParts.customerToPay ?? '';
         const packageParts = [
           booking.housing_type,
           booking.window_count,
@@ -925,7 +1154,7 @@
         ].filter(Boolean);
 
         return `
-          <article class="booking-card" data-booking-id="${booking.id}">
+          <article class="booking-card" data-booking-id="${booking.id}" data-uses-rut="${usesRut}" data-rut-received="${hasRutSubmission}">
             <div class="booking-top">
               <div>
                 <h3>${escapeHtml(booking.customer_name || 'Namn saknas')}</h3>
@@ -937,6 +1166,7 @@
               <div class="badge-row">
                 <span class="badge ${getBadgeClass(booking.status)}">${escapeHtml(booking.status || 'pending')}</span>
                 <span class="badge ${getBadgeClass(booking.payment_status)}">${escapeHtml(booking.payment_status || 'unpaid')}</span>
+                ${usesRut ? `<span class="badge pending">RUT: ${escapeHtml(rutWorkflowStatus)}</span>` : ''}
               </div>
             </div>
 
@@ -944,25 +1174,77 @@
               <div class="detail"><strong>Datum</strong><span>${escapeHtml(formatDate(booking.booking_date))}</span></div>
               <div class="detail"><strong>Tid</strong><span>${escapeHtml(booking.booking_time || 'Ej valt')}</span></div>
               <div class="detail"><strong>Adress</strong><span>${escapeHtml(booking.address || 'Ej angiven')}</span></div>
-              <div class="detail"><strong>Pris med RUT</strong><span>${escapeHtml(bookingPrices.withRut)}</span></div>
-              <div class="detail"><strong>Pris utan RUT</strong><span>${escapeHtml(bookingPrices.withoutRut)}</span></div>
-              <div class="detail"><strong>Material</strong><span>150 kr (ej RUT-grundande)</span></div>
+              <div class="detail"><strong>Kund att Swisha</strong><span>${escapeHtml(priceParts.isQuote ? 'Pris enligt offert' : formatMoney(priceParts.customerToPay))}</span></div>
+              <div class="detail"><strong>Pris utan RUT</strong><span>${escapeHtml(formatMoney(priceParts.priceBeforeRut))}</span></div>
+              <div class="detail"><strong>Arbetskostnad före RUT</strong><span>${escapeHtml(formatMoney(priceParts.laborBeforeRut))}</span></div>
+              <div class="detail"><strong>RUT-avdrag</strong><span>${escapeHtml(usesRut ? `−${formatMoney(priceParts.rutDeduction)}` : 'Inget RUT valt')}</span></div>
+              <div class="detail"><strong>Material</strong><span>${escapeHtml(formatMoney(priceParts.materialCost))} (ej RUT)</span></div>
+              <div class="detail"><strong>Transport</strong><span>${escapeHtml(formatMoney(priceParts.transportCost, '0 kr'))} (ej RUT)</span></div>
               ${booking.discount_code ? `<div class="detail"><strong>Rabatt</strong><span>${escapeHtml(`${booking.discount_code} • -${booking.discount_amount || 0} kr (ord. ${booking.original_price || '—'} kr)`)}</span></div>` : ''}
-              <div class="detail"><strong>Stripe</strong><span>${booking.stripe_payment_url ? `<a href="${escapeHtml(booking.stripe_payment_url)}" target="_blank" rel="noopener noreferrer">Öppna betalningslänk</a>` : 'Länk skapas på betalningssidan eller när klartmail skickas.'}</span></div>
+              <div class="detail"><strong>Swish Företag</strong><span>${SWISH_NUMBER_DISPLAY} • ${SWISH_RECIPIENT_NAME}<br>${escapeHtml(booking.payment_email_sent_at ? `Klartmejl skickat ${new Date(booking.payment_email_sent_at).toLocaleString('sv-SE')}` : 'Klartmejl ej skickat')}</span></div>
+              <div class="detail"><strong>Fakturareferens</strong><span>${escapeHtml(completionReference || 'Ej angiven')}</span></div>
               <div class="detail"><strong>Paket</strong><span>${packageParts.length ? escapeHtml(packageParts.join(' • ')) : 'Ej angivet'}</span></div>
               <div class="detail"><strong>Övrig information</strong><span>${escapeHtml(booking.message || 'Ingen extra information')}</span></div>
             </div>
 
+            <div class="completion-fields">
+              <label class="field-wide">Fakturareferens från din egen faktura
+                <input type="text" class="completion-invoice-reference" value="${escapeHtml(completionReference)}" maxlength="35" placeholder="Obligatoriskt fakturanummer eller referens" autocomplete="off" required>
+              </label>
+              <label>Swishbelopp
+                <input type="number" class="completion-swish-amount" value="${escapeHtml(completionAmount)}" min="1" step="1" inputmode="numeric">
+              </label>
+              <label>Faktisk arbetstid (timmar)
+                <input type="number" class="completion-work-hours" value="${escapeHtml(booking.actual_work_hours ?? '')}" min="0.25" max="999" step="0.25" inputmode="decimal" ${usesRut ? 'required' : ''}>
+              </label>
+              <label>Arbetskostnad före RUT
+                <input type="number" class="completion-labor-cost" value="${escapeHtml(priceParts.laborBeforeRut ?? '')}" min="0" step="1" inputmode="numeric">
+              </label>
+              <label>Material
+                <input type="number" class="completion-material-cost" value="${escapeHtml(priceParts.materialCost)}" min="0" step="1" inputmode="numeric">
+              </label>
+              <label>Transport
+                <input type="number" class="completion-transport-cost" value="${escapeHtml(priceParts.transportCost)}" min="0" step="1" inputmode="numeric">
+              </label>
+              <label>RUT-avdrag
+                <input type="number" class="completion-rut-deduction" value="${escapeHtml(priceParts.rutDeduction)}" min="0" step="1" inputmode="numeric" ${usesRut ? '' : 'readonly'}>
+              </label>
+              <p class="completion-help">Markera först arbetet som utfört. För RUT kan du då öppna personnumret och skapa fakturan själv. Fyll sedan i fakturareferensen och kontrollera beloppen här innan <strong>Klart + skicka Swish</strong>.</p>
+            </div>
+
             <div class="completion-row">
-              <select class="completion-payment-method">
-                <option value="Stripe Checkout">Skicka Stripe-betalningslänk</option>
-                <option value="Faktura via e-post">Skicka faktura via e-post</option>
-              </select>
               <button type="button" class="button button-secondary action-confirm">Bekräfta</button>
-              <button type="button" class="button button-success action-complete">Klart + skicka</button>
-              <button type="button" class="button button-secondary action-paid">Markera betald</button>
+              <button type="button" class="button button-secondary action-work-completed" ${workIsCompleted ? 'disabled' : ''}>${workIsCompleted ? 'Arbete utfört' : 'Markera arbete utfört'}</button>
+              <button type="button" class="button button-success action-complete" ${!workIsCompleted || booking.payment_email_sent ? 'disabled' : ''}>${booking.payment_email_sent ? 'Klartmejl skickat' : workIsCompleted ? 'Klart + skicka Swish' : 'Markera arbete utfört först'}</button>
+              <button type="button" class="button button-secondary action-paid" ${paymentIsPaid || !workIsCompleted ? 'disabled' : ''}>${paymentIsPaid ? 'Swish betald' : workIsCompleted ? 'Markera Swish betald' : 'Slutför jobbet först'}</button>
               <button type="button" class="button button-danger action-delete">Ta bort</button>
             </div>
+
+            ${usesRut ? `
+              <div class="rut-panel">
+                <h4>Manuellt RUT-underlag</h4>
+                <p>Personnumret är krypterat och visas bara när du aktivt öppnar det. Värdet döljs automatiskt efter en minut.</p>
+                <div class="booking-grid">
+                  <div class="detail"><strong>Betalningsdatum</strong><span>${escapeHtml(formatDateTime(booking.paid_at))}</span></div>
+                  <div class="detail"><strong>Fakturareferens</strong><span>${escapeHtml(completionReference || 'Ej angiven')}</span></div>
+                  <div class="detail"><strong>Faktisk arbetstid</strong><span>${escapeHtml(booking.actual_work_hours ? `${booking.actual_work_hours} timmar` : 'Ej angiven')}</span></div>
+                  <div class="detail"><strong>Kundbetalt / Swish</strong><span>${escapeHtml(formatMoney(booking.swish_amount ?? priceParts.customerToPay))}</span></div>
+                  <div class="detail"><strong>Arbetskostnad</strong><span>${escapeHtml(formatMoney(booking.labor_cost_before_rut ?? priceParts.laborBeforeRut))}</span></div>
+                  <div class="detail"><strong>Material + transport</strong><span>${escapeHtml(`${formatMoney(booking.material_cost ?? priceParts.materialCost)} + ${formatMoney(booking.transport_cost ?? priceParts.transportCost, '0 kr')}`)}</span></div>
+                  <div class="detail"><strong>Begärt RUT</strong><span>${escapeHtml(formatMoney(booking.rut_requested_amount ?? booking.rut_deduction ?? priceParts.rutDeduction))}</span></div>
+                </div>
+                <div class="rut-sensitive-value hidden" aria-live="polite"></div>
+                <div class="completion-row">
+                  <button type="button" class="button button-secondary button-small action-resend-rut" ${canResendRut ? '' : 'disabled'}>${hasRutSubmission ? 'RUT-underlag mottaget' : ['submitted', 'approved'].includes(rutWorkflowStatusKey) ? 'RUT redan hanterat' : 'Skicka ny RUT-länk'}</button>
+                  <button type="button" class="button button-secondary button-small action-show-rut" ${!workIsCompleted || !hasRutSubmission ? 'disabled' : ''}>Visa personnummer</button>
+                  <button type="button" class="button button-secondary button-small action-copy-rut hidden">Kopiera</button>
+                  <button type="button" class="button button-success button-small action-rut-applied" ${!paymentIsPaid || !workIsCompleted || !hasRutSubmission || !['ready', 'rejected', 'submitted'].includes(rutWorkflowStatusKey) ? 'disabled' : ''}>Markera RUT ansökt</button>
+                  <button type="button" class="button button-success button-small action-rut-approved" ${rutWorkflowStatusKey !== 'submitted' ? 'disabled' : ''}>Godkänt</button>
+                  <button type="button" class="button button-secondary button-small action-rut-rejected" ${rutWorkflowStatusKey !== 'submitted' ? 'disabled' : ''}>Avslag</button>
+                  <button type="button" class="button button-danger button-small action-purge-rut" ${!hasRutSubmission ? 'disabled' : ''}>Gallra personnummer</button>
+                </div>
+              </div>
+            ` : ''}
 
             <p class="status-message"></p>
           </article>
@@ -1074,18 +1356,6 @@
       renderBookings(data || []);
     }
 
-    async function updateBooking(id, patch, messageElement) {
-      const { error } = await supabase.from('bookings').update(patch).eq('id', id);
-
-      if (error) {
-        messageElement.textContent = `Kunde inte uppdatera bokningen: ${error.message}`;
-        messageElement.className = 'status-message error';
-        return false;
-      }
-
-      return true;
-    }
-
     async function deleteBooking(id, messageElement, button) {
       const confirmed = window.confirm('Är du säker på att du vill ta bort den här bokningen? Detta går inte att ångra och bokningen försvinner helt.');
 
@@ -1133,7 +1403,19 @@
       await fetchBlockedDates();
     }
 
-    async function completeBooking(id, paymentMethod, messageElement, button) {
+    function readNumberInput(card, selector) {
+      const input = card.querySelector(selector);
+      if (!(input instanceof HTMLInputElement) || !input.value.trim()) return null;
+      const value = Number(input.value.replace(',', '.'));
+      return Number.isFinite(value) ? value : null;
+    }
+
+    function readTextInput(card, selector) {
+      const input = card.querySelector(selector);
+      return input instanceof HTMLInputElement ? input.value.trim() : '';
+    }
+
+    async function completeBooking(id, card, messageElement, button) {
       const { data: sessionData } = await supabase.auth.getSession();
       const accessToken = sessionData.session?.access_token;
 
@@ -1142,6 +1424,54 @@
         messageElement.className = 'status-message error';
         return;
       }
+
+      const usesRut = card.dataset.usesRut === 'true';
+      const swishAmount = readNumberInput(card, '.completion-swish-amount');
+      const actualWorkHours = readNumberInput(card, '.completion-work-hours');
+      const laborCostBeforeRut = readNumberInput(card, '.completion-labor-cost');
+      const materialCost = readNumberInput(card, '.completion-material-cost');
+      const transportCost = readNumberInput(card, '.completion-transport-cost');
+      const rutDeduction = readNumberInput(card, '.completion-rut-deduction') ?? 0;
+      const invoiceReference = readTextInput(card, '.completion-invoice-reference');
+
+      if (!invoiceReference) {
+        messageElement.textContent = 'Fyll i fakturanumret eller referensen från fakturan du har skapat.';
+        messageElement.className = 'status-message error';
+        return;
+      }
+
+      if (!swishAmount || swishAmount <= 0) {
+        messageElement.textContent = 'Kontrollera Swishbeloppet innan klartmejlet skickas.';
+        messageElement.className = 'status-message error';
+        return;
+      }
+
+      if (usesRut && (!actualWorkHours || actualWorkHours <= 0)) {
+        messageElement.textContent = 'Fyll i faktisk arbetstid innan ett RUT-jobb markeras som klart.';
+        messageElement.className = 'status-message error';
+        return;
+      }
+
+      if (laborCostBeforeRut === null || materialCost === null || transportCost === null) {
+        messageElement.textContent = 'Kontrollera uppdelningen mellan arbete, material och transport.';
+        messageElement.className = 'status-message error';
+        return;
+      }
+
+      if (usesRut && (rutDeduction < 0 || rutDeduction > Math.round(laborCostBeforeRut / 2))) {
+        messageElement.textContent = 'RUT-avdraget kan inte vara högre än 50 % av arbetskostnaden.';
+        messageElement.className = 'status-message error';
+        return;
+      }
+
+      const normalizedSwishAmount = Math.round(swishAmount * 100) / 100;
+      const swishAmountDisplay = normalizedSwishAmount.toLocaleString('sv-SE', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+      if (!window.confirm(
+        `Skicka klartmejlet?\n\nSwish: ${swishAmountDisplay} kr till ${SWISH_NUMBER_DISPLAY}\nMottagare: ${SWISH_RECIPIENT_NAME}\nFakturareferens: ${invoiceReference}\n\nKontrollera att uppgifterna stämmer med fakturan.`
+      )) return;
 
       button.disabled = true;
       messageElement.textContent = 'Skickar klartmail...';
@@ -1157,7 +1487,13 @@
           },
           body: JSON.stringify({
             bookingId: id,
-            paymentMethod
+            swishAmount,
+            invoiceReference,
+            actualWorkHours,
+            laborCostBeforeRut,
+            materialCost,
+            transportCost,
+            rutDeduction: usesRut ? rutDeduction : 0
           })
         });
 
@@ -1167,11 +1503,172 @@
           throw new Error(body?.details || body?.error || 'Okänt fel när klartmail skulle skickas.');
         }
 
-        messageElement.textContent = 'Klartmail skickat och bokningen är markerad som completed.';
+        messageElement.textContent = `Klartmejlet med Swish ${SWISH_NUMBER_DISPLAY}, ${swishAmountDisplay} kr och referens ${invoiceReference} är skickat.`;
         messageElement.className = 'status-message success';
         await fetchBookings();
       } catch (error) {
         messageElement.textContent = error instanceof Error ? error.message : 'Något gick fel när klartmail skulle skickas.';
+        messageElement.className = 'status-message error';
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    const visibleRutNumbers = new WeakMap();
+    const rutHideTimers = new WeakMap();
+
+    function hideRutNumber(card) {
+      const valueElement = card.querySelector('.rut-sensitive-value');
+      const copyButton = card.querySelector('.action-copy-rut');
+      if (valueElement instanceof HTMLElement) {
+        valueElement.textContent = '';
+        valueElement.classList.add('hidden');
+      }
+      if (copyButton instanceof HTMLElement) copyButton.classList.add('hidden');
+      visibleRutNumbers.delete(card);
+      const timer = rutHideTimers.get(card);
+      if (timer) window.clearTimeout(timer);
+      rutHideTimers.delete(card);
+    }
+
+    function hideAllRutNumbers() {
+      bookingsList.querySelectorAll('.booking-card').forEach((card) => hideRutNumber(card));
+    }
+
+    async function callAdminRutDetails(action, bookingId) {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) throw new Error('Du måste vara inloggad för att öppna RUT-underlaget.');
+
+      const response = await fetch(ADMIN_RUT_DETAILS_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+          apikey: SUPABASE_ANON_KEY
+        },
+        body: JSON.stringify({ action, bookingId })
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok || body?.error) {
+        throw new Error(body?.error || 'Kunde inte hantera RUT-underlaget.');
+      }
+      return body;
+    }
+
+    async function showRutNumber(id, card, messageElement, button) {
+      button.disabled = true;
+      messageElement.textContent = 'Öppnar det krypterade RUT-underlaget...';
+      messageElement.className = 'status-message';
+
+      try {
+        const body = await callAdminRutDetails('get', id);
+        const valueElement = card.querySelector('.rut-sensitive-value');
+        const copyButton = card.querySelector('.action-copy-rut');
+        if (!(valueElement instanceof HTMLElement)) throw new Error('RUT-fältet kunde inte visas.');
+
+        valueElement.textContent = body.socialSecurityNumber;
+        valueElement.classList.remove('hidden');
+        if (copyButton instanceof HTMLElement) copyButton.classList.remove('hidden');
+        visibleRutNumbers.set(card, body.socialSecurityNumber);
+        const previousTimer = rutHideTimers.get(card);
+        if (previousTimer) window.clearTimeout(previousTimer);
+        rutHideTimers.set(card, window.setTimeout(() => hideRutNumber(card), 60_000));
+        messageElement.textContent = 'Personnumret visas i högst en minut.';
+        messageElement.className = 'status-message success';
+      } catch (error) {
+        hideRutNumber(card);
+        messageElement.textContent = error instanceof Error ? error.message : 'Kunde inte öppna RUT-underlaget.';
+        messageElement.className = 'status-message error';
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    async function copyRutNumber(card, messageElement) {
+      const personalNumber = visibleRutNumbers.get(card);
+      if (!personalNumber) {
+        messageElement.textContent = 'Öppna personnumret igen innan du kopierar.';
+        messageElement.className = 'status-message error';
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(personalNumber);
+        messageElement.textContent = 'Personnumret är kopierat. Klistra bara in det i Skatteverkets e-tjänst.';
+        messageElement.className = 'status-message success';
+      } catch {
+        messageElement.textContent = 'Kunde inte kopiera automatiskt. Markera numret och kopiera manuellt.';
+        messageElement.className = 'status-message error';
+      }
+    }
+
+    async function markRutApplied(id, card, messageElement, button) {
+      button.disabled = true;
+      messageElement.textContent = 'Markerar RUT-ansökan...';
+      messageElement.className = 'status-message';
+
+      try {
+        await callAdminRutDetails('mark_processed', id);
+        hideRutNumber(card);
+        messageElement.textContent = 'RUT-underlaget är markerat som ansökt.';
+        messageElement.className = 'status-message success';
+        await fetchBookings();
+      } catch (error) {
+        messageElement.textContent = error instanceof Error ? error.message : 'Kunde inte markera RUT-ansökan.';
+        messageElement.className = 'status-message error';
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    async function resendRutLink(id, messageElement, button) {
+      button.disabled = true;
+      messageElement.textContent = 'Skickar en ny säker RUT-länk...';
+      messageElement.className = 'status-message';
+
+      try {
+        await callAdminRutDetails('resend_link', id);
+        messageElement.textContent = 'En ny säker engångslänk har skickats till kunden.';
+        messageElement.className = 'status-message success';
+        await fetchBookings();
+      } catch (error) {
+        messageElement.textContent = error instanceof Error ? error.message : 'Kunde inte skicka en ny RUT-länk.';
+        messageElement.className = 'status-message error';
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    async function setRutDecision(id, status, messageElement, button) {
+      button.disabled = true;
+      try {
+        await callAdminRutDetails(status === 'approved' ? 'approve' : 'reject', id);
+        messageElement.textContent = `RUT-status ändrad till ${formatRutWorkflowStatus(status)}.`;
+        messageElement.className = 'status-message success';
+        await fetchBookings();
+      } catch (error) {
+        messageElement.textContent = error instanceof Error ? error.message : 'Kunde inte registrera RUT-beslutet.';
+        messageElement.className = 'status-message error';
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    async function purgeRutNumber(id, card, messageElement, button) {
+      if (!window.confirm('Gallra personnumret från hemsidan? Det går inte att ångra. Kontrollera först att du inte längre behöver uppgiften för RUT-ärendet.')) return;
+
+      button.disabled = true;
+      try {
+        const result = await callAdminRutDetails('purge', id);
+        hideRutNumber(card);
+        messageElement.textContent = result.purged
+          ? 'Personnumret är permanent gallrat från hemsidan.'
+          : 'Det fanns inget lagrat personnummer kvar att gallra.';
+        messageElement.className = 'status-message success';
+        await fetchBookings();
+      } catch (error) {
+        messageElement.textContent = error instanceof Error ? error.message : 'Kunde inte gallra personnumret.';
         messageElement.className = 'status-message error';
       } finally {
         button.disabled = false;
@@ -1187,34 +1684,88 @@
 
       const id = Number(card.dataset.bookingId);
       const messageElement = card.querySelector('.status-message');
-      const paymentSelect = card.querySelector('.completion-payment-method');
 
-      if (!(messageElement instanceof HTMLElement) || !(paymentSelect instanceof HTMLSelectElement)) return;
+      if (!(messageElement instanceof HTMLElement) || !Number.isInteger(id)) return;
 
       if (target.classList.contains('action-confirm')) {
         target.setAttribute('disabled', 'disabled');
-        const ok = await updateBooking(id, { status: 'confirmed' }, messageElement);
-        target.removeAttribute('disabled');
-        if (ok) {
+        try {
+          await callAdminRutDetails('confirm', id);
           messageElement.textContent = 'Bokningen är nu markerad som confirmed.';
           messageElement.className = 'status-message success';
           await fetchBookings();
+        } catch (error) {
+          messageElement.textContent = error instanceof Error ? error.message : 'Kunde inte bekräfta bokningen.';
+          messageElement.className = 'status-message error';
+          target.removeAttribute('disabled');
         }
       }
 
       if (target.classList.contains('action-paid')) {
         target.setAttribute('disabled', 'disabled');
-        const ok = await updateBooking(id, { payment_status: 'paid' }, messageElement);
-        target.removeAttribute('disabled');
-        if (ok) {
-          messageElement.textContent = 'Bokningen är nu markerad som paid.';
+        try {
+          await callAdminRutDetails('mark_paid', id);
+          messageElement.textContent = 'Swishbetalningen är kontrollerad och markerad som betald.';
           messageElement.className = 'status-message success';
           await fetchBookings();
+        } catch (error) {
+          messageElement.textContent = error instanceof Error ? error.message : 'Kunde inte markera Swishbetalningen.';
+          messageElement.className = 'status-message error';
+          target.removeAttribute('disabled');
+        }
+      }
+
+      if (target.classList.contains('action-work-completed')) {
+        const usesRut = card.dataset.usesRut === 'true';
+        const completionPrompt = usesRut
+          ? 'Markera att arbetet är utfört? Därefter kan personnumret öppnas för att skapa den manuella RUT-fakturan.'
+          : 'Markera att arbetet är utfört? Därefter kan fakturan skapas och klartmejlet med Swish skickas.';
+        if (!window.confirm(completionPrompt)) return;
+        target.setAttribute('disabled', 'disabled');
+        try {
+          await callAdminRutDetails('mark_completed', id);
+          messageElement.textContent = usesRut
+            ? 'Arbetet är markerat som utfört. Du kan nu öppna RUT-underlaget och skapa fakturan.'
+            : 'Arbetet är markerat som utfört. Du kan nu skapa fakturan och skicka klartmejlet.';
+          messageElement.className = 'status-message success';
+          await fetchBookings();
+        } catch (error) {
+          messageElement.textContent = error instanceof Error ? error.message : 'Kunde inte markera arbetet som utfört.';
+          messageElement.className = 'status-message error';
+          target.removeAttribute('disabled');
         }
       }
 
       if (target.classList.contains('action-complete')) {
-        await completeBooking(id, paymentSelect.value, messageElement, target);
+        await completeBooking(id, card, messageElement, target);
+      }
+
+      if (target.classList.contains('action-show-rut')) {
+        await showRutNumber(id, card, messageElement, target);
+      }
+
+      if (target.classList.contains('action-resend-rut')) {
+        await resendRutLink(id, messageElement, target);
+      }
+
+      if (target.classList.contains('action-copy-rut')) {
+        await copyRutNumber(card, messageElement);
+      }
+
+      if (target.classList.contains('action-rut-applied')) {
+        await markRutApplied(id, card, messageElement, target);
+      }
+
+      if (target.classList.contains('action-rut-approved')) {
+        await setRutDecision(id, 'approved', messageElement, target);
+      }
+
+      if (target.classList.contains('action-rut-rejected')) {
+        await setRutDecision(id, 'rejected', messageElement, target);
+      }
+
+      if (target.classList.contains('action-purge-rut')) {
+        await purgeRutNumber(id, card, messageElement, target);
       }
 
       if (target.classList.contains('action-delete')) {
@@ -1373,6 +1924,69 @@
       }
     });
 
+    mfaEnrollButton.addEventListener('click', async () => {
+      mfaEnrollButton.disabled = true;
+      setMfaMessage('Skapar en säker registreringskod...');
+
+      try {
+        const { data: factorData, error: factorError } = await supabase.auth.mfa.listFactors();
+        if (factorError) throw factorError;
+
+        const unverifiedFactors = getUniqueFactors(factorData)
+          .filter((factor) => factor.factor_type === 'totp' && factor.status !== 'verified');
+        for (const factor of unverifiedFactors) {
+          const { error } = await supabase.auth.mfa.unenroll({ factorId: factor.id });
+          if (error) throw error;
+        }
+
+        const { data, error } = await supabase.auth.mfa.enroll({
+          factorType: 'totp',
+          friendlyName: 'Berga admin'
+        });
+        if (error) throw error;
+
+        pendingMfaFactorId = data.id;
+        mfaQr.src = data.totp.qr_code;
+        mfaSecret.textContent = data.totp.secret;
+        mfaSetup.classList.remove('hidden');
+        mfaEnrollButton.classList.add('hidden');
+        mfaForm.classList.remove('hidden');
+        setMfaMessage('Skanna QR-koden och ange sedan den sexsiffriga koden.', 'success');
+        mfaCode.focus();
+      } catch (error) {
+        setMfaMessage(error instanceof Error ? `Kunde inte aktivera tvåstegsverifiering: ${error.message}` : 'Kunde inte aktivera tvåstegsverifiering.', 'error');
+      } finally {
+        mfaEnrollButton.disabled = false;
+      }
+    });
+
+    mfaForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const code = mfaCode.value.replace(/\D/g, '');
+      const factorId = pendingMfaFactorId || verifiedMfaFactorId;
+
+      if (!factorId || !/^\d{6}$/.test(code)) {
+        setMfaMessage('Ange en giltig sexsiffrig kod.', 'error');
+        return;
+      }
+
+      mfaVerifyButton.disabled = true;
+      setMfaMessage('Verifierar koden...');
+
+      const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId, code });
+      mfaVerifyButton.disabled = false;
+      mfaCode.value = '';
+
+      if (error) {
+        setMfaMessage(`Koden kunde inte verifieras: ${error.message}`, 'error');
+        return;
+      }
+
+      clearMfaSetup();
+      setMfaMessage('Tvåstegsverifieringen är klar.', 'success');
+      await refreshSession();
+    });
+
     loginForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       setLoginMessage('');
@@ -1382,6 +1996,7 @@
       const password = document.getElementById('adminPassword').value;
 
       const { error } = await supabase.auth.signInWithPassword({ email, password });
+      document.getElementById('adminPassword').value = '';
 
       loginButton.disabled = false;
 
@@ -1395,8 +2010,16 @@
     });
 
     logoutButton.addEventListener('click', async () => {
-      await supabase.auth.signOut();
+      hideAllRutNumbers();
+      clearMfaSetup();
+      verifiedMfaFactorId = '';
+      await supabase.auth.signOut({ scope: 'local' });
       await refreshSession();
+    });
+
+    window.addEventListener('pagehide', hideAllRutNumbers);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') hideAllRutNumbers();
     });
 
     adminTabs.addEventListener('click', async (event) => {
@@ -1433,15 +2056,36 @@
       const { data } = await supabase.auth.getSession();
       const session = data.session;
       const isLoggedIn = Boolean(session);
-
-      loginPanel.classList.toggle('hidden', isLoggedIn);
-      adminTabs.classList.toggle('hidden', !isLoggedIn);
-      logoutButton.classList.toggle('hidden', !isLoggedIn);
+      let isMfaVerified = false;
 
       if (isLoggedIn) {
+        const { data: assurance, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (error) {
+          setMfaMessage(`Kunde inte kontrollera tvåstegsverifieringen: ${error.message}`, 'error');
+        } else {
+          isMfaVerified = assurance.currentLevel === 'aal2' && assurance.nextLevel === 'aal2';
+        }
+      }
+
+      loginPanel.classList.toggle('hidden', isLoggedIn);
+      mfaPanel.classList.toggle('hidden', !isLoggedIn || isMfaVerified);
+      adminTabs.classList.toggle('hidden', !isMfaVerified);
+      logoutButton.classList.toggle('hidden', !isLoggedIn);
+
+      if (isMfaVerified) {
+        clearMfaSetup();
         renderAdminView();
         await fetchBookings();
+      } else if (isLoggedIn) {
+        hideAllRutNumbers();
+        bookingsPanel.classList.add('hidden');
+        blockedDatesPanel.classList.add('hidden');
+        discountCodesPanel.classList.add('hidden');
+        await prepareMfaPanel();
       } else {
+        hideAllRutNumbers();
+        clearMfaSetup();
+        verifiedMfaFactorId = '';
         activeAdminView = 'bookings';
         bookingsPanel.classList.add('hidden');
         blockedDatesPanel.classList.add('hidden');

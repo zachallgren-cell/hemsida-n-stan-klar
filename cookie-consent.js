@@ -75,7 +75,7 @@
     banner.innerHTML = `
       <div>
         <h2 id="cookieConsentTitle">Cookies</h2>
-        <p id="cookieConsentSummary">Vi använder nödvändig teknik för sidan och Google Analytics först om du godkänner analyscookies.</p>
+        <p id="cookieConsentSummary">Vi använder nödvändig teknik för sidan och Google Analytics först om du godkänner analyscookies. <a href="integritet.html">Läs integritetspolicyn</a>.</p>
       </div>
       <div class="cookie-actions">
         <button type="button" class="cookie-button cookie-button-primary" data-cookie-accept>Acceptera analyscookies</button>
@@ -113,6 +113,7 @@
         <h3>Kontakt</h3>
         <p>Har du frågor om vår användning av cookies är du välkommen att kontakta oss på:</p>
         <p><strong>info@bergafonsterputs.se</strong></p>
+        <p><a href="integritet.html">Läs mer i vår integritetspolicy</a></p>
 
         <div class="cookie-modal-actions">
           <button type="button" class="cookie-button cookie-button-primary" data-cookie-accept>Acceptera analyscookies</button>

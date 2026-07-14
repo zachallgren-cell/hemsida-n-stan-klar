@@ -9,11 +9,14 @@ verify_jwt = false
 [functions.validate-discount]
 verify_jwt = false
 
-[functions.stripe-webhook]
-verify_jwt = false
+[functions.complete-booking]
+verify_jwt = true
 
 [functions.rut-booking-details]
 verify_jwt = false
 
 [functions.submit-rut]
 verify_jwt = false
+
+[functions.admin-rut-details]
+verify_jwt = true

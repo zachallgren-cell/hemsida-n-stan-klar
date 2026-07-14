@@ -1,119 +1,156 @@
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type'
+  'Access-Control-Allow-Origin': 'https://bergafonsterputs.se',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  Vary: 'Origin'
+};
+
+const noStoreHeaders = {
+  ...corsHeaders,
+  'Cache-Control': 'no-store, max-age=0',
+  Pragma: 'no-cache',
+  'X-Content-Type-Options': 'nosniff'
+};
+
+type DetailsPayload = {
+  bookingId?: string | number | null;
+  token?: string | null;
+};
+
+type BookingTokenState = {
+  id: string | number;
+  rut_choice?: string | null;
+  rut_form_token_hash?: string | null;
+  rut_form_token_expires_at?: string | null;
+  rut_form_token_used_at?: string | null;
 };
 
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
     headers: {
-      ...corsHeaders,
-      'Content-Type': 'application/json'
+      ...noStoreHeaders,
+      'Content-Type': 'application/json; charset=utf-8'
     }
   });
 }
 
-function parsePriceNumber(value: unknown) {
-  if (typeof value === 'number' && Number.isFinite(value)) return Math.round(value);
-  const match = String(value || '').replace(/\s/g, '').replace(',', '.').match(/\d+(\.\d+)?/);
-  if (!match) return null;
-  const parsed = Number(match[0]);
-  return Number.isFinite(parsed) ? Math.round(parsed) : null;
+function isValidBookingId(value: string) {
+  return /^[a-z0-9_-]{1,80}$/i.test(value);
 }
 
 function isValidToken(value: string) {
-  return /^[a-f0-9]{64}$/i.test(value);
+  return /^[a-z0-9_-]{32,128}$/i.test(value);
 }
 
-async function fetchBooking(supabaseUrl: string, serviceRoleKey: string, bookingId: string, token: string) {
-  const selectAttempts = [
-    'id,customer_name,email,phone,price,original_price,rut_form_token',
-    'id,customer_name,email,phone,price,rut_form_token',
-    'id,customer_name,email,phone,rut_form_token',
-    'id,email,phone,price,rut_form_token',
-    'id,email,phone,rut_form_token'
-  ];
+function bytesToHex(bytes: Uint8Array) {
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+}
 
-  let lastError = '';
+async function sha256Hex(value: string) {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
+  return bytesToHex(new Uint8Array(digest));
+}
 
-  for (const select of selectAttempts) {
-    const bookingRes = await fetch(
-      `${supabaseUrl}/rest/v1/bookings?select=${encodeURIComponent(select)}&id=eq.${encodeURIComponent(bookingId)}&rut_form_token=eq.${encodeURIComponent(token)}&limit=1`,
-      {
-        headers: {
-          apikey: serviceRoleKey,
-          Authorization: `Bearer ${serviceRoleKey}`,
-          'Content-Type': 'application/json'
-        }
+function timingSafeEqual(left: string, right: string) {
+  if (left.length !== right.length) return false;
+  let mismatch = 0;
+  for (let index = 0; index < left.length; index += 1) {
+    mismatch |= left.charCodeAt(index) ^ right.charCodeAt(index);
+  }
+  return mismatch === 0;
+}
+
+async function fetchBookingTokenState(
+  supabaseUrl: string,
+  serviceRoleKey: string,
+  bookingId: string
+): Promise<BookingTokenState | null> {
+  const columns = [
+    'id',
+    'rut_choice',
+    'rut_form_token_hash',
+    'rut_form_token_expires_at',
+    'rut_form_token_used_at'
+  ].join(',');
+  const response = await fetch(
+    `${supabaseUrl}/rest/v1/bookings?select=${encodeURIComponent(columns)}&id=eq.${encodeURIComponent(bookingId)}&limit=1`,
+    {
+      headers: {
+        apikey: serviceRoleKey,
+        Authorization: `Bearer ${serviceRoleKey}`,
+        'Content-Type': 'application/json'
       }
-    );
-
-    if (bookingRes.ok) {
-      const bookings = await bookingRes.json();
-      return {
-        booking: Array.isArray(bookings) ? bookings[0] : null,
-        error: ''
-      };
     }
+  );
 
-    lastError = await bookingRes.text();
-    console.error('Could not fetch RUT booking details with select', select, lastError);
+  if (!response.ok) {
+    console.error('rut-booking-details could not read token state', { status: response.status });
+    throw new Error('Could not verify RUT token');
   }
 
-  return {
-    booking: null,
-    error: lastError || 'Unknown Supabase REST error'
-  };
+  const rows = await response.json();
+  return Array.isArray(rows) ? rows[0] || null : null;
 }
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response('ok', { headers: noStoreHeaders });
   }
 
-  if (req.method !== 'GET') {
+  if (req.method !== 'POST') {
     return jsonResponse({ error: 'Method not allowed' }, 405);
   }
 
   try {
+    const contentLength = Number(req.headers.get('content-length') || '0');
+    if (Number.isFinite(contentLength) && contentLength > 4096) {
+      return jsonResponse({ error: 'För stor begäran.' }, 413);
+    }
+
+    const payload = (await req.json()) as DetailsPayload;
+    const bookingId = String(payload.bookingId || '').trim();
+    const token = String(payload.token || '').trim();
+
+    if (!isValidBookingId(bookingId) || !isValidToken(token)) {
+      return jsonResponse({ error: 'RUT-länken är ogiltig eller saknas.' }, 403);
+    }
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    const url = new URL(req.url);
-    const bookingId = url.searchParams.get('bookingId') || url.searchParams.get('booking') || '';
-    const token = url.searchParams.get('token') || '';
 
     if (!supabaseUrl || !serviceRoleKey) {
       console.error('Supabase secrets are missing for rut-booking-details');
-      return jsonResponse({ error: 'Server configuration saknas.' }, 500);
+      return jsonResponse({ error: 'Serverkonfiguration saknas.' }, 500);
     }
 
-    if (!/^[a-z0-9_-]{1,80}$/i.test(bookingId)) {
-      return jsonResponse({ error: 'Ogiltigt boknings-ID.' }, 400);
+    const [booking, tokenHash] = await Promise.all([
+      fetchBookingTokenState(supabaseUrl, serviceRoleKey, bookingId),
+      sha256Hex(token)
+    ]);
+    const storedHash = String(booking?.rut_form_token_hash || '');
+    const expiryTime = new Date(String(booking?.rut_form_token_expires_at || '')).getTime();
+
+    if (!booking
+      || !storedHash
+      || !timingSafeEqual(tokenHash, storedHash)
+      || booking.rut_form_token_used_at
+      || !Number.isFinite(expiryTime)
+      || expiryTime <= Date.now()) {
+      return jsonResponse({ error: 'RUT-länken är ogiltig, förbrukad eller har gått ut.' }, 403);
     }
 
-    if (!isValidToken(token)) {
-      return jsonResponse({ error: 'Ogiltig eller saknad säkerhetslänk.' }, 403);
-    }
-
-    const { booking, error } = await fetchBooking(supabaseUrl, serviceRoleKey, bookingId, token);
-
-    if (error) {
-      return jsonResponse({ error: 'Kunde inte hämta bokningsuppgifter.' }, 500);
-    }
-
-    if (!booking) {
-      return jsonResponse({ error: 'Bokningen hittades inte eller länken är ogiltig.' }, 404);
+    if (!/^ja\b/i.test(String(booking.rut_choice || '').trim())) {
+      return jsonResponse({ error: 'Den här bokningen är inte registrerad för RUT-avdrag.' }, 409);
     }
 
     return jsonResponse({
-      bookingId: booking.id,
-      name: booking.customer_name || '',
-      email: booking.email || '',
-      phone: booking.phone || '',
-      rutAmount: Math.max(0, (parsePriceNumber(booking.original_price) ?? parsePriceNumber(booking.price) ?? 0) - 150)
+      success: true,
+      bookingId: String(booking.id),
+      ready: true
     });
-  } catch (error) {
-    console.error('Unhandled rut-booking-details error', error);
-    return jsonResponse({ error: error instanceof Error ? error.message : 'Okänt fel.' }, 500);
+  } catch {
+    console.error('Unhandled rut-booking-details error');
+    return jsonResponse({ error: 'RUT-länken kunde inte verifieras just nu.' }, 500);
   }
 });

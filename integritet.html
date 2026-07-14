@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <link rel="stylesheet" href="cookie-consent.css" />
+  <script src="cookie-consent.js" defer></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Integritetspolicy | Berga Fönsterputs</title>
+  <meta name="description" content="Läs hur Berga Fönsterputs hanterar personuppgifter vid bokning, kontakt, Swishbetalning och RUT-avdrag." />
+  <link rel="canonical" href="https://bergafonsterputs.se/integritet.html" />
+  <meta property="og:title" content="Integritetspolicy | Berga Fönsterputs" />
+  <meta property="og:description" content="Så hanterar Berga Fönsterputs personuppgifter vid bokning, betalning, kontakt och RUT-avdrag." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://bergafonsterputs.se/integritet.html" />
+  <meta property="og:image" content="https://bergafonsterputs.se/social-preview.jpg" />
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
+  <link rel="shortcut icon" href="/favicon-48.png" />
+  <link rel="apple-touch-icon" sizes="192x192" href="/favicon-192.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <style>
+    :root {
+      --primary: #0b6fa4;
+      --primary-dark: #084f74;
+      --cta: #ffb347;
+      --bg: #cfe8f5;
+      --surface: rgba(255, 255, 255, 0.97);
+      --text: #173042;
+      --muted: #5f7280;
+      --white: #ffffff;
+      --border: #c6dfec;
+      --shadow: 0 16px 38px rgba(11, 111, 164, 0.14);
+      --radius: 22px;
+      --max-width: 1180px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 24px;
+    }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background: linear-gradient(to bottom, #e2f2fb, var(--bg));
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      line-height: 1.65;
+    }
+
+    a { color: inherit; }
+
+    a:focus-visible,
+    button:focus-visible {
+      outline: 3px solid var(--cta);
+      outline-offset: 3px;
+    }
+
+    .skip-link {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 100;
+      padding: 10px 14px;
+      border-radius: 10px;
+      color: #173042;
+      background: #ffffff;
+      font-weight: 800;
+      transform: translateY(-160%);
+      transition: transform 0.2s ease;
+    }
+
+    .skip-link:focus { transform: translateY(0); }
+
+    .container {
+      width: min(92%, var(--max-width));
+      margin: 0 auto;
+    }
+
+    header {
+      position: relative;
+      overflow: hidden;
+      padding: 18px 0 112px;
+      color: var(--white);
+      background:
+        linear-gradient(135deg, rgba(8, 82, 120, 0.78), rgba(6, 58, 88, 0.74)),
+        linear-gradient(90deg, rgba(255,255,255,0.45) 0 1.2%, transparent 1.2% 48.8%, rgba(255,255,255,0.45) 48.8% 50.2%, transparent 50.2% 98.8%, rgba(255,255,255,0.45) 98.8% 100%),
+        linear-gradient(180deg, rgba(255,255,255,0.42) 0 1.5%, transparent 1.5% 48.5%, rgba(255,255,255,0.42) 48.5% 50%, transparent 50% 98.5%, rgba(255,255,255,0.42) 98.5% 100%),
+        linear-gradient(180deg, #effbff 0%, #8fd8f4 56%, #2f7ba7 100%);
+    }
+
+    header::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(128deg, transparent 16%, rgba(255,255,255,0.13) 27%, rgba(255,255,255,0.34) 33%, transparent 45%),
+        linear-gradient(to bottom, transparent 62%, rgba(5, 53, 78, 0.18) 88%, rgba(207, 232, 245, 0.16) 100%);
+    }
+
+    .topbar,
+    .hero {
+      position: relative;
+      z-index: 1;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 12px 16px;
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 26px;
+      background: rgba(8, 56, 82, 0.36);
+      box-shadow: 0 18px 34px rgba(4, 25, 36, 0.16);
+      backdrop-filter: blur(14px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      color: #ffffff;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .brand-logo {
+      width: 68px;
+      height: 68px;
+      padding: 6px;
+      flex: 0 0 auto;
+      border-radius: 18px;
+      background: #ffffff;
+      box-shadow: 0 10px 24px rgba(4, 25, 36, 0.16);
+    }
+
+    .brand-logo img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .brand-name {
+      display: grid;
+      line-height: 1.15;
+    }
+
+    .brand-name small {
+      margin-top: 4px;
+      color: rgba(255,255,255,0.8);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .site-nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 6px;
+      padding: 5px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+    }
+
+    .site-nav a {
+      padding: 9px 12px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      color: rgba(255,255,255,0.95);
+      font-size: 0.92rem;
+      font-weight: 800;
+      line-height: 1;
+      text-decoration: none;
+    }
+
+    .site-nav a:hover {
+      border-color: rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.14);
+    }
+
+    .hero {
+      max-width: 780px;
+      padding-top: 72px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 12px;
+      padding: 7px 12px;
+      border: 1px solid rgba(255,255,255,0.24);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.1);
+      font-size: 0.83rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      max-width: 720px;
+      margin: 0 0 16px;
+      font-size: clamp(2.35rem, 6vw, 4.8rem);
+      line-height: 1.02;
+      letter-spacing: -0.035em;
+    }
+
+    .hero p {
+      max-width: 720px;
+      margin: 0;
+      color: rgba(255,255,255,0.92);
+      font-size: clamp(1rem, 2vw, 1.18rem);
+    }
+
+    .updated {
+      display: inline-block;
+      margin-top: 18px;
+      color: rgba(255,255,255,0.82);
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    main {
+      position: relative;
+      z-index: 2;
+      margin-top: -58px;
+      padding-bottom: 72px;
+    }
+
+    .policy-layout {
+      display: grid;
+      grid-template-columns: minmax(210px, 0.3fr) minmax(0, 1fr);
+      align-items: start;
+      gap: 24px;
+    }
+
+    .contents,
+    .policy-card {
+      border: 1px solid rgba(198, 223, 236, 0.95);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .contents {
+      position: sticky;
+      top: 20px;
+      padding: 22px;
+    }
+
+    .contents h2 {
+      margin: 0 0 12px;
+      font-size: 1.05rem;
+    }
+
+    .contents ol {
+      display: grid;
+      gap: 7px;
+      margin: 0;
+      padding-left: 22px;
+    }
+
+    .contents a {
+      color: var(--primary-dark);
+      font-weight: 700;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    .policy-content {
+      display: grid;
+      gap: 22px;
+      min-width: 0;
+    }
+
+    .policy-card {
+      padding: clamp(24px, 4vw, 40px);
+      scroll-margin-top: 24px;
+    }
+
+    .policy-card h2 {
+      margin: 0 0 14px;
+      color: var(--primary-dark);
+      font-size: clamp(1.45rem, 3vw, 2rem);
+      line-height: 1.2;
+    }
+
+    .policy-card h3 {
+      margin: 26px 0 8px;
+      color: #16425c;
+      font-size: 1.12rem;
+    }
+
+    .policy-card p { margin: 0 0 14px; }
+    .policy-card p:last-child { margin-bottom: 0; }
+
+    .policy-card ul {
+      margin: 12px 0 0;
+      padding-left: 22px;
+    }
+
+    .policy-card li + li { margin-top: 7px; }
+
+    .summary-card {
+      border-top: 5px solid var(--cta);
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .summary-item {
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: #f2f9fc;
+    }
+
+    .summary-item strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--primary-dark);
+    }
+
+    .summary-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .notice {
+      margin: 20px 0 0;
+      padding: 18px 20px;
+      border: 1px solid #afd6e7;
+      border-left: 5px solid var(--primary);
+      border-radius: 14px;
+      background: #edf8fc;
+    }
+
+    .notice strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--primary-dark);
+    }
+
+    .table-wrap {
+      width: 100%;
+      margin-top: 20px;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #ffffff;
+      font-size: 0.94rem;
+    }
+
+    th,
+    td {
+      padding: 14px 15px;
+      border-bottom: 1px solid #dbeaf1;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: #ffffff;
+      background: var(--primary-dark);
+      font-size: 0.87rem;
+      letter-spacing: 0.015em;
+    }
+
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:nth-child(even) { background: #f5fafc; }
+
+    .security-steps {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin: 20px 0 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: security-step;
+    }
+
+    .security-steps li {
+      position: relative;
+      min-height: 118px;
+      margin: 0;
+      padding: 18px 18px 18px 58px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: #f7fbfd;
+      counter-increment: security-step;
+    }
+
+    .security-steps li::before {
+      content: counter(security-step);
+      position: absolute;
+      top: 18px;
+      left: 16px;
+      display: grid;
+      width: 30px;
+      height: 30px;
+      place-items: center;
+      border-radius: 50%;
+      color: #ffffff;
+      background: var(--primary);
+      font-weight: 900;
+    }
+
+    .external-links {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .external-links a {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 13px 15px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      color: var(--primary-dark);
+      background: #f2f9fc;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .external-links a:hover { background: #e8f5fa; }
+
+    .contact-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-top: 18px;
+      padding: 20px;
+      border-radius: 16px;
+      color: #ffffff;
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+    }
+
+    .contact-box p { margin: 0; }
+
+    .contact-box a {
+      display: inline-block;
+      flex: 0 0 auto;
+      padding: 11px 16px;
+      border-radius: 999px;
+      color: #173042;
+      background: linear-gradient(to right, #ffb347, #f1992d);
+      font-weight: 900;
+      text-decoration: none;
+    }
+
+    footer {
+      padding: 38px 0;
+      color: rgba(255,255,255,0.9);
+      background: linear-gradient(to bottom, #082c3d, #061f2c);
+    }
+
+    footer p { margin: 6px 0; }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .footer-links a {
+      color: rgba(255,255,255,0.94);
+      font-weight: 700;
+      text-underline-offset: 4px;
+    }
+
+    @media (max-width: 900px) {
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .site-nav { justify-content: flex-start; }
+
+      .policy-layout { grid-template-columns: 1fr; }
+
+      .contents {
+        position: static;
+        padding: 18px 22px;
+      }
+
+      .contents ol {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 7px 26px;
+      }
+    }
+
+    @media (max-width: 680px) {
+      header { padding-bottom: 94px; }
+
+      .container { width: min(94%, var(--max-width)); }
+
+      .topbar {
+        gap: 12px;
+        padding: 10px;
+        border-radius: 20px;
+      }
+
+      .brand-logo {
+        width: 58px;
+        height: 58px;
+        border-radius: 15px;
+      }
+
+      .brand-name small { display: none; }
+
+      .site-nav {
+        width: 100%;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        overflow-x: auto;
+        border-radius: 15px;
+        scrollbar-width: thin;
+      }
+
+      .site-nav a {
+        padding: 9px 10px;
+        font-size: 0.82rem;
+        white-space: nowrap;
+      }
+
+      .hero { padding-top: 52px; }
+
+      .hero h1 { font-size: clamp(2.25rem, 12vw, 3.25rem); }
+
+      main {
+        margin-top: -46px;
+        padding-bottom: 52px;
+      }
+
+      .contents ol,
+      .summary-grid,
+      .security-steps {
+        grid-template-columns: 1fr;
+      }
+
+      .policy-card { padding: 23px 19px; }
+
+      .table-wrap {
+        overflow: visible;
+        border: 0;
+      }
+
+      table,
+      tbody,
+      tr,
+      td {
+        display: block;
+        width: 100%;
+      }
+
+      thead { display: none; }
+
+      tbody {
+        display: grid;
+        gap: 12px;
+      }
+
+      tbody tr {
+        overflow: hidden;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: #ffffff;
+      }
+
+      td {
+        padding: 12px 14px;
+        border-bottom: 1px solid #dbeaf1;
+      }
+
+      td::before {
+        content: attr(data-label);
+        display: block;
+        margin-bottom: 3px;
+        color: var(--primary-dark);
+        font-size: 0.78rem;
+        font-weight: 900;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+      }
+
+      .contact-box {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      * { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Hoppa till innehållet</a>
+
+  <header id="top">
+    <div class="container">
+      <div class="topbar">
+        <a class="brand" href="index.html" aria-label="Berga Fönsterputs startsida">
+          <span class="brand-logo">
+            <img src="logga-fonsterputs-transparent.png" alt="" />
+          </span>
+          <span class="brand-name">
+            Berga Fönsterputs
+            <small>Personlig och lokal service</small>
+          </span>
+        </a>
+        <nav class="site-nav" aria-label="Huvudmeny">
+          <a href="index.html">Startsida</a>
+          <a href="var-tjanst.html">Vår tjänst</a>
+          <a href="om-oss.html">Om oss</a>
+          <a href="index.html#bokning">Boka</a>
+          <a href="index.html#kontakt">Kontakt</a>
+        </nav>
+      </div>
+
+      <div class="hero">
+        <p class="eyebrow">Din integritet</p>
+        <h1>Så hanterar vi dina personuppgifter</h1>
+        <p>Här förklarar vi vilka uppgifter Berga Fönsterputs använder, varför de behövs och vilka val och rättigheter du har.</p>
+        <span class="updated">Senast uppdaterad: 14 juli 2026</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" id="main-content">
+    <div class="policy-layout">
+      <aside class="contents" aria-label="Innehåll på sidan">
+        <h2>På den här sidan</h2>
+        <ol>
+          <li><a href="#oversikt">Kort sammanfattning</a></li>
+          <li><a href="#ansvar">Vem ansvarar?</a></li>
+          <li><a href="#behandling">Vad vi behandlar</a></li>
+          <li><a href="#rut">Säker RUT-hantering</a></li>
+          <li><a href="#mottagare">Mottagare</a></li>
+          <li><a href="#lagring">Hur länge vi sparar</a></li>
+          <li><a href="#rattigheter">Dina rättigheter</a></li>
+          <li><a href="#kontakt">Kontakt och klagomål</a></li>
+        </ol>
+      </aside>
+
+      <article class="policy-content">
+        <section class="policy-card summary-card" id="oversikt">
+          <h2>Kort sammanfattning</h2>
+          <p>Vi använder bara personuppgifter när de behövs för att svara dig, hantera en bokning, utföra tjänsten, ta emot betalning, administrera ett begärt RUT-avdrag eller hålla webbplatsen säker och fungerande.</p>
+          <div class="summary-grid">
+            <div class="summary-item">
+              <strong>Du styr RUT-valet</strong>
+              <span>Personnummer efterfrågas först när du själv väljer RUT och öppnar det separata formuläret.</span>
+            </div>
+            <div class="summary-item">
+              <strong>Betalning efter arbetet</strong>
+              <span>Swishbelopp och referens skickas när arbetet har markerats som klart.</span>
+            </div>
+            <div class="summary-item">
+              <strong>Begränsad lagring</strong>
+              <span>RUT-arbetskopian har en särskild gallringsgräns. Andra uppgifter sparas bara så länge de behövs eller måste bevaras.</span>
+            </div>
+            <div class="summary-item">
+              <strong>Fråga oss</strong>
+              <span>Du kan kontakta info@bergafonsterputs.se om dina uppgifter eller rättigheter.</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="policy-card" id="ansvar">
+          <h2>Vem ansvarar för uppgifterna?</h2>
+          <p><strong>Berga Fönsterputs</strong> är personuppgiftsansvarig för den behandling som beskrivs här. Det betyder att vi bestämmer varför och hur uppgifterna behandlas i vår verksamhet.</p>
+          <p>Frågor om integritet och begäranden om att utöva en rättighet skickas till <a href="mailto:info@bergafonsterputs.se"><strong>info@bergafonsterputs.se</strong></a>.</p>
+        </section>
+
+        <section class="policy-card" id="behandling">
+          <h2>Vilka uppgifter vi behandlar och varför</h2>
+          <p>Vilka uppgifter som används beror på hur du har kontakt med oss. Skriv inte känsliga eller onödiga personuppgifter i fritextfält.</p>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Situation</th>
+                  <th scope="col">Exempel på uppgifter</th>
+                  <th scope="col">Ändamål</th>
+                  <th scope="col">Rättslig grund</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td data-label="Situation"><strong>Bokning och tjänst</strong></td>
+                  <td data-label="Uppgifter">Namn, e-post, telefon, adress eller plats, bokad dag och tid, bostads- och fönsteruppgifter, tillval, transportbehov, koordinater, meddelande, pris och rabatt.</td>
+                  <td data-label="Ändamål">Räkna pris, ta emot och bekräfta bokningen, planera besöket, utföra arbetet och hantera frågor eller ändringar.</td>
+                  <td data-label="Rättslig grund">Avtal eller åtgärder på din begäran före avtal. Berättigat intresse kan användas för nödvändig administration, säkerhet och för att hantera eller försvara krav.</td>
+                </tr>
+                <tr>
+                  <td data-label="Situation"><strong>Kontakt</strong></td>
+                  <td data-label="Uppgifter">Kontaktuppgifter och det du väljer att skriva i ett mejl eller annat meddelande.</td>
+                  <td data-label="Ändamål">Svara på frågor, lämna offertinformation och följa upp ett pågående eller möjligt kundärende.</td>
+                  <td data-label="Rättslig grund">Åtgärder på din begäran före avtal, avtal eller berättigat intresse av att svara och ge service, beroende på frågan.</td>
+                </tr>
+                <tr>
+                  <td data-label="Situation"><strong>Swishbetalning</strong></td>
+                  <td data-label="Uppgifter">Belopp, betalningsreferens, tidpunkt, betalningsstatus och de avsändaruppgifter som visas för mottagaren av en Swishbetalning.</td>
+                  <td data-label="Ändamål">Koppla betalningen till rätt arbete, bekräfta att den är mottagen, följa upp fel och skapa nödvändigt underlag.</td>
+                  <td data-label="Rättslig grund">Avtal samt rättslig förpliktelse för exempelvis bokförings- och skatteunderlag. Berättigat intresse kan användas för att förebygga fel eller missbruk och hantera krav.</td>
+                </tr>
+                <tr>
+                  <td data-label="Situation"><strong>Manuellt RUT-underlag</strong></td>
+                  <td data-label="Uppgifter">Personnummer samt relevanta boknings-, arbets-, pris- och betalningsuppgifter.</td>
+                  <td data-label="Ändamål">Kontrollera och administrera det RUT-avdrag du har begärt, lämna nödvändiga uppgifter till Skatteverket och dokumentera ärendet.</td>
+                  <td data-label="Rättslig grund">Avtal för den begärda RUT-hanteringen och rättslig förpliktelse där skatte- eller bokföringsregler kräver behandling och dokumentation.</td>
+                </tr>
+                <tr>
+                  <td data-label="Situation"><strong>Webbplats och säkerhet</strong></td>
+                  <td data-label="Uppgifter">Cookieval, tekniska händelser och begränsade logguppgifter som tidpunkt, begärans status samt nätverks- eller enhetsinformation när tjänsterna skapar sådana loggar.</td>
+                  <td data-label="Ändamål">Få webbplatsen att fungera, skydda formulär och tjänster mot missbruk, felsöka och förbättra säkerheten.</td>
+                  <td data-label="Rättslig grund">Berättigat intresse av en säker och fungerande tjänst. Analysdata används först efter ditt samtycke till analyscookies.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>RUT-rutan är en bekräftelse</h3>
+          <p>När du markerar rutan i RUT-formuläret bekräftar du att du har läst informationen, vill lämna underlaget för den bokning som visas och att uppgifterna är riktiga. Rutan är inte den enda rättsliga grunden för behandlingen. Den fortsatta hanteringen behövs normalt för avtal och, när regler kräver det, rättslig förpliktelse.</p>
+
+          <h3>Cookies och besöksanalys</h3>
+          <p>Ditt cookieval sparas lokalt i webbläsaren. Google Analytics laddas endast om du accepterar analyscookies. Du kan ändra valet via knappen <strong>Cookieinställningar</strong> på webbplatsen. Ett återkallat samtycke påverkar inte behandling som redan skett innan återkallelsen.</p>
+
+          <h3>Automatiska beräkningar</h3>
+          <p>Webbplatsen räknar automatiskt fram ett pris utifrån dina val och kontrollerar beräkningen på servern. Vi använder inte denna prisberäkning för beslut som enbart fattas automatiskt och har rättsliga eller liknande betydande följder för dig.</p>
+        </section>
+
+        <section class="policy-card" id="rut">
+          <h2>Särskilt om säker RUT-hantering</h2>
+          <p>Personnummer kräver extra varsam hantering. Därför hålls RUT-underlaget åtskilt från det vanliga bokningsformuläret.</p>
+          <ol class="security-steps">
+            <li>Om du väljer RUT får du en separat, tidsbegränsad engångslänk kopplad till just din bokning.</li>
+            <li>Länken innehåller inte ditt personnummer. Formuläret kontrollerar bokning och token på servern innan uppgiften tas emot.</li>
+            <li>Personnumret sparas som en krypterad arbetskopia. Åtkomst till visning kräver administrativ behörighet och åtkomsthändelser loggas.</li>
+            <li>Token förbrukas efter inlämning. Arbetskopian kan gallras när RUT-ärendet är klart och omfattas alltid av den bortre tidsgränsen nedan.</li>
+          </ol>
+          <div class="notice">
+            <strong>Skicka inte personnummer via vanlig e-post.</strong>
+            Använd bara det separata RUT-formuläret från bekräftelsemejlet. Kontakta oss om länken saknas, har gått ut eller verkar felaktig.
+          </div>
+          <p style="margin-top:18px;">Säkerhetsåtgärder minskar risker men ingen digital lösning kan lova fullständig riskfrihet. Vi begränsar därför både åtkomst och lagringstid och följer upp avvikelser när de upptäcks.</p>
+          <div class="external-links">
+            <a href="https://www.skatteverket.se/foretag/skatterochavdrag/rotochrut/safungerarrutavdraget.4.64a656d113f4c7597011e41.html" target="_blank" rel="noopener noreferrer">
+              Så fungerar RUT-avdraget hos Skatteverket <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+        </section>
+
+        <section class="policy-card" id="mottagare">
+          <h2>Vilka kan få del av uppgifterna?</h2>
+          <p>Vi delar inte uppgifter vidare bara för att de finns. Följande mottagare kan behandla de uppgifter som behövs för sin del av tjänsten:</p>
+          <ul>
+            <li><strong>GitHub Pages</strong> för att leverera den publika webbplatsen.</li>
+            <li><strong>Supabase</strong> för bokningsdatabas, serverfunktioner och tillhörande teknisk drift.</li>
+            <li><strong>Resend</strong> för att leverera boknings-, RUT- och klartmejl. RUT-underlaget fylls i i det separata formuläret och ska inte skickas i vanlig e-post.</li>
+            <li><strong>Google Analytics</strong> för begränsad besöksanalys, men bara när du har accepterat analyscookies.</li>
+            <li><strong>Skatteverket</strong> när du har begärt RUT och uppgifterna behövs för ansökan, komplettering eller kontroll.</li>
+            <li><strong>Banker och tjänster kopplade till Swish</strong> för att genomföra och redovisa betalningen.</li>
+            <li><strong>Andra nödvändiga tekniska leverantörer</strong> om det krävs för säker drift eller leverans av tjänsten.</li>
+            <li><strong>Redovisningshjälp, rådgivare eller myndigheter</strong> när det behövs för administration, rättsliga krav eller för att fastställa, göra gällande eller försvara rättsliga anspråk.</li>
+          </ul>
+
+          <h3>Behandling utanför EU/EES</h3>
+          <p>En teknisk leverantör kan i vissa fall behandla uppgifter från ett land utanför EU/EES. Om en sådan överföring är aktuell behöver den bedömas utifrån gällande dataskyddsregler och lämpliga skyddsåtgärder. Kontakta oss om du vill ha aktuell information om en viss tjänst och eventuella överföringar. Vi anger inte en lagringsplats här när den inte är säkerställd.</p>
+        </section>
+
+        <section class="policy-card" id="lagring">
+          <h2>Hur länge sparar vi uppgifterna?</h2>
+          <p>Vi använder olika gallringsregler beroende på uppgift och ändamål. Uppgifter kan tas bort tidigare när de inte längre behövs, men vissa underlag kan behöva sparas för att följa rättsliga krav.</p>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Typ av uppgift</th>
+                  <th scope="col">Lagringsprincip</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td data-label="Typ"><strong>Krypterad RUT-arbetskopia</strong></td>
+                  <td data-label="Lagring">Gallras senast 180 dagar efter det senare av mottagandet och den bokade arbetsdagen, men aldrig längre än två år efter mottagandet. Den kan gallras tidigare när RUT-ärendet är klart.</td>
+                </tr>
+                <tr>
+                  <td data-label="Typ"><strong>RUT-länk och token</strong></td>
+                  <td data-label="Lagring">Gäller i 30 dagar och görs obrukbar direkt när den har använts eller ersatts. Revisionsuppgifter utan personnummer följer den separata tidsfristen för säkerhetsloggar.</td>
+                </tr>
+                <tr>
+                  <td data-label="Typ"><strong>Bokning, arbete och Swishbetalning</strong></td>
+                  <td data-label="Lagring">Sparas så länge det behövs för att fullgöra och följa upp tjänsten. Uppgifter som utgör bokförings-, skatte- eller annat rättsligt underlag sparas därefter enligt de krav som gäller för underlaget. Den exakta tiden kan därför variera.</td>
+                </tr>
+                <tr>
+                  <td data-label="Typ"><strong>Kontaktärenden</strong></td>
+                  <td data-label="Lagring">Gallras när dialogen är avslutad och uppgifterna inte längre behövs. Om kontakten leder till en bokning eller behöver sparas för ett krav följer den i stället den relevanta lagringsprincipen.</td>
+                </tr>
+                <tr>
+                  <td data-label="Typ"><strong>Säkerhetsloggar</strong></td>
+                  <td data-label="Lagring">RUT-relaterade åtkomst- och säkerhetsloggar gallras automatiskt efter två år. Andra tekniska loggar behålls bara så länge de behövs för säkerhet, felsökning, missbruksförebyggande eller åtkomstkontroll.</td>
+                </tr>
+                <tr>
+                  <td data-label="Typ"><strong>Cookieval och analys</strong></td>
+                  <td data-label="Lagring">Cookievalet ligger lokalt tills du ändrar eller rensar det. Analysuppgifter följer den aktuella inställningen för analystjänsten och används bara efter samtycke.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="policy-card" id="rattigheter">
+          <h2>Dina rättigheter</h2>
+          <p>Du kan, när förutsättningarna i dataskyddsreglerna är uppfyllda, begära att:</p>
+          <ul>
+            <li>få information om och en kopia av de personuppgifter vi behandlar om dig,</li>
+            <li>felaktiga eller ofullständiga uppgifter rättas,</li>
+            <li>uppgifter raderas eller behandlingen begränsas,</li>
+            <li>invända mot behandling som grundas på berättigat intresse,</li>
+            <li>få ut vissa uppgifter i ett strukturerat format när rätten till dataportabilitet gäller, och</li>
+            <li>återkalla ett samtycke, exempelvis för analyscookies.</li>
+          </ul>
+          <p style="margin-top:16px;">Rättigheterna är inte absoluta. Exempelvis kan vi behöva behålla uppgifter som omfattas av bokförings- eller skatteregler eller som behövs för att hantera ett rättsligt krav. Vi kan behöva kontrollera din identitet innan en begäran genomförs.</p>
+          <div class="external-links">
+            <a href="https://www.imy.se/privatperson/dataskydd/dina-rattigheter/" target="_blank" rel="noopener noreferrer">
+              Läs om dina rättigheter hos IMY <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+        </section>
+
+        <section class="policy-card" id="kontakt">
+          <h2>Kontakt, frågor och klagomål</h2>
+          <p>Kontakta oss först om du har en fråga, vill utöva en rättighet eller anser att något blivit fel. Beskriv gärna vilken bokning eller kontakt frågan gäller, men skicka inte personnummer eller andra känsliga uppgifter via vanlig e-post.</p>
+          <div class="contact-box">
+            <p><strong>Berga Fönsterputs</strong><br />Integritetsfrågor och rättighetsbegäranden</p>
+            <a href="mailto:info@bergafonsterputs.se">info@bergafonsterputs.se</a>
+          </div>
+
+          <h3>Klagomål till IMY</h3>
+          <p>Om du anser att dina personuppgifter behandlas felaktigt har du rätt att lämna klagomål till Integritetsskyddsmyndigheten (IMY). IMY rekommenderar att du först kontaktar den som behandlar uppgifterna.</p>
+          <div class="external-links">
+            <a href="https://www.imy.se/privatperson/utfora-arenden/lamna-ett-klagomal/" target="_blank" rel="noopener noreferrer">
+              Lämna ett klagomål hos IMY <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+
+          <h3>Ändringar i policyn</h3>
+          <p>Policyn kan uppdateras när våra arbetssätt, tjänster eller regler förändras. Den aktuella versionens datum visas högst upp på sidan.</p>
+        </section>
+      </article>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p><strong>Berga Fönsterputs</strong></p>
+      <p>E-post: <a href="mailto:info@bergafonsterputs.se">info@bergafonsterputs.se</a></p>
+      <div class="footer-links">
+        <a href="index.html">Startsida</a>
+        <a href="var-tjanst.html">Vår tjänst</a>
+        <a href="index.html#bokning">Boka tid</a>
+        <a href="index.html#kontakt">Kontakt</a>
+        <a href="#top" aria-current="page">Integritet</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

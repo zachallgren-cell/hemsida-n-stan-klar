@@ -1,261 +1,128 @@
-# Bokningsmail med Supabase
+# Bokning, Swish och manuell RUT
 
-Den här lösningen gör bokning och betalning i två steg:
+Webbplatsens aktiva betalningsflöde använder Swish Företag. Fortnox används inte för RUT och Stripe används inte för nya betalningar.
 
-1. sparar bokningen i tabellen `bookings`
-2. skickar ett bokningsmail till `bokning@bergafonsterputs.se`
-3. visar en tack-sida där kunden ser att betalning sker efter utfört jobb
-4. skickar en Stripe-länk i klartmailet när jobbet markeras som slutfört, och skapar en ny om den tidigare har gått ut
+## Kundflöde
 
-## Så fungerar det
+1. Kunden bokar och väljer om RUT ska användas.
+2. `create-booking` räknar om priset på servern, sparar bokningen och skickar bokningsmejlet.
+3. Vid RUT innehåller bokningsmejlet en tidsbegränsad engångslänk till `rut.html`.
+4. `submit-rut` validerar och AES-256-GCM-krypterar personnumret. Klartext sparas aldrig i `bookings`, mejl eller loggar.
+5. När arbetet är utfört klickar admin **Markera arbete utfört**. För ett RUT-jobb kan personnumret därefter visas kortvarigt så att den manuella fakturan kan skapas.
+6. Admin fyller i fakturareferens, faktisk arbetstid och slutliga kostnader och klickar **Klart + skicka Swish**.
+7. `complete-booking` skickar ett klartmejl med Swish Företag `123 677 43 84`, mottagare `Zac Hallgren`, exakt belopp, fakturareferens, mobilknapp och tydliga manuella betalningsuppgifter.
+8. Betalningen kontrolleras manuellt i Swish Företag och markeras därefter som betald i admin. Först då kan RUT markeras som ansökt.
+9. Den krypterade arbetskopian gallras manuellt när RUT-ärendet inte längre behöver den och automatiskt senast 180 dagar efter det senare av mottagandet och arbetsdagen, dock högst två år efter mottagandet.
 
-Bokningssidan kan anropa Edge Function:
+Fakturan skapas och skickas utanför webbplatsen. `invoice_reference` kopplar Swishbetalningen och RUT-underlaget till den manuella fakturan.
 
-- `create-booking`
-- `booked-slots`
-- `validate-discount`
-- `complete-booking`
-- `stripe-webhook`
-- `rut-booking-details`
-- `submit-rut`
+## Aktiva Edge Functions
 
-Funktionen:
+- `create-booking` – validerar tillgänglighet, räknar pris och skickar bokningsmejl.
+- `booked-slots` – visar upptagna och spärrade datum.
+- `validate-discount` – förhandskontrollerar rabattkod.
+- `rut-booking-details` – verifierar RUT-länken utan att lämna ut kunduppgifter.
+- `submit-rut` – validerar, krypterar och lagrar personnummer med en förbrukad engångstoken.
+- `admin-rut-details` – adminskyddad visning, ny engångslänk, betalningskontroll, RUT-status och gallring.
+- `complete-booking` – skickar klartmejlet med Swishuppgifterna.
 
-- sparar bokningen med `SUPABASE_SERVICE_ROLE_KEY`
-- visar bokade datum/tider publikt via `booked-slots` utan kunduppgifter
-- skickar bokningsmail via Resend
-- skickar kundens första bekräftelsemail utan Stripe-länk
-- återanvänder eller skapar ny Stripe Checkout-session i `complete-booking` när jobbet markeras som klart
-- skickar Stripe Checkout-länken i klartmailet när jobbet är utfört
-- markerar bokningen som `paid` när Stripe skickar `checkout.session.completed` till webhooken
+`stripe-webhook` finns kvar i källhistoriken för äldre Stripe-betalningar men ingår inte i det nya flödet och ska inte deployas på nytt.
 
-## Rabattkoder
+## Databas
 
-Kör `supabase/migrations/20260714_add_discount_codes.sql` för att skapa rabattkodstabellen, admin-policies och bokningens rabatthistorik. Koder skapas och pausas i `admin.html`. Kunden validerar sin kod via `validate-discount`, medan `create-booking` räknar om ordinarie pris och förbrukar koden server-side innan slutpriset sparas.
+Kör alla migrationer, inklusive:
 
-## Säkert RUT-formulär utan egen RUT-databas
-
-RUT-uppgifter hanteras via:
-
-- `rut.html`
-- `supabase/functions/submit-rut/index.ts`
-
-Flödet är:
-
-1. kunden väljer RUT i bokningen
-2. bekräftelsemejlet länkar till `rut.html`
-3. `rut.html` hämtar namn, e-post, telefon och RUT-belopp från `rut-booking-details` med boknings-ID
-4. kunden fyller bara i RUT-specifika uppgifter som personnummer och eventuell fastighetsbeteckning
-5. `rut.html` skickar personnummer och RUT-belopp till Edge Function `submit-rut`
-6. funktionen validerar uppgifterna server-side
-7. funktionen sparar inte RUT-data i Supabase-tabeller
-8. om Fortnox-token finns skapar funktionen kund i Fortnox, skapar en faktura/kontantfaktura, och skickar sedan underlaget till Fortnox `/3/taxreductions`
-9. ett internt mail skickas utan personnummer som kvittens/status
-10. om Fortnox-kopplingen saknas returnerar formuläret fel, så RUT-uppgifter inte tas emot och tappas bort
-
-Funktionen använder bokningen som fakturaunderlag. Den sparar Fortnox kundnummer, dokumentnummer och RUT-synktid på bokningen.
-
-Fortnox OAuth behöver godkännas manuellt en gång i Fortnox. Efter första `refresh_token` är sparad förnyar Edge Functionen access token automatiskt och sparar Fortnox nya roterade refresh token i `fortnox_oauth_tokens`.
-
-Om ett Fortnox-dokument redan finns kan formuläret fortfarande få dokumentet explicit:
-
-- `referenceDocumentType=INVOICE`, `ORDER` eller `OFFER`
-- `referenceNumber=<Fortnox dokumentnummer>`
-
-Utan dessa skapar funktionen själv kund och dokument i Fortnox. Det är medvetet att personnummer inte sparas i Supabase-tabeller eller skickas i mail.
-
-## Nya kolumner för fönsterputs
-
-Kör först SQL-filen:
-
-- `supabase/migrations/20260426_add_fonsterputs_booking_fields.sql`
-
-Den lägger till dessa kolumner i `bookings`:
-
-- `address`
-- `housing_type`
-- `window_count`
-- `service_scope`
-- `addons`
-- `payment_method`
-- `consent_accepted`
-
-Senare städas gamla dubbla kolumner bort med:
-
-- `supabase/migrations/20260509_drop_duplicate_booking_columns.sql`
-- `supabase/migrations/20260512_drop_unused_sensitive_booking_columns.sql`
-
-De behåller `housing_type` istället för `house_size`, `address` istället för `location`, tar bort gamla `wash_type` och `service`, och tar bort oanvända känsliga fält som `personal_number` och `map_link`.
-
-Kör sedan också:
-
-- `supabase/migrations/20260505_add_boat_transport_fields.sql`
-
-Den lägger till:
-
-- `transport_type`
-- `sea_miles`
-- `coordinates`
-
-För adminflödet, kör också:
-
-- `supabase/migrations/20260504_add_admin_fields_and_policies.sql`
-- `supabase/migrations/20260508_lock_down_booking_policies.sql`
-- `supabase/migrations/20260510_restrict_booking_admins.sql`
-- `supabase/migrations/20260511_move_admin_check_to_private_schema.sql`
-
-Den lägger till:
-
-- `price`
-- `completed_at`
-
-och policies så att bara användare i `admin_users` kan läsa, uppdatera och radera bokningar. Säkerhetsmigrationerna tar bort gamla publika policies och gör att en vanlig inloggad användare inte automatiskt blir admin.
-
-För Stripe-flödet, kör också:
-
-- `supabase/migrations/20260506_add_stripe_checkout_fields.sql`
-
-Den lägger till:
-
-- `payment_provider`
-- `stripe_product_id`
-- `stripe_price_id`
-- `stripe_checkout_session_id`
-- `stripe_payment_intent_id`
-- `stripe_payment_url`
-- `stripe_checkout_expires_at`
-- `stripe_paid_at`
-
-För Fortnox/RUT-flödet, kör också:
-
-- `supabase/migrations/20260630_add_fortnox_booking_fields.sql`
-
-Den lägger till:
-
-- `fortnox_customer_number`
-- `fortnox_invoice_number`
-- `fortnox_reference_document_type`
-- `fortnox_reference_number`
-- `fortnox_rut_synced_at`
-- en privat token-store-tabell `fortnox_oauth_tokens` för Fortnox OAuth-refresh
-
-## Secrets du behöver i Supabase
-
-Lägg in dessa i Supabase Edge Functions secrets:
-
-- `RESEND_API_KEY`
-- `BOOKING_NOTIFICATION_EMAIL=bokning@bergafonsterputs.se`
-- `BOOKING_CONTACT_EMAIL=info@bergafonsterputs.se`
-- `BOOKING_FROM_EMAIL=Berga Fönsterputs <bokning@din-domän.se>`
-- `BOOKING_RUT_FORM_URL=https://...` om ni vill lägga RUT-formuläret direkt i kundens bekräftelsemejl
-- `PUBLIC_SITE_URL=https://bergafonsterputs.se`
-- `STRIPE_SECRET_KEY=sk_live_...`
-- `STRIPE_WEBHOOK_SECRET=whsec_...`
-- `FORTNOX_CLIENT_ID=...`
-- `FORTNOX_CLIENT_SECRET=...`
-- `FORTNOX_REFRESH_TOKEN=...` kan användas som startvärde tills token-store är seedad
-- `FORTNOX_ACCESS_TOKEN=...` kan användas för kort snabbtest, men ska inte vara enda produktionslösningen
-- `FORTNOX_CASH_INVOICE_ENDPOINT=https://api.fortnox.se/3/invoices` om ni vill styra vilken Fortnox-resurs som används för dokumentet
-- `FORTNOX_INVOICE_ROW_VAT=25` om fakturaraden ska använda annan moms än 25%
-- `RUT_ALLOW_NO_FORTNOX=true` endast i testläge om formuläret ska acceptera utan Fortnox-postning
-
-För produktion bör Fortnox OAuth-token hanteras med en liten privat token-store, eftersom Fortnox access tokens går ut och refresh tokens roteras. Den token-storen ska bara lagra integrationstokens, inte kundens RUT-uppgifter.
-
-## Viktigt
-
-`BOOKING_NOTIFICATION_EMAIL` är adressen som får nya bokningar. `BOOKING_CONTACT_EMAIL` är adressen som visas för kunden och används som svara-till-adress i kundmailen.
-
-`BOOKING_FROM_EMAIL` måste vara en adress som Resend accepterar för ditt konto. I produktion är det normalt en verifierad domän hos Resend.
-
-Hämta `STRIPE_SECRET_KEY` i Stripe Dashboard. När `stripe-webhook` är deployad skapar du en webhook i Stripe Dashboard som pekar på:
-
-```text
-https://xeyippgcoqfskcmqzazx.supabase.co/functions/v1/stripe-webhook
+```bash
+supabase db push
 ```
 
-Lyssna på eventet:
+Migrationerna `20260715000000_secure_manual_rut.sql`, `20260715010000_restrict_rut_link_reissue.sql` och `20260715020000_finalize_rut_security.sql`:
 
-- `checkout.session.completed`
+- hash-lagrar RUT-token och sätter 30 dagars giltighetstid
+- skapar den låsta tabellen `rut_submissions`
+- skapar åtkomstloggen `rut_submission_access_log`
+- schemalägger automatisk gallring varje timme med `pg_cron`
+- gallrar RUT-relaterade åtkomstloggar automatiskt efter två år
+- lägger till separata belopp för arbete, material, transport, RUT och Swish
+- lägger till statusfält för manuell RUT-ansökan
+- återkallar äldre RUT-länkar som hade token i frågesträngen; admin kan skicka en ny fragmentbaserad länk
+- spärrar direkta adminuppdateringar av betalnings-, RUT- och tokenfält; statusändringar går via kontrollerade serverfunktioner
 
-Kopiera sedan webhookens signing secret till `STRIPE_WEBHOOK_SECRET`.
+`rut_submissions` saknar åtkomst för `anon` och `authenticated`. Endast serverfunktioner med service role får läsa eller ändra tabellen.
+
+## Secrets
+
+Följande behöver finnas i Supabase:
+
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `RESEND_API_KEY`
+- `BOOKING_FROM_EMAIL`
+- `BOOKING_NOTIFICATION_EMAIL`
+- `BOOKING_CONTACT_EMAIL`
+- `PUBLIC_SITE_URL=https://bergafonsterputs.se`
+- `BOOKING_RUT_FORM_URL=https://bergafonsterputs.se/rut.html` (valfri eftersom samma adress används som standard)
+- `BOOKING_REVIEW_URL` (valfri)
+- `RUT_ENCRYPTION_KEY` – unik 32-byte-nyckel, helst 64 hextecken
+
+Skapa en ny krypteringsnyckel utan att skriva in den i Git:
+
+```bash
+supabase secrets set RUT_ENCRYPTION_KEY="$(openssl rand -hex 32)"
+```
+
+Nyckeln får inte bytas eller tas bort medan krypterade RUT-poster behöver kunna öppnas. Säkerhetskopiera den i en godkänd lösenordshanterare.
+
+För den här driftsättningen finns en lokal reservkopia i macOS-nyckelringen med tjänsten `Berga Fönsterputs RUT encryption` och kontot `supabase-xeyippgcoqfskcmqzazx`. Själva nyckeln ska aldrig skrivas i dokumentation eller Git.
 
 ## Deploy
 
-När du har Supabase CLI installerat kan du deploya med:
+Admin använder den självhostade och versionslåsta webbläsarklienten `vendor/supabase-js-2.110.1.umd.min.js`. SHA-256 för den incheckade filen är `24f37921268bfba4d06c39de7ef5b205727310f908c4ca1c675610db0ec524cf`; uppdatera fil, SRI och CSP tillsammans vid versionsbyte.
 
 ```bash
 supabase functions deploy create-booking
 supabase functions deploy booked-slots
 supabase functions deploy validate-discount
-supabase functions deploy complete-booking
-supabase functions deploy stripe-webhook
 supabase functions deploy rut-booking-details
 supabase functions deploy submit-rut
-```
-
-Om du vill sätta secrets från terminalen:
-
-```bash
-supabase secrets set RESEND_API_KEY=re_xxx
-supabase secrets set BOOKING_NOTIFICATION_EMAIL=bokning@bergafonsterputs.se
-supabase secrets set BOOKING_CONTACT_EMAIL=info@bergafonsterputs.se
-supabase secrets set BOOKING_FROM_EMAIL="Berga Fönsterputs <bokning@din-domän.se>"
-supabase secrets set BOOKING_RUT_FORM_URL="https://..."
-supabase secrets set PUBLIC_SITE_URL=https://bergafonsterputs.se
-supabase secrets set STRIPE_SECRET_KEY="$STRIPE_SECRET_KEY"
-supabase secrets set STRIPE_WEBHOOK_SECRET="$STRIPE_WEBHOOK_SECRET"
-supabase secrets set FORTNOX_CLIENT_ID="$FORTNOX_CLIENT_ID"
-supabase secrets set FORTNOX_CLIENT_SECRET="$FORTNOX_CLIENT_SECRET"
-supabase secrets set FORTNOX_REFRESH_TOKEN="$FORTNOX_REFRESH_TOKEN"
-supabase secrets set FORTNOX_CASH_INVOICE_ENDPOINT="https://api.fortnox.se/3/invoices"
-supabase secrets set FORTNOX_INVOICE_ROW_VAT="25"
-```
-
-När första refresh token finns kan den även seedas i databasen:
-
-```sql
-insert into public.fortnox_oauth_tokens (provider, refresh_token)
-values ('fortnox', '<FORTNOX_REFRESH_TOKEN>')
-on conflict (provider)
-do update set refresh_token = excluded.refresh_token, updated_at = now();
-```
-
-## Efter deploy
-
-När funktionen är deployad kommer varje ny bokning från hemsidan att:
-
-- sparas i Supabase
-- skicka ett bokningsmail till er mail
-- spara bokningen utan Stripe-länk i första bekräftelsemejlet
-- visa tack-sidan utan direktbetalning
-- skicka Stripe-länken i klartmailet när jobbet markeras som klart
-
-## Adminsida
-
-Det finns också en adminsida:
-
-- `admin.html`
-
-Där kan ni:
-
-- logga in med Supabase Auth
-- se bokningar
-- markera `confirmed`
-- markera `paid`
-- markera jobbet som klart och skicka betalningsmail + recensionslänk
-
-## Extra secret för klartmail
-
-Lägg gärna också till:
-
-- `BOOKING_REVIEW_URL`
-
-Exempel:
-
-- `BOOKING_REVIEW_URL=https://g.page/r/.../review`
-
-## Deploya klartfunktionen
-
-```bash
+supabase functions deploy admin-rut-details
 supabase functions deploy complete-booking
 ```
+
+Kontrollera efter migreringen att cron-jobbet skapades:
+
+```sql
+select jobname, schedule, active
+from cron.job
+where jobname in (
+  'purge-expired-rut-submissions',
+  'purge-old-rut-access-logs'
+);
+```
+
+## Prisregler
+
+Följande hålls separerat i både bokning och admin:
+
+- `labor_cost_before_rut` – faktisk arbetskostnad inklusive moms
+- `material_cost` – ej RUT-grundande
+- `transport_cost` – ej RUT-grundande
+- `rut_deduction` – högst 50 procent av arbetskostnaden
+- `price_before_rut` – arbete + material + transport
+- `swish_amount` – kundens slutliga betalning
+
+Rabattkoder gäller kundens arbetsandel. Vid RUT minskas både kundens arbetsandel och det preliminära RUT-beloppet symmetriskt; material och transport rabatteras inte.
+
+## Admin och personnummer
+
+Adminåtkomst styrs av `public.admin_users`, obligatorisk TOTP-baserad tvåstegsverifiering och `private.is_booking_admin()`. Vid första inloggningen registreras en authenticator-app med QR-koden i admin. Lägg helst samma hemlighet i en andra betrodd app eller enhet som reserv innan den första verifieringen slutförs.
+
+Personnumret hämtas först när ett slutfört jobb öppnas aktivt av en tvåstegsverifierad admin, visas i högst en minut och skickas med `Cache-Control: no-store`. Visning är fail-closed om revisionsloggen inte kan skrivas. Statusändringar, betalningskontroll och gallring sker atomiskt med sin loggpost och loggarna innehåller aldrig personnummer.
+
+Innan **Markera RUT ansökt** fungerar måste:
+
+- bokningen vara markerad som slutförd
+- Swishbetalningen vara kontrollerad och markerad som betald
+- ett krypterat RUT-underlag finnas
+
+Historiska Stripe- och Fortnoxkolumner lämnas kvar tills eventuell gammal bokföringshistorik har kontrollerats.

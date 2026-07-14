@@ -1,3 +1,9 @@
+import {
+  InvalidJsonBodyError,
+  readJsonWithLimit,
+  RequestBodyTooLargeError
+} from '../_shared/read-json.ts';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type'
@@ -77,9 +83,41 @@ function parseCount(value: string | undefined, pattern = /\d+/) {
   return match ? Number(match[1] || match[0]) : 0;
 }
 
+type RutMode = 'with-rut' | 'without-rut' | 'undecided';
+
+type BookingPriceBreakdown = {
+  laborCostBeforeRut: number;
+  materialCost: number;
+  transportCost: number;
+  rutDeduction: number;
+  priceBeforeRut: number;
+  customerPriceBeforeDiscount: number;
+  usesRut: boolean;
+};
+
+type FinalizedPriceBreakdown = {
+  laborCostBeforeRut: number;
+  materialCost: number;
+  transportCost: number;
+  rutDeduction: number;
+  priceBeforeRut: number;
+  customerPrice: number;
+};
+
+function getRutMode(payload: BookingPayload): RutMode | null {
+  const value = String(payload.rutChoice || payload.rut_choice || '').trim();
+  if (value === 'Ja, skicka säkert RUT-formulär via bekräftelsemejl') return 'with-rut';
+  if (value === 'Nej, jag vill inte använda RUT-avdrag') return 'without-rut';
+  if (value === 'Jag är osäker och vill bli kontaktad') return 'undecided';
+  return null;
+}
+
 function calculateBookingPrice(payload: BookingPayload) {
   const housingType = payload.housingType || payload.boatSize;
   if (!['En våning', 'Två våningar'].includes(housingType)) return null;
+
+  const rutMode = getRutMode(payload);
+  if (!rutMode) return null;
 
   const totalWindows = parseCount(payload.windowCount);
   const regularWindows = parseCount(payload.addons, /(\d+)\s+utan spröjs/i);
@@ -101,15 +139,70 @@ function calculateBookingPrice(payload: BookingPayload) {
 
   let transportPrice = 0;
   if (payload.transportType === 'Båttransport behövs') {
-    const seaMiles = Number(payload.seaMiles);
+    const seaMilesValue = String(payload.seaMiles || '').trim();
+    if (!/^\d+$/.test(seaMilesValue) || !String(payload.coordinates || '').trim()) return null;
+    const seaMiles = Number(seaMilesValue);
     if (!Number.isFinite(seaMiles) || seaMiles < 0 || seaMiles > 1000) return null;
     transportPrice = ISLAND_START_PRICE + (seaMiles * ISLAND_PRICE_PER_SEA_MILE);
-  } else if (payload.transportType && payload.transportType !== 'Fastland') {
+  } else if (payload.transportType !== 'Fastland') {
     return null;
   }
 
-  const total = BASE_LABOR_PRICE_AFTER_RUT + MATERIAL_FEE + floorAddon + windowPrice + interiorPrice + transportPrice;
-  return Number.isFinite(total) ? Math.round(total) : null;
+  const laborCostAfterRut = BASE_LABOR_PRICE_AFTER_RUT + floorAddon + windowPrice + interiorPrice;
+  const laborCostBeforeRut = laborCostAfterRut * 2;
+  const materialCost = MATERIAL_FEE;
+  const transportCost = transportPrice;
+  const usesRut = rutMode === 'with-rut';
+  const rutDeduction = usesRut ? laborCostAfterRut : 0;
+  const priceBeforeRut = laborCostBeforeRut + materialCost + transportCost;
+  const customerPriceBeforeDiscount = priceBeforeRut - rutDeduction;
+
+  if (![laborCostBeforeRut, transportCost, rutDeduction, priceBeforeRut, customerPriceBeforeDiscount].every(Number.isFinite)) {
+    return null;
+  }
+
+  return {
+    laborCostBeforeRut: Math.round(laborCostBeforeRut),
+    materialCost,
+    transportCost: Math.round(transportCost),
+    rutDeduction: Math.round(rutDeduction),
+    priceBeforeRut: Math.round(priceBeforeRut),
+    customerPriceBeforeDiscount: Math.round(customerPriceBeforeDiscount),
+    usesRut
+  } satisfies BookingPriceBreakdown;
+}
+
+function getCustomerLaborPriceBeforeDiscount(price: BookingPriceBreakdown) {
+  return price.usesRut ? price.laborCostBeforeRut / 2 : price.laborCostBeforeRut;
+}
+
+function applyCustomerLaborDiscount(
+  price: BookingPriceBreakdown,
+  customerDiscountAmount: number
+): FinalizedPriceBreakdown | null {
+  const customerLaborBeforeDiscount = getCustomerLaborPriceBeforeDiscount(price);
+  const customerLaborAfterDiscount = customerLaborBeforeDiscount - customerDiscountAmount;
+
+  // A discount code only reduces the customer's labor share. With RUT, the same
+  // reduction must also lower the requested RUT amount, so the discounted gross
+  // labor cost remains exactly 2 × the customer's remaining labor share.
+  if (!Number.isFinite(customerLaborAfterDiscount) || customerLaborAfterDiscount <= 0) return null;
+
+  const laborCostBeforeRut = price.usesRut
+    ? customerLaborAfterDiscount * 2
+    : customerLaborAfterDiscount;
+  const rutDeduction = price.usesRut ? customerLaborAfterDiscount : 0;
+  const priceBeforeRut = laborCostBeforeRut + price.materialCost + price.transportCost;
+  const customerPrice = customerLaborAfterDiscount + price.materialCost + price.transportCost;
+
+  return {
+    laborCostBeforeRut: Math.round(laborCostBeforeRut),
+    materialCost: price.materialCost,
+    transportCost: price.transportCost,
+    rutDeduction: Math.round(rutDeduction),
+    priceBeforeRut: Math.round(priceBeforeRut),
+    customerPrice: Math.round(customerPrice)
+  };
 }
 
 type AppliedDiscount = {
@@ -208,10 +301,30 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const payload = (await req.json()) as BookingPayload;
+    const contentLength = Number(req.headers.get('content-length') || '0');
+    if (Number.isFinite(contentLength) && contentLength > 32_768) {
+      return jsonResponse({ error: 'För stor begäran.' }, 413);
+    }
+
+    let payload: BookingPayload;
+    try {
+      payload = await readJsonWithLimit<BookingPayload>(req, 32_768);
+    } catch (error) {
+      if (error instanceof RequestBodyTooLargeError) {
+        return jsonResponse({ error: 'För stor begäran.' }, 413);
+      }
+      if (error instanceof InvalidJsonBodyError) {
+        return jsonResponse({ error: 'Begäran innehåller inte giltig JSON.' }, 400);
+      }
+      throw error;
+    }
 
     if (!payload.name || !payload.email || !payload.phone || !payload.boatSize || !payload.date || !payload.time || !payload.location) {
       return jsonResponse({ error: 'Missing required booking fields' }, 400);
+    }
+
+    if (payload.consentAccepted !== true) {
+      return jsonResponse({ error: 'Du behöver bekräfta integritetsinformationen innan bokningen skickas.' }, 400);
     }
 
     if (!isBookableTime(payload.time)) {
@@ -222,19 +335,19 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'Välj ett senare datum.' }, 400);
     }
 
-    const originalPrice = calculateBookingPrice(payload);
-    if (originalPrice === null) {
-      return jsonResponse({ error: 'Prisuppgifterna är ogiltiga. Kontrollera bostad, fönster och transport.' }, 400);
+    const priceBreakdown = calculateBookingPrice(payload);
+    if (priceBreakdown === null) {
+      return jsonResponse({ error: 'Prisuppgifterna är ogiltiga. Kontrollera RUT-val, bostad, fönster och transport.' }, 400);
+    }
+    // Backwards-compatible meaning: the customer's selected RUT/no-RUT price before discount.
+    const originalPrice = priceBreakdown.customerPriceBeforeDiscount;
+
+    if (payload.website) {
+      return jsonResponse({ error: 'Formuläret innehåller ett ogiltigt extrafält. Ladda om sidan och försök igen.' }, 400);
     }
 
-    if (payload.website || isSuspiciouslyFastSubmission(payload.formStartedAt)) {
-      return jsonResponse({
-        success: true,
-        bookingId: null,
-        customerEmailSent: false,
-        stripeCheckoutUrl: null,
-        stripeCheckoutSessionId: null
-      });
+    if (isSuspiciouslyFastSubmission(payload.formStartedAt)) {
+      return jsonResponse({ error: 'Vänta ett ögonblick och försök skicka bokningen igen.' }, 429);
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
@@ -243,8 +356,8 @@ Deno.serve(async (req) => {
     const notificationEmail = Deno.env.get('BOOKING_NOTIFICATION_EMAIL') || 'bokning@bergafonsterputs.se';
     const contactEmail = Deno.env.get('BOOKING_CONTACT_EMAIL') || 'info@bergafonsterputs.se';
     const fromEmail = Deno.env.get('BOOKING_FROM_EMAIL');
-    const rutFormUrl = Deno.env.get('BOOKING_RUT_FORM_URL') || '';
     const siteUrl = (Deno.env.get('PUBLIC_SITE_URL') || 'https://bergafonsterputs.se').replace(/\/+$/, '');
+    const rutFormUrl = Deno.env.get('BOOKING_RUT_FORM_URL') || `${siteUrl}/rut.html`;
 
     if (!supabaseUrl || !serviceRoleKey) {
       console.error('Supabase secrets are missing', {
@@ -325,20 +438,31 @@ Deno.serve(async (req) => {
 
     const normalizedDiscountCode = String(payload.discountCode || '').trim().toUpperCase();
     let appliedDiscount: AppliedDiscount | null = null;
+    const customerLaborPriceBeforeDiscount = getCustomerLaborPriceBeforeDiscount(priceBreakdown);
 
     if (normalizedDiscountCode) {
       if (!/^[A-Z0-9_-]{3,32}$/.test(normalizedDiscountCode)) {
         return jsonResponse({ error: 'Rabattkoden är ogiltig.' }, 400);
       }
 
-      appliedDiscount = await consumeDiscountCode(supabaseUrl, serviceRoleKey, normalizedDiscountCode, originalPrice);
+      appliedDiscount = await consumeDiscountCode(
+        supabaseUrl,
+        serviceRoleKey,
+        normalizedDiscountCode,
+        customerLaborPriceBeforeDiscount
+      );
       if (!appliedDiscount) {
         return jsonResponse({ error: 'Rabattkoden är ogiltig, har gått ut eller har redan använts maximalt antal gånger.' }, 400);
       }
     }
 
-    const finalPrice = appliedDiscount?.final_price ?? originalPrice;
-    const rutFormToken = createRutFormToken();
+    const customerDiscountAmount = appliedDiscount?.discount_amount || 0;
+    const finalizedPrice = applyCustomerLaborDiscount(priceBreakdown, customerDiscountAmount);
+    if (!finalizedPrice) {
+      return jsonResponse({ error: 'Rabatten är för stor för arbetskostnaden.' }, 400);
+    }
+    const finalPrice = finalizedPrice.customerPrice;
+    const rutFormToken = priceBreakdown.usesRut ? createRutFormToken() : '';
     const bookingInsert = {
       customer_name: payload.name,
       email: payload.email,
@@ -346,7 +470,7 @@ Deno.serve(async (req) => {
       housing_type: payload.housingType || payload.boatSize,
       window_count: payload.windowCount || null,
       service_scope: payload.serviceScope || null,
-      payment_method: payload.paymentMethod || null,
+      payment_method: 'Swish Företag',
       addons: payload.addons || null,
       transport_type: payload.transportType || 'Fastland',
       sea_miles: payload.seaMiles || null,
@@ -356,50 +480,85 @@ Deno.serve(async (req) => {
       address: payload.location,
       message: payload.message || null,
       price: String(finalPrice),
+      // Trusted invoice components after any labor-only discount.
+      labor_cost_before_rut: finalizedPrice.laborCostBeforeRut,
+      material_cost: finalizedPrice.materialCost,
+      transport_cost: finalizedPrice.transportCost,
+      rut_deduction: finalizedPrice.rutDeduction,
+      price_before_rut: finalizedPrice.priceBeforeRut,
+      customer_price_before_discount: priceBreakdown.customerPriceBeforeDiscount,
+      // Kept for older admin/payment code; same value as customer_price_before_discount.
       original_price: originalPrice,
-      discount_amount: appliedDiscount?.discount_amount || 0,
+      discount_amount: customerDiscountAmount,
       discount_code: appliedDiscount?.normalized_code || null,
       discount_code_id: appliedDiscount?.discount_code_id || null,
       rut_choice: payload.rutChoice || payload.rut_choice || null,
-      rut_form_token: rutFormToken,
-      consent_accepted: Boolean(payload.consentAccepted),
+      rut_form_token: rutFormToken || null,
+      rut_status: priceBreakdown.usesRut
+        ? 'Skickat'
+        : getRutMode(payload) === 'without-rut' ? 'Ej RUT' : 'Ej skickat',
+      rut_application_status: 'not_ready',
+      consent_accepted: true,
       status: 'pending',
       payment_status: 'unpaid'
     };
 
-    let bookingRes = await fetch(`${supabaseUrl}/rest/v1/bookings?select=id`, {
-      method: 'POST',
-      headers: {
-        apikey: serviceRoleKey,
-        Authorization: `Bearer ${serviceRoleKey}`,
-        'Content-Type': 'application/json',
-        Prefer: 'return=representation'
-      },
-      body: JSON.stringify(bookingInsert)
-    });
+    const optionalPriceColumns = [
+      'labor_cost_before_rut',
+      'material_cost',
+      'transport_cost',
+      'rut_deduction',
+      'price_before_rut',
+      'customer_price_before_discount'
+    ];
+    const optionalRutWorkflowColumns = [
+      'rut_status',
+      'rut_application_status'
+    ];
+    const insertWithSchemaFallback: Record<string, unknown> = { ...bookingInsert };
+    let bookingRes: Response | null = null;
+    let bookingErrorText = '';
 
-    if (!bookingRes.ok) {
-      const errorText = await bookingRes.text();
-      if (/rut_choice/i.test(errorText) && !/rut_form_token/i.test(errorText)) {
-        const fallbackInsert = { ...bookingInsert };
-        delete (fallbackInsert as Record<string, unknown>).rut_choice;
-        bookingRes = await fetch(`${supabaseUrl}/rest/v1/bookings?select=id`, {
-          method: 'POST',
-          headers: {
-            apikey: serviceRoleKey,
-            Authorization: `Bearer ${serviceRoleKey}`,
-            'Content-Type': 'application/json',
-            Prefer: 'return=representation'
-          },
-          body: JSON.stringify(fallbackInsert)
-        });
+    for (let attempt = 0; attempt < 6; attempt += 1) {
+      bookingRes = await fetch(`${supabaseUrl}/rest/v1/bookings?select=id`, {
+        method: 'POST',
+        headers: {
+          apikey: serviceRoleKey,
+          Authorization: `Bearer ${serviceRoleKey}`,
+          'Content-Type': 'application/json',
+          Prefer: 'return=representation'
+        },
+        body: JSON.stringify(insertWithSchemaFallback)
+      });
+
+      if (bookingRes.ok) break;
+
+      bookingErrorText = await bookingRes.text();
+      let removedUnsupportedField = false;
+
+      if (optionalPriceColumns.some((column) => bookingErrorText.includes(column))) {
+        optionalPriceColumns.forEach((column) => delete insertWithSchemaFallback[column]);
+        removedUnsupportedField = true;
       }
+
+      optionalRutWorkflowColumns.forEach((column) => {
+        if (bookingErrorText.includes(column)) {
+          delete insertWithSchemaFallback[column];
+          removedUnsupportedField = true;
+        }
+      });
+
+      if (/rut_choice/i.test(bookingErrorText) && !/rut_form_token/i.test(bookingErrorText)) {
+        delete insertWithSchemaFallback.rut_choice;
+        removedUnsupportedField = true;
+      }
+
+      if (!removedUnsupportedField) break;
     }
 
-    if (!bookingRes.ok) {
-      const errorText = await bookingRes.text();
-      console.error('Could not save booking', errorText);
-      return jsonResponse({ error: 'Could not save booking', details: errorText }, 500);
+    if (!bookingRes?.ok) {
+      console.error('Could not save booking', bookingErrorText);
+      return jsonResponse({ error: 'Could not save booking', details: bookingErrorText }, 500);
     }
 
     const [savedBooking] = await bookingRes.json();
@@ -408,8 +567,9 @@ Deno.serve(async (req) => {
     const safeHousingType = payload.housingType ? escapeHtml(payload.housingType) : escapeHtml(payload.boatSize);
     const safeWindowCount = payload.windowCount ? escapeHtml(payload.windowCount) : 'Ej angivet';
     const safeServiceScope = payload.serviceScope ? escapeHtml(payload.serviceScope) : 'Ej angivet';
-    const safePaymentMethod = payload.paymentMethod ? escapeHtml(payload.paymentMethod) : 'Ej angivet';
+    const safePaymentMethod = 'Swish Företag';
     const rawRutChoice = payload.rutChoice || payload.rut_choice || '';
+    const rutMode = getRutMode(payload);
     const safeRutChoice = rawRutChoice ? escapeHtml(rawRutChoice) : 'Ej angivet';
     const safeAddons = payload.addons ? escapeHtml(payload.addons).replaceAll('\n', '<br>') : 'Inga tillägg';
     const safeTransportType = payload.transportType ? escapeHtml(payload.transportType) : 'Fastland';
@@ -422,35 +582,35 @@ Deno.serve(async (req) => {
     const logoUrl = `${siteUrl}/logga-fonsterputs-transparent.png`;
     const safeLogoUrl = escapeHtml(logoUrl);
     const safeContactEmail = escapeHtml(contactEmail);
-    const priceAfterRutNumber = finalPrice;
-    const discountAmount = appliedDiscount?.discount_amount || 0;
-    const rutDeductionNumber = Math.max(0, originalPrice - MATERIAL_FEE);
-    const priceBeforeRutNumber = originalPrice + rutDeductionNumber - discountAmount;
-    const priceBeforeRutDisplay = formatSek(priceBeforeRutNumber);
-    const rutDeductionDisplay = rutDeductionNumber === null ? 'Ej angivet' : `-${formatSek(rutDeductionNumber)}`;
-    const priceAfterRutDisplay = priceAfterRutNumber === null ? safePriceDisplay : formatSek(priceAfterRutNumber);
+    const laborCostBeforeRutDisplay = formatSek(finalizedPrice.laborCostBeforeRut);
+    const materialCostDisplay = formatSek(finalizedPrice.materialCost);
+    const transportCostDisplay = formatSek(finalizedPrice.transportCost);
+    const priceBeforeRutDisplay = formatSek(finalizedPrice.priceBeforeRut);
+    const rutDeductionDisplay = finalizedPrice.rutDeduction > 0
+      ? `-${formatSek(finalizedPrice.rutDeduction)}`
+      : formatSek(0);
+    const customerPriceDisplay = formatSek(finalPrice);
+    const priceSectionTitle = priceBreakdown.usesRut ? 'Pris med RUT' : 'Pris utan RUT';
+    const customerPriceLabel = priceBreakdown.usesRut ? 'Att betala med RUT' : 'Att betala utan RUT';
+    const laborCostLabel = appliedDiscount ? 'Arbetskostnad efter rabatt, före RUT' : 'Arbetskostnad före RUT';
     let rutFormUrlWithBooking = rutFormUrl;
 
-    if (rutFormUrlWithBooking) {
+    if (rutFormUrlWithBooking && priceBreakdown.usesRut) {
+      const fragmentParams = new URLSearchParams();
+      if (savedBooking?.id) fragmentParams.set('bookingId', String(savedBooking.id));
+      fragmentParams.set('token', rutFormToken);
+
       try {
         const rutUrl = new URL(rutFormUrlWithBooking);
-        if (savedBooking?.id) rutUrl.searchParams.set('bookingId', String(savedBooking.id));
-        rutUrl.searchParams.set('token', rutFormToken);
-        if (rutDeductionNumber !== null) {
-          rutUrl.searchParams.set('rutAmount', String(Math.round(rutDeductionNumber)));
-          rutUrl.searchParams.set('priceAfterRut', String(Math.round(priceAfterRutNumber)));
-        }
+        const existingFragment = new URLSearchParams(rutUrl.hash.replace(/^#/, ''));
+        fragmentParams.forEach((value, key) => existingFragment.set(key, value));
+        rutUrl.hash = existingFragment.toString();
         rutFormUrlWithBooking = rutUrl.toString();
       } catch {
-        const separator = rutFormUrlWithBooking.includes('?') ? '&' : '?';
-        const params = new URLSearchParams();
-        if (savedBooking?.id) params.set('bookingId', String(savedBooking.id));
-        params.set('token', rutFormToken);
-        if (rutDeductionNumber !== null) {
-          params.set('rutAmount', String(Math.round(rutDeductionNumber)));
-          params.set('priceAfterRut', String(Math.round(priceAfterRutNumber)));
-        }
-        rutFormUrlWithBooking = params.toString() ? `${rutFormUrlWithBooking}${separator}${params.toString()}` : rutFormUrlWithBooking;
+        const [baseUrl, existingHash = ''] = rutFormUrlWithBooking.split('#', 2);
+        const existingFragment = new URLSearchParams(existingHash);
+        fragmentParams.forEach((value, key) => existingFragment.set(key, value));
+        rutFormUrlWithBooking = `${baseUrl}#${existingFragment.toString()}`;
       }
     }
 
@@ -477,7 +637,7 @@ Deno.serve(async (req) => {
             <td width="58%" style="width: 58%; padding: 12px 0; border-bottom: 1px solid #e6edf3; color: #0f2638; font-size: 14px; font-weight: 700; text-align: right; vertical-align: top;">${value || 'Ej angivet'}</td>
           </tr>
         `).join('');
-    const rutFormSection = rawRutChoice.includes('Ja')
+    const rutFormSection = rutMode === 'with-rut'
       ? `
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; background: #f7fbf8; border: 1px solid #d7e7dd; border-radius: 14px;">
           <tr>
@@ -498,12 +658,12 @@ Deno.serve(async (req) => {
           </tr>
         </table>
       `
-      : rawRutChoice.includes('Nej')
+      : rutMode === 'without-rut'
         ? `
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; background: #fff8ec; border: 1px solid #ffd08b; border-radius: 14px;">
             <tr>
               <td style="padding: 18px 20px;">
-                <p style="margin: 0; color: #0f2638; font-size: 14px; line-height: 1.7;"><strong>RUT-avdrag:</strong> Du har valt att inte använda RUT-avdrag. Kontakta oss gärna om du vill dubbelkolla priset utan RUT.</p>
+                <p style="margin: 0; color: #0f2638; font-size: 14px; line-height: 1.7;"><strong>RUT-avdrag:</strong> Du har valt att inte använda RUT-avdrag. Priset är därför beräknat med hela arbetskostnaden.</p>
               </td>
             </tr>
           </table>
@@ -538,8 +698,13 @@ Deno.serve(async (req) => {
           <tr><td style="padding: 8px 0; font-weight: 700;">Koordinater</td><td style="padding: 8px 0;">${safeCoordinates}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Betalningsmetod</td><td style="padding: 8px 0;">${safePaymentMethod}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Tillägg</td><td style="padding: 8px 0;">${safeAddons}</td></tr>
-          <tr><td style="padding: 8px 0; font-weight: 700;">Pris</td><td style="padding: 8px 0;">${safePriceDisplay}</td></tr>
+          <tr><td style="padding: 8px 0; font-weight: 700;">${laborCostLabel}</td><td style="padding: 8px 0;">${laborCostBeforeRutDisplay}</td></tr>
+          <tr><td style="padding: 8px 0; font-weight: 700;">Material (ej RUT)</td><td style="padding: 8px 0;">${materialCostDisplay}</td></tr>
+          <tr><td style="padding: 8px 0; font-weight: 700;">Transport/resa (ej RUT)</td><td style="padding: 8px 0;">${transportCostDisplay}</td></tr>
+          <tr><td style="padding: 8px 0; font-weight: 700;">RUT-avdrag</td><td style="padding: 8px 0;">${rutDeductionDisplay}</td></tr>
+          <tr><td style="padding: 8px 0; font-weight: 700;">Kundpris före rabatt</td><td style="padding: 8px 0;">${safeOriginalPriceDisplay}</td></tr>
           ${appliedDiscount ? `<tr><td style="padding: 8px 0; font-weight: 700;">Rabattkod</td><td style="padding: 8px 0;">${safeDiscountCode} (${safeDiscountDisplay})</td></tr>` : ''}
+          <tr><td style="padding: 8px 0; font-weight: 700;">Att betala</td><td style="padding: 8px 0;">${safePriceDisplay}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700; vertical-align: top;">Meddelande</td><td style="padding: 8px 0;">${safeMessage}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Samtycke</td><td style="padding: 8px 0;">${payload.consentAccepted ? 'Ja' : 'Nej'}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Boknings-ID</td><td style="padding: 8px 0;">${escapeHtml(String(savedBooking?.id || 'okänt'))}</td></tr>
@@ -619,25 +784,42 @@ Deno.serve(async (req) => {
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; border: 1px solid #d7e7dd; border-radius: 14px; background: #f7fbf8;">
                       <tr>
                         <td style="padding: 20px;">
-                          <h2 style="margin: 0 0 14px; color: #0f2638; font-size: 18px; line-height: 1.3;">Pris med RUT</h2>
+                          <h2 style="margin: 0 0 14px; color: #0f2638; font-size: 18px; line-height: 1.3;">${priceSectionTitle}</h2>
                           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+                            <tr>
+                              <td style="padding: 9px 0; color: #5b6b7a; font-size: 14px;">${laborCostLabel}</td>
+                              <td align="right" style="padding: 9px 0; color: #0f2638; font-size: 15px; font-weight: 700;">${laborCostBeforeRutDisplay}</td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 9px 0; color: #5b6b7a; font-size: 14px;">Material (ej RUT)</td>
+                              <td align="right" style="padding: 9px 0; color: #0f2638; font-size: 15px; font-weight: 700;">${materialCostDisplay}</td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 9px 0; color: #5b6b7a; font-size: 14px;">Transport/resa (ej RUT)</td>
+                              <td align="right" style="padding: 9px 0; color: #0f2638; font-size: 15px; font-weight: 700;">${transportCostDisplay}</td>
+                            </tr>
                             <tr>
                               <td style="padding: 9px 0; color: #5b6b7a; font-size: 14px;">Pris före RUT</td>
                               <td align="right" style="padding: 9px 0; color: #0f2638; font-size: 15px; font-weight: 700;">${priceBeforeRutDisplay}</td>
                             </tr>
                             <tr>
-                              <td style="padding: 9px 0; color: #5b6b7a; font-size: 14px;">Beräknat RUT-avdrag 50%</td>
+                              <td style="padding: 9px 0; color: #5b6b7a; font-size: 14px;">RUT-avdrag (50% av arbetskostnaden)</td>
                               <td align="right" style="padding: 9px 0; color: #287a45; font-size: 15px; font-weight: 700;">${rutDeductionDisplay}</td>
                             </tr>
+                            ${appliedDiscount ? `
                             <tr>
-                              <td style="padding: 9px 0; color: #5b6b7a; font-size: 14px;">Material (ej RUT)</td>
-                              <td align="right" style="padding: 9px 0; color: #0f2638; font-size: 15px; font-weight: 700;">${formatSek(MATERIAL_FEE)}</td>
+                              <td style="padding: 9px 0; color: #5b6b7a; font-size: 14px;">Kundpris före rabatt</td>
+                              <td align="right" style="padding: 9px 0; color: #0f2638; font-size: 15px; font-weight: 700;">${safeOriginalPriceDisplay}</td>
                             </tr>
+                            <tr>
+                              <td style="padding: 9px 0; color: #5b6b7a; font-size: 14px;">Din arbetsrabatt ${safeDiscountCode} (inräknad)</td>
+                              <td align="right" style="padding: 9px 0; color: #287a45; font-size: 15px; font-weight: 700;">${safeDiscountDisplay}</td>
+                            </tr>` : ''}
                           </table>
                           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top: 12px; border-collapse: collapse; background: #247a43; border-radius: 12px;">
                             <tr>
-                              <td style="padding: 18px 18px; color: #ffffff; font-size: 15px; font-weight: 700;">Att betala efter RUT</td>
-                              <td align="right" style="padding: 18px 18px; color: #ffffff; font-size: 26px; line-height: 1.1; font-weight: 800;">${priceAfterRutDisplay}</td>
+                              <td style="padding: 18px 18px; color: #ffffff; font-size: 15px; font-weight: 700;">${customerPriceLabel}</td>
+                              <td align="right" style="padding: 18px 18px; color: #ffffff; font-size: 26px; line-height: 1.1; font-weight: 800;">${customerPriceDisplay}</td>
                             </tr>
                           </table>
                         </td>
@@ -651,14 +833,10 @@ Deno.serve(async (req) => {
                       <tr>
                         <td style="padding: 20px; background: #0f2638; border-radius: 14px;">
                           <h2 style="margin: 0 0 12px; color: #ffffff; font-size: 18px;">Betalning</h2>
-                          <p style="margin: 0 0 14px; color: #d8e1e8; font-size: 14px; line-height: 1.7;">Betalning sker efter utfört arbete.</p>
+                          <p style="margin: 0 0 14px; color: #d8e1e8; font-size: 14px; line-height: 1.7;">När jobbet är klart skickar vi belopp, Swish-nummer och referens i klartmejlet.</p>
                           <table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
                             <tr>
-                              <td style="padding: 8px 12px; background: #ffffff; color: #0f2638; font-size: 13px; font-weight: 700; border-radius: 999px;">Swish</td>
-                              <td style="width: 8px;"></td>
-                              <td style="padding: 8px 12px; background: #ffffff; color: #0f2638; font-size: 13px; font-weight: 700; border-radius: 999px;">Kort</td>
-                              <td style="width: 8px;"></td>
-                              <td style="padding: 8px 12px; background: #ffffff; color: #0f2638; font-size: 13px; font-weight: 700; border-radius: 999px;">Faktura</td>
+                              <td style="padding: 8px 12px; background: #ffffff; color: #0f2638; font-size: 13px; font-weight: 700; border-radius: 999px;">Swish Företag i klartmejlet</td>
                             </tr>
                           </table>
                         </td>
@@ -721,7 +899,14 @@ Deno.serve(async (req) => {
         bookingId: savedBooking?.id || null,
         price: finalPrice,
         originalPrice,
-        discountAmount: appliedDiscount?.discount_amount || 0,
+        laborCostBeforeRut: finalizedPrice.laborCostBeforeRut,
+        materialCost: finalizedPrice.materialCost,
+        transportCost: finalizedPrice.transportCost,
+        rutDeduction: finalizedPrice.rutDeduction,
+        priceBeforeRut: finalizedPrice.priceBeforeRut,
+        customerPriceBeforeDiscount: priceBreakdown.customerPriceBeforeDiscount,
+        usesRut: priceBreakdown.usesRut,
+        discountAmount: customerDiscountAmount,
         discountCode: appliedDiscount?.normalized_code || null
       }, 502);
     }
@@ -772,7 +957,14 @@ Deno.serve(async (req) => {
       bookingId: savedBooking?.id || null,
       price: finalPrice,
       originalPrice,
-      discountAmount: appliedDiscount?.discount_amount || 0,
+      laborCostBeforeRut: finalizedPrice.laborCostBeforeRut,
+      materialCost: finalizedPrice.materialCost,
+      transportCost: finalizedPrice.transportCost,
+      rutDeduction: finalizedPrice.rutDeduction,
+      priceBeforeRut: finalizedPrice.priceBeforeRut,
+      customerPriceBeforeDiscount: priceBreakdown.customerPriceBeforeDiscount,
+      usesRut: priceBreakdown.usesRut,
+      discountAmount: customerDiscountAmount,
       discountCode: appliedDiscount?.normalized_code || null,
       customerEmailSent,
       stripeCheckoutUrl: null,
