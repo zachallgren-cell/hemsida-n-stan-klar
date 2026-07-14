@@ -55,6 +55,7 @@
       --primary-dark: #084f74;
       --cta: #ffb347;
       --cta-dark: #f1992d;
+      --accent: #dff2fb;
       --bg: #cfe8f5;
       --surface: rgba(255,255,255,0.97);
       --text: #173042;
@@ -63,7 +64,8 @@
       --border: #c6dfec;
       --success: #127c56;
       --shadow: 0 16px 38px rgba(11, 111, 164, 0.14);
-      --radius: 20px;
+      --radius: 22px;
+      --max-width: 1240px;
     }
 
     * { box-sizing: border-box; }
@@ -77,14 +79,16 @@
     }
     a { color: inherit; text-decoration: none; }
     button { font: inherit; }
-    .container { width: min(92%, 1120px); margin: 0 auto; }
+    .container { width: min(92%, var(--max-width)); margin: 0 auto; }
 
     header {
-      color: var(--white);
-      padding: 18px 0 96px;
       background:
-        linear-gradient(135deg, rgba(8, 82, 120, 0.84), rgba(6, 58, 88, 0.76)),
+        linear-gradient(135deg, rgba(8, 82, 120, 0.82), rgba(6, 58, 88, 0.76)),
         url("efter-optimized.jpeg") center/cover;
+      color: var(--white);
+      padding: 18px 0 26px;
+      position: relative;
+      overflow: hidden;
     }
     .topbar {
       display: flex;
@@ -93,10 +97,13 @@
       gap: 16px;
       flex-wrap: wrap;
       padding: 12px 14px;
-      border-radius: 24px;
-      background: rgba(8, 56, 82, 0.36);
+      border-radius: 28px;
+      background: rgba(8, 56, 82, 0.34);
       border: 1px solid rgba(255,255,255,0.16);
-      backdrop-filter: blur(12px);
+      backdrop-filter: blur(14px);
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 18px 34px rgba(4, 25, 36, 0.16);
     }
     .brand {
       display: flex;
@@ -105,12 +112,13 @@
       font-weight: 900;
     }
     .brand img {
-      width: 76px;
-      height: 76px;
+      width: 92px;
+      height: 92px;
       object-fit: contain;
-      border-radius: 18px;
+      border-radius: 24px;
       background: #fff;
-      padding: 7px;
+      padding: 8px;
+      box-shadow: 0 15px 28px rgba(4, 25, 36, 0.17);
     }
     nav { display: flex; gap: 8px; flex-wrap: wrap; }
     nav a {
@@ -123,60 +131,33 @@
       font-size: 0.95rem;
     }
     nav a.is-active { background: rgba(255,255,255,0.22); }
-    .hero {
-      display: grid;
-      grid-template-columns: minmax(0, 1.05fr) minmax(300px, 0.8fr);
-      gap: 28px;
-      align-items: end;
-      padding-top: 76px;
-    }
-    .hero-kicker {
-      display: inline-flex;
-      width: fit-content;
-      padding: 8px 13px;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.14);
-      border: 1px solid rgba(255,255,255,0.18);
-      font-weight: 900;
-      margin-bottom: 16px;
-    }
-    h1 {
-      margin: 0 0 14px;
-      font-size: clamp(2.25rem, 6vw, 4.6rem);
-      line-height: 0.98;
-      letter-spacing: 0;
-    }
-    .hero p {
-      margin: 0;
-      color: rgba(255,255,255,0.92);
-      font-size: 1.08rem;
-      max-width: 680px;
-    }
-    .hero-panel {
-      background: rgba(255,255,255,0.95);
-      color: var(--text);
-      border: 1px solid rgba(255,255,255,0.82);
-      border-radius: var(--radius);
-      padding: 22px;
-      box-shadow: 0 18px 34px rgba(4, 25, 36, 0.18);
-    }
-    .hero-panel strong {
-      display: block;
-      color: var(--primary-dark);
-      font-size: 1.15rem;
-      margin-bottom: 10px;
-    }
-    .hero-panel ul {
-      display: grid;
-      gap: 9px;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-      color: var(--muted);
+    .btn {
+      display: inline-block;
+      padding: 14px 22px;
+      border-radius: 999px;
+      border: none;
+      font-size: 1rem;
       font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+    .btn-primary {
+      background: linear-gradient(to right, var(--cta), var(--cta-dark));
+      color: #173042;
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.16);
+      position: relative;
+    }
+    .btn-secondary {
+      background: rgba(255,255,255,0.10);
+      color: var(--white);
+      border: 1px solid rgba(255,255,255,0.42);
+      backdrop-filter: blur(8px);
     }
 
-    main { margin-top: -54px; padding-bottom: 52px; }
+    main { margin-top: -6px; padding-bottom: 52px; }
     .section { margin-bottom: 24px; }
     .card {
       background: var(--surface);
@@ -212,6 +193,47 @@
       margin-bottom: 4px;
     }
     .quick-item span { color: var(--muted); font-weight: 700; }
+    .booking-intro {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .booking-intro-card {
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid #cfe4ee;
+      background: linear-gradient(to bottom, #ffffff, #f5fbff);
+    }
+    .booking-intro-card strong {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--primary-dark);
+    }
+    .booking-intro-card span {
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .booking-requirements {
+      margin-bottom: 22px;
+      padding: 18px 20px;
+      border-radius: 18px;
+      border: 1px solid #cfe4ee;
+      background: linear-gradient(to right, rgba(255,255,255,0.9), rgba(240,249,255,0.96));
+    }
+    .booking-requirements h3 {
+      margin: 0 0 10px;
+      color: var(--primary-dark);
+      font-size: 1.05rem;
+    }
+    .booking-requirements ul {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-weight: 700;
+    }
 
     .booking-layout {
       display: grid;
@@ -378,6 +400,21 @@
       gap: 8px;
       min-height: 44px;
     }
+    .calendar-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .calendar-legend span {
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid #d7e9f1;
+      background: #f7fcff;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
     .time-slot {
       min-height: 44px;
       border-radius: 12px;
@@ -427,7 +464,7 @@
       cursor: not-allowed;
       box-shadow: none;
     }
-    .btn-secondary {
+    .contact-actions .btn-secondary {
       background: #ffffff;
       color: var(--primary-dark);
       border: 1px solid var(--border);
@@ -463,6 +500,40 @@
       gap: 10px;
       flex-wrap: wrap;
     }
+    .support-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+    }
+    .support-links a {
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: 1px solid #d0e3ee;
+      background: #ffffff;
+      color: var(--primary-dark);
+      font-weight: 800;
+    }
+    .faq-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .faq-item {
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px solid #cfe4ee;
+      background: linear-gradient(to bottom, #ffffff, #f6fbff);
+    }
+    .faq-item strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--primary-dark);
+    }
+    .faq-item p {
+      margin: 0;
+      color: var(--muted);
+      font-weight: 700;
+    }
     footer {
       background: #082c3d;
       color: rgba(255,255,255,0.9);
@@ -478,21 +549,22 @@
     footer a { border-bottom: 1px solid rgba(255,255,255,0.2); }
 
     @media (max-width: 860px) {
-      header { padding-bottom: 78px; }
-      .hero,
+      header { padding-bottom: 22px; }
       .booking-layout,
-      .quick-grid { grid-template-columns: 1fr; }
-      .hero { padding-top: 50px; }
+      .quick-grid,
+      .booking-intro,
+      .faq-grid { grid-template-columns: 1fr; }
       .calendar-progress { grid-template-columns: 1fr; }
       .time-slots { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .card { padding: 20px; }
     }
 
     @media (max-width: 560px) {
+      header { padding: 16px 0 18px; }
       .topbar { align-items: flex-start; }
       nav { width: 100%; }
       nav a { flex: 1 1 auto; text-align: center; }
-      .brand img { width: 64px; height: 64px; }
+      .brand img { width: 64px; height: 64px; border-radius: 18px; }
       .calendar-card { padding: 15px; }
       .calendar-logo { display: none; }
       .calendar-weekdays,
@@ -517,22 +589,6 @@
           <a href="index.html#kontakt">Kontakt</a>
         </nav>
       </div>
-
-      <section class="hero">
-        <div>
-          <div class="hero-kicker">Direktbokning från Google</div>
-          <h1>Boka fönsterputs på under en minut.</h1>
-          <p>Välj en ledig tid direkt här, gå vidare till formuläret och se priset innan du skickar bokningen. Vi hjälper kunder i Åkersberga, Stockholm, Vaxholm, Ljusterö och skärgården.</p>
-        </div>
-        <aside class="hero-panel">
-          <strong>Så fungerar bokningen</strong>
-          <ul>
-            <li>1. Välj datum och tid</li>
-            <li>2. Fyll i kontaktuppgifter och omfattning</li>
-            <li>3. Betalningslänk skickas efter utfört jobb</li>
-          </ul>
-        </aside>
-      </section>
     </div>
   </header>
 
@@ -544,11 +600,11 @@
           <span>Du ser priset innan bokningen skickas.</span>
         </div>
         <div class="quick-item">
-          <strong>RUT-stöd</strong>
-          <span>RUT-uppgifter lämnas via säkert formulär efteråt.</span>
+          <strong>Trygg planering</strong>
+          <span>Kalendern visar bara tider som faktiskt går att boka.</span>
         </div>
         <div class="quick-item">
-          <strong>Trygg betalning</strong>
+          <strong>Betala efteråt</strong>
           <span>Stripe-länk kommer när jobbet är klart.</span>
         </div>
       </div>
@@ -557,6 +613,31 @@
     <section class="section card" id="boka">
       <h2 class="section-title">Välj din tid</h2>
       <p class="section-subtitle">Kalendern visar bokningsbara datum från och med två dagar framåt. Varje dag kan bokas en gång.</p>
+
+      <div class="booking-intro">
+        <div class="booking-intro-card">
+          <strong>1. Välj tid</strong>
+          <span>Lediga datum och tider visas direkt i kalendern.</span>
+        </div>
+        <div class="booking-intro-card">
+          <strong>2. Gå vidare</strong>
+          <span>Knappen under kalendern öppnar bokningsformuläret.</span>
+        </div>
+        <div class="booking-intro-card">
+          <strong>3. Fyll i detaljer</strong>
+          <span>Där lämnar du uppgifter, ser priset och skickar bokningen.</span>
+        </div>
+      </div>
+
+      <div class="booking-requirements">
+        <h3>Bra att veta innan du bokar</h3>
+        <ul>
+          <li>Fönstren behöver vara säkert åtkomliga.</li>
+          <li>Vid invändig puts behöver fönsterbrädan vara fri.</li>
+          <li>För skärgårdsjobb väljer du båttransport i formuläret.</li>
+          <li>RUT-uppgifter lämnas via säkert formulär efter bokningen.</li>
+        </ul>
+      </div>
 
       <div class="booking-layout">
         <div class="calendar-card">
@@ -595,6 +676,11 @@
 
           <div class="calendar-grid" id="calendarGrid"></div>
           <div class="selected-date-box" id="selectedDateBox">Inget datum valt ännu</div>
+          <div class="calendar-legend" aria-hidden="true">
+            <span>Vit = ledig dag</span>
+            <span>Orange = valt datum</span>
+            <span>Grå = ej bokbar</span>
+          </div>
 
           <div class="time-picker">
             <h4>Välj tid</h4>
@@ -602,7 +688,7 @@
           </div>
 
           <button type="button" class="submit-btn" id="continueBookingButton" disabled>Välj datum först</button>
-          <p class="booking-note">Knappen öppnar bokningsformuläret med vald tid förifylld.</p>
+          <p class="booking-note">Knappen öppnar bokningsformuläret med vald tid förifylld, så att du kan se livepris och fylla i resten.</p>
         </div>
 
         <aside class="side-panel">
@@ -615,13 +701,42 @@
             </ul>
           </div>
           <div class="support-card">
+            <strong>Områden vi jobbar i</strong>
+            <p>Vi hjälper kunder i Österåker, Åkersberga, Vaxholm, Ljusterö, Stockholm och ute i skärgården.</p>
+          </div>
+          <div class="support-card">
             <strong>Vill du fråga först?</strong>
-            <p>Mejla om du är osäker på område, pris eller skärgårdsupplägg.</p>
+            <p>Mejla om du är osäker på område, pris, omfattning eller skärgårdsupplägg.</p>
             <div class="contact-actions">
               <a class="btn btn-secondary" href="mailto:info@bergafonsterputs.se">Mejla oss</a>
             </div>
+            <div class="support-links">
+              <a href="https://www.instagram.com/bergafonsterputs" target="_blank" rel="noopener noreferrer">Instagram</a>
+              <a href="https://www.tiktok.com/@bergafonsterputs" target="_blank" rel="noopener noreferrer">TikTok</a>
+              <a href="https://www.facebook.com/bergaf%C3%B6nsterputs" target="_blank" rel="noopener noreferrer">Facebook</a>
+            </div>
           </div>
         </aside>
+      </div>
+    </section>
+
+    <section class="section card">
+      <h2 class="section-title">Vanliga frågor</h2>
+      <p class="section-subtitle">Kort svar på det som brukar avgöra om man bokar direkt eller vill fråga först.</p>
+
+      <div class="faq-grid">
+        <div class="faq-item">
+          <strong>Hur snabbt går det att boka?</strong>
+          <p>Du väljer först datum och tid här. Sedan öppnas formuläret med tiden förifylld så att du snabbt kan fylla i resten.</p>
+        </div>
+        <div class="faq-item">
+          <strong>När betalar jag?</strong>
+          <p>Du betalar efter att jobbet är utfört. Då skickas en trygg Stripe-länk via mejl.</p>
+        </div>
+        <div class="faq-item">
+          <strong>Kan jag boka skärgårdsjobb?</strong>
+          <p>Ja. I bokningsformuläret väljer du båttransport och fyller i plats eller koordinater om jobbet ligger ute i skärgården.</p>
+        </div>
       </div>
     </section>
   </main>
@@ -631,6 +746,12 @@
       <p><strong>Berga Fönsterputs</strong></p>
       <p>Personlig och lokal fönsterputs i Åkersberga, Stockholm och skärgården.</p>
       <p>E-post: info@bergafonsterputs.se</p>
+      <p>
+        Sociala medier:
+        <a href="https://www.instagram.com/bergafonsterputs" target="_blank" rel="noopener noreferrer">Instagram</a>,
+        <a href="https://www.tiktok.com/@bergafonsterputs" target="_blank" rel="noopener noreferrer">TikTok</a>,
+        <a href="https://www.facebook.com/bergaf%C3%B6nsterputs" target="_blank" rel="noopener noreferrer">Facebook</a>
+      </p>
       <div class="footer-links">
         <a href="index.html">Startsida</a>
         <a href="var-tjanst.html">Vår tjänst</a>
@@ -666,6 +787,7 @@
     let selectedDate = '';
     let selectedTime = '';
     let bookingsCache = [];
+    let blockedDatesCache = [];
 
     function getHeaders() {
       return {
@@ -680,13 +802,16 @@
         const response = await fetch(BOOKED_SLOTS_FUNCTION_URL, { headers: getHeaders() });
         if (!response.ok) {
           bookingsCache = [];
+          blockedDatesCache = [];
           return;
         }
         const data = await response.json();
         bookingsCache = Array.isArray(data?.bookings) ? data.bookings : [];
+        blockedDatesCache = Array.isArray(data?.blockedDates) ? data.blockedDates : [];
       } catch (error) {
         console.error(error);
         bookingsCache = [];
+        blockedDatesCache = [];
       }
     }
 
@@ -712,8 +837,16 @@
       return bookingsCache.filter((booking) => booking.date === date).map((booking) => booking.time);
     }
 
+    function getBlockedDate(date) {
+      return blockedDatesCache.find((blockedDate) => blockedDate.date === date) || null;
+    }
+
+    function isBlockedDate(date) {
+      return Boolean(getBlockedDate(date));
+    }
+
     function isFullyBooked(date) {
-      return getBookedTimes(date).length > 0;
+      return getBookedTimes(date).length > 0 || isBlockedDate(date);
     }
 
     function updateSelectedDateBox() {
@@ -772,7 +905,7 @@
         && dateObject.getFullYear() === bookingYear
         && initialDate >= todayString;
 
-      if (!isValidDate || isFullyBooked(initialDate)) return;
+      if (!isValidDate || isFullyBooked(initialDate) || isBlockedDate(initialDate)) return;
 
       selectedDate = initialDate;
       currentMonth = dateObject.getMonth();
@@ -790,6 +923,7 @@
 
       const booked = getBookedTimes(selectedDate);
       const dayIsBooked = booked.length > 0;
+      const blockedDate = getBlockedDate(selectedDate);
 
       getTimes().forEach((time) => {
         const button = document.createElement('button');
@@ -797,7 +931,11 @@
         button.className = 'time-slot';
         button.textContent = time;
 
-        if (dayIsBooked) {
+        if (blockedDate) {
+          button.classList.add('booked');
+          button.disabled = true;
+          button.textContent = `${time} • ej bokbar`;
+        } else if (dayIsBooked) {
           button.classList.add('booked');
           button.disabled = true;
           button.textContent = booked.includes(time) ? `${time} • bokad` : `${time} • ej ledig`;
@@ -839,9 +977,10 @@
         const bookedCount = getBookedTimes(date).length;
         const past = date < todayString;
         const tooSoon = !past && date < minBookableString;
+        const blocked = isBlockedDate(date);
         const full = isFullyBooked(date);
 
-        if (bookedCount > 0) button.classList.add('booked');
+        if (bookedCount > 0 || blocked) button.classList.add('booked');
         if (selectedDate === date) button.classList.add('selected');
         if (date === todayString) button.classList.add('today');
 

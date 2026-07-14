@@ -765,6 +765,41 @@
       font-size: 0.92rem;
     }
 
+    .discount-card {
+      display: grid;
+      gap: 10px;
+      padding: 17px 18px;
+      border-radius: 16px;
+      border: 1px solid #cfe4ee;
+      background: linear-gradient(to bottom, #ffffff, #f4fbff);
+    }
+
+    .discount-card strong {
+      color: var(--primary-dark);
+    }
+
+    .discount-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+    }
+
+    .discount-row .btn {
+      min-height: 46px;
+      padding: 10px 15px;
+    }
+
+    .discount-status {
+      min-height: 21px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 800;
+    }
+
+    .discount-status.success { color: var(--success); }
+    .discount-status.error { color: var(--error); }
+
     footer {
       padding: 34px 0 42px;
       background: #12384c;
@@ -1329,6 +1364,15 @@
             </div>
           </div>
 
+          <div class="discount-card">
+            <strong>Har du en rabattkod?</strong>
+            <div class="discount-row">
+              <input type="text" id="discountCode" placeholder="Ange rabattkod" maxlength="32" autocomplete="off" aria-label="Rabattkod">
+              <button type="button" class="btn" id="applyDiscountButton">Använd</button>
+            </div>
+            <p class="discount-status" id="discountCodeStatus" aria-live="polite"></p>
+          </div>
+
           <div class="booking-support-card">
             <strong>Det här gör bokningen enkel</strong>
             <ul>
@@ -1417,6 +1461,9 @@
     const coordinatesInput = document.getElementById('coordinates');
     const livePriceValue = document.getElementById('livePriceValue');
     const livePriceText = document.getElementById('livePriceText');
+    const discountCodeInput = document.getElementById('discountCode');
+    const applyDiscountButton = document.getElementById('applyDiscountButton');
+    const discountCodeStatus = document.getElementById('discountCodeStatus');
     const bookingPackages = document.getElementById('bookingPackages');
     const bookingPackagesToggle = document.getElementById('bookingPackagesToggle');
     const bookingProgressBar = document.getElementById('bookingProgressBar');
@@ -1427,6 +1474,8 @@
     const SUPABASE_URL = 'https://xeyippgcoqfskcmqzazx.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_MUKxAwv0vNXDrcgumq81fQ_Uvx4eOuq';
     const BOOKING_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/create-booking`;
+    const VALIDATE_DISCOUNT_URL = `${SUPABASE_URL}/functions/v1/validate-discount`;
+    let appliedDiscount = null;
     const todayDate = new Date();
     todayDate.setHours(12, 0, 0, 0);
     const bookingYear = todayDate.getFullYear();
@@ -1523,7 +1572,8 @@
       return selectedOption?.dataset.label || selectedOption?.textContent || housingTypeInput.value;
     }
 
-    const START_PRICE = 949;
+    const BASE_LABOR_PRICE_AFTER_RUT = 799;
+    const MATERIAL_FEE = 150;
     const INCLUDED_WINDOWS = 15;
     const MAX_TOTAL_WINDOWS = 60;
     const TWO_FLOOR_ADDON = 200;
@@ -1536,7 +1586,7 @@
 
     function getBasePrice(housingTypeLabel, windowCount) {
       const floorAddon = housingTypeLabel === 'Två våningar' ? TWO_FLOOR_ADDON : 0;
-      return START_PRICE + floorAddon;
+      return BASE_LABOR_PRICE_AFTER_RUT + MATERIAL_FEE + floorAddon;
     }
 
     function getInteriorAddon(housingTypeLabel, windowCount) {
@@ -1583,7 +1633,8 @@
         ? getSeaMilesAddon()
         : { label: '', price: 0, isQuote: false };
       const priceAfterRut = seaMilesAddon.isQuote ? null : basePrice + windowPrice + interiorAddon + addonsPrice + seaMilesAddon.price;
-      const priceBeforeRut = priceAfterRut === null ? null : priceAfterRut * 2;
+      const rutEligiblePriceAfterRut = priceAfterRut === null ? null : Math.max(0, priceAfterRut - MATERIAL_FEE);
+      const priceBeforeRut = priceAfterRut === null ? null : priceAfterRut + rutEligiblePriceAfterRut;
 
       return {
         total: priceAfterRut,
@@ -1607,6 +1658,18 @@
         windowCount,
         serviceScopeValue
       };
+    }
+
+    function getDiscountAmount(originalPrice) {
+      if (!appliedDiscount || !Number.isFinite(originalPrice)) return 0;
+      const amount = appliedDiscount.discountType === 'percentage'
+        ? Math.round(originalPrice * appliedDiscount.discountValue / 100)
+        : appliedDiscount.discountValue;
+      return Math.min(Math.max(amount, 0), Math.max(originalPrice - 1, 0));
+    }
+
+    function getFinalPrice(originalPrice) {
+      return originalPrice - getDiscountAmount(originalPrice);
     }
 
     function updateLivePrice() {
@@ -1636,7 +1699,9 @@
         return;
       }
 
-      livePriceValue.textContent = `${estimate.total} kr`;
+      const discountAmount = getDiscountAmount(estimate.total);
+      const finalPrice = getFinalPrice(estimate.total);
+      livePriceValue.textContent = `${finalPrice} kr`;
       const parts = [
         `startavgift ${estimate.basePrice} kr`,
         `${INCLUDED_WINDOWS} fönster ingår`
@@ -1659,7 +1724,65 @@
         parts.push(`skärgård ${estimate.seaMilesAddon.price} kr`);
       }
 
-      livePriceText.textContent = `${parts.join(' + ')}. Pris efter RUT.`;
+      if (discountAmount > 0) {
+        parts.push(`rabattkod ${appliedDiscount.code} -${discountAmount} kr`);
+      }
+
+      livePriceText.textContent = `${parts.join(' + ')}. Pris efter RUT${discountAmount > 0 ? ` (ordinarie ${estimate.total} kr)` : ''}.`;
+    }
+
+    async function applyDiscountCode() {
+      const code = discountCodeInput.value.trim().toUpperCase();
+      const estimate = calculateEstimatedPrice();
+
+      discountCodeInput.value = code;
+      discountCodeStatus.textContent = '';
+      discountCodeStatus.className = 'discount-status';
+
+      if (!/^[A-Z0-9_-]{3,32}$/.test(code)) {
+        discountCodeStatus.textContent = 'Ange en giltig rabattkod.';
+        discountCodeStatus.classList.add('error');
+        return;
+      }
+
+      if (!estimate.housingTypeLabel || !estimate.windowCount || !estimate.serviceScopeValue) {
+        discountCodeStatus.textContent = 'Välj bostad, antal fönster och putsning först.';
+        discountCodeStatus.classList.add('error');
+        return;
+      }
+
+      applyDiscountButton.disabled = true;
+      applyDiscountButton.textContent = 'Kontrollerar...';
+
+      try {
+        const response = await fetch(VALIDATE_DISCOUNT_URL, {
+          method: 'POST',
+          headers: getHeaders(),
+          body: JSON.stringify({ code, originalPrice: estimate.total })
+        });
+        const body = await response.json().catch(() => ({}));
+
+        if (!response.ok || !body.valid) {
+          throw new Error(body.message || body.error || 'Rabattkoden kunde inte användas.');
+        }
+
+        appliedDiscount = {
+          code: body.code,
+          discountType: body.discountType,
+          discountValue: Number(body.discountValue)
+        };
+        discountCodeStatus.textContent = `Rabattkod använd: −${getDiscountAmount(estimate.total)} kr.`;
+        discountCodeStatus.classList.add('success');
+        updateLivePrice();
+      } catch (error) {
+        appliedDiscount = null;
+        discountCodeStatus.textContent = error instanceof Error ? error.message : 'Rabattkoden kunde inte användas.';
+        discountCodeStatus.classList.add('error');
+        updateLivePrice();
+      } finally {
+        applyDiscountButton.disabled = false;
+        applyDiscountButton.textContent = 'Använd';
+      }
     }
 
     function updateBookingProgress() {
@@ -1756,6 +1879,7 @@
         consentAccepted: booking.consentAccepted,
         message: booking.fullMessage || null,
         price: booking.price,
+        discountCode: booking.discountCode || null,
         formStartedAt: formStartedAtInput?.value || '',
         website: websiteInput?.value || ''
       };
@@ -1791,6 +1915,16 @@
     seaMilesInput.addEventListener('change', updateLivePrice);
     seaMilesInput.addEventListener('input', updateLivePrice);
     rutChoiceInput.addEventListener('change', updateLivePrice);
+    applyDiscountButton.addEventListener('click', applyDiscountCode);
+    discountCodeInput.addEventListener('input', () => {
+      const typedCode = discountCodeInput.value.trim().toUpperCase();
+      if (appliedDiscount && typedCode !== appliedDiscount.code) {
+        appliedDiscount = null;
+        discountCodeStatus.textContent = 'Koden ändrades. Klicka på Använd igen.';
+        discountCodeStatus.className = 'discount-status';
+        updateLivePrice();
+      }
+    });
     bookingForm.addEventListener('input', updateBookingProgress);
     bookingForm.addEventListener('change', updateBookingProgress);
 
@@ -1847,6 +1981,7 @@
       }
 
       const estimate = calculateEstimatedPrice();
+      const discountAmount = getDiscountAmount(estimate.total);
       const booking = {
         name: document.getElementById('name').value.trim(),
         email: document.getElementById('email').value.trim(),
@@ -1863,7 +1998,8 @@
         time: timeInput.value,
         location: document.getElementById('location').value.trim(),
         message: document.getElementById('message').value.trim(),
-        price: estimate.isQuote ? 'Pris enligt offert' : estimate.total,
+        price: estimate.isQuote ? 'Pris enligt offert' : getFinalPrice(estimate.total),
+        discountCode: appliedDiscount?.code || '',
         consentAccepted: document.getElementById('consent').checked
       };
 
@@ -1876,7 +2012,9 @@
         `Putsning: ${booking.serviceScope}`,
         `Transport: ${booking.transportType}`,
         `Prisrad: startavgift ${estimate.basePrice} kr, extra fönster ${estimate.windowPrice} kr, invändigt ${estimate.interiorAddon} kr, skärgård ${estimate.seaMilesAddon.price} kr`,
-        `Pris efter RUT: ${estimate.total} kr`,
+        `Ordinarie pris efter RUT: ${estimate.total} kr`,
+        ...(booking.discountCode ? [`Rabattkod: ${booking.discountCode}`, `Rabatt: -${discountAmount} kr`] : []),
+        `Pris efter RUT och rabatt: ${booking.price} kr`,
         `Pris före RUT: ${estimate.priceBeforeRut} kr`,
         `Önskat datum / helg: ${isHoliday(booking.date) ? `${formatDateForDisplay(booking.date)} (helg/röd dag)` : formatDateForDisplay(booking.date)}`
       ];
@@ -1908,7 +2046,10 @@
           transportType: booking.transportType,
           seaMiles: booking.seaMiles,
           coordinates: booking.coordinates,
-          price: String(booking.price)
+          price: String(createdBooking?.price ?? booking.price),
+          discountCode: createdBooking?.discountCode || booking.discountCode,
+          discountAmount: String(createdBooking?.discountAmount || 0),
+          originalPrice: String(createdBooking?.originalPrice ?? estimate.total)
         });
 
         if (createdBooking?.bookingId) {
@@ -1918,7 +2059,7 @@
         window.location.href = `betalning.html?${params.toString()}`;
       } catch (error) {
         console.error('Bokningsfel:', error);
-        setStatus('Kunde inte spara bokningen. Kontrollera uppgifterna eller försök igen.');
+        setStatus(error instanceof Error ? error.message : 'Kunde inte spara bokningen. Kontrollera uppgifterna eller försök igen.');
       }
     });
 

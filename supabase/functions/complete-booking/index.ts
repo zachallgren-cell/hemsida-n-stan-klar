@@ -402,9 +402,19 @@ Deno.serve(async (req) => {
     const safeContactEmail = escapeHtml(contactEmail);
     const safeStripePaymentUrl = escapeHtml(stripePaymentUrl);
     const safeReviewUrl = escapeHtml(reviewUrl);
+    const materialFeeOre = 15000;
     const priceAfterRutOre = parsePriceToOre(booking.price as number | string | undefined);
-    const priceBeforeRutDisplay = formatSekFromOre(priceAfterRutOre === null ? null : priceAfterRutOre * 2);
-    const rutDeductionDisplay = priceAfterRutOre === null ? '' : `-${formatSekFromOre(priceAfterRutOre)}`;
+    const discountAmountOre = parsePriceToOre(booking.discount_amount as number | string | undefined) || 0;
+    const originalPriceAfterRutOre = parsePriceToOre(booking.original_price as number | string | undefined)
+      ?? (priceAfterRutOre === null ? null : priceAfterRutOre + discountAmountOre);
+    const rutDeductionOre = originalPriceAfterRutOre === null
+      ? null
+      : Math.max(0, originalPriceAfterRutOre - materialFeeOre);
+    const priceBeforeRutOre = originalPriceAfterRutOre === null || rutDeductionOre === null
+      ? null
+      : originalPriceAfterRutOre + rutDeductionOre - discountAmountOre;
+    const priceBeforeRutDisplay = formatSekFromOre(priceBeforeRutOre);
+    const rutDeductionDisplay = rutDeductionOre === null ? '' : `-${formatSekFromOre(rutDeductionOre)}`;
     const priceAfterRutDisplay = priceAfterRutOre === null
       ? escapeDisplayValue(booking.price)
       : formatSekFromOre(priceAfterRutOre);
@@ -434,6 +444,10 @@ Deno.serve(async (req) => {
         <tr>
           <td style="padding: 9px 0; color: #5b6b7a; font-size: 14px;">RUT-avdrag (50%)</td>
           <td align="right" style="padding: 9px 0; color: #287a45; font-size: 15px; font-weight: 700;">${rutDeductionDisplay}</td>
+        </tr>
+        <tr>
+          <td style="padding: 9px 0; color: #5b6b7a; font-size: 14px;">Material (ej RUT)</td>
+          <td align="right" style="padding: 9px 0; color: #0f2638; font-size: 15px; font-weight: 700;">${formatSekFromOre(materialFeeOre)}</td>
         </tr>
       `
       : '';

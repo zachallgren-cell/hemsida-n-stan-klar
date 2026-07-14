@@ -340,6 +340,13 @@
       margin: 14px 0 0;
     }
 
+    .price small {
+      display: block;
+      margin-top: 4px;
+      color: var(--success);
+      font-size: 0.92rem;
+    }
+
     .summary-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -721,7 +728,7 @@
             <strong>Valt paket</strong>
             <span id="bookingPackage">Ej valt ännu</span>
           </div>
-          <div class="price"><span id="bookingPrice">599 kr</span></div>
+          <div class="price"><span id="bookingPrice">599 kr</span><small id="bookingDiscount" hidden></small></div>
         </div>
 
         <div class="next-step-box">
@@ -788,6 +795,7 @@
     const bookingBoatSize = document.getElementById('bookingBoatSize');
     const bookingPackage = document.getElementById('bookingPackage');
     const bookingPrice = document.getElementById('bookingPrice');
+    const bookingDiscount = document.getElementById('bookingDiscount');
     const payLaterButton = document.getElementById('payLaterButton');
     const statusBox = document.getElementById('statusBox');
     const statusText = document.getElementById('statusText');
@@ -812,6 +820,9 @@
     const seaMiles = params.get('seaMiles') || '';
     const coordinates = params.get('coordinates') || '';
     const price = params.get('price') || '599';
+    const discountCode = params.get('discountCode') || '';
+    const discountAmount = params.get('discountAmount') || '0';
+    const originalPrice = params.get('originalPrice') || '';
     const stripeStatus = params.get('stripe') || '';
 
     function formatDateForDisplay(dateString) {
@@ -871,6 +882,10 @@
     bookingBoatSize.textContent = housingType;
     bookingPackage.textContent = buildPackageSummary();
     bookingPrice.textContent = String(price).includes('offert') || String(price).includes('Offert') ? String(price) : `${price} kr`;
+    if (discountCode && Number(discountAmount) > 0) {
+      bookingDiscount.hidden = false;
+      bookingDiscount.textContent = `Rabattkod ${discountCode}: −${discountAmount} kr${originalPrice ? ` (ordinarie ${originalPrice} kr)` : ''}`;
+    }
 
     setStatus('Tack! Vi har tagit emot bokningen. Betalningslänken kommer i klartmejlet när fönsterputsen är utförd.');
 

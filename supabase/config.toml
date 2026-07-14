@@ -6,6 +6,9 @@ verify_jwt = false
 [functions.booked-slots]
 verify_jwt = false
 
+[functions.validate-discount]
+verify_jwt = false
+
 [functions.stripe-webhook]
 verify_jwt = false
 

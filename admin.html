@@ -271,13 +271,15 @@
       box-shadow: 0 10px 22px rgba(18, 67, 103, 0.08);
     }
 
-    .blocked-dates-list {
+    .blocked-dates-list,
+    .discount-codes-list {
       display: grid;
       gap: 10px;
       margin-top: 18px;
     }
 
-    .blocked-date-row {
+    .blocked-date-row,
+    .discount-code-row {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 12px;
@@ -289,11 +291,14 @@
     }
 
     .blocked-date-row strong,
-    .blocked-date-row span {
+    .blocked-date-row span,
+    .discount-code-row strong,
+    .discount-code-row span {
       display: block;
     }
 
-    .blocked-date-row span {
+    .blocked-date-row span,
+    .discount-code-row span {
       color: var(--muted);
       line-height: 1.5;
     }
@@ -393,16 +398,19 @@
     }
 
     #bookingsPanel,
-    #blockedDatesPanel {
+    #blockedDatesPanel,
+    #discountCodesPanel {
       grid-column: 1 / -1;
       width: 100%;
     }
 
-    #blockedDatesPanel {
+    #blockedDatesPanel,
+    #discountCodesPanel {
       padding: 32px;
     }
 
-    #blockedDatesPanel .blocked-dates-list {
+    #blockedDatesPanel .blocked-dates-list,
+    #discountCodesPanel .discount-codes-list {
       max-width: 980px;
     }
 
@@ -546,7 +554,9 @@
       .bookings-header { flex-direction: column; align-items: stretch; }
       .date-range-grid { grid-template-columns: 1fr; }
       .blocked-date-row { grid-template-columns: 1fr; align-items: stretch; }
-      .blocked-date-row .button { width: 100%; }
+      .discount-code-row { grid-template-columns: 1fr; align-items: stretch; }
+      .blocked-date-row .button,
+      .discount-code-row .button { width: 100%; }
     }
   </style>
 </head>
@@ -578,6 +588,7 @@
         <h2>Det här kan ni göra här</h2>
         <ul>
           <li>Se alla bokningar på ett ställe</li>
+          <li>Skapa, pausa och följa upp rabattkoder</li>
           <li>Lägga in semesterdagar som ej bokbara</li>
           <li>Markera bokning som bekräftad</li>
           <li>Markera jobb som klart och skicka betalning</li>
@@ -607,6 +618,7 @@
       <nav class="admin-tabs hidden" id="adminTabs" aria-label="Adminvyer">
         <button type="button" class="admin-tab is-active" data-admin-view="bookings">Bokningar</button>
         <button type="button" class="admin-tab" data-admin-view="blockedDates">Semesterdagar</button>
+        <button type="button" class="admin-tab" data-admin-view="discountCodes">Rabattkoder</button>
       </nav>
 
       <section class="card panel hidden" id="blockedDatesPanel">
@@ -631,6 +643,43 @@
         </form>
         <p class="status-message" id="blockedDateMessage"></p>
         <div class="blocked-dates-list" id="blockedDatesList"></div>
+      </section>
+
+      <section class="card panel hidden" id="discountCodesPanel">
+        <h2>Rabattkoder</h2>
+        <p>Skapa en kod som kunden kan ange i bokningen. Rabatten kan vara procent eller ett fast belopp i kronor.</p>
+        <form class="admin-form" id="discountCodeForm">
+          <div class="date-range-grid">
+            <label>
+              Rabattkod
+              <input type="text" id="discountCodeInput" placeholder="Till exempel SOMMAR20" minlength="3" maxlength="32" pattern="[A-Za-z0-9_-]+" required>
+            </label>
+            <label>
+              Rabattyp
+              <select id="discountTypeInput" required>
+                <option value="percentage">Procent</option>
+                <option value="fixed">Fast belopp</option>
+              </select>
+            </label>
+          </div>
+          <div class="date-range-grid">
+            <label>
+              Rabattvärde
+              <input type="number" id="discountValueInput" min="1" step="1" placeholder="20" required>
+            </label>
+            <label>
+              Max antal användningar
+              <input type="number" id="discountMaxUsesInput" min="1" step="1" placeholder="Obegränsat om tomt">
+            </label>
+          </div>
+          <label>
+            Giltig till och med
+            <input type="date" id="discountExpiryInput">
+          </label>
+          <button type="submit" class="button button-primary" id="discountCodeButton">Skapa rabattkod</button>
+        </form>
+        <p class="status-message" id="discountCodeMessage"></p>
+        <div class="discount-codes-list" id="discountCodesList"></div>
       </section>
 
       <section class="card panel hidden" id="bookingsPanel">
@@ -658,6 +707,7 @@
     const loginPanel = document.getElementById('loginPanel');
     const adminTabs = document.getElementById('adminTabs');
     const blockedDatesPanel = document.getElementById('blockedDatesPanel');
+    const discountCodesPanel = document.getElementById('discountCodesPanel');
     const bookingsPanel = document.getElementById('bookingsPanel');
     const loginForm = document.getElementById('loginForm');
     const loginButton = document.getElementById('loginButton');
@@ -672,6 +722,15 @@
     const blockedDateMessage = document.getElementById('blockedDateMessage');
     const blockedDatesList = document.getElementById('blockedDatesList');
     const blockedDateEndInput = document.getElementById('blockedDateEndInput');
+    const discountCodeForm = document.getElementById('discountCodeForm');
+    const discountCodeInput = document.getElementById('discountCodeInput');
+    const discountTypeInput = document.getElementById('discountTypeInput');
+    const discountValueInput = document.getElementById('discountValueInput');
+    const discountMaxUsesInput = document.getElementById('discountMaxUsesInput');
+    const discountExpiryInput = document.getElementById('discountExpiryInput');
+    const discountCodeButton = document.getElementById('discountCodeButton');
+    const discountCodeMessage = document.getElementById('discountCodeMessage');
+    const discountCodesList = document.getElementById('discountCodesList');
     let activeAdminView = 'bookings';
 
     function setLoginMessage(text, type = '') {
@@ -684,10 +743,18 @@
       blockedDateMessage.className = `status-message ${type}`.trim();
     }
 
+    function setDiscountCodeMessage(text, type = '') {
+      discountCodeMessage.textContent = text;
+      discountCodeMessage.className = `status-message ${type}`.trim();
+    }
+
     function renderAdminView() {
       const showBookings = activeAdminView === 'bookings';
+      const showBlockedDates = activeAdminView === 'blockedDates';
+      const showDiscountCodes = activeAdminView === 'discountCodes';
       bookingsPanel.classList.toggle('hidden', !showBookings);
-      blockedDatesPanel.classList.toggle('hidden', showBookings);
+      blockedDatesPanel.classList.toggle('hidden', !showBlockedDates);
+      discountCodesPanel.classList.toggle('hidden', !showDiscountCodes);
 
       adminTabs.querySelectorAll('.admin-tab').forEach((button) => {
         button.classList.toggle('is-active', button.dataset.adminView === activeAdminView);
@@ -749,7 +816,8 @@
       return match ? Number(match[0]) : 0;
     }
 
-    const START_PRICE = 949;
+    const BASE_LABOR_PRICE_AFTER_RUT = 799;
+    const MATERIAL_FEE = 150;
     const INCLUDED_WINDOWS = 15;
     const TWO_FLOOR_ADDON = 200;
     const EXTRA_REGULAR_WINDOW_PRICE = 39;
@@ -764,7 +832,7 @@
       const floorAddon = housingTypeLabel === 'Två våningar' || housingTypeLabel === 'Tvåplansvilla'
         ? TWO_FLOOR_ADDON
         : 0;
-      return START_PRICE + floorAddon;
+      return BASE_LABOR_PRICE_AFTER_RUT + MATERIAL_FEE + floorAddon;
     }
 
     function getInteriorAddon(housingTypeLabel, windowCount) {
@@ -792,19 +860,32 @@
       return (extraRegularWindowCount * EXTRA_REGULAR_WINDOW_PRICE) + (extraMuntinsCount * EXTRA_MUNTINS_WINDOW_PRICE);
     }
 
-    function getBookingPriceDisplay(booking) {
+    function getBookingPrices(booking) {
       const directPrice = booking.price || booking.total_price;
       if (directPrice) {
         const directText = String(directPrice).trim();
-        if (/kr|offert/i.test(directText)) return directText;
-        return `${directText} kr`;
+        if (/offert/i.test(directText)) return { withRut: directText, withoutRut: directText };
+
+        const priceWithRut = Number(directText.replace(/[^\d,.-]/g, '').replace(',', '.'));
+        if (Number.isFinite(priceWithRut)) {
+          const discountAmount = Number(booking.discount_amount || 0);
+          const originalPriceWithRut = Number(booking.original_price || priceWithRut + discountAmount);
+          const rutEligibleLabor = Math.max(0, originalPriceWithRut - MATERIAL_FEE);
+          const priceWithoutRut = originalPriceWithRut + rutEligibleLabor - discountAmount;
+          return {
+            withRut: `${Math.round(priceWithRut)} kr`,
+            withoutRut: `${Math.round(priceWithoutRut)} kr`
+          };
+        }
+
+        return { withRut: directText, withoutRut: 'Ej angivet' };
       }
 
       const housingType = booking.housing_type || '';
       const windowCount = parseWindowCount(booking.window_count);
       const basePrice = getBasePrice(housingType, windowCount);
 
-      if (!basePrice) return 'Ej angivet';
+      if (!basePrice) return { withRut: 'Ej angivet', withoutRut: 'Ej angivet' };
 
       const interiorAddon = booking.service_scope === 'Invändig + utvändig'
         ? getInteriorAddon(housingType, windowCount)
@@ -815,10 +896,14 @@
         : { price: 0, isQuote: false };
 
       if (seaMilesAddon.isQuote) {
-        return 'Pris enligt offert';
+        return { withRut: 'Pris enligt offert', withoutRut: 'Pris enligt offert' };
       }
 
-      return `${basePrice + windowTypePrice + interiorAddon + seaMilesAddon.price} kr`;
+      const priceWithRut = basePrice + windowTypePrice + interiorAddon + seaMilesAddon.price;
+      return {
+        withRut: `${priceWithRut} kr`,
+        withoutRut: `${priceWithRut + Math.max(0, priceWithRut - MATERIAL_FEE)} kr`
+      };
     }
 
     function renderBookings(bookings) {
@@ -828,6 +913,7 @@
       }
 
       bookingsList.innerHTML = bookings.map((booking) => {
+        const bookingPrices = getBookingPrices(booking);
         const packageParts = [
           booking.housing_type,
           booking.window_count,
@@ -858,7 +944,10 @@
               <div class="detail"><strong>Datum</strong><span>${escapeHtml(formatDate(booking.booking_date))}</span></div>
               <div class="detail"><strong>Tid</strong><span>${escapeHtml(booking.booking_time || 'Ej valt')}</span></div>
               <div class="detail"><strong>Adress</strong><span>${escapeHtml(booking.address || 'Ej angiven')}</span></div>
-              <div class="detail"><strong>Pris</strong><span>${escapeHtml(getBookingPriceDisplay(booking))}</span></div>
+              <div class="detail"><strong>Pris med RUT</strong><span>${escapeHtml(bookingPrices.withRut)}</span></div>
+              <div class="detail"><strong>Pris utan RUT</strong><span>${escapeHtml(bookingPrices.withoutRut)}</span></div>
+              <div class="detail"><strong>Material</strong><span>150 kr (ej RUT-grundande)</span></div>
+              ${booking.discount_code ? `<div class="detail"><strong>Rabatt</strong><span>${escapeHtml(`${booking.discount_code} • -${booking.discount_amount || 0} kr (ord. ${booking.original_price || '—'} kr)`)}</span></div>` : ''}
               <div class="detail"><strong>Stripe</strong><span>${booking.stripe_payment_url ? `<a href="${escapeHtml(booking.stripe_payment_url)}" target="_blank" rel="noopener noreferrer">Öppna betalningslänk</a>` : 'Länk skapas på betalningssidan eller när klartmail skickas.'}</span></div>
               <div class="detail"><strong>Paket</strong><span>${packageParts.length ? escapeHtml(packageParts.join(' • ')) : 'Ej angivet'}</span></div>
               <div class="detail"><strong>Övrig information</strong><span>${escapeHtml(booking.message || 'Ingen extra information')}</span></div>
@@ -896,6 +985,54 @@
           <button type="button" class="button button-danger action-delete-blocked-date">Ta bort</button>
         </div>
       `).join('');
+    }
+
+    function renderDiscountCodes(discountCodes) {
+      if (!discountCodes.length) {
+        discountCodesList.innerHTML = '<div class="empty-state">Inga rabattkoder har skapats ännu.</div>';
+        return;
+      }
+
+      discountCodesList.innerHTML = discountCodes.map((discountCode) => {
+        const value = discountCode.discount_type === 'percentage'
+          ? `${discountCode.discount_value} %`
+          : `${discountCode.discount_value} kr`;
+        const usage = discountCode.max_uses
+          ? `${discountCode.times_used} av ${discountCode.max_uses} använda`
+          : `${discountCode.times_used} använda • obegränsad`;
+        const expiry = discountCode.expires_at
+          ? `Gäller till ${new Date(discountCode.expires_at).toLocaleDateString('sv-SE')}`
+          : 'Ingen slutdag';
+
+        return `
+          <div class="discount-code-row" data-discount-code-id="${discountCode.id}">
+            <div>
+              <strong>${escapeHtml(discountCode.code)} — ${escapeHtml(value)}</strong>
+              <span>${escapeHtml(usage)} • ${escapeHtml(expiry)} • ${discountCode.active ? 'Aktiv' : 'Pausad'}</span>
+            </div>
+            <div class="button-stack">
+              <button type="button" class="button button-secondary action-toggle-discount-code" data-active="${discountCode.active}">${discountCode.active ? 'Pausa' : 'Aktivera'}</button>
+              <button type="button" class="button button-danger action-delete-discount-code">Ta bort</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function fetchDiscountCodes() {
+      discountCodesList.innerHTML = '<div class="empty-state">Hämtar rabattkoder...</div>';
+
+      const { data, error } = await supabase
+        .from('discount_codes')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        discountCodesList.innerHTML = `<div class="empty-state">${escapeHtml(`Kunde inte hämta rabattkoder: ${error.message}`)}</div>`;
+        return;
+      }
+
+      renderDiscountCodes(data || []);
     }
 
     async function fetchBlockedDates() {
@@ -1146,6 +1283,96 @@
       await deleteBlockedDate(id, target);
     });
 
+    discountCodeForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      setDiscountCodeMessage('');
+      discountCodeButton.disabled = true;
+
+      const code = discountCodeInput.value.trim().toUpperCase();
+      const discountType = discountTypeInput.value;
+      const discountValue = Number(discountValueInput.value);
+      const maxUses = discountMaxUsesInput.value ? Number(discountMaxUsesInput.value) : null;
+      const expiresAt = discountExpiryInput.value
+        ? new Date(`${discountExpiryInput.value}T23:59:59`).toISOString()
+        : null;
+      const { data: sessionData } = await supabase.auth.getSession();
+
+      if (!/^[A-Z0-9_-]{3,32}$/.test(code)) {
+        setDiscountCodeMessage('Koden måste vara 3–32 tecken och får innehålla bokstäver, siffror, bindestreck och understreck.', 'error');
+        discountCodeButton.disabled = false;
+        return;
+      }
+
+      if (!Number.isInteger(discountValue) || discountValue < 1 || (discountType === 'percentage' && discountValue > 100)) {
+        setDiscountCodeMessage('Ange ett giltigt rabattvärde. Procent måste vara mellan 1 och 100.', 'error');
+        discountCodeButton.disabled = false;
+        return;
+      }
+
+      if (maxUses !== null && (!Number.isInteger(maxUses) || maxUses < 1)) {
+        setDiscountCodeMessage('Max antal användningar måste vara ett heltal större än noll.', 'error');
+        discountCodeButton.disabled = false;
+        return;
+      }
+
+      const { error } = await supabase.from('discount_codes').insert({
+        code,
+        discount_type: discountType,
+        discount_value: discountValue,
+        max_uses: maxUses,
+        expires_at: expiresAt,
+        created_by: sessionData.session?.user?.id || null
+      });
+
+      discountCodeButton.disabled = false;
+
+      if (error) {
+        const message = /duplicate|unique/i.test(error.message)
+          ? 'Den rabattkoden finns redan.'
+          : `Kunde inte skapa rabattkoden: ${error.message}`;
+        setDiscountCodeMessage(message, 'error');
+        return;
+      }
+
+      discountCodeForm.reset();
+      setDiscountCodeMessage(`Rabattkoden ${code} är skapad och aktiv.`, 'success');
+      await fetchDiscountCodes();
+    });
+
+    discountCodesList.addEventListener('click', async (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      const row = target.closest('.discount-code-row');
+      const id = Number(row?.dataset.discountCodeId);
+      if (!id) return;
+
+      if (target.classList.contains('action-toggle-discount-code')) {
+        target.setAttribute('disabled', 'disabled');
+        const nextActive = target.dataset.active !== 'true';
+        const { error } = await supabase.from('discount_codes').update({ active: nextActive }).eq('id', id);
+        if (error) {
+          setDiscountCodeMessage(`Kunde inte uppdatera koden: ${error.message}`, 'error');
+          target.removeAttribute('disabled');
+          return;
+        }
+        setDiscountCodeMessage(nextActive ? 'Rabattkoden är aktiv.' : 'Rabattkoden är pausad.', 'success');
+        await fetchDiscountCodes();
+      }
+
+      if (target.classList.contains('action-delete-discount-code')) {
+        if (!window.confirm('Ta bort rabattkoden? Befintliga bokningar behåller sin rabatthistorik.')) return;
+        target.setAttribute('disabled', 'disabled');
+        const { error } = await supabase.from('discount_codes').delete().eq('id', id);
+        if (error) {
+          setDiscountCodeMessage(`Kunde inte ta bort koden: ${error.message}`, 'error');
+          target.removeAttribute('disabled');
+          return;
+        }
+        setDiscountCodeMessage('Rabattkoden är borttagen.', 'success');
+        await fetchDiscountCodes();
+      }
+    });
+
     loginForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       setLoginMessage('');
@@ -1183,11 +1410,19 @@
       if (activeAdminView === 'blockedDates') {
         await fetchBlockedDates();
       }
+      if (activeAdminView === 'discountCodes') {
+        await fetchDiscountCodes();
+      }
     });
 
     refreshButton.addEventListener('click', async () => {
       if (activeAdminView === 'blockedDates') {
         await fetchBlockedDates();
+        return;
+      }
+
+      if (activeAdminView === 'discountCodes') {
+        await fetchDiscountCodes();
         return;
       }
 
@@ -1210,6 +1445,7 @@
         activeAdminView = 'bookings';
         bookingsPanel.classList.add('hidden');
         blockedDatesPanel.classList.add('hidden');
+        discountCodesPanel.classList.add('hidden');
       }
     }
 

@@ -23,6 +23,7 @@ type BookingPayload = {
   location: string;
   message?: string;
   price?: number | string;
+  discountCode?: string;
   consentAccepted?: boolean;
   formStartedAt?: string;
   website?: string;
@@ -55,16 +56,93 @@ function normalizePhone(value: string) {
   return value.replace(/[^\d+]/g, '');
 }
 
-function parsePriceNumber(value: number | string | undefined) {
-  if (typeof value === 'number' && Number.isFinite(value)) return value;
-  const match = String(value || '').replace(/\s/g, '').replace(',', '.').match(/\d+(\.\d+)?/);
-  if (!match) return null;
-  const parsed = Number(match[0]);
-  return Number.isFinite(parsed) ? parsed : null;
-}
-
 function formatSek(value: number | null) {
   return value === null ? 'Ej angivet' : `${Math.round(value).toLocaleString('sv-SE')} kr`;
+}
+
+const BASE_LABOR_PRICE_AFTER_RUT = 799;
+const MATERIAL_FEE = 150;
+const INCLUDED_WINDOWS = 15;
+const MAX_TOTAL_WINDOWS = 60;
+const TWO_FLOOR_ADDON = 200;
+const EXTRA_REGULAR_WINDOW_PRICE = 39;
+const EXTRA_MUNTINS_WINDOW_PRICE = 49;
+const INTERIOR_BASE_ADDON = 320;
+const INTERIOR_EXTRA_WINDOW_PRICE = 39;
+const ISLAND_START_PRICE = 799;
+const ISLAND_PRICE_PER_SEA_MILE = 125;
+
+function parseCount(value: string | undefined, pattern = /\d+/) {
+  const match = String(value || '').match(pattern);
+  return match ? Number(match[1] || match[0]) : 0;
+}
+
+function calculateBookingPrice(payload: BookingPayload) {
+  const housingType = payload.housingType || payload.boatSize;
+  if (!['En våning', 'Två våningar'].includes(housingType)) return null;
+
+  const totalWindows = parseCount(payload.windowCount);
+  const regularWindows = parseCount(payload.addons, /(\d+)\s+utan spröjs/i);
+  const muntinsWindows = parseCount(payload.addons, /(\d+)\s+med spröjs/i);
+
+  if (totalWindows < 1 || totalWindows > MAX_TOTAL_WINDOWS || regularWindows + muntinsWindows !== totalWindows) {
+    return null;
+  }
+
+  const includedRegular = Math.min(regularWindows, INCLUDED_WINDOWS);
+  const includedMuntins = Math.min(muntinsWindows, Math.max(0, INCLUDED_WINDOWS - includedRegular));
+  const extraRegular = Math.max(0, regularWindows - includedRegular);
+  const extraMuntins = Math.max(0, muntinsWindows - includedMuntins);
+  const floorAddon = housingType === 'Två våningar' ? TWO_FLOOR_ADDON : 0;
+  const windowPrice = (extraRegular * EXTRA_REGULAR_WINDOW_PRICE) + (extraMuntins * EXTRA_MUNTINS_WINDOW_PRICE);
+  const interiorPrice = payload.serviceScope === 'Invändig + utvändig'
+    ? INTERIOR_BASE_ADDON + (Math.max(0, totalWindows - INCLUDED_WINDOWS) * INTERIOR_EXTRA_WINDOW_PRICE)
+    : payload.serviceScope === 'Endast utvändig' ? 0 : NaN;
+
+  let transportPrice = 0;
+  if (payload.transportType === 'Båttransport behövs') {
+    const seaMiles = Number(payload.seaMiles);
+    if (!Number.isFinite(seaMiles) || seaMiles < 0 || seaMiles > 1000) return null;
+    transportPrice = ISLAND_START_PRICE + (seaMiles * ISLAND_PRICE_PER_SEA_MILE);
+  } else if (payload.transportType && payload.transportType !== 'Fastland') {
+    return null;
+  }
+
+  const total = BASE_LABOR_PRICE_AFTER_RUT + MATERIAL_FEE + floorAddon + windowPrice + interiorPrice + transportPrice;
+  return Number.isFinite(total) ? Math.round(total) : null;
+}
+
+type AppliedDiscount = {
+  discount_code_id: number;
+  normalized_code: string;
+  discount_type: 'percentage' | 'fixed';
+  discount_value: number;
+  discount_amount: number;
+  final_price: number;
+};
+
+async function consumeDiscountCode(
+  supabaseUrl: string,
+  serviceRoleKey: string,
+  code: string,
+  originalPrice: number
+) {
+  const response = await fetch(`${supabaseUrl}/rest/v1/rpc/consume_discount_code`, {
+    method: 'POST',
+    headers: {
+      apikey: serviceRoleKey,
+      Authorization: `Bearer ${serviceRoleKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ p_code: code, p_original_price: originalPrice })
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const rows = await response.json();
+  return Array.isArray(rows) && rows.length ? rows[0] as AppliedDiscount : null;
 }
 
 function isSuspiciouslyFastSubmission(startedAt: string | undefined) {
@@ -142,6 +220,11 @@ Deno.serve(async (req) => {
 
     if (!isBookableDate(payload.date)) {
       return jsonResponse({ error: 'Välj ett senare datum.' }, 400);
+    }
+
+    const originalPrice = calculateBookingPrice(payload);
+    if (originalPrice === null) {
+      return jsonResponse({ error: 'Prisuppgifterna är ogiltiga. Kontrollera bostad, fönster och transport.' }, 400);
     }
 
     if (payload.website || isSuspiciouslyFastSubmission(payload.formStartedAt)) {
@@ -240,6 +323,21 @@ Deno.serve(async (req) => {
       }
     }
 
+    const normalizedDiscountCode = String(payload.discountCode || '').trim().toUpperCase();
+    let appliedDiscount: AppliedDiscount | null = null;
+
+    if (normalizedDiscountCode) {
+      if (!/^[A-Z0-9_-]{3,32}$/.test(normalizedDiscountCode)) {
+        return jsonResponse({ error: 'Rabattkoden är ogiltig.' }, 400);
+      }
+
+      appliedDiscount = await consumeDiscountCode(supabaseUrl, serviceRoleKey, normalizedDiscountCode, originalPrice);
+      if (!appliedDiscount) {
+        return jsonResponse({ error: 'Rabattkoden är ogiltig, har gått ut eller har redan använts maximalt antal gånger.' }, 400);
+      }
+    }
+
+    const finalPrice = appliedDiscount?.final_price ?? originalPrice;
     const rutFormToken = createRutFormToken();
     const bookingInsert = {
       customer_name: payload.name,
@@ -257,7 +355,11 @@ Deno.serve(async (req) => {
       booking_time: payload.time,
       address: payload.location,
       message: payload.message || null,
-      price: payload.price ? String(payload.price) : null,
+      price: String(finalPrice),
+      original_price: originalPrice,
+      discount_amount: appliedDiscount?.discount_amount || 0,
+      discount_code: appliedDiscount?.normalized_code || null,
+      discount_code_id: appliedDiscount?.discount_code_id || null,
       rut_choice: payload.rutChoice || payload.rut_choice || null,
       rut_form_token: rutFormToken,
       consent_accepted: Boolean(payload.consentAccepted),
@@ -313,14 +415,17 @@ Deno.serve(async (req) => {
     const safeTransportType = payload.transportType ? escapeHtml(payload.transportType) : 'Fastland';
     const safeSeaMiles = payload.seaMiles ? escapeHtml(payload.seaMiles) : 'Ej angivet';
     const safeCoordinates = payload.coordinates ? escapeHtml(payload.coordinates) : 'Ej angivet';
-    const safePrice = escapeHtml(String(payload.price || 'Ej angivet'));
-    const safePriceDisplay = /^\d+$/.test(String(payload.price || '')) ? `${safePrice} kr` : safePrice;
+    const safePriceDisplay = formatSek(finalPrice);
+    const safeOriginalPriceDisplay = formatSek(originalPrice);
+    const safeDiscountDisplay = appliedDiscount ? `-${formatSek(appliedDiscount.discount_amount)}` : '';
+    const safeDiscountCode = appliedDiscount ? escapeHtml(appliedDiscount.normalized_code) : '';
     const logoUrl = `${siteUrl}/logga-fonsterputs-transparent.png`;
     const safeLogoUrl = escapeHtml(logoUrl);
     const safeContactEmail = escapeHtml(contactEmail);
-    const priceAfterRutNumber = parsePriceNumber(payload.price);
-    const priceBeforeRutNumber = priceAfterRutNumber === null ? null : priceAfterRutNumber * 2;
-    const rutDeductionNumber = priceAfterRutNumber;
+    const priceAfterRutNumber = finalPrice;
+    const discountAmount = appliedDiscount?.discount_amount || 0;
+    const rutDeductionNumber = Math.max(0, originalPrice - MATERIAL_FEE);
+    const priceBeforeRutNumber = originalPrice + rutDeductionNumber - discountAmount;
     const priceBeforeRutDisplay = formatSek(priceBeforeRutNumber);
     const rutDeductionDisplay = rutDeductionNumber === null ? 'Ej angivet' : `-${formatSek(rutDeductionNumber)}`;
     const priceAfterRutDisplay = priceAfterRutNumber === null ? safePriceDisplay : formatSek(priceAfterRutNumber);
@@ -333,7 +438,7 @@ Deno.serve(async (req) => {
         rutUrl.searchParams.set('token', rutFormToken);
         if (rutDeductionNumber !== null) {
           rutUrl.searchParams.set('rutAmount', String(Math.round(rutDeductionNumber)));
-          rutUrl.searchParams.set('priceAfterRut', String(Math.round(rutDeductionNumber)));
+          rutUrl.searchParams.set('priceAfterRut', String(Math.round(priceAfterRutNumber)));
         }
         rutFormUrlWithBooking = rutUrl.toString();
       } catch {
@@ -343,7 +448,7 @@ Deno.serve(async (req) => {
         params.set('token', rutFormToken);
         if (rutDeductionNumber !== null) {
           params.set('rutAmount', String(Math.round(rutDeductionNumber)));
-          params.set('priceAfterRut', String(Math.round(rutDeductionNumber)));
+          params.set('priceAfterRut', String(Math.round(priceAfterRutNumber)));
         }
         rutFormUrlWithBooking = params.toString() ? `${rutFormUrlWithBooking}${separator}${params.toString()}` : rutFormUrlWithBooking;
       }
@@ -361,6 +466,11 @@ Deno.serve(async (req) => {
       ['Transport', safeTransportType],
       ...(payload.seaMiles ? [['Sjömil', safeSeaMiles]] : []),
       ...(payload.coordinates ? [['Koordinater', safeCoordinates]] : [])
+      ,...(appliedDiscount ? [
+        ['Rabattkod', safeDiscountCode],
+        ['Ordinarie pris', safeOriginalPriceDisplay],
+        ['Rabatt', safeDiscountDisplay]
+      ] : [])
     ].map(([label, value]) => `
           <tr>
             <td width="42%" style="width: 42%; padding: 12px 0; border-bottom: 1px solid #e6edf3; color: #5b6b7a; font-size: 14px; vertical-align: top;">${label}</td>
@@ -429,6 +539,7 @@ Deno.serve(async (req) => {
           <tr><td style="padding: 8px 0; font-weight: 700;">Betalningsmetod</td><td style="padding: 8px 0;">${safePaymentMethod}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Tillägg</td><td style="padding: 8px 0;">${safeAddons}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Pris</td><td style="padding: 8px 0;">${safePriceDisplay}</td></tr>
+          ${appliedDiscount ? `<tr><td style="padding: 8px 0; font-weight: 700;">Rabattkod</td><td style="padding: 8px 0;">${safeDiscountCode} (${safeDiscountDisplay})</td></tr>` : ''}
           <tr><td style="padding: 8px 0; font-weight: 700; vertical-align: top;">Meddelande</td><td style="padding: 8px 0;">${safeMessage}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Samtycke</td><td style="padding: 8px 0;">${payload.consentAccepted ? 'Ja' : 'Nej'}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">Boknings-ID</td><td style="padding: 8px 0;">${escapeHtml(String(savedBooking?.id || 'okänt'))}</td></tr>
@@ -518,6 +629,10 @@ Deno.serve(async (req) => {
                               <td style="padding: 9px 0; color: #5b6b7a; font-size: 14px;">Beräknat RUT-avdrag 50%</td>
                               <td align="right" style="padding: 9px 0; color: #287a45; font-size: 15px; font-weight: 700;">${rutDeductionDisplay}</td>
                             </tr>
+                            <tr>
+                              <td style="padding: 9px 0; color: #5b6b7a; font-size: 14px;">Material (ej RUT)</td>
+                              <td align="right" style="padding: 9px 0; color: #0f2638; font-size: 15px; font-weight: 700;">${formatSek(MATERIAL_FEE)}</td>
+                            </tr>
                           </table>
                           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top: 12px; border-collapse: collapse; background: #247a43; border-radius: 12px;">
                             <tr>
@@ -603,7 +718,11 @@ Deno.serve(async (req) => {
       return jsonResponse({
         error: 'Booking saved but email failed',
         details: errorText,
-        bookingId: savedBooking?.id || null
+        bookingId: savedBooking?.id || null,
+        price: finalPrice,
+        originalPrice,
+        discountAmount: appliedDiscount?.discount_amount || 0,
+        discountCode: appliedDiscount?.normalized_code || null
       }, 502);
     }
 
@@ -651,6 +770,10 @@ Deno.serve(async (req) => {
     return jsonResponse({
       success: true,
       bookingId: savedBooking?.id || null,
+      price: finalPrice,
+      originalPrice,
+      discountAmount: appliedDiscount?.discount_amount || 0,
+      discountCode: appliedDiscount?.normalized_code || null,
       customerEmailSent,
       stripeCheckoutUrl: null,
       stripeCheckoutSessionId: null

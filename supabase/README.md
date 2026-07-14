@@ -13,6 +13,7 @@ Bokningssidan kan anropa Edge Function:
 
 - `create-booking`
 - `booked-slots`
+- `validate-discount`
 - `complete-booking`
 - `stripe-webhook`
 - `rut-booking-details`
@@ -27,6 +28,10 @@ Funktionen:
 - återanvänder eller skapar ny Stripe Checkout-session i `complete-booking` när jobbet markeras som klart
 - skickar Stripe Checkout-länken i klartmailet när jobbet är utfört
 - markerar bokningen som `paid` när Stripe skickar `checkout.session.completed` till webhooken
+
+## Rabattkoder
+
+Kör `supabase/migrations/20260714_add_discount_codes.sql` för att skapa rabattkodstabellen, admin-policies och bokningens rabatthistorik. Koder skapas och pausas i `admin.html`. Kunden validerar sin kod via `validate-discount`, medan `create-booking` räknar om ordinarie pris och förbrukar koden server-side innan slutpriset sparas.
 
 ## Säkert RUT-formulär utan egen RUT-databas
 
@@ -44,16 +49,20 @@ Flödet är:
 5. `rut.html` skickar personnummer och RUT-belopp till Edge Function `submit-rut`
 6. funktionen validerar uppgifterna server-side
 7. funktionen sparar inte RUT-data i Supabase-tabeller
-8. om Fortnox-token och Fortnox-dokument finns skickas underlaget till Fortnox `/3/taxreductions`
+8. om Fortnox-token finns skapar funktionen kund i Fortnox, skapar en faktura/kontantfaktura, och skickar sedan underlaget till Fortnox `/3/taxreductions`
 9. ett internt mail skickas utan personnummer som kvittens/status
 10. om Fortnox-kopplingen saknas returnerar formuläret fel, så RUT-uppgifter inte tas emot och tappas bort
 
-För att skapa en Tax Reduction i Fortnox behöver formuläret få ett Fortnox-dokument:
+Funktionen använder bokningen som fakturaunderlag. Den sparar Fortnox kundnummer, dokumentnummer och RUT-synktid på bokningen.
+
+Fortnox OAuth behöver godkännas manuellt en gång i Fortnox. Efter första `refresh_token` är sparad förnyar Edge Functionen access token automatiskt och sparar Fortnox nya roterade refresh token i `fortnox_oauth_tokens`.
+
+Om ett Fortnox-dokument redan finns kan formuläret fortfarande få dokumentet explicit:
 
 - `referenceDocumentType=INVOICE`, `ORDER` eller `OFFER`
 - `referenceNumber=<Fortnox dokumentnummer>`
 
-Utan dessa kan funktionen notifiera internt att koppling saknas, men den tar inte emot kundens RUT-underlag som lyckat. Det är medvetet: personnummer ska inte tappas bort, sparas i fel system eller skickas i mail.
+Utan dessa skapar funktionen själv kund och dokument i Fortnox. Det är medvetet att personnummer inte sparas i Supabase-tabeller eller skickas i mail.
 
 ## Nya kolumner för fönsterputs
 
@@ -117,6 +126,19 @@ Den lägger till:
 - `stripe_checkout_expires_at`
 - `stripe_paid_at`
 
+För Fortnox/RUT-flödet, kör också:
+
+- `supabase/migrations/20260630_add_fortnox_booking_fields.sql`
+
+Den lägger till:
+
+- `fortnox_customer_number`
+- `fortnox_invoice_number`
+- `fortnox_reference_document_type`
+- `fortnox_reference_number`
+- `fortnox_rut_synced_at`
+- en privat token-store-tabell `fortnox_oauth_tokens` för Fortnox OAuth-refresh
+
 ## Secrets du behöver i Supabase
 
 Lägg in dessa i Supabase Edge Functions secrets:
@@ -129,7 +151,12 @@ Lägg in dessa i Supabase Edge Functions secrets:
 - `PUBLIC_SITE_URL=https://bergafonsterputs.se`
 - `STRIPE_SECRET_KEY=sk_live_...`
 - `STRIPE_WEBHOOK_SECRET=whsec_...`
-- `FORTNOX_ACCESS_TOKEN=...` för första Fortnox-kopplingen till `submit-rut`
+- `FORTNOX_CLIENT_ID=...`
+- `FORTNOX_CLIENT_SECRET=...`
+- `FORTNOX_REFRESH_TOKEN=...` kan användas som startvärde tills token-store är seedad
+- `FORTNOX_ACCESS_TOKEN=...` kan användas för kort snabbtest, men ska inte vara enda produktionslösningen
+- `FORTNOX_CASH_INVOICE_ENDPOINT=https://api.fortnox.se/3/invoices` om ni vill styra vilken Fortnox-resurs som används för dokumentet
+- `FORTNOX_INVOICE_ROW_VAT=25` om fakturaraden ska använda annan moms än 25%
 - `RUT_ALLOW_NO_FORTNOX=true` endast i testläge om formuläret ska acceptera utan Fortnox-postning
 
 För produktion bör Fortnox OAuth-token hanteras med en liten privat token-store, eftersom Fortnox access tokens går ut och refresh tokens roteras. Den token-storen ska bara lagra integrationstokens, inte kundens RUT-uppgifter.
@@ -159,6 +186,7 @@ När du har Supabase CLI installerat kan du deploya med:
 ```bash
 supabase functions deploy create-booking
 supabase functions deploy booked-slots
+supabase functions deploy validate-discount
 supabase functions deploy complete-booking
 supabase functions deploy stripe-webhook
 supabase functions deploy rut-booking-details
@@ -176,7 +204,20 @@ supabase secrets set BOOKING_RUT_FORM_URL="https://..."
 supabase secrets set PUBLIC_SITE_URL=https://bergafonsterputs.se
 supabase secrets set STRIPE_SECRET_KEY="$STRIPE_SECRET_KEY"
 supabase secrets set STRIPE_WEBHOOK_SECRET="$STRIPE_WEBHOOK_SECRET"
-supabase secrets set FORTNOX_ACCESS_TOKEN="$FORTNOX_ACCESS_TOKEN"
+supabase secrets set FORTNOX_CLIENT_ID="$FORTNOX_CLIENT_ID"
+supabase secrets set FORTNOX_CLIENT_SECRET="$FORTNOX_CLIENT_SECRET"
+supabase secrets set FORTNOX_REFRESH_TOKEN="$FORTNOX_REFRESH_TOKEN"
+supabase secrets set FORTNOX_CASH_INVOICE_ENDPOINT="https://api.fortnox.se/3/invoices"
+supabase secrets set FORTNOX_INVOICE_ROW_VAT="25"
+```
+
+När första refresh token finns kan den även seedas i databasen:
+
+```sql
+insert into public.fortnox_oauth_tokens (provider, refresh_token)
+values ('fortnox', '<FORTNOX_REFRESH_TOKEN>')
+on conflict (provider)
+do update set refresh_token = excluded.refresh_token, updated_at = now();
 ```
 
 ## Efter deploy

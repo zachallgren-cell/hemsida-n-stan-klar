@@ -27,6 +27,7 @@ function isValidToken(value: string) {
 
 async function fetchBooking(supabaseUrl: string, serviceRoleKey: string, bookingId: string, token: string) {
   const selectAttempts = [
+    'id,customer_name,email,phone,price,original_price,rut_form_token',
     'id,customer_name,email,phone,price,rut_form_token',
     'id,customer_name,email,phone,rut_form_token',
     'id,email,phone,price,rut_form_token',
@@ -109,7 +110,7 @@ Deno.serve(async (req) => {
       name: booking.customer_name || '',
       email: booking.email || '',
       phone: booking.phone || '',
-      rutAmount: parsePriceNumber(booking.price)
+      rutAmount: Math.max(0, (parsePriceNumber(booking.original_price) ?? parsePriceNumber(booking.price) ?? 0) - 150)
     });
   } catch (error) {
     console.error('Unhandled rut-booking-details error', error);
