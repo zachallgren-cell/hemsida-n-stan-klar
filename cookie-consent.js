@@ -2,7 +2,6 @@
   const consentKey = 'berga_cookie_consent';
   const analyticsId = 'G-B78CWM4L6V';
   const clarityProjectId = 'xogpsbqaar';
-  const clarityModuleUrl = 'https://cdn.jsdelivr.net/npm/@microsoft/clarity@1.0.2/index.js';
   let analyticsLoaded = false;
   let clarityLoaded = false;
   let modalReturnFocus = null;
@@ -24,7 +23,6 @@
 
     if (value === 'accepted') {
       loadAnalytics();
-      loadClarity();
     } else if (window.gtag) {
       window.gtag('consent', 'update', {
         analytics_storage: 'denied',
@@ -74,38 +72,34 @@
     window.gtag('config', analyticsId);
   }
 
-  async function loadClarity() {
-    if (
-      clarityLoaded ||
-      !clarityProjectId ||
-      clarityProjectId === 'REPLACE_WITH_CLARITY_PROJECT_ID'
-    ) {
+  function loadClarity() {
+    if (clarityLoaded || !clarityProjectId) return;
+
+    window.clarity = window.clarity || function () {
+      (window.clarity.q = window.clarity.q || []).push(arguments);
+    };
+
+    const existingScript = document.querySelector(`script[src="https://www.clarity.ms/tag/${clarityProjectId}"]`);
+    if (existingScript) {
+      clarityLoaded = true;
       return;
     }
 
-    try {
-      const { default: Clarity } = await import(clarityModuleUrl);
-      Clarity.init(clarityProjectId);
-      Clarity.consentV2({
-        ad_Storage: 'denied',
-        analytics_Storage: 'granted'
-      });
-      window.bergaClarity = Clarity;
-      clarityLoaded = true;
-    } catch (error) {
-      console.error('Clarity kunde inte laddas.', error);
-    }
+    const clarityScript = document.createElement('script');
+    clarityScript.async = true;
+    clarityScript.src = `https://www.clarity.ms/tag/${clarityProjectId}`;
+    document.head.appendChild(clarityScript);
+    clarityLoaded = true;
   }
 
   function updateClarityConsent(value) {
-    const clarity = window.bergaClarity;
-    if (!clarity?.consentV2) return;
+    window.clarity = window.clarity || function () {
+      (window.clarity.q = window.clarity.q || []).push(arguments);
+    };
 
-    clarity.consentV2(
-      value === 'accepted'
-        ? { ad_Storage: 'denied', analytics_Storage: 'granted' }
-        : { ad_Storage: 'denied', analytics_Storage: 'denied' }
-    );
+    window.clarity('consentv2', value === 'accepted'
+      ? { ad_Storage: 'denied', analytics_Storage: 'granted' }
+      : { ad_Storage: 'denied', analytics_Storage: 'denied' });
   }
 
   function closeConsentUi() {
@@ -280,19 +274,23 @@
   }
 
   function initCookieConsent() {
+    loadClarity();
+
     const consent = getConsent();
     if (consent === 'accepted') {
       loadAnalytics();
-      loadClarity();
+      updateClarityConsent('accepted');
       renderSettingsButton();
       return;
     }
 
     if (consent === 'necessary') {
+      updateClarityConsent('necessary');
       renderSettingsButton();
       return;
     }
 
+    updateClarityConsent('necessary');
     renderBanner();
   }
 
