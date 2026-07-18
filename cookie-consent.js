@@ -1,7 +1,10 @@
 (function () {
   const consentKey = 'berga_cookie_consent';
   const analyticsId = 'G-B78CWM4L6V';
+  const clarityProjectId = 'xogpsbqaar';
+  const clarityModuleUrl = 'https://cdn.jsdelivr.net/npm/@microsoft/clarity@1.0.2/index.js';
   let analyticsLoaded = false;
+  let clarityLoaded = false;
   let modalReturnFocus = null;
 
   function getConsent() {
@@ -21,6 +24,7 @@
 
     if (value === 'accepted') {
       loadAnalytics();
+      loadClarity();
     } else if (window.gtag) {
       window.gtag('consent', 'update', {
         analytics_storage: 'denied',
@@ -29,6 +33,8 @@
         ad_personalization: 'denied'
       });
     }
+
+    updateClarityConsent(value);
 
     window.dispatchEvent(new CustomEvent('berga:consent-change', {
       detail: { value }
@@ -66,6 +72,40 @@
 
     window.gtag('js', new Date());
     window.gtag('config', analyticsId);
+  }
+
+  async function loadClarity() {
+    if (
+      clarityLoaded ||
+      !clarityProjectId ||
+      clarityProjectId === 'REPLACE_WITH_CLARITY_PROJECT_ID'
+    ) {
+      return;
+    }
+
+    try {
+      const { default: Clarity } = await import(clarityModuleUrl);
+      Clarity.init(clarityProjectId);
+      Clarity.consentV2({
+        ad_Storage: 'denied',
+        analytics_Storage: 'granted'
+      });
+      window.bergaClarity = Clarity;
+      clarityLoaded = true;
+    } catch (error) {
+      console.error('Clarity kunde inte laddas.', error);
+    }
+  }
+
+  function updateClarityConsent(value) {
+    const clarity = window.bergaClarity;
+    if (!clarity?.consentV2) return;
+
+    clarity.consentV2(
+      value === 'accepted'
+        ? { ad_Storage: 'denied', analytics_Storage: 'granted' }
+        : { ad_Storage: 'denied', analytics_Storage: 'denied' }
+    );
   }
 
   function closeConsentUi() {
@@ -112,7 +152,7 @@
     banner.innerHTML = `
       <div>
         <h2 id="cookieConsentTitle">Cookies</h2>
-        <p id="cookieConsentSummary">Vi använder nödvändig teknik för sidan och Google Analytics först om du godkänner analyscookies. <a href="integritet.html">Läs integritetspolicyn</a>.</p>
+        <p id="cookieConsentSummary">Vi använder nödvändig teknik för sidan och laddar Google Analytics och Microsoft Clarity först om du godkänner analyscookies. <a href="integritet.html">Läs integritetspolicyn</a>.</p>
       </div>
       <div class="cookie-actions">
         <button type="button" class="cookie-button cookie-button-primary" data-cookie-accept>Acceptera analyscookies</button>
@@ -148,7 +188,7 @@
         <p>Hemsidan använder nödvändig teknik för att fungera korrekt. Vi sparar även ditt cookieval lokalt i webbläsaren så att du slipper välja igen vid nästa besök.</p>
 
         <h3>Analyscookies</h3>
-        <p>Vi kan använda analystjänster, exempelvis Google Analytics, för att förstå hur besökare använder hemsidan och för att förbättra innehåll och funktioner.</p>
+        <p>Vi kan använda analystjänster, exempelvis Google Analytics och Microsoft Clarity, för att förstå hur besökare använder hemsidan och för att förbättra innehåll och funktioner.</p>
         <p>Informationen används endast för statistik och utveckling av hemsidan.</p>
 
         <h3>Hur kan du kontrollera cookies?</h3>
@@ -243,6 +283,7 @@
     const consent = getConsent();
     if (consent === 'accepted') {
       loadAnalytics();
+      loadClarity();
       renderSettingsButton();
       return;
     }
