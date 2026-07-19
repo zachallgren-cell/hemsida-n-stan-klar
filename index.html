@@ -2901,6 +2901,7 @@
     const monthNames = ['januari', 'februari', 'mars', 'april', 'maj', 'juni', 'juli', 'augusti', 'september', 'oktober', 'november', 'december'];
 
     let currentCalendarMonth = new Date(firstCalendarMonth);
+    let firstAvailableCalendarMonth = new Date(firstCalendarMonth);
     let selectedDate = '';
     let selectedTime = '';
     let bookingsCache = [];
@@ -2972,11 +2973,13 @@
         bookingsCache = availability.bookings;
         blockedDatesCache = availability.blockedDates;
         setAvailabilityState('ready');
+        setCalendarToFirstAvailableMonth();
         applyInitialBookingSelection();
       } catch (error) {
         console.error(error);
         bookingsCache = [];
         blockedDatesCache = [];
+        firstAvailableCalendarMonth = new Date(firstCalendarMonth);
         setAvailabilityState('error');
       }
 
@@ -3021,6 +3024,51 @@
 
     function isBlockedDate(date) {
       return Boolean(getBlockedDate(date));
+    }
+
+    function isDateWithinBookableRange(date) {
+      return date >= minBookableString && date <= lastBookableString;
+    }
+
+    function isDateSelectable(date) {
+      return isDateWithinBookableRange(date) && !isFullyBooked(date);
+    }
+
+    function findFirstAvailableDate() {
+      const cursor = new Date(minBookableDate);
+
+      while (formatDate(cursor.getFullYear(), cursor.getMonth(), cursor.getDate()) <= lastBookableString) {
+        const date = formatDate(cursor.getFullYear(), cursor.getMonth(), cursor.getDate());
+        if (isDateSelectable(date)) {
+          return date;
+        }
+        cursor.setDate(cursor.getDate() + 1);
+      }
+
+      return '';
+    }
+
+    function setCalendarToFirstAvailableMonth() {
+      const firstAvailableDate = findFirstAvailableDate();
+      if (!firstAvailableDate) {
+        firstAvailableCalendarMonth = new Date(firstCalendarMonth);
+        currentCalendarMonth = new Date(firstCalendarMonth);
+        return;
+      }
+
+      const firstAvailableDateObject = new Date(`${firstAvailableDate}T12:00:00`);
+      firstAvailableCalendarMonth = new Date(
+        firstAvailableDateObject.getFullYear(),
+        firstAvailableDateObject.getMonth(),
+        1,
+        12
+      );
+
+      if (!selectedDate) {
+        selectedDate = firstAvailableDate;
+        selectedTime = '';
+        currentCalendarMonth = new Date(firstAvailableCalendarMonth);
+      }
     }
 
     function updateSelectedDateBox() {
@@ -3104,10 +3152,9 @@
       const dateObject = new Date(`${initialDate}T12:00:00`);
       const isValidDate = !Number.isNaN(dateObject.getTime())
         && formatDate(dateObject.getFullYear(), dateObject.getMonth(), dateObject.getDate()) === initialDate
-        && initialDate >= minBookableString
-        && initialDate <= lastBookableString;
+        && isDateWithinBookableRange(initialDate);
 
-      if (!isValidDate || isFullyBooked(initialDate) || isBlockedDate(initialDate)) return;
+      if (!isValidDate || !isDateSelectable(initialDate)) return;
 
       selectedDate = initialDate;
       currentCalendarMonth = new Date(dateObject.getFullYear(), dateObject.getMonth(), 1, 12);
@@ -3241,7 +3288,7 @@
       const availabilityReady = availabilityState === 'ready';
 
       calendarTitle.textContent = `${monthNames[viewMonth]} ${viewYear}`;
-      prevMonthButton.disabled = !availabilityReady || isSameCalendarMonth(currentCalendarMonth, firstCalendarMonth);
+      prevMonthButton.disabled = !availabilityReady || isSameCalendarMonth(currentCalendarMonth, firstAvailableCalendarMonth);
       nextMonthButton.disabled = !availabilityReady || isSameCalendarMonth(currentCalendarMonth, lastCalendarMonth);
       prevMonthButton.setAttribute('aria-label', `Visa ${formatMonthForDisplay(previousMonth)}`);
       nextMonthButton.setAttribute('aria-label', `Visa ${formatMonthForDisplay(nextMonth)}`);
@@ -3336,7 +3383,7 @@
     }
 
     prevMonthButton.addEventListener('click', () => {
-      if (availabilityState === 'ready' && !isSameCalendarMonth(currentCalendarMonth, firstCalendarMonth)) {
+      if (availabilityState === 'ready' && !isSameCalendarMonth(currentCalendarMonth, firstAvailableCalendarMonth)) {
         currentCalendarMonth = new Date(
           currentCalendarMonth.getFullYear(),
           currentCalendarMonth.getMonth() - 1,

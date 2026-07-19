@@ -933,6 +933,7 @@
     const lastBookableString = formatDate(lastBookableDate.getFullYear(), lastBookableDate.getMonth(), lastBookableDate.getDate());
 
     let currentCalendarMonth = new Date(firstCalendarMonth);
+    let firstAvailableCalendarMonth = new Date(firstCalendarMonth);
     let selectedDate = '';
     let selectedTime = '';
     let bookingsCache = [];
@@ -959,23 +960,66 @@
         throw new Error('Ogiltigt kalendersvar');
       }
 
-      const bookings = data.bookings.map((booking) => ({
-        date: typeof booking?.date === 'string' ? booking.date : '',
-        time: typeof booking?.time === 'string' ? booking.time.slice(0, 5) : ''
-      }));
-      const blockedDates = data.blockedDates.map((blockedDate) => ({
-        date: typeof blockedDate?.date === 'string' ? blockedDate.date : '',
-        reason: typeof blockedDate?.reason === 'string' ? blockedDate.reason.slice(0, 160) : ''
-      }));
+      const bookings = data.bookings
+        .map((booking) => ({
+          date: typeof booking?.date === 'string' ? booking.date : '',
+          time: typeof booking?.time === 'string' ? booking.time.slice(0, 5) : ''
+        }))
+        .filter((booking) => /^\d{4}-\d{2}-\d{2}$/.test(booking.date) && BOOKABLE_TIMES.includes(booking.time));
 
-      if (bookings.some((booking) => !/^\d{4}-\d{2}-\d{2}$/.test(booking.date) || !BOOKABLE_TIMES.includes(booking.time))) {
-        throw new Error('Ogiltig bokningsdata');
-      }
-      if (blockedDates.some((blockedDate) => !/^\d{4}-\d{2}-\d{2}$/.test(blockedDate.date))) {
-        throw new Error('Ogiltig blockeringsdata');
-      }
+      const blockedDates = data.blockedDates
+        .map((blockedDate) => ({
+          date: typeof blockedDate?.date === 'string' ? blockedDate.date : '',
+          reason: typeof blockedDate?.reason === 'string' ? blockedDate.reason.slice(0, 160) : ''
+        }))
+        .filter((blockedDate) => /^\d{4}-\d{2}-\d{2}$/.test(blockedDate.date));
 
       return { bookings, blockedDates };
+    }
+
+    function isDateWithinBookableRange(date) {
+      return date >= minBookableString && date <= lastBookableString;
+    }
+
+    function isDateSelectable(date) {
+      return isDateWithinBookableRange(date) && !isFullyBooked(date);
+    }
+
+    function findFirstAvailableDate() {
+      const cursor = new Date(minBookableDate);
+
+      while (formatDate(cursor.getFullYear(), cursor.getMonth(), cursor.getDate()) <= lastBookableString) {
+        const date = formatDate(cursor.getFullYear(), cursor.getMonth(), cursor.getDate());
+        if (isDateSelectable(date)) {
+          return date;
+        }
+        cursor.setDate(cursor.getDate() + 1);
+      }
+
+      return '';
+    }
+
+    function setCalendarToFirstAvailableMonth() {
+      const firstAvailableDate = findFirstAvailableDate();
+      if (!firstAvailableDate) {
+        firstAvailableCalendarMonth = new Date(firstCalendarMonth);
+        currentCalendarMonth = new Date(firstCalendarMonth);
+        return;
+      }
+
+      const firstAvailableDateObject = new Date(`${firstAvailableDate}T12:00:00`);
+      firstAvailableCalendarMonth = new Date(
+        firstAvailableDateObject.getFullYear(),
+        firstAvailableDateObject.getMonth(),
+        1,
+        12
+      );
+
+      if (!selectedDate) {
+        selectedDate = firstAvailableDate;
+        selectedTime = '';
+        currentCalendarMonth = new Date(firstAvailableCalendarMonth);
+      }
     }
 
     async function fetchBookings() {
@@ -1004,8 +1048,10 @@
         blockedDatesCache = normalized.blockedDates;
         calendarReady = true;
         setCalendarState('ready', 'Kalendern är uppdaterad. Välj en vit dag.');
+        setCalendarToFirstAvailableMonth();
         applyInitialBookingSelection();
-      } catch {
+      } catch (error) {
+        console.error('Google booking calendar failed to load', error);
         setCalendarState('error', 'Vi kan inte kontrollera lediga dagar just nu. Ingen tid visas som ledig förrän anslutningen fungerar.');
       } finally {
         window.clearTimeout(timeoutId);
@@ -1108,10 +1154,9 @@
       const dateObject = new Date(`${initialDate}T12:00:00`);
       const isValidDate = !Number.isNaN(dateObject.getTime())
         && formatDate(dateObject.getFullYear(), dateObject.getMonth(), dateObject.getDate()) === initialDate
-        && initialDate >= minBookableString
-        && initialDate <= lastBookableString;
+        && isDateWithinBookableRange(initialDate);
 
-      if (!isValidDate || isFullyBooked(initialDate) || isBlockedDate(initialDate)) return;
+      if (!isValidDate || !isDateSelectable(initialDate)) return;
 
       selectedDate = initialDate;
       currentCalendarMonth = new Date(dateObject.getFullYear(), dateObject.getMonth(), 1, 12);
@@ -1165,7 +1210,7 @@
       const year = currentCalendarMonth.getFullYear();
       const month = currentCalendarMonth.getMonth();
       calendarTitle.textContent = `${monthNames[month]} ${year}`;
-      prevMonthButton.disabled = !calendarReady || currentCalendarMonth <= firstCalendarMonth;
+      prevMonthButton.disabled = !calendarReady || currentCalendarMonth <= firstAvailableCalendarMonth;
       nextMonthButton.disabled = !calendarReady || currentCalendarMonth >= lastCalendarMonth;
 
       const first = new Date(year, month, 1);
@@ -1233,7 +1278,7 @@
     }
 
     prevMonthButton.addEventListener('click', () => {
-      if (calendarReady && currentCalendarMonth > firstCalendarMonth) {
+      if (calendarReady && currentCalendarMonth > firstAvailableCalendarMonth) {
         currentCalendarMonth = new Date(currentCalendarMonth.getFullYear(), currentCalendarMonth.getMonth() - 1, 1, 12);
         renderCalendar();
       }
