@@ -1,11 +1,12 @@
 (() => {
   'use strict';
 
-  const SUPABASE_URL = 'https://xeyippgcoqfskcmqzazx.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_MUKxAwv0vNXDrcgumq81fQ_Uvx4eOuq';
-  const BOOKING_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/create-booking`;
-  const VALIDATE_DISCOUNT_URL = `${SUPABASE_URL}/functions/v1/validate-discount`;
-  const BOOKED_SLOTS_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/booked-slots`;
+  const SUPABASE_FUNCTIONS_URL = 'https://xeyippgcoqfskcmqzazx.functions.supabase.co';
+  const BOOKING_FUNCTION_URL = `${SUPABASE_FUNCTIONS_URL}/create-booking`;
+  const VALIDATE_DISCOUNT_URL = `${SUPABASE_FUNCTIONS_URL}/validate-discount`;
+  const BOOKED_SLOTS_FUNCTION_URL = `${SUPABASE_FUNCTIONS_URL}/booked-slots`;
+  const AVAILABILITY_TIMEOUT_MS = 20_000;
   const BOOKABLE_TIMES = ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
   const MONTH_NAMES = ['januari', 'februari', 'mars', 'april', 'maj', 'juni', 'juli', 'augusti', 'september', 'oktober', 'november', 'december'];
   const DRAFT_KEY = 'bergaBookingDraft';
@@ -111,7 +112,6 @@
   function getHeaders() {
     return {
       apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
       'Content-Type': 'application/json'
     };
   }
@@ -575,7 +575,7 @@
     updateSelectedDateBox();
 
     const controller = new AbortController();
-    const timeoutId = window.setTimeout(() => controller.abort(), 10000);
+    const timeoutId = window.setTimeout(() => controller.abort(), AVAILABILITY_TIMEOUT_MS);
     try {
       const response = await fetch(BOOKED_SLOTS_FUNCTION_URL, {
         headers: getHeaders(),
