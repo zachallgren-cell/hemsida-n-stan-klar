@@ -662,18 +662,215 @@
       .blocked-date-row .button,
       .discount-code-row .button { width: 100%; }
     }
+
+    /* Samma visuella system som den publika webbplatsen, utan att påverka adminlogiken. */
+    :root {
+      --bg-top: #eef7fb;
+      --bg-bottom: #eef7fb;
+      --ink: #173042;
+      --muted: #5f7280;
+      --card: #ffffff;
+      --line: #c6dfec;
+      --brand: #0b6fa4;
+      --brand-soft: #e9f5fb;
+      --danger: #a93838;
+      --shadow: 0 14px 34px rgba(8, 79, 116, 0.1);
+      --radius-xl: 22px;
+      --radius-lg: 20px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      overflow-x: hidden;
+      background: #eef7fb;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+    }
+
+    body::before,
+    body::after { display: none; }
+
+    :focus-visible {
+      outline: 3px solid #ffb347;
+      outline-offset: 3px;
+    }
+
+    .admin-skip-link {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 9999;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: #fff;
+      color: #084f74;
+      font-weight: 800;
+      transform: translateY(-160%);
+    }
+
+    .admin-skip-link:focus { transform: translateY(0); }
+
+    .container { width: min(calc(100% - 40px), 1160px); }
+
+    header {
+      padding: 0;
+      border-bottom: 1px solid #c6dfec;
+      background: #ffffff;
+    }
+
+    .topbar {
+      min-height: 82px;
+      padding: 9px 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      backdrop-filter: none;
+    }
+
+    .brand {
+      gap: 12px;
+      color: #173042;
+      letter-spacing: 0;
+    }
+
+    .brand img {
+      width: 58px;
+      height: 57px;
+      padding: 0;
+      border-radius: 12px;
+      box-shadow: none;
+    }
+
+    .brand span { display: grid; }
+    .brand small { color: #5f7280; font-size: 0.76rem; font-weight: 700; }
+
+    .topbar-links a,
+    .topbar-links button {
+      min-height: 44px;
+      padding: 9px 13px;
+      border-color: transparent;
+      background: transparent;
+      color: #173042;
+    }
+
+    .topbar-links a:hover,
+    .topbar-links button:hover { background: #e9f5fb; }
+
+    .hero {
+      grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+      gap: 28px;
+      padding: 48px 0 30px;
+    }
+
+    .hero h1 {
+      margin-bottom: 14px;
+      color: #173042;
+      font-size: clamp(2.4rem, 5vw, 4.4rem);
+      line-height: 1.02;
+    }
+
+    .hero p { color: #5f7280; font-size: 1.08rem; }
+
+    .pill {
+      margin-bottom: 14px;
+      padding: 8px 12px;
+      border-color: #c6dfec;
+      background: #ffffff;
+      color: #084f74;
+      font-size: 0.82rem;
+    }
+
+    .hero-card,
+    .card,
+    .booking-card {
+      border-color: #c6dfec;
+      border-radius: 20px;
+      background: #ffffff;
+      box-shadow: var(--shadow);
+    }
+
+    .hero-card { padding: 24px; }
+    .hero-card h2 { font-size: 1.5rem; }
+
+    .panel { padding: 24px; }
+    .panel h2,
+    .bookings-header h2 { color: #084f74; font-size: 1.7rem; }
+
+    .admin-tabs {
+      border-radius: 16px;
+      background: #ffffff;
+      box-shadow: 0 8px 24px rgba(8, 79, 116, 0.07);
+    }
+
+    .admin-tab { min-height: 44px; border-radius: 12px; }
+    .admin-tab.is-active { background: #e9f5fb; box-shadow: none; }
+
+    input,
+    select,
+    textarea {
+      min-height: 50px;
+      border-color: #b8d6e6;
+      border-radius: 12px;
+    }
+
+    .button {
+      min-height: 48px;
+      border-radius: 12px;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+    }
+
+    .button-primary {
+      background: #ffb347;
+      box-shadow: 0 10px 22px rgba(225, 141, 28, 0.18);
+    }
+
+    .detail,
+    .completion-fields,
+    .blocked-date-row,
+    .discount-code-row { background: #f5fbfe; }
+
+    @media (max-width: 720px) {
+      .container { width: min(calc(100% - 24px), 1160px); }
+      .topbar { align-items: flex-start; }
+      .brand img { width: 50px; height: 49px; border-radius: 10px; }
+      .brand small { display: none; }
+      .topbar-links { gap: 4px; }
+      .topbar-links a { display: none; }
+      .hero { padding-top: 34px; }
+      .hero h1 { font-size: clamp(2.25rem, 12vw, 3.1rem); }
+      .hero-card,
+      .panel,
+      .booking-card { padding: 18px; border-radius: 16px; }
+      .admin-tabs { width: 100%; padding: 6px; }
+      .admin-tab { flex: 1 1 130px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
   </style>
 </head>
 <body>
+  <a class="admin-skip-link" href="#main-content">Hoppa till admininnehållet</a>
   <header>
     <div class="container">
       <div class="topbar">
         <a class="brand" href="index.html">
           <img src="logo-compact.png" alt="Berga Fönsterputs" width="256" height="251">
+          <span>Berga Fönsterputs<small>Administration</small></span>
         </a>
         <div class="topbar-links">
           <a href="index.html">Startsida</a>
-          <a href="var-tjanst.html">Vår tjänst</a>
+          <a href="var-tjanst.html">Våra tjänster</a>
           <a href="om-oss.html">Om oss</a>
           <button type="button" id="logoutButton" class="hidden">Logga ut</button>
         </div>
@@ -681,7 +878,7 @@
     </div>
   </header>
 
-  <main class="container">
+  <main class="container" id="main-content">
     <section class="hero">
       <div>
         <span class="pill">Admin för Berga Fönsterputs</span>
@@ -726,7 +923,7 @@
         <button type="button" class="button button-primary hidden" id="mfaEnrollButton">Aktivera tvåstegsverifiering</button>
         <div class="mfa-setup hidden" id="mfaSetup">
           <strong>Skanna koden i din authenticator-app</strong>
-          <img class="mfa-qr" id="mfaQr" alt="QR-kod för att registrera tvåstegsverifiering">
+          <img class="mfa-qr" id="mfaQr" alt="QR-kod för att registrera tvåstegsverifiering" width="220" height="220">
           <span>Om du inte kan skanna, skriv in nyckeln manuellt:</span>
           <code class="mfa-secret" id="mfaSecret"></code>
           <small>Registrera gärna samma nyckel i en andra betrodd app eller enhet som reserv innan du går vidare.</small>

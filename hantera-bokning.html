@@ -8,362 +8,33 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src https://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'none'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src https://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'unsafe-inline'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'none'; upgrade-insecure-requests">
   <title>Hantera bokning | Berga Fönsterputs</title>
-  <style>
-    :root {
-      --ink: #102d3e;
-      --ink-soft: #526a78;
-      --navy: #12384c;
-      --navy-deep: #0a2636;
-      --paper: #ffffff;
-      --mist: #edf3f6;
-      --line: #d9e5eb;
-      --orange: #f2a33a;
-      --orange-dark: #d98720;
-      --green: #237a45;
-      --green-soft: #e9f7ef;
-      --amber: #9a6400;
-      --amber-soft: #fff6e4;
-      --red: #a73c35;
-      --red-soft: #fff0ed;
-      --shadow: 0 20px 52px rgba(8, 38, 54, 0.14);
-      --radius: 22px;
-      --max: 1060px;
-    }
-
-    * { box-sizing: border-box; }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background:
-        radial-gradient(circle at 8% 2%, rgba(242, 163, 58, 0.16), transparent 30rem),
-        linear-gradient(180deg, var(--navy-deep) 0 330px, var(--mist) 330px 100%);
-      color: var(--ink);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      line-height: 1.55;
-    }
-
-    button, input, select { font: inherit; }
-    button, a { -webkit-tap-highlight-color: transparent; }
-    [hidden] { display: none !important; }
-
-    .container {
-      width: min(calc(100% - 32px), var(--max));
-      margin-inline: auto;
-    }
-
-    header { padding: 22px 0 100px; }
-
-    .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 22px;
-    }
-
-    .brand {
-      display: inline-flex;
-      align-items: center;
-      gap: 14px;
-      color: #fff;
-      text-decoration: none;
-      font-weight: 850;
-      letter-spacing: -0.02em;
-    }
-
-    .brand-mark {
-      display: grid;
-      width: 72px;
-      height: 72px;
-      place-items: center;
-      overflow: hidden;
-      border-radius: 18px;
-      background: #fff;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
-    }
-
-    .brand-mark img { width: 65px; height: auto; display: block; }
-    .brand-copy small { display: block; color: #bfd0da; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; }
-
-    .home-link {
-      color: #fff;
-      text-decoration: none;
-      padding: 10px 16px;
-      border: 1px solid rgba(255, 255, 255, 0.28);
-      border-radius: 999px;
-      font-weight: 750;
-    }
-
-    .home-link:hover, .home-link:focus-visible { background: rgba(255, 255, 255, 0.1); }
-
-    .hero { max-width: 730px; padding-top: 68px; }
-
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 14px;
-      color: #ffd69d;
-      font-size: 0.78rem;
-      font-weight: 850;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-
-    .eyebrow::before { content: ""; width: 28px; height: 2px; background: var(--orange); }
-
-    h1 {
-      margin: 0;
-      max-width: 760px;
-      color: #fff;
-      font-size: clamp(2.35rem, 7vw, 4.5rem);
-      line-height: 0.98;
-      letter-spacing: -0.055em;
-    }
-
-    .hero p {
-      margin: 20px 0 0;
-      max-width: 680px;
-      color: #c9d8df;
-      font-size: clamp(1rem, 2.3vw, 1.14rem);
-    }
-
-    main { margin-top: -62px; padding-bottom: 72px; }
-
-    .panel {
-      border: 1px solid rgba(217, 229, 235, 0.85);
-      border-radius: var(--radius);
-      background: var(--paper);
-      box-shadow: var(--shadow);
-    }
-
-    .state-panel { padding: clamp(24px, 5vw, 46px); text-align: center; }
-
-    .spinner {
-      width: 42px;
-      height: 42px;
-      margin: 0 auto 18px;
-      border: 4px solid #dbe7ed;
-      border-top-color: var(--orange-dark);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .state-panel h2 { margin: 0 0 8px; font-size: clamp(1.4rem, 4vw, 2rem); }
-    .state-panel p { margin: 0 auto; max-width: 620px; color: var(--ink-soft); }
-
-    .status-card {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 22px;
-      align-items: center;
-      padding: clamp(24px, 5vw, 40px);
-      border-bottom: 1px solid var(--line);
-    }
-
-    .status-card h2 { margin: 6px 0 8px; font-size: clamp(1.55rem, 4vw, 2.45rem); line-height: 1.12; letter-spacing: -0.035em; }
-    .status-card p { margin: 0; max-width: 650px; color: var(--ink-soft); }
-
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      width: max-content;
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: var(--amber-soft);
-      color: var(--amber);
-      font-size: 0.78rem;
-      font-weight: 850;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-    }
-
-    .status-pill::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
-    .status-pill.success { background: var(--green-soft); color: var(--green); }
-    .status-pill.danger { background: var(--red-soft); color: var(--red); }
-    .status-pill.neutral { background: #edf2f5; color: #536875; }
-
-    .date-badge {
-      min-width: 170px;
-      padding: 18px;
-      border-radius: 18px;
-      background: var(--navy);
-      color: #fff;
-      text-align: center;
-    }
-
-    .date-badge strong { display: block; font-size: 1.1rem; }
-    .date-badge span { display: block; margin-top: 4px; color: #cbdbe3; }
-
-    .content { padding: clamp(22px, 5vw, 40px); }
-
-    .section-heading { margin: 0 0 18px; font-size: 1.25rem; letter-spacing: -0.02em; }
-
-    .details-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 1px;
-      overflow: hidden;
-      margin: 0;
-      border: 1px solid var(--line);
-      border-radius: 17px;
-      background: var(--line);
-    }
-
-    .detail { min-width: 0; padding: 16px 18px; background: #f9fbfc; }
-    .detail dt { margin: 0 0 4px; color: #6d7f89; font-size: 0.76rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
-    .detail dd { margin: 0; overflow-wrap: anywhere; color: var(--ink); font-weight: 720; }
-    .detail.wide { grid-column: 1 / -1; }
-
-    .notice {
-      margin: 0 0 22px;
-      padding: 14px 16px;
-      border: 1px solid #cde5d5;
-      border-radius: 14px;
-      background: var(--green-soft);
-      color: #185f37;
-      font-weight: 700;
-    }
-
-    .notice.error { border-color: #efc3bd; background: var(--red-soft); color: var(--red); }
-    .notice.warning { border-color: #efd4a2; background: var(--amber-soft); color: #785000; }
-
-    .action-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 18px;
-      margin-top: 28px;
-    }
-
-    .action-card {
-      padding: 22px;
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      background: #fff;
-    }
-
-    .action-card.primary { border-color: #f0cd96; background: #fffaf1; }
-    .action-card.wide { grid-column: 1 / -1; }
-    .action-card h3 { margin: 0 0 7px; font-size: 1.12rem; }
-    .action-card p { margin: 0 0 17px; color: var(--ink-soft); font-size: 0.94rem; }
-
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .field { display: grid; gap: 6px; }
-    label { color: var(--ink); font-size: 0.83rem; font-weight: 800; }
-
-    input, select {
-      width: 100%;
-      min-height: 48px;
-      border: 1px solid #bacbd4;
-      border-radius: 12px;
-      background: #fff;
-      color: var(--ink);
-      padding: 10px 12px;
-    }
-
-    input:focus, select:focus { outline: 3px solid rgba(242, 163, 58, 0.25); border-color: var(--orange-dark); }
-
-    .button-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
-
-    .btn {
-      display: inline-flex;
-      min-height: 46px;
-      align-items: center;
-      justify-content: center;
-      border: 0;
-      border-radius: 999px;
-      padding: 11px 18px;
-      background: var(--orange);
-      color: var(--ink);
-      font-weight: 850;
-      text-decoration: none;
-      cursor: pointer;
-      transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
-    }
-
-    .btn:hover:not(:disabled), .btn:focus-visible:not(:disabled) { transform: translateY(-1px); box-shadow: 0 9px 22px rgba(217, 135, 32, 0.22); background: #f5ae4f; }
-    .btn.secondary { border: 1px solid #b8cbd4; background: #fff; color: var(--ink); }
-    .btn.secondary:hover:not(:disabled) { background: #f4f8fa; box-shadow: none; }
-    .btn.danger { border: 1px solid #e4b6af; background: #fff; color: var(--red); }
-    .btn.danger:hover:not(:disabled) { background: var(--red-soft); box-shadow: none; }
-    .btn:disabled { opacity: 0.58; cursor: wait; }
-
-    .security-note {
-      display: flex;
-      gap: 11px;
-      align-items: flex-start;
-      margin-top: 22px;
-      padding: 15px 16px;
-      border-radius: 14px;
-      background: #edf4f7;
-      color: #4c6572;
-      font-size: 0.86rem;
-    }
-
-    .security-icon {
-      flex: 0 0 auto;
-      display: grid;
-      width: 25px;
-      height: 25px;
-      place-items: center;
-      border-radius: 50%;
-      background: var(--navy);
-      color: #fff;
-      font-weight: 900;
-    }
-
-    footer { padding: 30px 0 38px; background: var(--navy); color: #cbd9e0; }
-    footer .container { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 14px; }
-    footer p { margin: 0; }
-    footer a { color: #fff; }
-
-    @media (max-width: 760px) {
-      body { background: linear-gradient(180deg, var(--navy-deep) 0 350px, var(--mist) 350px 100%); }
-      header { padding-bottom: 84px; }
-      .brand-copy { display: none; }
-      .brand-mark { width: 62px; height: 62px; }
-      .brand-mark img { width: 57px; }
-      .hero { padding-top: 48px; }
-      main { margin-top: -48px; }
-      .status-card { grid-template-columns: 1fr; }
-      .date-badge { min-width: 0; width: 100%; text-align: left; }
-      .details-grid, .action-grid, .form-row { grid-template-columns: 1fr; }
-      .detail.wide, .action-card.wide { grid-column: auto; }
-      .button-row .btn { width: 100%; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      html { scroll-behavior: auto; }
-      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-    }
-  </style>
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="/favicon-192.png">
+  <link rel="stylesheet" href="site.css">
+  <link rel="stylesheet" href="flow-ui.css?v=20260720">
 </head>
-<body>
-  <header>
+<body class="flow-page manage-flow">
+  <a class="skip-link" href="#main-content">Hoppa till innehållet</a>
+  <header class="flow-header">
     <div class="container">
-      <div class="topbar">
-        <a class="brand" href="index.html" aria-label="Berga Fönsterputs startsida">
-          <span class="brand-mark"><img src="logo-compact.png" alt="" width="256" height="251"></span>
-          <span class="brand-copy">Berga Fönsterputs<small>Lokalt & personligt</small></span>
+      <div class="flow-topbar">
+        <a class="flow-brand" href="index.html" aria-label="Berga Fönsterputs startsida">
+          <img src="logo-compact.png" alt="Berga Fönsterputs logotyp" width="256" height="251">
+          <span class="flow-brand-copy">Berga Fönsterputs<small>Personlig och lokal service</small></span>
         </a>
-        <a class="home-link" href="index.html">Till startsidan</a>
+        <a class="flow-home-link" href="index.html">Till startsidan</a>
       </div>
-      <div class="hero">
-        <div class="eyebrow">Säker bokningshantering</div>
-        <h1>Din bokning, på dina villkor.</h1>
+      <div class="flow-hero">
+        <p class="flow-eyebrow">Din personliga bokningslänk</p>
+        <h1>Hantera din bokning</h1>
         <p>Se bokningsstatus, bekräfta din tid, boka om eller avboka. Du kan också välja hur ofta du vill få en ny bokningsinbjudan.</p>
       </div>
     </div>
   </header>
 
-  <main class="container">
+  <main class="container flow-main" id="main-content">
     <section class="panel state-panel" id="loadingPanel" aria-live="polite">
       <div class="spinner" aria-hidden="true"></div>
       <h2>Hämtar din bokning…</h2>
@@ -373,7 +44,7 @@
     <section class="panel state-panel" id="errorPanel" hidden>
       <h2 id="errorTitle">Länken kunde inte öppnas</h2>
       <p id="errorText">Länken är ogiltig eller har gått ut. Kontakta oss om du behöver hjälp med bokningen.</p>
-      <div class="button-row" style="justify-content:center;">
+      <div class="button-row flow-center-actions">
         <a class="btn" href="mailto:info@bergafonsterputs.se">Kontakta oss</a>
         <a class="btn secondary" href="bokning.html">Boka en ny tid</a>
       </div>
@@ -410,6 +81,7 @@
           <div class="detail"><dt>Återkommande</dt><dd id="detailRecurrence">–</dd></div>
         </dl>
 
+        <h2 class="section-heading action-heading">Vad vill du göra?</h2>
         <div class="action-grid">
           <article class="action-card primary wide" id="confirmCard" hidden>
             <h3 id="confirmCardTitle">Bekräfta bokningen</h3>
@@ -440,7 +112,7 @@
                   </select>
                 </div>
               </div>
-              <div class="button-row"><button class="btn" type="submit">Boka om tiden</button></div>
+              <div class="button-row"><button class="btn" type="submit">Boka om min tid</button></div>
             </form>
           </article>
 
@@ -472,7 +144,7 @@
           <article class="action-card wide" id="cancelCard" hidden>
             <h3>Behöver du avboka?</h3>
             <p>Avbokningen genomförs direkt. Om tiden redan är bekräftad får du ett avbokningsmejl och en annullerad kalenderfil.</p>
-            <button class="btn danger" type="button" id="cancelButton">Avboka bokningen</button>
+            <button class="btn danger" type="button" id="cancelButton">Avboka min bokning</button>
           </article>
         </div>
 
@@ -484,9 +156,9 @@
     </section>
   </main>
 
-  <footer>
-    <div class="container">
-      <p><strong>Berga Fönsterputs</strong> · info@bergafonsterputs.se</p>
+  <footer class="flow-footer">
+    <div class="container flow-footer-inner">
+      <p><strong>Berga Fönsterputs</strong> · <a href="mailto:info@bergafonsterputs.se">info@bergafonsterputs.se</a></p>
       <p><a href="integritet.html">Integritet</a> · <a href="villkor.html">Villkor</a></p>
     </div>
   </footer>

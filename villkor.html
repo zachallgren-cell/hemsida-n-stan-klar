@@ -544,39 +544,14 @@
       * { transition: none !important; }
     }
   </style>
+  <link rel="stylesheet" href="site.css">
+  <link rel="stylesheet" href="legacy-page.css">
 </head>
-<body>
+<body class="legacy-page has-mobile-booking-cta">
   <a class="skip-link" href="#main-content">Hoppa till innehållet</a>
 
-  <header id="top">
-    <div class="container">
-      <div class="topbar">
-        <a class="brand" href="index.html" aria-label="Berga Fönsterputs startsida">
-          <span class="brand-logo">
-            <img src="logo-compact.png" alt="" width="256" height="251" />
-          </span>
-          <span class="brand-name">
-            Berga Fönsterputs
-            <small>Personlig och lokal service</small>
-          </span>
-        </a>
-        <nav class="site-nav" aria-label="Huvudmeny">
-          <a href="index.html">Startsida</a>
-          <a href="var-tjanst.html">Vår tjänst</a>
-          <a href="om-oss.html">Om oss</a>
-          <a href="bokning.html">Boka</a>
-          <a href="kontakt.html">Kontakt</a>
-        </nav>
-      </div>
-
-      <div class="hero">
-        <p class="eyebrow">Tydligt före bokning</p>
-        <h1>Bokningsvillkor för fönsterputs</h1>
-        <p>Här ser du vad som gäller för bokning, pris, RUT, skärgårdsjobb, ändringar och betalning hos Berga Fönsterputs.</p>
-        <span class="updated">Senast uppdaterad: 14 juli 2026</span>
-      </div>
-    </div>
-  </header>
+  <header class="site-header" id="top"><div class="container site-header-inner"><a class="site-brand" href="index.html" aria-label="Berga Fönsterputs startsida"><img src="logo-compact.png" width="256" height="251" alt="Berga Fönsterputs logotyp"><span class="site-brand-copy">Berga Fönsterputs<small>Personlig och lokal service</small></span></a><button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" aria-label="Öppna meny" data-menu-toggle><span class="menu-toggle-lines" aria-hidden="true"></span></button><nav class="site-nav" id="primary-navigation" aria-label="Huvudnavigation" data-site-nav data-open="false"><a href="index.html">Hem</a><a href="var-tjanst.html">Våra tjänster</a><a href="om-oss.html">Om oss</a><a href="priser.html">Priser</a><a href="kontakt.html">Kontakt</a><a class="nav-booking" href="bokning.html" data-booking-cta data-cta-location="navigation">Boka</a></nav></div></header>
+  <section class="legacy-hero" aria-labelledby="terms-title"><div class="container legacy-hero-inner"><p class="eyebrow">Tydligt före bokning</p><h1 id="terms-title">Bokningsvillkor för fönsterputs</h1><p>Här ser du vad som gäller för bokning, pris, RUT, skärgårdsjobb, ändringar och betalning hos Berga Fönsterputs.</p><span class="updated">Senast uppdaterad: 14 juli 2026</span></div></section>
 
   <main class="container" id="main-content">
     <div class="terms-layout">
@@ -757,19 +732,7 @@
     </div>
   </main>
 
-  <footer>
-    <div class="container">
-      <p><strong>Berga Fönsterputs</strong></p>
-      <p>E-post: <a href="mailto:info@bergafonsterputs.se">info@bergafonsterputs.se</a></p>
-      <div class="footer-links">
-        <a href="index.html">Startsida</a>
-        <a href="var-tjanst.html">Vår tjänst</a>
-        <a href="bokning.html">Boka tid</a>
-        <a href="kontakt.html">Kontakt</a>
-        <a href="integritet.html">Integritet</a>
-        <a href="#top" aria-current="page">Bokningsvillkor</a>
-      </div>
-    </div>
-  </footer>
+  <footer class="site-footer"><div class="container"><div class="footer-grid"><div><div class="footer-brand">Berga Fönsterputs</div><p>Personlig och lokal fönsterputs i Österåker, Täby, Vaxholm och Stockholms skärgård.</p></div><div><p class="footer-heading">Genvägar</p><div class="footer-links"><a href="var-tjanst.html">Våra tjänster</a><a href="om-oss.html">Om oss</a><a href="priser.html">Priser</a><a href="kontakt.html">Kontakt</a></div></div><div><p class="footer-heading">Kontakt</p><div class="footer-links"><a href="mailto:info@bergafonsterputs.se" data-cta-location="footer">info@bergafonsterputs.se</a><a href="#top">Till sidans början</a><a href="integritet.html">Integritet</a></div></div></div><div class="footer-bottom"><span>© 2026 Berga Fönsterputs</span><div class="footer-legal"><a href="integritet.html">Integritet</a><a href="#top" aria-current="page">Bokningsvillkor</a></div></div></div></footer>
+  <a class="mobile-booking-bar" href="bokning.html" data-booking-cta data-cta-location="mobile_sticky">Se pris och boka</a>
 </body>
 </html>

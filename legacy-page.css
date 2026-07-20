@@ -1,0 +1,391 @@
+.legacy-page {
+  background: var(--background);
+}
+
+.legacy-page .site-header {
+  position: sticky;
+  overflow: visible;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--text);
+}
+
+.legacy-page .site-header::before,
+.legacy-page .site-header::after {
+  content: none;
+  display: none;
+}
+
+.legacy-page .legacy-hero,
+.campaign-hero {
+  padding: clamp(48px, 7vw, 78px) 0;
+  border-bottom: 1px solid var(--border);
+  background: #dff2fb;
+}
+
+.legacy-page .legacy-hero-inner {
+  max-width: 820px;
+}
+
+.legacy-page .legacy-hero .eyebrow,
+.campaign-hero .landing-eyebrow {
+  display: inline-block;
+  margin: 0 0 12px;
+  color: var(--primary-dark);
+  font-size: 0.78rem;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.legacy-page .legacy-hero h1,
+.campaign-hero h1 {
+  max-width: 780px;
+  margin-bottom: 16px;
+  color: #102e3e;
+  font-size: clamp(2.35rem, 6vw, 4.5rem);
+}
+
+.legacy-page .legacy-hero p,
+.campaign-hero .landing-hero-copy > p {
+  max-width: 720px;
+  margin: 0;
+  color: #345363;
+  font-size: clamp(1.02rem, 2vw, 1.18rem);
+}
+
+.legacy-page .legacy-hero .updated {
+  display: inline-flex;
+  margin-top: 20px;
+  padding: 7px 11px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.68);
+  color: var(--primary-dark);
+  font-size: 0.84rem;
+  font-weight: 760;
+}
+
+.quote-page .legacy-hero .hero-points span {
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--primary-dark);
+}
+
+.legacy-page main.container {
+  margin-top: 0;
+  padding-top: clamp(42px, 6vw, 70px);
+  padding-bottom: clamp(58px, 8vw, 94px);
+}
+
+.location-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.55fr);
+  align-items: center;
+  gap: clamp(30px, 7vw, 72px);
+}
+
+.location-hero-photo {
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  margin: 0;
+  border: 6px solid rgba(255, 255, 255, 0.72);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+
+.location-hero-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.location-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.7fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.location-grid .card {
+  padding: clamp(24px, 4vw, 34px);
+}
+
+.location-list {
+  display: grid;
+  gap: 10px;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.location-list li {
+  position: relative;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  padding: 10px 12px 10px 38px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+  font-weight: 760;
+}
+
+.location-list li::before {
+  content: "";
+  position: absolute;
+  left: 16px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--success);
+}
+
+.location-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+/* Existing content components retain their meaning while matching the shared UI. */
+.legacy-page .price-strip,
+.legacy-page .intro-card,
+.legacy-page .guide-card,
+.legacy-page .form-card,
+.legacy-page .terms-card,
+.legacy-page .policy-card,
+.legacy-page .side-card,
+.legacy-page .contents,
+.legacy-page .local-copy,
+.legacy-page .choice-card,
+.legacy-page .card,
+.legacy-page .support-card,
+.legacy-page .calendar-card,
+.legacy-page .booking-requirements {
+  border-color: var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.legacy-page .price-strip {
+  overflow: hidden;
+  margin-top: 0;
+  border: 1px solid var(--border);
+}
+
+.legacy-page .section + .section {
+  border-top: 0;
+}
+
+.legacy-page .section-heading {
+  max-width: 760px;
+}
+
+.legacy-page .form-card input,
+.legacy-page .form-card textarea,
+.legacy-page .form-card select {
+  min-height: 48px;
+  border-color: var(--border);
+  border-radius: var(--radius-sm);
+  background: #ffffff;
+  color: var(--text);
+}
+
+.legacy-page .form-card textarea {
+  min-height: 150px;
+}
+
+.legacy-page .form-card input:focus,
+.legacy-page .form-card textarea:focus,
+.legacy-page .form-card select:focus {
+  border-color: var(--primary);
+  outline: 3px solid rgba(11, 111, 164, 0.18);
+  outline-offset: 1px;
+}
+
+.legacy-page .submit-button,
+.legacy-page .submit-btn {
+  min-height: 52px;
+  border: 1px solid rgba(122, 81, 0, 0.18);
+  border-radius: 999px;
+  background: var(--cta);
+  color: var(--text);
+  font-weight: 900;
+}
+
+.legacy-page .submit-button:hover,
+.legacy-page .submit-btn:hover:not(:disabled) {
+  background: var(--cta-hover);
+}
+
+.legacy-page .policy-layout,
+.legacy-page .terms-layout {
+  align-items: start;
+}
+
+.legacy-page .contents {
+  top: 104px;
+}
+
+.legacy-page .policy-content,
+.legacy-page .terms-content {
+  min-width: 0;
+}
+
+.legacy-page .policy-card,
+.legacy-page .terms-card {
+  scroll-margin-top: 100px;
+}
+
+.legacy-page .table-wrap {
+  border-color: var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.legacy-page .contact-box,
+.legacy-page .notice {
+  border-radius: var(--radius-sm);
+}
+
+.legacy-page .contact-box {
+  background: var(--primary-dark);
+}
+
+.legacy-page .contact-box a {
+  background: var(--cta);
+}
+
+.booking-landing-page .quick-item,
+.booking-landing-page .booking-intro-card,
+.booking-landing-page .faq-item {
+  border-color: var(--border);
+  background: var(--surface);
+}
+
+.booking-landing-page .card > .section-subtitle {
+  margin: 0 0 22px;
+}
+
+.booking-landing-page .calendar-day:hover:not(:disabled),
+.booking-landing-page .calendar-day.selected {
+  background: var(--cta);
+}
+
+.booking-landing-page .time-slot.selected,
+.booking-landing-page .time-slot:hover:not(:disabled) {
+  background: var(--primary-dark);
+}
+
+.campaign-hero {
+  color: var(--text);
+}
+
+.campaign-hero .landing-hero {
+  padding: 0;
+}
+
+.campaign-hero .landing-actions {
+  margin-top: 26px;
+}
+
+.campaign-hero .price-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.booking-landing-page main.container {
+  margin-top: 0;
+  padding-top: clamp(36px, 5vw, 56px);
+}
+
+.booking-landing-page main.container > .section {
+  margin-bottom: 24px;
+  padding: 0;
+}
+
+.quote-page main.container {
+  padding-top: clamp(36px, 5vw, 56px);
+}
+
+.quote-page main.container > .section {
+  margin-top: clamp(46px, 6vw, 68px);
+  padding: 0;
+}
+
+.quote-page main.container > .guide-card {
+  padding: clamp(22px, 4vw, 32px);
+}
+
+.booking-landing-page .calendar-nav,
+.booking-landing-page .time-slot,
+.booking-landing-page .calendar-retry {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.booking-landing-page .calendar-day {
+  min-width: 0;
+  min-height: 40px;
+}
+
+@media (max-width: 920px) {
+  .location-hero-grid,
+  .location-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .location-hero-photo {
+    max-width: 560px;
+  }
+}
+
+@media (max-width: 720px) {
+  .legacy-page .legacy-hero,
+  .campaign-hero {
+    padding: 44px 0 50px;
+  }
+
+  .legacy-page .legacy-hero h1,
+  .campaign-hero h1 {
+    font-size: clamp(2.2rem, 11vw, 3.35rem);
+  }
+
+  .location-hero-photo {
+    max-height: 300px;
+  }
+
+  .location-actions {
+    display: grid;
+  }
+
+  .location-actions .btn {
+    width: 100%;
+  }
+
+  .legacy-page .contents {
+    position: static;
+  }
+
+  .legacy-page .policy-card,
+  .legacy-page .terms-card,
+  .legacy-page .guide-card,
+  .legacy-page .form-card {
+    padding: 22px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .legacy-page *,
+  .legacy-page *::before,
+  .legacy-page *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

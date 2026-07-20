@@ -16,6 +16,9 @@
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
   <link rel="manifest" href="/site.webmanifest">
+  <link rel="stylesheet" href="cookie-consent.css?v=20260720">
+  <script src="cookie-consent.js?v=20260720" defer></script>
+  <script src="site.js" defer></script>
   <style>
     :root {
       --primary: #0b6fa4;
@@ -413,36 +416,28 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="site.css">
+  <link rel="stylesheet" href="legacy-page.css">
 </head>
-<body>
-  <header>
-    <div class="container">
-      <div class="topbar">
-        <a class="brand" href="index.html" aria-label="Berga Fönsterputs startsida">
-          <img src="logo-compact.png" alt="" width="256" height="251">
-          <span>Berga Fönsterputs</span>
-        </a>
-        <nav aria-label="Huvudnavigation">
-          <a href="index.html">Startsida</a>
-          <a href="var-tjanst.html">Vår tjänst</a>
-          <a href="bokning.html">Boka med livepris</a>
-          <a href="kontakt.html">Kontakt</a>
-        </nav>
-      </div>
-      <section class="hero">
-        <span class="eyebrow">Personlig offertbedömning</span>
-        <h1>Osäker på hur många fönster du har?</h1>
-        <p>Beskriv jobbet och bifoga upp till tre bilder. Då kan vi bedöma omfattningen bättre innan du bokar.</p>
-        <div class="hero-points" aria-label="Offertformulärets viktigaste egenskaper">
-          <span>Högst 3 bilder</span>
-          <span>JPEG, PNG eller WebP</span>
-          <span>Skickas som mejlbilagor</span>
-        </div>
-      </section>
+<body class="legacy-page quote-page has-mobile-booking-cta">
+  <a class="skip-link" href="#main-content">Hoppa till innehållet</a>
+  <header class="site-header">
+    <div class="container site-header-inner">
+      <a class="site-brand" href="index.html" aria-label="Berga Fönsterputs startsida"><img src="logo-compact.png" width="256" height="251" alt="Berga Fönsterputs logotyp"><span class="site-brand-copy">Berga Fönsterputs<small>Personlig och lokal service</small></span></a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" aria-label="Öppna meny" data-menu-toggle><span class="menu-toggle-lines" aria-hidden="true"></span></button>
+      <nav class="site-nav" id="primary-navigation" aria-label="Huvudnavigation" data-site-nav data-open="false"><a href="index.html">Hem</a><a href="var-tjanst.html">Våra tjänster</a><a href="om-oss.html">Om oss</a><a href="priser.html">Priser</a><a href="kontakt.html">Kontakt</a><a class="nav-booking" href="bokning.html" data-booking-cta data-cta-location="navigation">Boka</a></nav>
     </div>
   </header>
+  <section class="legacy-hero" aria-labelledby="quote-page-title">
+    <div class="container legacy-hero-inner">
+      <span class="eyebrow">Personlig offertbedömning</span>
+      <h1 id="quote-page-title">Osäker på hur många fönster du har?</h1>
+      <p>Beskriv jobbet och bifoga upp till tre bilder. Då kan vi bedöma omfattningen bättre innan du bokar.</p>
+      <div class="hero-points" aria-label="Offertformulärets viktigaste egenskaper"><span>Högst 3 bilder</span><span>JPEG, PNG eller WebP</span><span>Skickas som mejlbilagor</span></div>
+    </div>
+  </section>
 
-  <main class="container">
+  <main class="container" id="main-content">
     <section class="intro-card" aria-label="Så fungerar offertförfrågan">
       <div class="intro-item">
         <strong>1. Ta översiktsbilder</strong>
@@ -590,22 +585,8 @@
     </section>
   </main>
 
-  <footer>
-    <div class="container">
-      <p><strong>Berga Fönsterputs</strong></p>
-      <p>Personlig och lokal fönsterputs i Åkersberga, Täby, Vaxholm och skärgården.</p>
-      <p>E-post: <a href="mailto:info@bergafonsterputs.se">info@bergafonsterputs.se</a></p>
-      <div class="footer-links">
-        <a href="index.html">Startsida</a>
-        <a href="var-tjanst.html">Vår tjänst</a>
-        <a href="bokning.html">Boka tid</a>
-        <a href="integritet.html">Integritet</a>
-        <a href="villkor.html">Villkor</a>
-        <a href="villkor.html">Bokningsvillkor</a>
-        <a href="#offertvillkor">Offertvillkor</a>
-      </div>
-    </div>
-  </footer>
+  <footer class="site-footer"><div class="container"><div class="footer-grid"><div><div class="footer-brand">Berga Fönsterputs</div><p>Personlig och lokal fönsterputs i Österåker, Täby, Vaxholm och Stockholms skärgård.</p></div><div><p class="footer-heading">Genvägar</p><div class="footer-links"><a href="var-tjanst.html">Våra tjänster</a><a href="om-oss.html">Om oss</a><a href="priser.html">Priser</a><a href="kontakt.html">Kontakt</a></div></div><div><p class="footer-heading">Kontakt</p><div class="footer-links"><a href="mailto:info@bergafonsterputs.se" data-cta-location="footer">info@bergafonsterputs.se</a><a href="#offertvillkor">Offertvillkor</a><a href="villkor.html">Bokningsvillkor</a></div></div></div><div class="footer-bottom"><span>© 2026 Berga Fönsterputs</span><div class="footer-legal"><a href="integritet.html">Integritet</a><a href="villkor.html">Bokningsvillkor</a></div></div></div></footer>
+  <a class="mobile-booking-bar" href="bokning.html" data-booking-cta data-cta-location="mobile_sticky">Se pris och boka</a>
 
   <script>
     const SUPABASE_URL = 'https://xeyippgcoqfskcmqzazx.supabase.co';

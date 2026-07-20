@@ -7,319 +7,45 @@
   <meta name="description" content="Säkert formulär för RUT-underlag till Berga Fönsterputs." />
   <meta name="robots" content="noindex, nofollow" />
   <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src https://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self'; script-src 'unsafe-inline'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'none'; upgrade-insecure-requests" />
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
-  <style>
-    :root {
-      --primary: #0b6fa4;
-      --primary-dark: #084f74;
-      --cta: #ffb347;
-      --cta-dark: #f1992d;
-      --bg: #cfe8f5;
-      --surface: rgba(255,255,255,0.97);
-      --text: #173042;
-      --muted: #5f7280;
-      --white: #ffffff;
-      --border: #c6dfec;
-      --success: #127c56;
-      --error: #a23a2d;
-      --shadow: 0 16px 38px rgba(11, 111, 164, 0.14);
-      --radius: 20px;
-      --max-width: 980px;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
-      color: var(--text);
-      background: linear-gradient(to bottom, #e2f2fb, var(--bg));
-      line-height: 1.5;
-    }
-
-    a { color: inherit; text-decoration: none; }
-
-    button,
-    input,
-    select,
-    textarea { font: inherit; }
-
-    .container {
-      width: min(92%, var(--max-width));
-      margin: 0 auto;
-    }
-
-    header {
-      background:
-        linear-gradient(135deg, rgba(8, 82, 120, 0.84), rgba(6, 58, 88, 0.78)),
-        linear-gradient(180deg, #effbff 0%, #8fd8f4 52%, #2f7ba7 100%);
-      color: var(--white);
-      padding: 18px 0 116px;
-    }
-
-    .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 18px;
-      padding: 12px 16px;
-      border-radius: 24px;
-      background: rgba(8, 56, 82, 0.34);
-      border: 1px solid rgba(255,255,255,0.16);
-      backdrop-filter: blur(14px);
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 82px;
-      height: 82px;
-      padding: 8px;
-      border-radius: 20px;
-      background: #ffffff;
-      overflow: hidden;
-      flex-shrink: 0;
-    }
-
-    .brand img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      border-radius: 16px;
-      display: block;
-    }
-
-    nav {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 8px;
-      padding: 6px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-
-    nav a {
-      padding: 9px 13px;
-      border-radius: 999px;
-      color: rgba(255,255,255,0.95);
-      font-weight: 800;
-      font-size: 0.95rem;
-    }
-
-    nav a:hover { background: rgba(255,255,255,0.18); }
-
-    .hero {
-      display: grid;
-      gap: 12px;
-      margin-top: 56px;
-      max-width: 760px;
-    }
-
-    .hero-label {
-      width: fit-content;
-      padding: 8px 14px;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.18);
-      font-weight: 800;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: clamp(2.2rem, 7vw, 4.5rem);
-      line-height: 0.98;
-    }
-
-    .hero p {
-      margin: 0;
-      color: rgba(255,255,255,0.92);
-      font-size: 1.08rem;
-      max-width: 680px;
-    }
-
-    main {
-      margin-top: -72px;
-      padding-bottom: 56px;
-    }
-
-    .panel {
-      background: var(--surface);
-      border: 1px solid rgba(214, 225, 222, 0.9);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 30px;
-    }
-
-    .security-note {
-      padding: 16px 18px;
-      border-radius: 16px;
-      border: 1px solid #d7e7dd;
-      background: #f7fbf8;
-      color: #245b3d;
-      font-weight: 800;
-      margin-bottom: 22px;
-    }
-
-    form {
-      display: grid;
-      gap: 18px;
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 7px;
-      font-weight: 800;
-      color: var(--primary-dark);
-    }
-
-    input,
-    select {
-      width: 100%;
-      min-height: 52px;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 12px 14px;
-      background: #ffffff;
-      color: var(--text);
-      outline: none;
-    }
-
-    input:focus,
-    select:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 4px rgba(11,111,164,0.12);
-    }
-
-    .field-note {
-      margin: 7px 0 0;
-      color: var(--muted);
-      font-size: 0.94rem;
-    }
-
-    .field-note.is-success {
-      color: var(--success);
-      font-weight: 800;
-    }
-
-    .consent-box {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 12px;
-      align-items: start;
-      padding: 16px;
-      border-radius: 16px;
-      background: #f4fbff;
-      border: 1px solid #bfddeb;
-    }
-
-    .consent-box input {
-      width: 20px;
-      height: 20px;
-      min-height: 20px;
-      margin-top: 3px;
-    }
-
-    .consent-box label {
-      margin: 0;
-      color: var(--text);
-    }
-
-    .rut-trap {
-      position: absolute;
-      left: -9999px;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-    }
-
-    .submit-btn {
-      border: 0;
-      min-height: 58px;
-      border-radius: 16px;
-      padding: 14px 22px;
-      background: linear-gradient(to right, var(--cta), var(--cta-dark));
-      color: #173042;
-      font-weight: 900;
-      cursor: pointer;
-      box-shadow: 0 14px 28px rgba(241,153,45,0.24);
-    }
-
-    .submit-btn:disabled {
-      opacity: 0.72;
-      cursor: wait;
-    }
-
-    .status-message {
-      display: none;
-      padding: 14px 16px;
-      border-radius: 14px;
-      font-weight: 800;
-    }
-
-    .status-message.is-visible { display: block; }
-    .status-message.success { background: #e8f6ef; color: var(--success); border: 1px solid #bce3cf; }
-    .status-message.error { background: #fff0ec; color: var(--error); border: 1px solid #f0c1b8; }
-
-    footer {
-      padding: 34px 0 42px;
-      background: #12384c;
-      color: rgba(255,255,255,0.88);
-    }
-
-    @media (max-width: 760px) {
-      .container { width: min(100% - 28px, var(--max-width)); }
-      header { padding: 12px 0 82px; }
-      .topbar { display: grid; border-radius: 18px; }
-      .brand { width: 66px; height: 66px; }
-      nav { border-radius: 16px; justify-content: flex-start; }
-      nav a { font-size: 0.84rem; padding: 8px 10px; }
-      .hero { margin-top: 38px; }
-      h1 { font-size: clamp(2.05rem, 12vw, 3rem); line-height: 1.02; }
-      main { margin-top: -42px; padding-bottom: 36px; }
-      .panel { padding: 17px; border-radius: 16px; }
-      .form-row { grid-template-columns: 1fr; gap: 14px; }
-      input, select { border-radius: 12px; }
-      .submit-btn { width: 100%; border-radius: 14px; }
-    }
-  </style>
+  <link rel="stylesheet" href="site.css" />
+  <link rel="stylesheet" href="flow-ui.css?v=20260720" />
 </head>
-<body>
-  <header>
+<body class="flow-page rut-flow">
+  <a class="skip-link" href="#main-content">Hoppa till innehållet</a>
+  <header class="flow-header">
     <div class="container">
-      <div class="topbar">
-        <a href="index.html" class="brand" aria-label="Berga Fönsterputs startsida">
+      <div class="flow-topbar">
+        <a href="index.html" class="flow-brand" aria-label="Berga Fönsterputs startsida">
           <img src="logo-compact.png" alt="Berga Fönsterputs logotyp" width="256" height="251">
+          <span class="flow-brand-copy">Berga Fönsterputs<small>Personlig och lokal service</small></span>
         </a>
-        <nav>
-          <a href="index.html">Startsida</a>
-          <a href="var-tjanst.html">Vår tjänst</a>
-          <a href="om-oss.html">Om oss</a>
-          <a href="bokning.html">Boka tid</a>
-          <a href="kontakt.html">Kontakt</a>
-        </nav>
+        <a class="flow-home-link" href="index.html">Till startsidan</a>
       </div>
 
-      <div class="hero">
-        <div class="hero-label">Säkert RUT-underlag</div>
-        <h1>Fyll i RUT-uppgifterna.</h1>
-        <p>Personnumret skickas krypterat till en separat, skyddad RUT-inkorg och används bara för din RUT-ansökan.</p>
+      <div class="flow-hero">
+        <p class="flow-eyebrow">Säkert RUT-underlag</p>
+        <h1>Lämna personnummer tryggt</h1>
+        <p>Personnumret skickas krypterat till en separat, skyddad RUT-inkorg och används bara för RUT-hanteringen av din bokning.</p>
       </div>
     </div>
   </header>
 
-  <main class="container">
-    <section class="panel">
+  <main class="container flow-main" id="main-content">
+    <section class="panel" aria-labelledby="rut-form-title">
+      <h2 class="section-title" id="rut-form-title">Dina RUT-uppgifter</h2>
+      <p class="section-subtitle">Kontrollera att du öppnat länken från ditt senaste bokningsmejl och fyll sedan i personnumret.</p>
       <div class="security-note">Personnumret skickas aldrig via e-post. Det krypteras innan lagring, kan endast öppnas av behörig admin och gallras när RUT-ärendet är färdigt. <a href="integritet.html#rut">Läs hur RUT-uppgifterna hanteras.</a></div>
+      <ul class="rut-trust-list" aria-label="Så skyddas uppgifterna">
+        <li>Krypterad överföring</li>
+        <li>Endast för din RUT-ansökan</li>
+        <li>Engångslänk från mejlet</li>
+      </ul>
 
       <form id="rutForm">
         <input type="hidden" id="formStartedAt">
@@ -348,10 +74,9 @@
     </section>
   </main>
 
-  <footer>
-    <div class="container">
-      <p><strong>Berga Fönsterputs</strong></p>
-      <p>E-post: info@bergafonsterputs.se</p>
+  <footer class="flow-footer">
+    <div class="container flow-footer-inner">
+      <p><strong>Berga Fönsterputs</strong> · <a href="mailto:info@bergafonsterputs.se">info@bergafonsterputs.se</a></p>
       <p><a href="integritet.html">Integritet</a> · <a href="villkor.html">Villkor</a></p>
     </div>
   </footer>

@@ -96,6 +96,7 @@
   let currentStep = 1;
   let desiredInitialStep = 1;
   let currentCalendarMonth = new Date(firstCalendarMonth);
+  let firstAvailableCalendarMonth = new Date(firstCalendarMonth);
   let selectedDate = '';
   let selectedTime = '';
   let bookingsCache = [];
@@ -387,6 +388,18 @@
     return calendarReady && isDateWithinBookableRange(date) && !isFullyBooked(date);
   }
 
+  function findFirstAvailableDate() {
+    const cursor = new Date(minBookableDate);
+
+    while (cursor <= lastBookableDate) {
+      const date = formatDate(cursor.getFullYear(), cursor.getMonth(), cursor.getDate());
+      if (isDateSelectable(date)) return date;
+      cursor.setDate(cursor.getDate() + 1);
+    }
+
+    return '';
+  }
+
   function syncDateInputs() {
     dateInput.value = selectedDate;
     timeInput.value = selectedTime;
@@ -459,7 +472,7 @@
     const year = currentCalendarMonth.getFullYear();
     const month = currentCalendarMonth.getMonth();
     calendarTitle.textContent = `${MONTH_NAMES[month]} ${year}`;
-    prevMonthButton.disabled = !calendarReady || currentCalendarMonth <= firstCalendarMonth;
+    prevMonthButton.disabled = !calendarReady || currentCalendarMonth <= firstAvailableCalendarMonth;
     nextMonthButton.disabled = !calendarReady || currentCalendarMonth >= lastCalendarMonth;
 
     const firstDay = new Date(year, month, 1, 12);
@@ -521,6 +534,17 @@
   }
 
   function applyAvailableInitialSelection() {
+    const firstAvailableDate = findFirstAvailableDate();
+    const firstAvailableDateObject = firstAvailableDate
+      ? new Date(`${firstAvailableDate}T12:00:00`)
+      : minBookableDate;
+    firstAvailableCalendarMonth = new Date(
+      firstAvailableDateObject.getFullYear(),
+      firstAvailableDateObject.getMonth(),
+      1,
+      12
+    );
+
     const dateObject = new Date(`${selectedDate}T12:00:00`);
     const dateIsValid = selectedDate
       && !Number.isNaN(dateObject.getTime())
@@ -531,6 +555,7 @@
       selectedDate = '';
       selectedTime = '';
       desiredInitialStep = 1;
+      currentCalendarMonth = new Date(firstAvailableCalendarMonth);
       return;
     }
 
@@ -543,6 +568,7 @@
     calendarReady = false;
     bookingsCache = [];
     blockedDatesCache = [];
+    firstAvailableCalendarMonth = new Date(firstCalendarMonth);
     setCalendarState('loading', 'Kontrollerar lediga dagar…');
     renderCalendar();
     renderTimes();
@@ -1465,7 +1491,7 @@
   }
 
   prevMonthButton.addEventListener('click', () => {
-    if (!calendarReady || currentCalendarMonth <= firstCalendarMonth) return;
+    if (!calendarReady || currentCalendarMonth <= firstAvailableCalendarMonth) return;
     currentCalendarMonth = new Date(currentCalendarMonth.getFullYear(), currentCalendarMonth.getMonth() - 1, 1, 12);
     renderCalendar();
   });
