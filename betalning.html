@@ -699,15 +699,15 @@
   <header>
     <div class="container">
       <div class="topbar">
-        <a class="brand" href="index.html#top" aria-label="Till startsidan">
-          <img src="logga-fonsterputs-transparent.png" alt="Berga Fönsterputs logga" onerror="this.style.display='none'">
+        <a class="brand" href="index.html" aria-label="Till startsidan">
+          <img src="logo-compact.png" alt="Berga Fönsterputs logga" width="256" height="251" onerror="this.style.display='none'">
           <div class="brand-text">
             <span class="brand-title">Berga Fönsterputs</span>
             <span class="brand-tagline">Personlig och lokal service</span>
           </div>
         </a>
         <div class="topbar-actions">
-          <a href="index.html" class="back-link">← Tillbaka till bokningen</a>
+          <a href="bokning.html" class="back-link">← Tillbaka till bokningen</a>
           <button type="button" class="topbar-toggle" id="topbarToggleButton">Dölj</button>
         </div>
       </div>
@@ -805,7 +805,7 @@
       <div class="footer-links">
         <a href="index.html">Startsida</a>
         <a href="var-tjanst.html">Vår tjänst</a>
-        <a href="index.html#bokning">Boka tid</a>
+        <a href="bokning.html">Boka tid</a>
         <a href="om-oss.html">Om oss</a>
         <a href="integritet.html">Integritet</a>
         <a href="villkor.html">Villkor</a>
@@ -943,7 +943,10 @@
 
     payLaterButton.addEventListener('click', () => {
       setStatus('Bekräfta först via mejlet. När fönsterputsen sedan är slutförd skickar vi Swishuppgifterna i klartmejlet.', 'Nästa steg');
-      statusBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      statusBox.scrollIntoView({
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+        block: 'center'
+      });
     });
 
     if (String(price).includes('offert') || String(price).includes('Offert')) {

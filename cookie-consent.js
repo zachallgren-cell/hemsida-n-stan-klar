@@ -23,16 +23,19 @@
 
     if (value === 'accepted') {
       loadAnalytics();
-    } else if (window.gtag) {
-      window.gtag('consent', 'update', {
-        analytics_storage: 'denied',
-        ad_storage: 'denied',
-        ad_user_data: 'denied',
-        ad_personalization: 'denied'
-      });
+      loadClarity();
+      updateClarityConsent('accepted');
+    } else {
+      if (window.gtag) {
+        window.gtag('consent', 'update', {
+          analytics_storage: 'denied',
+          ad_storage: 'denied',
+          ad_user_data: 'denied',
+          ad_personalization: 'denied'
+        });
+      }
+      updateClarityConsent(value);
     }
-
-    updateClarityConsent(value);
 
     window.dispatchEvent(new CustomEvent('berga:consent-change', {
       detail: { value }
@@ -93,9 +96,7 @@
   }
 
   function updateClarityConsent(value) {
-    window.clarity = window.clarity || function () {
-      (window.clarity.q = window.clarity.q || []).push(arguments);
-    };
+    if (typeof window.clarity !== 'function') return;
 
     window.clarity('consentv2', value === 'accepted'
       ? { ad_Storage: 'denied', analytics_Storage: 'granted' }
@@ -274,11 +275,10 @@
   }
 
   function initCookieConsent() {
-    loadClarity();
-
     const consent = getConsent();
     if (consent === 'accepted') {
       loadAnalytics();
+      loadClarity();
       updateClarityConsent('accepted');
       renderSettingsButton();
       return;

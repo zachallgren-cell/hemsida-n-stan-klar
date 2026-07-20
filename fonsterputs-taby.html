@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-  <link rel="stylesheet" href="cookie-consent.css">
-  <script src="cookie-consent.js" defer></script>
+  <link rel="stylesheet" href="cookie-consent.css?v=20260720">
+  <script src="cookie-consent.js?v=20260720" defer></script>
+  <script src="site.js" defer></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fönsterputs Täby från 949 kr | Berga Fönsterputs</title>
@@ -318,6 +319,14 @@
       h1 { font-size: 2.35rem; }
       .hero-actions .btn { width: 100%; }
     }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -325,13 +334,13 @@
     <div class="container">
       <div class="topbar">
         <a class="brand" href="index.html" aria-label="Berga Fönsterputs startsida">
-          <img src="logga-fonsterputs-transparent.png" alt="">
+          <img src="logo-compact.png" alt="" width="256" height="251">
           <span>Berga Fönsterputs</span>
         </a>
         <nav aria-label="Huvudnavigation">
           <a href="index.html">Startsida</a>
           <a href="var-tjanst.html">Vår tjänst</a>
-          <a href="index.html#bokning">Boka tid</a>
+          <a href="bokning.html">Boka tid</a>
           <a href="offert.html">Be om offert</a>
         </nav>
       </div>
@@ -341,7 +350,7 @@
           <h1>Rena fönster med tydligt pris.</h1>
           <p>Berga Fönsterputs utgår från Åkersberga och tar bokningar i Täby. Välj en ledig tid och se priset direkt, eller skicka bilder om du vill ha hjälp att bedöma omfattningen.</p>
           <div class="hero-actions">
-            <a class="btn btn-primary" href="index.html#bokning">Boka fönsterputs</a>
+            <a class="btn btn-primary" href="bokning.html">Boka fönsterputs</a>
             <a class="btn btn-light" href="offert.html">Jag vill ha offert</a>
           </div>
         </section>

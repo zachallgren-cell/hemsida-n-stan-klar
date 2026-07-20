@@ -350,7 +350,7 @@
     <div class="container">
       <div class="topbar">
         <a class="brand" href="index.html" aria-label="Berga Fönsterputs startsida">
-          <span class="brand-mark"><img src="logga-fonsterputs-transparent.png" alt=""></span>
+          <span class="brand-mark"><img src="logo-compact.png" alt="" width="256" height="251"></span>
           <span class="brand-copy">Berga Fönsterputs<small>Lokalt & personligt</small></span>
         </a>
         <a class="home-link" href="index.html">Till startsidan</a>
@@ -375,7 +375,7 @@
       <p id="errorText">Länken är ogiltig eller har gått ut. Kontakta oss om du behöver hjälp med bokningen.</p>
       <div class="button-row" style="justify-content:center;">
         <a class="btn" href="mailto:info@bergafonsterputs.se">Kontakta oss</a>
-        <a class="btn secondary" href="index.html#bokning">Boka en ny tid</a>
+        <a class="btn secondary" href="bokning.html">Boka en ny tid</a>
       </div>
     </section>
 
@@ -644,7 +644,10 @@
         actionNotice.textContent = message;
         actionNotice.className = `notice${type === 'success' ? '' : ` ${type}`}`;
         actionNotice.hidden = false;
-        actionNotice.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        actionNotice.scrollIntoView({
+          behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+          block: 'nearest'
+        });
       }
 
       function setBusy(isBusy) {
@@ -846,7 +849,7 @@
         };
         try {
           sessionStorage.setItem('bergaRebookPrefill', JSON.stringify(prefill));
-          window.location.assign('index.html#bokning');
+          window.location.assign('bokning.html');
         } catch {
           showNotice('Förifyllningen kunde inte sparas i webbläsaren. Försök igen eller boka manuellt.', 'error');
         }

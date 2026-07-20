@@ -404,6 +404,14 @@
       .hero h1 { font-size: 2.25rem; }
       .hero-points span { width: 100%; text-align: center; }
     }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -411,14 +419,14 @@
     <div class="container">
       <div class="topbar">
         <a class="brand" href="index.html" aria-label="Berga Fönsterputs startsida">
-          <img src="logga-fonsterputs-transparent.png" alt="">
+          <img src="logo-compact.png" alt="" width="256" height="251">
           <span>Berga Fönsterputs</span>
         </a>
         <nav aria-label="Huvudnavigation">
           <a href="index.html">Startsida</a>
           <a href="var-tjanst.html">Vår tjänst</a>
-          <a href="index.html#bokning">Boka med livepris</a>
-          <a href="index.html#kontakt">Kontakt</a>
+          <a href="bokning.html">Boka med livepris</a>
+          <a href="kontakt.html">Kontakt</a>
         </nav>
       </div>
       <section class="hero">
@@ -565,7 +573,7 @@
           <section class="side-card">
             <h3>Vill du boka direkt?</h3>
             <p>Om du redan vet ungefärligt antal kan du välja en ledig tid och se livepriset i det vanliga bokningsflödet.</p>
-            <p><a href="index.html#bokning"><strong>Gå till bokningen →</strong></a></p>
+            <p><a href="bokning.html"><strong>Gå till bokningen →</strong></a></p>
           </section>
         </aside>
       </div>
@@ -590,7 +598,7 @@
       <div class="footer-links">
         <a href="index.html">Startsida</a>
         <a href="var-tjanst.html">Vår tjänst</a>
-        <a href="index.html#bokning">Boka tid</a>
+        <a href="bokning.html">Boka tid</a>
         <a href="integritet.html">Integritet</a>
         <a href="villkor.html">Villkor</a>
         <a href="villkor.html">Bokningsvillkor</a>
