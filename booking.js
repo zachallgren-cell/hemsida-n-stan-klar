@@ -467,6 +467,20 @@
     });
   }
 
+  function revealTimesAndContinueButton() {
+    window.requestAnimationFrame(() => {
+      const firstTimeButton = timeSlots.querySelector('button');
+      const continueButton = document.querySelector('[data-booking-step="1"] [data-next-step]');
+      if (!firstTimeButton || !continueButton) return;
+
+      firstTimeButton.focus({ preventScroll: true });
+      continueButton.scrollIntoView({
+        behavior: reduceMotion ? 'auto' : 'smooth',
+        block: 'end'
+      });
+    });
+  }
+
   function renderCalendar() {
     calendarGrid.replaceChildren();
     const year = currentCalendarMonth.getFullYear();
@@ -526,7 +540,7 @@
           renderTimes();
           syncBookingUrl();
           saveDraft();
-          window.setTimeout(() => timeSlots.querySelector('button')?.focus(), 0);
+          revealTimesAndContinueButton();
         });
       }
       calendarGrid.appendChild(button);

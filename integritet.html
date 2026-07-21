@@ -652,7 +652,7 @@
           <div class="summary-grid">
             <div class="summary-item">
               <strong>Du styr RUT-valet</strong>
-              <span>Personnummer efterfrågas först när du själv väljer RUT och öppnar det separata formuläret.</span>
+              <span>Personnummer efterfrågas först när du själv väljer RUT, har bekräftat bokningen och öppnar formuläret från din personliga bekräftelsesida.</span>
             </div>
             <div class="summary-item">
               <strong>Betalning efter arbetet</strong>
@@ -744,15 +744,15 @@
           <h2>Särskilt om säker RUT-hantering</h2>
           <p>Personnummer kräver extra varsam hantering. Därför hålls RUT-underlaget åtskilt från det vanliga bokningsformuläret.</p>
           <ol class="security-steps">
-            <li>Om du väljer RUT får du en separat, tidsbegränsad engångslänk kopplad till just din bokning.</li>
-            <li>Länken innehåller inte ditt personnummer. Formuläret kontrollerar bokning och token på servern innan uppgiften tas emot.</li>
+            <li>Om du väljer RUT kan du efter bekräftelsen öppna ett separat, tidsbegränsat RUT-formulär från din personliga bekräftelsesida.</li>
+            <li>Åtkomsten innehåller inte ditt personnummer. Formuläret kontrollerar bokning och token på servern innan uppgiften tas emot.</li>
             <li>Personnumret sparas som en krypterad arbetskopia. Åtkomst till visning kräver administrativ behörighet och åtkomsthändelser loggas.</li>
             <li>Token förbrukas efter inlämning. Arbetskopian kan gallras när RUT-ärendet är klart och omfattas alltid av den bortre tidsgränsen nedan.</li>
           </ol>
-          <p>Även länken för att bekräfta, boka om eller avboka är personlig. Den hemliga delen ligger efter <code>#</code> i länken, tas bort från adressfältet när sidan öppnas och sparas bara som ett hashvärde på servern.</p>
+          <p>Även länken för att bekräfta, boka om eller avboka är personlig. Den hemliga delen ligger efter <code>#</code> i länken, tas bort från adressfältet när sidan öppnas och sparas bara som ett hashvärde på servern. När du öppnar RUT-formuläret förs dess separata engångstoken vidare inom samma webbläsarflik utan att visas i adressfältet.</p>
           <div class="notice">
             <strong>Skicka inte personnummer via vanlig e-post.</strong>
-            Använd bara det separata RUT-formuläret från bekräftelsemejlet. Kontakta oss om länken saknas, har gått ut eller verkar felaktig.
+            Använd bara det separata RUT-formuläret som du öppnar från din personliga bekräftelsesida. Kontakta oss om formuläret inte går att öppna eller verkar felaktigt.
           </div>
           <p style="margin-top:18px;">Säkerhetsåtgärder minskar risker men ingen digital lösning kan lova fullständig riskfrihet. Vi begränsar därför både åtkomst och lagringstid och följer upp avvikelser när de upptäcks.</p>
           <div class="external-links">
@@ -768,7 +768,7 @@
           <ul>
             <li><strong>GitHub Pages</strong> för att leverera den publika webbplatsen.</li>
             <li><strong>Supabase</strong> för bokningsdatabas, serverfunktioner och tillhörande teknisk drift.</li>
-            <li><strong>Resend</strong> för att leverera boknings-, påminnelse-, offert-, RUT- och klartmejl. Bilder i en offertförfrågan skickas som e-postbilagor men skrivs inte till webbplatsens databas. RUT-underlaget fylls i i det separata formuläret och ska inte skickas i vanlig e-post.</li>
+            <li><strong>Resend</strong> för att leverera boknings-, påminnelse-, offert-, administrativa RUT-reservlänkar och klartmejl. Bilder i en offertförfrågan skickas som e-postbilagor men skrivs inte till webbplatsens databas. RUT-underlaget fylls i i det separata formuläret och ska inte skickas i vanlig e-post.</li>
             <li><strong>Google Analytics och Microsoft Clarity</strong> för begränsad besöksanalys, men bara när du har accepterat analyscookies.</li>
             <li><strong>Skatteverket</strong> när du har begärt RUT och uppgifterna behövs för ansökan, komplettering eller kontroll.</li>
             <li><strong>Banker och tjänster kopplade till Swish</strong> för att genomföra och redovisa betalningen.</li>
@@ -798,7 +798,7 @@
                   <td data-label="Lagring">Gallras senast 180 dagar efter det senare av mottagandet och den bokade arbetsdagen, men aldrig längre än två år efter mottagandet. Den kan gallras tidigare när RUT-ärendet är klart.</td>
                 </tr>
                 <tr>
-                  <td data-label="Typ"><strong>RUT-länk och token</strong></td>
+                  <td data-label="Typ"><strong>RUT-åtkomst och token</strong></td>
                   <td data-label="Lagring">Gäller i 30 dagar och görs obrukbar direkt när den har använts eller ersatts. Revisionsuppgifter utan personnummer följer den separata tidsfristen för säkerhetsloggar.</td>
                 </tr>
                 <tr>

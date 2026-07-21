@@ -29,6 +29,8 @@ type RutPayload = {
 
 type BookingTokenState = {
   id: string | number;
+  status?: string | null;
+  email_confirmed_at?: string | null;
   rut_choice?: string | null;
   rut_form_token_hash?: string | null;
   rut_form_token_expires_at?: string | null;
@@ -220,6 +222,8 @@ async function fetchBookingTokenState(
 ): Promise<BookingTokenState | null> {
   const columns = [
     'id',
+    'status',
+    'email_confirmed_at',
     'rut_choice',
     'rut_form_token_hash',
     'rut_form_token_expires_at',
@@ -354,6 +358,11 @@ Deno.serve(async (req) => {
 
     if (!/^ja\b/i.test(String(booking.rut_choice || '').trim())) {
       return jsonResponse({ error: 'Den här bokningen är inte registrerad för RUT-avdrag.' }, 409);
+    }
+
+    if (!booking.email_confirmed_at
+      || !['pending', 'confirmed', 'completed'].includes(String(booking.status || '').toLowerCase())) {
+      return jsonResponse({ error: 'Bokningen måste vara bekräftad och aktiv för att lämna RUT-underlag.' }, 409);
     }
 
     const encrypted = await encryptPersonalNumber(personalNumber, bookingId);

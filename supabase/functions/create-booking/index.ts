@@ -763,7 +763,14 @@ Deno.serve(async (req) => {
     const safePaymentMethod = 'Swish Företag';
     const rawRutChoice = payload.rutChoice || payload.rut_choice || '';
     const rutMode = getRutMode(payload);
-    const safeRutChoice = rawRutChoice ? escapeHtml(rawRutChoice) : 'Ej angivet';
+    const rutChoiceDisplay = rutMode === 'with-rut'
+      ? 'Ja, använd RUT'
+      : rutMode === 'without-rut'
+        ? 'Nej, utan RUT'
+        : rutMode === 'undecided'
+          ? 'Osäker – kontakta mig'
+          : rawRutChoice;
+    const safeRutChoice = rutChoiceDisplay ? escapeHtml(rutChoiceDisplay) : 'Ej angivet';
     const safeAddons = payload.addons ? escapeHtml(payload.addons).replaceAll('\n', '<br>') : 'Inga tillägg';
     const safeTransportType = payload.transportType ? escapeHtml(payload.transportType) : 'Fastland';
     const safeSeaMiles = payload.seaMiles ? escapeHtml(payload.seaMiles) : 'Ej angivet';
@@ -823,7 +830,7 @@ Deno.serve(async (req) => {
           <td style="padding: 20px;">
             <p style="margin: 0 0 8px; color: #7a5100; font-size: 12px; line-height: 1.3; font-weight: 800; text-transform: uppercase; letter-spacing: .05em;">Bekräfta din e-post</p>
             <h2 style="margin: 0 0 10px; color: #0f2638; font-size: 20px; line-height: 1.25;">Ett klick kvar innan tiden reserveras</h2>
-            <p style="margin: 0 0 14px; color: #536574; font-size: 14px; line-height: 1.7;">Bekräfta bokningen inom 24 timmar. Först då reserveras dagen i kalendern. Samma säkra sida kan senare användas för ombokning, avbokning, kalenderfil och återkommande putsning.</p>
+            <p style="margin: 0 0 14px; color: #536574; font-size: 14px; line-height: 1.7;">Bekräfta bokningen inom 24 timmar. Först då reserveras dagen i kalendern. På samma säkra sida kan du sedan hantera bokningen, ladda ner en kalenderfil och, om du valt RUT, öppna RUT-formuläret.</p>
             <table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse: collapse; width: 100%;">
               <tr>
                 <td align="center" style="background: #247a43; border-radius: 999px;">
@@ -852,7 +859,7 @@ Deno.serve(async (req) => {
                   </td>
                 </tr>
               </table>`
-            : '<p style="margin: 0; color: #536574; font-size: 14px; line-height: 1.7;">Vi skickar en säker formulärlänk för RUT-uppgifterna innan jobbet utförs.</p>'}
+            : '<p style="margin: 0; color: #536574; font-size: 14px; line-height: 1.7;">Bekräfta först bokningen via knappen ovan. Därefter kan du öppna det säkra RUT-formuläret på din personliga bekräftelsesida.</p>'}
             </td>
           </tr>
         </table>

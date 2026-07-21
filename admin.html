@@ -6,7 +6,7 @@
   <title>Admin | Berga Fönsterputs</title>
   <meta name="robots" content="noindex, nofollow">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-i4MHdFkbGTHCsOj2XZB39L5Zs/AOnLUMUtB1AeKNaig='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-mLLQjuYrBUiFNnGf5jS3vil20DbQ5cVOytPSqkhGUL8='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
   <link rel="shortcut icon" href="/favicon-48.png" />
@@ -1357,7 +1357,20 @@
         const bookingCanBeWorked = ['pending', 'confirmed'].includes(bookingStatus);
         const bookingCanBeAdminConfirmed = bookingStatus === 'pending' && Boolean(booking.email_confirmed_at);
         const hasRutSubmission = booking.rut_submission_available === true;
-        const canResendRut = !hasRutSubmission && !['submitted', 'approved'].includes(rutWorkflowStatusKey);
+        const rutLinkCanBeIssued = Boolean(booking.email_confirmed_at)
+          && ['pending', 'confirmed', 'completed'].includes(bookingStatus);
+        const canResendRut = rutLinkCanBeIssued
+          && !hasRutSubmission
+          && !['submitted', 'approved'].includes(rutWorkflowStatusKey);
+        const resendRutLabel = hasRutSubmission
+          ? 'RUT-underlag mottaget'
+          : ['submitted', 'approved'].includes(rutWorkflowStatusKey)
+            ? 'RUT redan hanterat'
+            : !booking.email_confirmed_at
+              ? 'Kundbekräftelse krävs'
+              : !rutLinkCanBeIssued
+                ? 'Bokningen är inte aktiv'
+                : 'Skicka ny RUT-länk';
         const completionReference = booking.invoice_reference || booking.swish_reference || '';
         const completionAmount = priceParts.customerToPay ?? '';
         const packageParts = [
@@ -1455,7 +1468,7 @@
                 </div>
                 <div class="rut-sensitive-value hidden" aria-live="polite"></div>
                 <div class="completion-row">
-                  <button type="button" class="button button-secondary button-small action-resend-rut" ${canResendRut ? '' : 'disabled'}>${hasRutSubmission ? 'RUT-underlag mottaget' : ['submitted', 'approved'].includes(rutWorkflowStatusKey) ? 'RUT redan hanterat' : 'Skicka ny RUT-länk'}</button>
+                  <button type="button" class="button button-secondary button-small action-resend-rut" ${canResendRut ? '' : 'disabled'}>${resendRutLabel}</button>
                   <button type="button" class="button button-secondary button-small action-show-rut" ${!workIsCompleted || !hasRutSubmission ? 'disabled' : ''}>Visa personnummer</button>
                   <button type="button" class="button button-secondary button-small action-copy-rut hidden">Kopiera</button>
                   <button type="button" class="button button-success button-small action-rut-applied" ${!paymentIsPaid || !workIsCompleted || !hasRutSubmission || !['ready', 'rejected', 'submitted'].includes(rutWorkflowStatusKey) ? 'disabled' : ''}>Markera RUT ansökt</button>

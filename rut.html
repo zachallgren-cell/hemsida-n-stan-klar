@@ -10,7 +10,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src https://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self'; script-src 'unsafe-inline'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'none'; upgrade-insecure-requests" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src https://xeyippgcoqfskcmqzazx.functions.supabase.co; img-src 'self' data:; style-src 'self'; script-src 'unsafe-inline'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'none'; upgrade-insecure-requests" />
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
   <link rel="stylesheet" href="site.css" />
@@ -39,12 +39,12 @@
   <main class="container flow-main" id="main-content">
     <section class="panel" aria-labelledby="rut-form-title">
       <h2 class="section-title" id="rut-form-title">Dina RUT-uppgifter</h2>
-      <p class="section-subtitle">Kontrollera att du öppnat länken från ditt senaste bokningsmejl och fyll sedan i personnumret.</p>
+      <p class="section-subtitle">Den säkra åtkomsten är kopplad till din bokning. Fyll i personnumret nedan.</p>
       <div class="security-note">Personnumret skickas aldrig via e-post. Det krypteras innan lagring, kan endast öppnas av behörig admin och gallras när RUT-ärendet är färdigt. <a href="integritet.html#rut">Läs hur RUT-uppgifterna hanteras.</a></div>
       <ul class="rut-trust-list" aria-label="Så skyddas uppgifterna">
         <li>Krypterad överföring</li>
         <li>Endast för din RUT-ansökan</li>
-        <li>Engångslänk från mejlet</li>
+        <li>Säker engångsåtkomst</li>
       </ul>
 
       <form id="rutForm">
@@ -82,10 +82,10 @@
   </footer>
 
   <script>
-    const SUPABASE_URL = 'https://xeyippgcoqfskcmqzazx.supabase.co';
+    const SUPABASE_FUNCTIONS_URL = 'https://xeyippgcoqfskcmqzazx.functions.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_MUKxAwv0vNXDrcgumq81fQ_Uvx4eOuq';
-    const RUT_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/submit-rut`;
-    const RUT_BOOKING_DETAILS_URL = `${SUPABASE_URL}/functions/v1/rut-booking-details`;
+    const RUT_FUNCTION_URL = `${SUPABASE_FUNCTIONS_URL}/submit-rut`;
+    const RUT_BOOKING_DETAILS_URL = `${SUPABASE_FUNCTIONS_URL}/rut-booking-details`;
 
     const rutForm = document.getElementById('rutForm');
     const rutStatus = document.getElementById('rutStatus');
@@ -143,7 +143,6 @@
     function getHeaders() {
       return {
         apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
         'Content-Type': 'application/json'
       };
     }
@@ -151,7 +150,7 @@
     async function validateSecureLink() {
       submitButton.disabled = true;
       if (!bookingId || !token) {
-        bookingLinkStatus.textContent = 'Länken saknar bokningsuppgifter. Öppna RUT-länken i ditt bokningsmejl.';
+        bookingLinkStatus.textContent = 'Åtkomsten saknas. Öppna RUT-formuläret från din personliga bekräftelsesida.';
         setStatus('Den säkra RUT-länken är ofullständig eller ogiltig.');
         return;
       }
@@ -159,6 +158,10 @@
       try {
         const res = await fetch(RUT_BOOKING_DETAILS_URL, {
           method: 'POST',
+          mode: 'cors',
+          credentials: 'omit',
+          cache: 'no-store',
+          referrerPolicy: 'no-referrer',
           headers: getHeaders(),
           body: JSON.stringify({ bookingId, token })
         });
@@ -223,6 +226,10 @@
       try {
         const res = await fetch(RUT_FUNCTION_URL, {
           method: 'POST',
+          mode: 'cors',
+          credentials: 'omit',
+          cache: 'no-store',
+          referrerPolicy: 'no-referrer',
           headers: getHeaders(),
           body: JSON.stringify(payload)
         });

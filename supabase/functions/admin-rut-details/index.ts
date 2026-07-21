@@ -27,6 +27,8 @@ type AdminPayload = {
 
 type BookingAdminState = {
   id: string | number;
+  status?: string | null;
+  email_confirmed_at?: string | null;
   completed_at?: string | null;
   payment_status?: string | null;
   customer_name?: string | null;
@@ -240,7 +242,7 @@ async function requireBookingAdmin(
   // project's authoritative admin allowlist.
   const publicApiKey = Deno.env.get('SUPABASE_ANON_KEY') || serviceRoleKey;
   const bookingResponse = await fetch(
-    `${supabaseUrl}/rest/v1/bookings?select=id,completed_at,payment_status,customer_name,email,rut_choice,rut_application_status&id=eq.${encodeURIComponent(bookingId)}&limit=1`,
+    `${supabaseUrl}/rest/v1/bookings?select=id,status,email_confirmed_at,completed_at,payment_status,customer_name,email,rut_choice,rut_application_status&id=eq.${encodeURIComponent(bookingId)}&limit=1`,
     {
       headers: {
         apikey: publicApiKey,
@@ -535,6 +537,11 @@ Deno.serve(async (req) => {
     if (action === 'resend_link') {
       if (!isRutBooking(adminCheck.booking.rut_choice)) {
         return jsonResponse({ error: 'Bokningen är inte registrerad för RUT-avdrag.' }, 409);
+      }
+
+      if (!adminCheck.booking.email_confirmed_at
+        || !['pending', 'confirmed', 'completed'].includes(String(adminCheck.booking.status || '').toLowerCase())) {
+        return jsonResponse({ error: 'Kunden måste först bekräfta en aktiv bokning.' }, 409);
       }
 
       if (['submitted', 'approved'].includes(String(adminCheck.booking.rut_application_status || '').toLowerCase())) {

@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src https://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'unsafe-inline'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'none'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src https://xeyippgcoqfskcmqzazx.functions.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'unsafe-inline'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'none'; upgrade-insecure-requests">
   <title>Hantera bokning | Berga Fönsterputs</title>
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png">
   <link rel="apple-touch-icon" sizes="192x192" href="/favicon-192.png">
@@ -29,7 +29,7 @@
       <div class="flow-hero">
         <p class="flow-eyebrow">Din personliga bokningslänk</p>
         <h1>Hantera din bokning</h1>
-        <p>Se bokningsstatus, bekräfta din tid, boka om eller avboka. Du kan också välja hur ofta du vill få en ny bokningsinbjudan.</p>
+        <p>Bekräfta din tid, fyll i RUT-uppgifter vid behov eller hantera bokningen senare.</p>
       </div>
     </div>
   </header>
@@ -85,8 +85,14 @@
         <div class="action-grid">
           <article class="action-card primary wide" id="confirmCard" hidden>
             <h3 id="confirmCardTitle">Bekräfta bokningen</h3>
-            <p id="confirmCardText">Tiden reserveras först när du bekräftar. Därefter får du ett bekräftelsemejl och en kalenderfil. Har du valt RUT finns den säkra RUT-länken i samma mejl.</p>
+            <p id="confirmCardText">Tiden reserveras när du bekräftar. Därefter kan du ladda ner kalenderfilen och, om du valt RUT, öppna det säkra RUT-formuläret här.</p>
             <button class="btn" type="button" id="confirmButton">Bekräfta min bokning</button>
+          </article>
+
+          <article class="action-card primary wide" id="rutCard" hidden>
+            <h3 id="rutCardTitle">Fyll i RUT-uppgifter</h3>
+            <p id="rutCardText">Lämna personnumret i vårt säkra engångsformulär. Uppgiften skickas aldrig via e-post.</p>
+            <button class="btn" type="button" id="rutButton">Gå till säkert RUT-formulär</button>
           </article>
 
           <article class="action-card" id="rescheduleCard" hidden>
@@ -167,7 +173,8 @@
     (() => {
       'use strict';
 
-      const ENDPOINT = 'https://xeyippgcoqfskcmqzazx.supabase.co/functions/v1/manage-booking';
+      const ENDPOINT = 'https://xeyippgcoqfskcmqzazx.functions.supabase.co/manage-booking';
+      const SUPABASE_ANON_KEY = 'sb_publishable_MUKxAwv0vNXDrcgumq81fQ_Uvx4eOuq';
       const BOOKABLE_TIMES = ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
       const linkStorageKey = 'bergaManagementLink';
       const fragment = new URLSearchParams(window.location.hash.replace(/^#/, ''));
@@ -210,6 +217,10 @@
       const confirmCard = document.getElementById('confirmCard');
       const confirmCardTitle = document.getElementById('confirmCardTitle');
       const confirmCardText = document.getElementById('confirmCardText');
+      const rutCard = document.getElementById('rutCard');
+      const rutCardTitle = document.getElementById('rutCardTitle');
+      const rutCardText = document.getElementById('rutCardText');
+      const rutButton = document.getElementById('rutButton');
       const rescheduleCard = document.getElementById('rescheduleCard');
       const recurrenceCard = document.getElementById('recurrenceCard');
       const cancelCard = document.getElementById('cancelCard');
@@ -335,7 +346,10 @@
           credentials: 'omit',
           cache: 'no-store',
           referrerPolicy: 'no-referrer',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json'
+          },
           body: JSON.stringify({ action, bookingId, token: managementToken, ...extra })
         });
         let data = null;
@@ -375,19 +389,32 @@
         setText('detailService', booking.serviceScope);
         setText('detailWindows', [booking.windowCount, booking.addons].filter(Boolean).join(' · '));
         setText('detailTransport', [booking.transportType, booking.seaMiles ? `${booking.seaMiles} sjömil` : ''].filter(Boolean).join(' · '));
-        setText('detailRut', booking.rutChoice);
+        setText('detailRut', booking.rutRequested
+          ? (booking.rutSubmissionReceived ? 'Ja – underlag mottaget' : 'Ja, använd RUT')
+          : booking.rutChoice);
         setText('detailRecurrence', recurrenceLabel(booking.recurrenceWeeks));
 
         const capabilities = booking.capabilities || {};
-        const isConfirmationRetry = booking.status !== 'awaiting_confirmation'
-          && capabilities.canConfirm
-          && booking.confirmationReceiptSent === false;
-        confirmCardTitle.textContent = isConfirmationRetry ? 'Skicka bekräftelsemejlet igen' : 'Bekräfta bokningen';
-        confirmCardText.textContent = isConfirmationRetry
-          ? 'Tiden är reserverad, men bekräftelsemejlet kunde inte levereras. Försök igen för att få kalenderfilen och eventuell säker RUT-länk.'
-          : 'Tiden reserveras först när du bekräftar. Därefter får du ett bekräftelsemejl och en kalenderfil. Har du valt RUT finns den säkra RUT-länken i samma mejl.';
-        confirmButton.textContent = isConfirmationRetry ? 'Skicka mejlet igen' : 'Bekräfta min bokning';
+        confirmCardTitle.textContent = 'Bekräfta bokningen';
+        confirmCardText.textContent = 'Tiden reserveras när du bekräftar. Därefter kan du ladda ner kalenderfilen och, om du valt RUT, öppna det säkra RUT-formuläret här.';
+        confirmButton.textContent = 'Bekräfta min bokning';
         confirmCard.hidden = !capabilities.canConfirm;
+
+        const showRutCard = booking.rutRequested
+          && ['pending', 'confirmed', 'completed'].includes(booking.status);
+        rutCard.hidden = !showRutCard;
+        if (showRutCard && booking.rutSubmissionReceived) {
+          rutCardTitle.textContent = 'RUT-underlag mottaget';
+          rutCardText.textContent = 'Tack! Personnumret är mottaget och lagrat krypterat för RUT-hanteringen.';
+          rutButton.hidden = true;
+        } else if (showRutCard && capabilities.canSubmitRut) {
+          rutCardTitle.textContent = 'Fyll i RUT-uppgifter';
+          rutCardText.textContent = 'Lämna personnumret i vårt säkra engångsformulär. Uppgiften skickas aldrig via e-post.';
+          rutButton.hidden = false;
+        } else {
+          rutButton.hidden = true;
+        }
+
         rescheduleCard.hidden = !capabilities.canReschedule;
         recurrenceCard.hidden = !capabilities.canSetRecurrence;
         cancelCard.hidden = !capabilities.canCancel;
@@ -422,12 +449,6 @@
             type: 'warning'
           };
         }
-        if (data.notification?.rutLinkPrepared === false) {
-          return {
-            message: `${successMessage} RUT-länken kunde inte skapas automatiskt. Kontakta oss så hjälper vi dig.`,
-            type: 'warning'
-          };
-        }
         return { message: successMessage, type: 'success' };
       }
 
@@ -439,10 +460,41 @@
           if (data.booking) renderBooking(data.booking);
           const result = notificationMessage(data, successMessage);
           showNotice(result.message, result.type);
+          return data;
         } catch (error) {
           showNotice(error instanceof Error ? error.message : 'Något gick fel. Försök igen.', 'error');
+          return null;
         } finally {
           setBusy(false);
+        }
+      }
+
+      async function openRutForm() {
+        setBusy(true);
+        showNotice('Öppnar det säkra RUT-formuläret…', 'warning');
+        let isLeavingPage = false;
+        try {
+          const data = await request('prepare_rut');
+          const rutBookingId = String(data.rutAccess?.bookingId || '');
+          const rutToken = String(data.rutAccess?.token || '');
+          if (!/^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$/.test(rutBookingId)
+            || !/^[0-9a-fA-F]{64}$/.test(rutToken)) {
+            throw new Error('RUT-formuläret kunde inte öppnas säkert. Försök igen.');
+          }
+          try {
+            sessionStorage.setItem('bergaRutLink', JSON.stringify({
+              bookingId: rutBookingId,
+              token: rutToken
+            }));
+          } catch {
+            throw new Error('Webbläsaren blockerar den säkra övergången. Tillåt sessionslagring och försök igen.');
+          }
+          isLeavingPage = true;
+          window.location.assign('rut.html');
+        } catch (error) {
+          showNotice(error instanceof Error ? error.message : 'RUT-formuläret kunde inte öppnas. Försök igen.', 'error');
+        } finally {
+          if (!isLeavingPage) setBusy(false);
         }
       }
 
@@ -527,16 +579,22 @@
         }
       }
 
-      confirmButton.addEventListener('click', () => {
-        const isRetry = currentBooking?.status !== 'awaiting_confirmation';
-        runAction(
+      confirmButton.addEventListener('click', async () => {
+        const data = await runAction(
           'confirm',
           {},
-          isRetry ? 'Skickar bekräftelsemejlet igen…' : 'Bekräftar bokningen…',
-          isRetry
-            ? 'Bekräftelsemejlet med kalenderfil har skickats.'
-            : 'Bokningen är bekräftad. Ett bekräftelsemejl med kalenderfil har skickats.'
+          'Bekräftar bokningen…',
+          'Bokningen är bekräftad. Din tid är reserverad.'
         );
+        if (data?.booking?.capabilities?.canSubmitRut && !rutButton.hidden) {
+          window.setTimeout(() => {
+            rutCard.scrollIntoView({
+              behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+              block: 'center'
+            });
+            rutButton.focus({ preventScroll: true });
+          }, 0);
+        }
       });
 
       rescheduleForm.addEventListener('submit', (event) => {
@@ -569,6 +627,7 @@
 
       calendarButton.addEventListener('click', downloadCalendar);
       rebookButton.addEventListener('click', rebook);
+      rutButton.addEventListener('click', openRutForm);
 
       async function initialize() {
         if (!/^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$/.test(bookingId)

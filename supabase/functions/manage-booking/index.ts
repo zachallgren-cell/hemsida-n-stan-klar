@@ -10,9 +10,7 @@ const BOOKABLE_TIMES = new Set([
   '16:00',
   '17:00'
 ]);
-const RUT_YES = 'Ja, skicka säkert RUT-formulär via bekräftelsemejl';
-
-type ManageAction = 'details' | 'confirm' | 'cancel' | 'reschedule' | 'set_recurrence';
+type ManageAction = 'details' | 'confirm' | 'cancel' | 'reschedule' | 'set_recurrence' | 'prepare_rut';
 
 type ManagePayload = {
   action?: unknown;
@@ -45,7 +43,8 @@ type BookingRow = {
   recurrence_weeks?: number | null;
   email_confirmation_expires_at?: string | null;
   email_confirmed_at?: string | null;
-  customer_confirmation_email_sent_at?: string | null;
+  rut_submission_available?: boolean | null;
+  rut_application_status?: string | null;
   cancelled_at?: string | null;
   rescheduled_at?: string | null;
   completed_at?: string | null;
@@ -200,7 +199,7 @@ function parseAndValidatePayload(payload: ManagePayload) {
   const token = payload.token;
 
   if (typeof action !== 'string'
-    || !['details', 'confirm', 'cancel', 'reschedule', 'set_recurrence'].includes(action)
+    || !['details', 'confirm', 'cancel', 'reschedule', 'set_recurrence', 'prepare_rut'].includes(action)
     || !isValidBookingId(bookingId)
     || !isValidRawToken(token)) {
     return null;
@@ -315,7 +314,8 @@ const BOOKING_COLUMNS = [
   'recurrence_weeks',
   'email_confirmation_expires_at',
   'email_confirmed_at',
-  'customer_confirmation_email_sent_at',
+  'rut_submission_available',
+  'rut_application_status',
   'cancelled_at',
   'rescheduled_at',
   'completed_at',
@@ -370,6 +370,10 @@ function timestampSequence(values: Array<string | null | undefined>) {
   return Math.min(2_147_483_647, Math.max(0, Math.floor(latest / 1000)));
 }
 
+function isRutRequested(value: unknown) {
+  return /^ja\b/i.test(limitedText(value, 120).trim());
+}
+
 function publicBooking(row: BookingRow) {
   const status = ['awaiting_confirmation', 'pending', 'confirmed', 'completed', 'cancelled', 'expired']
     .includes(String(row.status || ''))
@@ -380,6 +384,10 @@ function publicBooking(row: BookingRow) {
     ? row.recurrence_weeks
     : null;
   const counts = parseWindowCounts(row.addons);
+  const rutRequested = isRutRequested(row.rut_choice);
+  const rutApplicationStatus = limitedText(row.rut_application_status, 30).toLowerCase();
+  const rutSubmissionReceived = Boolean(row.rut_submission_available)
+    || ['submitted', 'approved'].includes(rutApplicationStatus);
 
   return {
     id: limitedText(row.id, 80),
@@ -402,11 +410,12 @@ function publicBooking(row: BookingRow) {
     price: limitedText(row.price, 40),
     status,
     rutChoice: limitedText(row.rut_choice, 120),
+    rutRequested,
+    rutSubmissionReceived,
     recurrenceWeeks,
     confirmationExpiresAt: status === 'awaiting_confirmation'
       ? limitedText(row.email_confirmation_expires_at, 40)
       : null,
-    confirmationReceiptSent: Boolean(row.customer_confirmation_email_sent_at),
     calendarSequence: timestampSequence([
       row.email_confirmed_at,
       row.rescheduled_at,
@@ -414,16 +423,17 @@ function publicBooking(row: BookingRow) {
       row.completed_at
     ]),
     capabilities: {
-      canConfirm: (status === 'awaiting_confirmation'
+      canConfirm: status === 'awaiting_confirmation'
         && Number.isFinite(confirmationExpiry)
-        && confirmationExpiry > Date.now())
-        || (['pending', 'confirmed'].includes(status)
-          && Boolean(row.email_confirmed_at)
-          && !row.customer_confirmation_email_sent_at),
+        && confirmationExpiry > Date.now(),
       canReschedule: status === 'pending' || status === 'confirmed',
       canCancel: ['awaiting_confirmation', 'pending', 'confirmed'].includes(status),
       canSetRecurrence: ['pending', 'confirmed', 'completed'].includes(status),
       canDownloadCalendar: ['pending', 'confirmed', 'completed', 'cancelled'].includes(status),
+      canSubmitRut: rutRequested
+        && Boolean(row.email_confirmed_at)
+        && ['pending', 'confirmed', 'completed'].includes(status)
+        && !rutSubmissionReceived,
       canRebook: true
     }
   };
@@ -434,7 +444,7 @@ async function callManagementRpc(
   serviceRoleKey: string,
   bookingId: string,
   tokenHash: string,
-  action: Exclude<ManageAction, 'details'>,
+  action: Exclude<ManageAction, 'details' | 'prepare_rut'>,
   newDate: string | null,
   newTime: string | null,
   recurrenceWeeks: 8 | 12 | null
@@ -475,38 +485,18 @@ function rpcErrorResponse(result: RpcResult) {
   return jsonResponse({ ok: false, code, error: error.message }, error.status);
 }
 
-async function patchBooking(
+async function issueCustomerRutFormTokenHash(
   supabaseUrl: string,
   serviceRoleKey: string,
-  bookingId: string,
   body: Record<string, unknown>
 ) {
-  const query = new URLSearchParams({ id: `eq.${bookingId}` });
-  const response = await fetch(`${supabaseUrl}/rest/v1/bookings?${query.toString()}`, {
-    method: 'PATCH',
-    headers: serviceHeaders(serviceRoleKey, { Prefer: 'return=minimal' }),
-    body: JSON.stringify(body)
-  });
-  if (!response.ok) {
-    console.error('manage-booking update failed', { status: response.status });
-  }
-  return response.ok;
-}
-
-async function callBooleanRpc(
-  supabaseUrl: string,
-  serviceRoleKey: string,
-  functionName: 'issue_rut_form_token_hash' | 'finish_rut_form_token_email',
-  body: Record<string, unknown>
-) {
-  const response = await fetch(`${supabaseUrl}/rest/v1/rpc/${functionName}`, {
+  const response = await fetch(`${supabaseUrl}/rest/v1/rpc/issue_customer_rut_form_token_hash`, {
     method: 'POST',
     headers: serviceHeaders(serviceRoleKey),
     body: JSON.stringify(body)
   });
   if (!response.ok) {
     console.error('manage-booking RUT link RPC failed', {
-      functionName,
       status: response.status
     });
     return false;
@@ -659,16 +649,8 @@ function customerEmailHtml(
   title: string,
   intro: string,
   row: BookingRow,
-  manageUrl: string,
-  rutUrl: string | null
+  manageUrl: string
 ) {
-  const rutSection = rutUrl ? `
-    <div style="margin:22px 0;padding:18px;background:#edf8f1;border:1px solid #cce8d6;border-radius:14px;">
-      <h2 style="margin:0 0 8px;font-size:18px;color:#175d35;">Säkert RUT-formulär</h2>
-      <p style="margin:0 0 14px;color:#36584a;line-height:1.6;">Fyll i personnumret via den säkra länken. Uppgiften skickas inte i e-post.</p>
-      <a href="${escapeHtml(rutUrl)}" style="display:inline-block;padding:12px 18px;border-radius:999px;background:#237a45;color:#fff;text-decoration:none;font-weight:800;">FYLL I RUT-UPPGIFTER</a>
-    </div>` : '';
-
   return `
     <div style="margin:0;padding:28px 12px;background:#f2f6f8;font-family:Arial,Helvetica,sans-serif;color:#102d3e;">
       <div style="max-width:680px;margin:0 auto;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 12px 34px rgba(15,38,56,.10);">
@@ -679,7 +661,6 @@ function customerEmailHtml(
           <h1 style="margin:0 0 12px;font-size:28px;line-height:1.2;color:#102d3e;">${escapeHtml(title)}</h1>
           <p style="margin:0 0 20px;color:#526674;line-height:1.7;">Hej ${escapeHtml(row.customer_name)}, ${escapeHtml(intro)}</p>
           <table role="presentation" style="width:100%;border-collapse:collapse;">${bookingDetailRows(row)}</table>
-          ${rutSection}
           <div style="margin-top:22px;padding:18px;background:#fff8ec;border:1px solid #f2d298;border-radius:14px;">
             <strong>Betalning efter utfört arbete</strong>
             <p style="margin:7px 0 0;color:#665332;line-height:1.6;">När jobbet är klart får du ett separat klartmejl med belopp, Swish-nummer och referens.</p>
@@ -696,8 +677,7 @@ function customerEmailText(
   title: string,
   intro: string,
   row: BookingRow,
-  manageUrl: string,
-  rutUrl: string | null
+  manageUrl: string
 ) {
   return [
     title,
@@ -709,7 +689,6 @@ function customerEmailText(
     `Adress: ${limitedText(row.address, 300)}`,
     `Pris: ${formatPrice(row.price)}`,
     '',
-    ...(rutUrl ? ['Säkert RUT-formulär:', rutUrl, ''] : []),
     'Hantera bokningen:',
     manageUrl,
     '',
@@ -778,38 +757,27 @@ function getEmailConfig(): EmailConfig | null {
 
 async function sendCustomerChangeEmail(
   config: EmailConfig,
-  action: 'confirm' | 'reschedule' | 'cancel',
+  action: 'reschedule' | 'cancel',
   row: BookingRow,
   before: BookingRow,
-  managementToken: string,
-  rutToken: string | null
+  managementToken: string
 ) {
   if (!isValidEmail(row.email)) return false;
 
-  const content = action === 'confirm'
+  const content = action === 'reschedule'
     ? {
-        title: 'Din bokning är bekräftad',
-        intro: 'din tid är nu reserverad.',
-        subject: `Bokningen är bekräftad – ${limitedText(row.booking_date, 10)}`,
-        calendarKind: 'confirmed' as const
+        title: 'Din bokning har bokats om',
+        intro: 'vi har uppdaterat datum och tid enligt ditt val.',
+        subject: `Bokningen är ombokad – ${limitedText(row.booking_date, 10)}`,
+        calendarKind: 'rescheduled' as const
       }
-    : action === 'reschedule'
-      ? {
-          title: 'Din bokning har bokats om',
-          intro: 'vi har uppdaterat datum och tid enligt ditt val.',
-          subject: `Bokningen är ombokad – ${limitedText(row.booking_date, 10)}`,
-          calendarKind: 'rescheduled' as const
-        }
-      : {
-          title: 'Din bokning är avbokad',
-          intro: 'bokningen är nu avbokad.',
-          subject: `Bokningen är avbokad – ${limitedText(row.booking_date, 10)}`,
-          calendarKind: 'cancelled' as const
-        };
+    : {
+        title: 'Din bokning är avbokad',
+        intro: 'bokningen är nu avbokad.',
+        subject: `Bokningen är avbokad – ${limitedText(row.booking_date, 10)}`,
+        calendarKind: 'cancelled' as const
+      };
   const manageUrl = buildFragmentUrl(config.siteUrl, 'hantera-bokning.html', limitedText(row.id, 80), managementToken);
-  const rutUrl = rutToken
-    ? buildFragmentUrl(config.siteUrl, 'rut.html', limitedText(row.id, 80), rutToken)
-    : null;
   const calendar = createCalendar(row, content.calendarKind, config.contactEmail);
   const key = await eventKey(`${action}-customer`, row, before);
 
@@ -818,8 +786,8 @@ async function sendCustomerChangeEmail(
     to: [limitedText(row.email, 254)],
     reply_to: config.contactEmail,
     subject: content.subject,
-    html: customerEmailHtml(content.title, content.intro, row, manageUrl, rutUrl),
-    text: customerEmailText(content.title, content.intro, row, manageUrl, rutUrl),
+    html: customerEmailHtml(content.title, content.intro, row, manageUrl),
+    text: customerEmailText(content.title, content.intro, row, manageUrl),
     ...(calendar ? {
       attachments: [{
         filename: `berga-fonsterputs-${limitedText(row.id, 80)}.ics`,
@@ -925,6 +893,74 @@ Deno.serve(async (req) => {
       return jsonResponse({ ok: true, booking: publicBooking(before) });
     }
 
+    if (payload.action === 'prepare_rut') {
+      const booking = publicBooking(before);
+      if (!booking.rutRequested) {
+        return jsonResponse({
+          ok: false,
+          error: 'Den här bokningen är inte registrerad för RUT-avdrag.'
+        }, 409);
+      }
+      if (booking.rutSubmissionReceived) {
+        return jsonResponse({
+          ok: false,
+          error: 'RUT-underlaget är redan mottaget för den här bokningen.'
+        }, 409);
+      }
+      if (!booking.capabilities.canSubmitRut) {
+        return jsonResponse({
+          ok: false,
+          error: 'Bekräfta bokningen innan du öppnar RUT-formuläret.'
+        }, 409);
+      }
+
+      const rutToken = await sha256Hex(`berga-rut-link:v1:${payload.bookingId}:${payload.token}`);
+      const rutTokenHash = await sha256Hex(rutToken);
+      const issued = await issueCustomerRutFormTokenHash(
+        supabaseUrl,
+        serviceRoleKey,
+        {
+          p_booking_id: payload.bookingId,
+          p_management_token_hash: tokenHash,
+          p_rut_token_hash: rutTokenHash
+        }
+      );
+
+      if (!issued) {
+        const latest = await fetchVerifiedBooking(
+          supabaseUrl,
+          serviceRoleKey,
+          payload.bookingId,
+          tokenHash
+        );
+        if (latest && publicBooking(latest).rutSubmissionReceived) {
+          return jsonResponse({
+            ok: false,
+            error: 'RUT-underlaget är redan mottaget för den här bokningen.'
+          }, 409);
+        }
+        return jsonResponse({
+          ok: false,
+          error: 'RUT-formuläret kunde inte öppnas för den här bokningen.'
+        }, 409);
+      }
+
+      const refreshed = await fetchVerifiedBooking(
+        supabaseUrl,
+        serviceRoleKey,
+        payload.bookingId,
+        tokenHash
+      );
+      return jsonResponse({
+        ok: true,
+        booking: publicBooking(refreshed || before),
+        rutAccess: {
+          bookingId: payload.bookingId,
+          token: rutToken
+        }
+      });
+    }
+
     if (payload.action === 'reschedule'
       && limitedText(before.booking_date, 10) === payload.newDate
       && limitedText(before.booking_time, 5) === payload.newTime) {
@@ -975,76 +1011,29 @@ Deno.serve(async (req) => {
     const notification: {
       customerEmailSent?: boolean;
       adminEmailSent?: boolean;
-      rutLinkPrepared?: boolean;
     } = {};
     const firstMutation = rpcResult.already_done !== true;
-    const shouldSendChangeEmail = firstMutation
-      || (payload.action === 'confirm' && !before.customer_confirmation_email_sent_at);
 
-    if (shouldSendChangeEmail && ['confirm', 'reschedule', 'cancel'].includes(payload.action)) {
+    if (firstMutation && ['confirm', 'reschedule', 'cancel'].includes(payload.action)) {
       const emailConfig = getEmailConfig();
-      let rutToken: string | null = null;
-      let rutTokenHash: string | null = null;
 
       if (!emailConfig) {
         console.error('manage-booking email configuration is missing');
-        notification.customerEmailSent = false;
-        if (payload.action === 'confirm') notification.adminEmailSent = false;
-      } else {
-        if (payload.action === 'confirm' && limitedText(after.rut_choice, 120) === RUT_YES) {
-          const candidate = await sha256Hex(`berga-rut-link:v1:${payload.bookingId}:${payload.token}`);
-          const candidateHash = await sha256Hex(candidate);
-          const issued = await callBooleanRpc(
-            supabaseUrl,
-            serviceRoleKey,
-            'issue_rut_form_token_hash',
-            {
-              p_booking_id: payload.bookingId,
-              p_token_hash: candidateHash
-            }
-          );
-          notification.rutLinkPrepared = issued;
-          if (issued) {
-            rutToken = candidate;
-            rutTokenHash = candidateHash;
-          }
+        if (payload.action === 'confirm') {
+          notification.adminEmailSent = false;
+        } else {
+          notification.customerEmailSent = false;
         }
-
+      } else if (payload.action === 'confirm') {
+        notification.adminEmailSent = await sendAdminConfirmationEmail(emailConfig, after, before);
+      } else {
         notification.customerEmailSent = await sendCustomerChangeEmail(
           emailConfig,
-          payload.action as 'confirm' | 'reschedule' | 'cancel',
+          payload.action as 'reschedule' | 'cancel',
           after,
           before,
-          payload.token,
-          rutToken
+          payload.token
         );
-
-        if (payload.action === 'confirm') {
-          notification.adminEmailSent = await sendAdminConfirmationEmail(emailConfig, after, before);
-          if (rutTokenHash) {
-            const rutDeliveryFinalized = await callBooleanRpc(
-              supabaseUrl,
-              serviceRoleKey,
-              'finish_rut_form_token_email',
-              {
-                p_booking_id: payload.bookingId,
-                p_token_hash: rutTokenHash,
-                p_delivered: notification.customerEmailSent === true
-              }
-            );
-            notification.rutLinkPrepared = rutDeliveryFinalized
-              && notification.customerEmailSent === true;
-          }
-          if (notification.customerEmailSent) {
-            const sentAt = new Date().toISOString();
-            const confirmationSaved = await patchBooking(supabaseUrl, serviceRoleKey, payload.bookingId, {
-              customer_confirmation_email_sent_at: sentAt
-            });
-            if (confirmationSaved) {
-              after.customer_confirmation_email_sent_at = sentAt;
-            }
-          }
-        }
       }
     }
 

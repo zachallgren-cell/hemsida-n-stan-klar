@@ -5,10 +5,10 @@ Webbplatsens aktiva betalningsflöde använder Swish Företag. Fortnox används 
 ## Kundflöde
 
 1. Kunden bokar och väljer om RUT ska användas. `create-booking` räknar om priset på servern och skapar en reservation som måste bekräftas via mejl inom 24 timmar.
-2. Kunden bekräftar via `hantera-bokning.html`. Först då blockeras datumet och ett slutligt bokningsmejl skickas.
-3. Vid RUT innehåller det slutliga mejlet en tidsbegränsad engångslänk till `rut.html`.
+2. Kunden bekräftar via den personliga sidan `hantera-bokning.html`. Först då blockeras datumet. Inget andra bokningsmejl skickas efter bekräftelsen.
+3. Vid RUT öppnar kunden efter bekräftelsen det tidsbegränsade engångsformuläret på `rut.html` direkt från den personliga bekräftelsesidan.
 4. `submit-rut` validerar och AES-256-GCM-krypterar personnumret. Klartext sparas aldrig i `bookings`, mejl eller loggar.
-5. Kunden kan via sin fragmentbaserade hanteringslänk boka om, avboka, lägga till kalenderfil, boka samma igen och välja en frivillig påminnelse efter 8 eller 12 veckor.
+5. Kunden kan via sin fragmentbaserade hanteringslänk ladda ner en kalenderfil, boka om, avboka, boka samma igen och välja en frivillig påminnelse efter 8 eller 12 veckor.
 6. När arbetet är utfört klickar admin **Markera arbete utfört**. För ett RUT-jobb kan personnumret därefter visas kortvarigt så att den manuella fakturan kan skapas.
 7. Admin fyller i fakturareferens, faktisk arbetstid och slutliga kostnader och klickar **Klart + skicka Swish**.
 8. `complete-booking` skickar ett klartmejl med Swish Företag `123 677 43 84`, mottagare `Zac Hallgren`, exakt belopp, fakturareferens, mobilknapp och tydliga manuella betalningsuppgifter.
@@ -22,11 +22,11 @@ Fakturan skapas och skickas utanför webbplatsen. `invoice_reference` kopplar Sw
 - `create-booking` – validerar tillgänglighet, räknar pris och skickar bokningsmejl.
 - `booked-slots` – visar upptagna och spärrade datum.
 - `validate-discount` – förhandskontrollerar rabattkod.
-- `rut-booking-details` – verifierar RUT-länken utan att lämna ut kunduppgifter.
+- `rut-booking-details` – verifierar RUT-åtkomsten utan att lämna ut kunduppgifter.
 - `submit-rut` – validerar, krypterar och lagrar personnummer med en förbrukad engångstoken.
 - `admin-rut-details` – adminskyddad visning, ny engångslänk, betalningskontroll, RUT-status och gallring.
 - `complete-booking` – skickar klartmejlet med Swishuppgifterna.
-- `manage-booking` – bekräftelse, ombokning, avbokning och frivillig återkommande inbjudan med hashad kundtoken.
+- `manage-booking` – bekräftelse, säker RUT-åtkomst, ombokning, avbokning och frivillig återkommande inbjudan med hashad kundtoken.
 - `send-booking-reminders` – idempotenta 24-timmarspåminnelser och frivilliga inbjudningar efter 8 eller 12 veckor.
 - `request-photo-quote` – tar emot högst tre validerade bilder och vidarebefordrar dem som mejlbilagor utan permanent bildlagring.
 
@@ -40,7 +40,7 @@ Kör alla migrationer, inklusive:
 supabase db push
 ```
 
-Migrationerna `20260715000000_secure_manual_rut.sql`, `20260715010000_restrict_rut_link_reissue.sql`, `20260715020000_finalize_rut_security.sql` och `20260715030000_complete_booking_platform.sql`:
+Migrationerna `20260715000000_secure_manual_rut.sql`, `20260715010000_restrict_rut_link_reissue.sql`, `20260715020000_finalize_rut_security.sql`, `20260715030000_complete_booking_platform.sql` och `20260720010000_rut_on_confirmation_page.sql`:
 
 - hash-lagrar RUT-token och sätter 30 dagars giltighetstid
 - skapar den låsta tabellen `rut_submissions`
@@ -53,6 +53,7 @@ Migrationerna `20260715000000_secure_manual_rut.sql`, `20260715010000_restrict_r
 - spärrar direkta adminuppdateringar av betalnings-, RUT- och tokenfält; statusändringar går via kontrollerade serverfunktioner
 - låter bara mejlbekräftade bokningar blockera ett datum och förhindrar dubbla aktiva bokningar
 - skapar hashade kundlänkar, säkra om-/avbokningar, rate limiting och automatiska påminnelsejobb
+- öppnar kundens RUT-formulär först efter mejlbekräftelsen och kontrollerar bokningsstatus atomiskt när underlaget sparas
 
 `rut_submissions` saknar åtkomst för `anon` och `authenticated`. Endast serverfunktioner med service role får läsa eller ändra tabellen.
 
