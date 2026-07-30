@@ -1,5 +1,71 @@
 # Bokning, Swish och manuell RUT
 
+## BERGA PUTS-GP
+
+Tävlingsfunktionen ligger i `puts-gp/` och är avgränsad från bokningsflödet.
+
+### Lokal start och verifiering
+
+Den publika sidan öppnas via `puts-gp/index.html`, TV-vyn via `puts-gp/live/` och
+den MFA-skyddade tävlingsadminen via `puts-gp/admin/`. Kör exempelvis en lokal
+statisk server från projektroten och öppna dessa adresser. Kontrollera koden med:
+
+```bash
+npm run lint
+npm test
+supabase db push --dry-run --linked
+```
+
+### Databas och admin
+
+Kör migrationerna med `supabase db push` efter granskning. Lägg den person som
+ska administrera tävlingen i befintliga `public.admin_users` och kontrollera att
+personen har en verifierad TOTP-faktor. Tävlingsadminen accepterar endast AAL2.
+Skrivningar går genom Edge Function `puts-gp-admin`, som ska deployas efter
+migreringen:
+
+```bash
+supabase functions deploy puts-gp-admin
+```
+
+Testdata finns i `supabase/seed_puts_gp.sql` och får endast köras mot lokal- eller
+utvecklingsdatabas. Den skapar 15 fiktiva deltagare.
+
+### Sekretess, bilder och resultatlänkar
+
+Telefonnummer, fullständigt namn, födelseår, samtycken och adminanteckningar
+finns bara i RLS-skyddade tabeller. Den publika leaderboard-vyn och resultat-RPC:n
+returnerar aldrig dessa fält. Deltagarbilder ska vara JPEG eller WebP och högst
+3 MB. De ska beskäras/komprimeras i adminflödet före uppladdning till den publika
+bucketen `puts-gp-public-photos`, och får bara få en publik URL när bildsamtycke
+är registrerat.
+
+Resultatkort använder den svårgissade tokenlänken
+`/puts-gp/resultat.html?t=<uuid>`. GitHub Pages saknar route-rewrites, därför
+används frågeparameter i stället för en dynamisk katalog per token.
+
+### Tävlingsdagen
+
+1. Skapa dagens event i tävlingsadminen och välj **Starta tävling**.
+2. Registrera deltagare och välj en person från kön.
+3. Space startar nedräkning och stoppar bara ett redan aktivt försök.
+4. Ange straff, förhandsgranska, publicera och dela resultatkortet.
+5. Välj **Pausa** vid avbrott och **Avsluta dagen** när eventet är klart.
+6. Exportera CSV från adminen. Återställning inför nytt event sker genom att skapa
+   ett nytt event – historiska event ska inte raderas.
+
+Vid internetavbrott sparar adminen det aktiva försöket lokalt. Skriv också ned rå
+tid manuellt som reserv. Publicera aldrig ett osynkroniserat resultat förrän
+anslutningen är tillbaka; TV- och mobilvyn återansluter/pollar automatiskt.
+
+### Ljud och drönarfilm
+
+Ljudplatser ska ligga under `puts-gp/assets/sounds/` med namnen
+`countdown.wav`, `start.wav`, `stop.wav`, `published.wav`, `record.wav` och
+`podium.wav`. Byt dem mot lokala, licensierade WAV-filer före eventet och testa
+ljud i webbläsaren innan TV-vyn öppnas. Drönarfil eller videolänk anges i
+eventets `settings.droneVideoUrl`; den ska vara ljudlös som standard.
+
 Webbplatsens aktiva betalningsflöde använder Swish Företag. Fortnox används inte för RUT och Stripe används inte för nya betalningar.
 
 ## Kundflöde
@@ -71,6 +137,10 @@ Följande behöver finnas i Supabase:
 - `BOOKING_RUT_FORM_URL=https://bergafonsterputs.se/rut.html` (valfri eftersom samma adress används som standard)
 - `BOOKING_REVIEW_URL` (valfri)
 - `RUT_ENCRYPTION_KEY` – unik 32-byte-nyckel, helst 64 hextecken
+- `CLARITY_API_TOKEN` – roterad Data Export-token, endast i Edge Functions
+- `CLARITY_PROJECT_ID=xogpsbqaar`
+- `CLARITY_API_BASE_URL=https://www.clarity.ms/export-data/api/v1`
+- `CLARITY_CRON_SECRET` – samma slumpvärde som Vault-hemligheten `clarity_cron_secret`
 
 Skapa en ny krypteringsnyckel utan att skriva in den i Git:
 
@@ -97,7 +167,10 @@ supabase functions deploy complete-booking
 supabase functions deploy manage-booking
 supabase functions deploy send-booking-reminders
 supabase functions deploy request-photo-quote
+supabase functions deploy clarity-analytics
 ```
+
+Se `CLARITY_ANALYTICS.md` för API-begränsningar, säker aktivering, cache, retention och adminrapport.
 
 Kontrollera efter migreringen att cron-jobbet skapades:
 

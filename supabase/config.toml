@@ -29,3 +29,9 @@ verify_jwt = false
 
 [functions.send-booking-reminders]
 verify_jwt = false
+
+[functions.clarity-analytics]
+verify_jwt = false
+
+[functions.puts-gp-admin]
+verify_jwt = false

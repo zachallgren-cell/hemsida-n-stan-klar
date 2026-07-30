@@ -37,6 +37,7 @@ type BookingPayload = {
   utmCampaign?: string;
   utmContent?: string;
   utmTerm?: string;
+  attributionRef?: string;
   landingPage?: string;
   message?: string;
   price?: number | string;
@@ -682,6 +683,7 @@ Deno.serve(async (req) => {
       utm_campaign: normalizeAttribution(payload.utmCampaign),
       utm_content: normalizeAttribution(payload.utmContent),
       utm_term: normalizeAttribution(payload.utmTerm),
+      attribution_ref: payload.attributionRef === 'referral' ? 'referral' : null,
       landing_page: normalizeAttribution(payload.landingPage),
       consent_accepted: true,
       status: 'awaiting_confirmation',
