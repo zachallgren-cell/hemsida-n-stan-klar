@@ -46,7 +46,7 @@ Deno.serve(async (req) => {
         ...requestHeaders
       }
     });
-    const capacityOverridesRes = await fetch(`${supabaseUrl}/rest/v1/booking_capacity_overrides?select=booking_date`, { headers: requestHeaders });
+    const capacityOverridesRes = await fetch(`${supabaseUrl}/rest/v1/booking_capacity_overrides?select=booking_date,extra_bookings`, { headers: requestHeaders });
 
     if (!bookingsRes.ok) {
       const errorText = await bookingsRes.text();
@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
         date: blockedDate.blocked_date || '',
         reason: blockedDate.reason || ''
       })),
-      capacityOverrideDates: capacityOverrides.map((override: Record<string, unknown>) => override.booking_date || '')
+      capacityOverrides: capacityOverrides.map((override: Record<string, unknown>) => ({ date: override.booking_date || '', extraBookings: override.extra_bookings || 1 }))
     });
   } catch (error) {
     console.error('Unhandled booked-slots error', error);

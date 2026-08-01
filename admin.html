@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="admin-analytics.css?v=20260721">
   <meta name="robots" content="noindex, nofollow">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-muiM/pdof9RjUzPzvY/VRJQq8tU24+QsO+jrFIKZV7o='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-0fSRTnd37LRO1MgHHDEj/ZHmimWIJzf+jJn/EBhejxM='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
   <link rel="shortcut icon" href="/favicon-48.png" />
@@ -1571,7 +1571,7 @@
             <strong>${escapeHtml(formatDate(booking.booking_date))}</strong>
             <span>${escapeHtml(booking.customer_name || 'Kundbokning')} · ${escapeHtml(booking.booking_time || 'Tid ej angiven')}</span>
           </div>
-          <div class="button-stack"><button type="button" class="button button-secondary action-open-booking">Öppna bokning</button><button type="button" class="button button-primary action-open-capacity">Öppna för fler</button></div>
+          <div class="button-stack"><button type="button" class="button button-secondary action-open-booking">Öppna bokning</button><label>Extra bokningar <select class="extra-bookings-select"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></label><button type="button" class="button button-primary action-open-capacity">Öppna för fler</button></div>
         </div>
       `).join('');
     }
@@ -2164,13 +2164,15 @@
       const target = event.target;
       if (!(target instanceof HTMLElement)) return;
       if (target.classList.contains('action-open-capacity')) {
-        const date = target.closest('[data-booking-date]')?.dataset.bookingDate;
+        const row = target.closest('[data-booking-date]');
+        const date = row?.dataset.bookingDate;
+        const extraBookings = Number(row?.querySelector('.extra-bookings-select')?.value) || 1;
         if (!date || !window.confirm('Öppna datumet för fler bokningar? Den befintliga kundbokningen behålls.')) return;
         target.setAttribute('disabled', 'disabled');
         const { data: sessionData } = await supabase.auth.getSession();
-        const { error } = await supabase.from('booking_capacity_overrides').upsert({ booking_date: date, reason: 'Öppnad för fler bokningar i admin', created_by: sessionData.session?.user?.id || null }, { onConflict: 'booking_date' });
+        const { error } = await supabase.from('booking_capacity_overrides').upsert({ booking_date: date, extra_bookings: extraBookings, reason: 'Öppnad för fler bokningar i admin', created_by: sessionData.session?.user?.id || null }, { onConflict: 'booking_date' });
         if (error) { setBlockedDateMessage(`Kunde inte öppna datumet: ${error.message}`, 'error'); target.removeAttribute('disabled'); return; }
-        setBlockedDateMessage('Datumet är öppet för fler bokningar. Den befintliga bokningen ligger kvar.', 'success');
+        setBlockedDateMessage(`Datumet är öppet för ${extraBookings} extra bokning${extraBookings === 1 ? '' : 'ar'}. Den befintliga bokningen ligger kvar.`, 'success');
         await fetchFullyBookedDates();
         return;
       }

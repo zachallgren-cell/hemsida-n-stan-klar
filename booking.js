@@ -102,7 +102,7 @@
   let selectedTime = '';
   let bookingsCache = [];
   let blockedDatesCache = [];
-  let capacityOverrideDatesCache = [];
+  let capacityOverridesCache = [];
   let calendarReady = false;
   let appliedDiscount = null;
   let rebookedFromBookingId = '';
@@ -354,7 +354,7 @@
   }
 
   function normalizeBookingData(data) {
-    if (!data || !Array.isArray(data.bookings) || !Array.isArray(data.blockedDates) || !Array.isArray(data.capacityOverrideDates)) {
+    if (!data || !Array.isArray(data.bookings) || !Array.isArray(data.blockedDates) || !Array.isArray(data.capacityOverrides)) {
       throw new Error('Kalendern gav ett oväntat svar.');
     }
     const bookings = data.bookings
@@ -369,8 +369,8 @@
         reason: typeof blockedDate?.reason === 'string' ? blockedDate.reason.slice(0, 160) : ''
       }))
       .filter((blockedDate) => /^\d{4}-\d{2}-\d{2}$/.test(blockedDate.date));
-    const capacityOverrideDates = data.capacityOverrideDates.filter((date) => /^\d{4}-\d{2}-\d{2}$/.test(String(date)));
-    return { bookings, blockedDates, capacityOverrideDates };
+    const capacityOverrides = data.capacityOverrides.filter((item) => /^\d{4}-\d{2}-\d{2}$/.test(String(item?.date)));
+    return { bookings, blockedDates, capacityOverrides };
   }
 
   function getBookedTimes(date) {
@@ -381,8 +381,9 @@
     return blockedDatesCache.find((blockedDate) => blockedDate.date === date) || null;
   }
 
-  function hasCapacityOverride(date) {
-    return capacityOverrideDatesCache.includes(date);
+  function getCapacity(date) {
+    const override = capacityOverridesCache.find((item) => item.date === date);
+    return 1 + (override ? Math.min(3, Math.max(1, Number(override.extraBookings) || 1)) : 0);
   }
 
   function isDateWithinBookableRange(date) {
@@ -390,7 +391,7 @@
   }
 
   function isFullyBooked(date) {
-    return (getBookedTimes(date).length > 0 && !hasCapacityOverride(date)) || Boolean(getBlockedDate(date));
+    return getBookedTimes(date).length >= getCapacity(date) || Boolean(getBlockedDate(date));
   }
 
   function isDateSelectable(date) {
@@ -518,7 +519,7 @@
       const tooSoon = !past && date < minBookableString;
       const tooLate = date > lastBookableString;
       const blocked = Boolean(getBlockedDate(date));
-      const booked = getBookedTimes(date).length > 0 && !hasCapacityOverride(date);
+      const booked = getBookedTimes(date).length >= getCapacity(date);
       const selectable = calendarReady && !past && !tooSoon && !tooLate && !blocked && !booked;
 
       if (date === todayString) {
@@ -591,7 +592,7 @@
     calendarReady = false;
     bookingsCache = [];
     blockedDatesCache = [];
-    capacityOverrideDatesCache = [];
+    capacityOverridesCache = [];
     firstAvailableCalendarMonth = new Date(firstCalendarMonth);
     setCalendarState('loading', 'Kontrollerar lediga dagar…');
     renderCalendar();
@@ -610,7 +611,7 @@
       const normalized = normalizeBookingData(await response.json());
       bookingsCache = normalized.bookings;
       blockedDatesCache = normalized.blockedDates;
-      capacityOverrideDatesCache = normalized.capacityOverrideDates;
+      capacityOverridesCache = normalized.capacityOverrides;
       calendarReady = true;
       setCalendarState('ready', 'Kalendern är uppdaterad. Välj en ledig dag.');
       applyAvailableInitialSelection();

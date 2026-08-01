@@ -588,7 +588,7 @@ Deno.serve(async (req) => {
     }
 
     const capacityOverrideRes = await fetchSupabaseRows(
-      `${supabaseUrl}/rest/v1/booking_capacity_overrides?select=id&booking_date=eq.${encodeURIComponent(payload.date)}&limit=1`,
+      `${supabaseUrl}/rest/v1/booking_capacity_overrides?select=extra_bookings&booking_date=eq.${encodeURIComponent(payload.date)}&limit=1`,
       serviceRoleKey
     );
     if (!capacityOverrideRes.ok) {
@@ -596,10 +596,11 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'Could not check booking availability' }, 500);
     }
     const capacityOverrides = await capacityOverrideRes.json();
-    const allowsExtraBookings = Array.isArray(capacityOverrides) && capacityOverrides.length > 0;
+    const extraBookings = Array.isArray(capacityOverrides) && capacityOverrides.length
+      ? Math.min(3, Math.max(1, Number(capacityOverrides[0]?.extra_bookings) || 1)) : 0;
 
     const existingBookingRes = await fetchSupabaseRows(
-      `${supabaseUrl}/rest/v1/bookings?select=id&booking_date=eq.${encodeURIComponent(payload.date)}&status=in.(pending,confirmed)&limit=1`,
+      `${supabaseUrl}/rest/v1/bookings?select=id&booking_date=eq.${encodeURIComponent(payload.date)}&status=in.(pending,confirmed)&limit=4`,
       serviceRoleKey
     );
 
@@ -609,7 +610,7 @@ Deno.serve(async (req) => {
     }
 
     const existingBookings = await existingBookingRes.json();
-    if (Array.isArray(existingBookings) && existingBookings.length && !allowsExtraBookings) {
+    if (Array.isArray(existingBookings) && existingBookings.length >= 1 + extraBookings) {
       return jsonResponse({ error: 'Det valda datumet är redan bokat. Välj en annan dag.' }, 409);
     }
 
