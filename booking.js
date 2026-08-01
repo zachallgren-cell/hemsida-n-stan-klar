@@ -8,6 +8,7 @@
   const BOOKED_SLOTS_FUNCTION_URL = `${SUPABASE_FUNCTIONS_URL}/booked-slots`;
   const AVAILABILITY_TIMEOUT_MS = 20_000;
   const BOOKABLE_TIMES = ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
+  const WEEKDAY_BOOKABLE_TIMES = ['16:00', '17:00'];
   const MONTH_NAMES = ['januari', 'februari', 'mars', 'april', 'maj', 'juni', 'juli', 'augusti', 'september', 'oktober', 'november', 'december'];
   const DRAFT_KEY = 'bergaBookingDraft';
   const CONFIRMATION_KEY = 'bergaBookingConfirmation';
@@ -140,6 +141,51 @@
     return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
   }
 
+  function getEasterSunday(year) {
+    const a = year % 19;
+    const b = Math.floor(year / 100);
+    const c = year % 100;
+    const d = Math.floor(b / 4);
+    const e = b % 4;
+    const f = Math.floor((b + 8) / 25);
+    const g = Math.floor((b - f + 1) / 3);
+    const h = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4);
+    const k = c % 4;
+    const l = (32 + 2 * e + 2 * i - h - k) % 7;
+    const m = Math.floor((a + 11 * h + 22 * l) / 451);
+    const month = Math.floor((h + l - 7 * m + 114) / 31);
+    const day = ((h + l - 7 * m + 114) % 31) + 1;
+    return new Date(Date.UTC(year, month - 1, day, 12));
+  }
+
+  function dateStringFromUtc(date) {
+    return date.toISOString().slice(0, 10);
+  }
+
+  function offsetDateString(date, days) {
+    const result = new Date(date);
+    result.setUTCDate(result.getUTCDate() + days);
+    return dateStringFromUtc(result);
+  }
+
+  function isSwedishPublicHoliday(dateString) {
+    const year = Number(dateString.slice(0, 4));
+    const easter = getEasterSunday(year);
+    return new Set([
+      `${year}-01-01`, `${year}-01-06`, `${year}-05-01`, `${year}-06-06`,
+      `${year}-12-25`, `${year}-12-26`,
+      offsetDateString(easter, -2), offsetDateString(easter, 0),
+      offsetDateString(easter, 1), offsetDateString(easter, 39), offsetDateString(easter, 49)
+    ]).has(dateString);
+  }
+
+  function getBookableTimes(dateString) {
+    const date = new Date(`${dateString}T12:00:00Z`);
+    const weekend = date.getUTCDay() === 0 || date.getUTCDay() === 6;
+    return weekend || isSwedishPublicHoliday(dateString) ? BOOKABLE_TIMES : WEEKDAY_BOOKABLE_TIMES;
+  }
+
   function formatDateForDisplay(dateString) {
     const dateObject = new Date(`${dateString}T12:00:00`);
     if (Number.isNaN(dateObject.getTime())) return dateString;
@@ -260,7 +306,7 @@
     const draftStep = Number(draft.currentStep);
     desiredInitialStep = Number.isInteger(draftStep) && draftStep >= 1 && draftStep <= 4 ? draftStep : 1;
     selectedDate = /^\d{4}-\d{2}-\d{2}$/.test(String(draft.date || '')) ? String(draft.date) : '';
-    selectedTime = BOOKABLE_TIMES.includes(String(draft.time || '')) ? String(draft.time) : '';
+    selectedTime = getBookableTimes(selectedDate).includes(String(draft.time || '')) ? String(draft.time) : '';
     setCheckedValue('rutChoice', draft.rutChoice);
     setCheckedValue('housingType', draft.housingType);
     setWindowCountValue(Number(draft.regularWindowCount), false);
@@ -330,7 +376,7 @@
     if (!hasQuerySelection) return;
 
     selectedDate = /^\d{4}-\d{2}-\d{2}$/.test(queryDate) ? queryDate : '';
-    selectedTime = BOOKABLE_TIMES.includes(queryTime) ? queryTime : '';
+    selectedTime = getBookableTimes(selectedDate).includes(queryTime) ? queryTime : '';
     desiredInitialStep = selectedDate && selectedTime ? Math.max(desiredInitialStep, 2) : 1;
   }
 
@@ -447,7 +493,7 @@
   }
 
   function selectBookingTime(time) {
-    if (!isDateSelectable(selectedDate) || !BOOKABLE_TIMES.includes(time)) return;
+    if (!isDateSelectable(selectedDate) || !getBookableTimes(selectedDate).includes(time)) return;
     selectedTime = time;
     clearDateTimeError();
     updateSelectedDateBox();
@@ -460,7 +506,7 @@
     timeSlots.replaceChildren();
     if (!calendarReady || !selectedDate) return;
 
-    BOOKABLE_TIMES.forEach((time) => {
+    getBookableTimes(selectedDate).forEach((time) => {
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'time-slot';
@@ -584,7 +630,7 @@
     }
 
     currentCalendarMonth = new Date(dateObject.getFullYear(), dateObject.getMonth(), 1, 12);
-    if (!BOOKABLE_TIMES.includes(selectedTime)) selectedTime = '';
+    if (!getBookableTimes(selectedDate).includes(selectedTime)) selectedTime = '';
     if (!selectedTime) desiredInitialStep = 1;
   }
 
@@ -917,7 +963,7 @@
     if (!calendarReady) message = 'Vänta tills kalendern har laddats eller försök igen.';
     else if (!selectedDate) message = 'Välj en ledig dag i kalendern.';
     else if (!isDateSelectable(selectedDate)) message = 'Den valda dagen är inte längre ledig. Välj en annan dag.';
-    else if (!selectedTime || !BOOKABLE_TIMES.includes(selectedTime)) message = 'Välj en starttid för besöket.';
+    else if (!selectedTime || !getBookableTimes(selectedDate).includes(selectedTime)) message = 'Välj en starttid för besöket.';
     if (!message) return true;
 
     dateTimeError.textContent = message;
