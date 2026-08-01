@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin | Berga Fönsterputs</title>
+  <link rel="stylesheet" href="admin-analytics.css?v=20260721">
   <meta name="robots" content="noindex, nofollow">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-mLLQjuYrBUiFNnGf5jS3vil20DbQ5cVOytPSqkhGUL8='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-fxMLuYpO4iWn+IwKV0sB+b8WfocN86iLDYJE+42Lp94='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
   <link rel="shortcut icon" href="/favicon-48.png" />
@@ -940,13 +941,14 @@
 
       <nav class="admin-tabs hidden" id="adminTabs" aria-label="Adminvyer">
         <button type="button" class="admin-tab is-active" data-admin-view="bookings">Bokningar</button>
-        <button type="button" class="admin-tab" data-admin-view="blockedDates">Semesterdagar</button>
+        <button type="button" class="admin-tab" data-admin-view="blockedDates">Spärrade dagar</button>
         <button type="button" class="admin-tab" data-admin-view="discountCodes">Rabattkoder</button>
+        <button type="button" class="admin-tab" data-admin-view="analytics">Analys</button>
       </nav>
 
       <section class="card panel hidden" id="blockedDatesPanel">
-        <h2>Semesterdagar</h2>
-        <p>Lägg in ett datum eller ett intervall som inte ska kunna bokas. De spärras både i kalendern och när bokningen skickas.</p>
+        <h2>Spärrade dagar</h2>
+        <p>Hantera manuellt spärrade eller fullbokade dagar. Du kan avblockera en dag här så att den blir bokningsbar igen. Befintliga bekräftade bokningar håller fortfarande sitt datum spärrat.</p>
         <form class="admin-form" id="blockedDateForm">
           <div class="date-range-grid">
             <label>
@@ -1015,10 +1017,52 @@
         </div>
         <div class="bookings-list" id="bookingsList"></div>
       </section>
+
+      <section class="card panel hidden" id="analyticsPanel">
+        <div class="analytics-toolbar">
+          <div>
+            <h2>Clarity-analys</h2>
+            <p>Beslutsunderlag från aggregerade snapshots. Clarity-data är signaler, inte absolut sanning.</p>
+          </div>
+          <div class="analytics-actions">
+            <button type="button" class="button button-secondary" id="analyticsTest">Testa API</button>
+            <button type="button" class="button button-secondary" id="analyticsRefresh">Hämta ny data</button>
+          </div>
+        </div>
+        <div class="analytics-periods" aria-label="Snabbval för period">
+          <button type="button" class="button button-secondary" data-analytics-days="7" aria-pressed="true">7 dagar</button>
+          <button type="button" class="button button-secondary" data-analytics-days="14" aria-pressed="false">14 dagar</button>
+          <button type="button" class="button button-secondary" data-analytics-days="30" aria-pressed="false">30 dagar</button>
+        </div>
+        <div class="analytics-date-range">
+          <label>Från <input type="date" id="analyticsStart"></label>
+          <label>Till <input type="date" id="analyticsEnd"></label>
+          <button type="button" class="button button-primary" id="analyticsApply">Visa period</button>
+        </div>
+        <p class="analytics-status" id="analyticsStatus" role="status" aria-live="polite">Välj period för att hämta analys.</p>
+        <p id="analyticsFreshness"></p>
+
+        <div class="analytics-metrics">
+          <div class="analytics-metric"><span>Sessioner</span><strong id="analyticsSessions">–</strong><small id="analyticsSessionsDetail">–</small></div>
+          <div class="analytics-metric"><span>Användare</span><strong id="analyticsUsers">–</strong><small id="analyticsUsersDetail">–</small></div>
+          <div class="analytics-metric"><span>Mobilandel</span><strong id="analyticsMobile">–</strong><small id="analyticsMobileDetail">–</small></div>
+          <div class="analytics-metric"><span>Slutförda bokningar</span><strong id="analyticsBookings">–</strong><small id="analyticsBookingsDetail">–</small></div>
+          <div class="analytics-metric"><span>Konverteringsgrad</span><strong id="analyticsConversion">–</strong><small id="analyticsConversionDetail">–</small></div>
+          <div class="analytics-metric"><span>Bokningsfel</span><strong id="analyticsErrors">–</strong><small id="analyticsErrorsDetail">–</small></div>
+        </div>
+
+        <div class="analytics-grid">
+          <section class="analytics-card"><h3>Trafikkällor</h3><div id="analyticsSources"></div></section>
+          <section class="analytics-card"><h3>Enheter</h3><div id="analyticsDevices"></div></section>
+        </div>
+        <section class="analytics-card"><h3>Viktigaste beteendesignaler</h3><div class="analytics-issues" id="analyticsIssues"></div></section>
+        <section class="analytics-card analytics-limitations"><h3>API-begränsningar</h3><ul id="analyticsLimitations"></ul></section>
+      </section>
     </section>
   </main>
 
   <script src="vendor/supabase-js-2.110.1.umd.min.js" integrity="sha384-baNpjjkY1KK3WRj5l8Fkp2P/pd/wQ4dXsejAvxqNeBEugKB7WLjHXreLejokZekT" crossorigin="anonymous"></script>
+  <script src="admin-analytics.js?v=20260721"></script>
   <script type="module">
     const { createClient } = window.supabase;
 
@@ -1026,6 +1070,7 @@
     const SUPABASE_ANON_KEY = 'sb_publishable_MUKxAwv0vNXDrcgumq81fQ_Uvx4eOuq';
     const COMPLETE_BOOKING_URL = `${SUPABASE_URL}/functions/v1/complete-booking`;
     const ADMIN_RUT_DETAILS_URL = `${SUPABASE_URL}/functions/v1/admin-rut-details`;
+    const CLARITY_ANALYTICS_URL = `${SUPABASE_URL}/functions/v1/clarity-analytics`;
     const SWISH_NUMBER_DISPLAY = '123 677 43 84';
     const SWISH_RECIPIENT_NAME = 'Zac Hallgren';
 
@@ -1042,6 +1087,7 @@
     const blockedDatesPanel = document.getElementById('blockedDatesPanel');
     const discountCodesPanel = document.getElementById('discountCodesPanel');
     const bookingsPanel = document.getElementById('bookingsPanel');
+    const analyticsPanel = document.getElementById('analyticsPanel');
     const loginForm = document.getElementById('loginForm');
     const loginButton = document.getElementById('loginButton');
     const loginMessage = document.getElementById('loginMessage');
@@ -1075,6 +1121,11 @@
     const discountCodeMessage = document.getElementById('discountCodeMessage');
     const discountCodesList = document.getElementById('discountCodesList');
     let activeAdminView = 'bookings';
+    const analyticsController = window.bergaAdminAnalytics.init({
+      supabase,
+      endpoint: CLARITY_ANALYTICS_URL,
+      anonKey: SUPABASE_ANON_KEY
+    });
     let verifiedMfaFactorId = '';
     let pendingMfaFactorId = '';
 
@@ -1137,9 +1188,11 @@
       const showBookings = activeAdminView === 'bookings';
       const showBlockedDates = activeAdminView === 'blockedDates';
       const showDiscountCodes = activeAdminView === 'discountCodes';
+      const showAnalytics = activeAdminView === 'analytics';
       bookingsPanel.classList.toggle('hidden', !showBookings);
       blockedDatesPanel.classList.toggle('hidden', !showBlockedDates);
       discountCodesPanel.classList.toggle('hidden', !showDiscountCodes);
+      analyticsPanel.classList.toggle('hidden', !showAnalytics);
 
       adminTabs.querySelectorAll('.admin-tab').forEach((button) => {
         button.classList.toggle('is-active', button.dataset.adminView === activeAdminView);
@@ -1497,7 +1550,7 @@
             <strong>${escapeHtml(formatDate(blockedDate.blocked_date))}</strong>
             <span>${escapeHtml(blockedDate.reason || 'Ingen orsak angiven')}</span>
           </div>
-          <button type="button" class="button button-danger action-delete-blocked-date">Ta bort</button>
+          <button type="button" class="button button-secondary action-delete-blocked-date">Avblockera</button>
         </div>
       `).join('');
     }
@@ -1618,8 +1671,12 @@
     }
 
     async function deleteBlockedDate(id, button) {
+      if (!window.confirm('Avblockera den här dagen? Den blir bokningsbar igen om det inte redan finns en aktiv bokning den dagen.')) {
+        return;
+      }
+
       button.disabled = true;
-      setBlockedDateMessage('Tar bort spärrat datum...');
+      setBlockedDateMessage('Avblockerar datum...');
 
       const { error } = await supabase
         .from('booking_blocked_dates')
@@ -1632,7 +1689,7 @@
         return;
       }
 
-      setBlockedDateMessage('Datumet är bokbart igen.', 'success');
+      setBlockedDateMessage('Datumet har avblockerats. Det är bokbart igen om ingen aktiv bokning finns den dagen.', 'success');
       await fetchBlockedDates();
     }
 
@@ -2269,6 +2326,9 @@
       if (activeAdminView === 'discountCodes') {
         await fetchDiscountCodes();
       }
+      if (activeAdminView === 'analytics') {
+        await analyticsController.load();
+      }
     });
 
     refreshButton.addEventListener('click', async () => {
@@ -2279,6 +2339,11 @@
 
       if (activeAdminView === 'discountCodes') {
         await fetchDiscountCodes();
+        return;
+      }
+
+      if (activeAdminView === 'analytics') {
+        await analyticsController.refresh();
         return;
       }
 
@@ -2314,6 +2379,7 @@
         bookingsPanel.classList.add('hidden');
         blockedDatesPanel.classList.add('hidden');
         discountCodesPanel.classList.add('hidden');
+        analyticsPanel.classList.add('hidden');
         await prepareMfaPanel();
       } else {
         hideAllRutNumbers();
@@ -2323,6 +2389,7 @@
         bookingsPanel.classList.add('hidden');
         blockedDatesPanel.classList.add('hidden');
         discountCodesPanel.classList.add('hidden');
+        analyticsPanel.classList.add('hidden');
       }
     }
 
