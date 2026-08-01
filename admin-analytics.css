@@ -1,0 +1,50 @@
+.analytics-toolbar,
+.analytics-periods,
+.analytics-date-range,
+.analytics-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: end;
+}
+
+.analytics-toolbar { justify-content: space-between; margin-bottom: 18px; }
+.analytics-date-range label { display: grid; gap: 5px; font-weight: 700; }
+.analytics-periods .button[aria-pressed="true"] { background: #0b6fa4; color: #fff; }
+.analytics-status { padding: 12px; border-radius: 12px; background: #edf7fc; margin: 12px 0; }
+.analytics-status[data-state="error"] { color: #8b1f1f; background: #fff0f0; }
+.analytics-status[data-state="success"] { color: #17633a; background: #edfaf2; }
+
+.analytics-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.analytics-metric { border: 1px solid #d8e5ec; border-radius: 14px; padding: 14px; background: #fff; }
+.analytics-metric span { display: block; color: #607381; font-size: .88rem; }
+.analytics-metric strong { display: block; margin-top: 5px; font-size: 1.45rem; color: #0f2638; }
+.analytics-metric small { display: block; margin-top: 4px; color: #607381; }
+
+.analytics-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.analytics-card { border: 1px solid #d8e5ec; border-radius: 14px; padding: 16px; background: #fff; }
+.analytics-card h3 { margin-top: 0; }
+.analytics-table { width: 100%; border-collapse: collapse; }
+.analytics-table th, .analytics-table td { padding: 8px 4px; border-bottom: 1px solid #e5edf2; text-align: left; }
+.analytics-table th:last-child, .analytics-table td:last-child { text-align: right; }
+.analytics-issues { display: grid; gap: 12px; }
+.analytics-issue { border-left: 4px solid #7b8d98; padding: 12px 14px; background: #f7fafb; border-radius: 8px; }
+.analytics-issue[data-status="confirmed"] { border-left-color: #a33131; }
+.analytics-issue[data-status="hypothesis"] { border-left-color: #c07613; }
+.analytics-issue dl { display: grid; grid-template-columns: minmax(120px, .35fr) 1fr; gap: 5px 12px; margin: 10px 0 0; }
+.analytics-issue dt { font-weight: 800; }
+.analytics-issue dd { margin: 0; }
+.analytics-limitations { color: #516875; }
+
+@media (max-width: 760px) {
+  .analytics-grid { grid-template-columns: 1fr; }
+  .analytics-date-range { width: 100%; }
+  .analytics-date-range label { flex: 1 1 130px; }
+  .analytics-issue dl { grid-template-columns: 1fr; }
+}

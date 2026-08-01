@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="admin-analytics.css?v=20260721">
   <meta name="robots" content="noindex, nofollow">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-fxMLuYpO4iWn+IwKV0sB+b8WfocN86iLDYJE+42Lp94='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Hjq1ytW7/x+c0jml4FneFjWieQVIpP7YU/vn/urHksc='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
   <link rel="shortcut icon" href="/favicon-48.png" />
@@ -1121,11 +1121,11 @@
     const discountCodeMessage = document.getElementById('discountCodeMessage');
     const discountCodesList = document.getElementById('discountCodesList');
     let activeAdminView = 'bookings';
-    const analyticsController = window.bergaAdminAnalytics.init({
+    const analyticsController = window.bergaAdminAnalytics?.init?.({
       supabase,
       endpoint: CLARITY_ANALYTICS_URL,
       anonKey: SUPABASE_ANON_KEY
-    });
+    }) || null;
     let verifiedMfaFactorId = '';
     let pendingMfaFactorId = '';
 
@@ -2326,7 +2326,7 @@
       if (activeAdminView === 'discountCodes') {
         await fetchDiscountCodes();
       }
-      if (activeAdminView === 'analytics') {
+      if (activeAdminView === 'analytics' && analyticsController) {
         await analyticsController.load();
       }
     });
@@ -2342,7 +2342,7 @@
         return;
       }
 
-      if (activeAdminView === 'analytics') {
+      if (activeAdminView === 'analytics' && analyticsController) {
         await analyticsController.refresh();
         return;
       }
