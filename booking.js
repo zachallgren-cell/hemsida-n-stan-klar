@@ -102,11 +102,13 @@
   let selectedTime = '';
   let bookingsCache = [];
   let blockedDatesCache = [];
+  let capacityOverrideDatesCache = [];
   let calendarReady = false;
   let appliedDiscount = null;
   let rebookedFromBookingId = '';
   let bookingPending = false;
   let beginTracked = false;
+  let priceShownTracked = false;
   let rebookPrefillApplied = false;
 
   function getHeaders() {
@@ -130,6 +132,8 @@
     if (beginTracked) return;
     beginTracked = true;
     trackEvent('begin_booking', { entry_step: currentStep, page_path: window.location.pathname });
+    trackEvent('booking_started', { entry_step: currentStep, page_path: window.location.pathname });
+    if (getCampaignAttribution().referral === 'referral') trackEvent('referral_booking_started');
   }
 
   function formatDate(year, month, day) {
@@ -350,7 +354,7 @@
   }
 
   function normalizeBookingData(data) {
-    if (!data || !Array.isArray(data.bookings) || !Array.isArray(data.blockedDates)) {
+    if (!data || !Array.isArray(data.bookings) || !Array.isArray(data.blockedDates) || !Array.isArray(data.capacityOverrideDates)) {
       throw new Error('Kalendern gav ett oväntat svar.');
     }
     const bookings = data.bookings
@@ -365,7 +369,8 @@
         reason: typeof blockedDate?.reason === 'string' ? blockedDate.reason.slice(0, 160) : ''
       }))
       .filter((blockedDate) => /^\d{4}-\d{2}-\d{2}$/.test(blockedDate.date));
-    return { bookings, blockedDates };
+    const capacityOverrideDates = data.capacityOverrideDates.filter((date) => /^\d{4}-\d{2}-\d{2}$/.test(String(date)));
+    return { bookings, blockedDates, capacityOverrideDates };
   }
 
   function getBookedTimes(date) {
@@ -376,12 +381,16 @@
     return blockedDatesCache.find((blockedDate) => blockedDate.date === date) || null;
   }
 
+  function hasCapacityOverride(date) {
+    return capacityOverrideDatesCache.includes(date);
+  }
+
   function isDateWithinBookableRange(date) {
     return date >= minBookableString && date <= lastBookableString;
   }
 
   function isFullyBooked(date) {
-    return getBookedTimes(date).length > 0 || Boolean(getBlockedDate(date));
+    return (getBookedTimes(date).length > 0 && !hasCapacityOverride(date)) || Boolean(getBlockedDate(date));
   }
 
   function isDateSelectable(date) {
@@ -509,7 +518,7 @@
       const tooSoon = !past && date < minBookableString;
       const tooLate = date > lastBookableString;
       const blocked = Boolean(getBlockedDate(date));
-      const booked = getBookedTimes(date).length > 0;
+      const booked = getBookedTimes(date).length > 0 && !hasCapacityOverride(date);
       const selectable = calendarReady && !past && !tooSoon && !tooLate && !blocked && !booked;
 
       if (date === todayString) {
@@ -582,6 +591,7 @@
     calendarReady = false;
     bookingsCache = [];
     blockedDatesCache = [];
+    capacityOverrideDatesCache = [];
     firstAvailableCalendarMonth = new Date(firstCalendarMonth);
     setCalendarState('loading', 'Kontrollerar lediga dagar…');
     renderCalendar();
@@ -600,6 +610,7 @@
       const normalized = normalizeBookingData(await response.json());
       bookingsCache = normalized.bookings;
       blockedDatesCache = normalized.blockedDates;
+      capacityOverrideDatesCache = normalized.capacityOverrideDates;
       calendarReady = true;
       setCalendarState('ready', 'Kalendern är uppdaterad. Välj en ledig dag.');
       applyAvailableInitialSelection();
@@ -1042,6 +1053,11 @@
         price: calculateDiscountedPrice(calculateEstimatedPrice()).customerPrice,
         currency: 'SEK'
       });
+      trackEvent('booking_summary_shown');
+    }
+    if (safeStep === 2 && !priceShownTracked) {
+      priceShownTracked = true;
+      trackEvent('price_shown');
     }
     saveDraft();
     if (shouldFocus) {
@@ -1243,6 +1259,7 @@
         utmCampaign: String(stored.utmCampaign || '').slice(0, 160),
         utmContent: String(stored.utmContent || '').slice(0, 160),
         utmTerm: String(stored.utmTerm || '').slice(0, 160),
+        referral: stored.referral === 'referral' ? 'referral' : '',
         landingPage: String(stored.landingPage || '').slice(0, 160)
       };
     } catch {
@@ -1316,6 +1333,7 @@
       utmCampaign: booking.attribution.utmCampaign || null,
       utmContent: booking.attribution.utmContent || null,
       utmTerm: booking.attribution.utmTerm || null,
+      attributionRef: booking.attribution.referral || null,
       landingPage: booking.attribution.landingPage || null,
       consent_accepted: booking.consentAccepted,
       consentAccepted: booking.consentAccepted,
@@ -1378,6 +1396,7 @@
     const rawMessage = error instanceof Error ? error.message : '';
     const message = rawMessage.toLocaleLowerCase('sv-SE');
     trackEvent('form_error', { step: 4, field: 'booking_submission', error_type: 'submission_error' });
+    trackEvent('booking_error');
 
     if (message.includes('för många') || message.includes('vänta ett ögonblick')) {
       showStep(4);
@@ -1486,6 +1505,7 @@
       safelyRemoveSession(DRAFT_KEY);
       safelyRemoveSession(REBOOK_KEY);
       trackEvent('booking_step_complete', { step: 4, total_steps: 4 });
+      trackEvent('booking_step_4_complete');
       trackEvent('booking_submitted', {
         booking_id: createdBooking?.bookingId || '',
         price: Number(createdBooking?.price ?? booking.price),
@@ -1493,6 +1513,8 @@
         uses_rut: Boolean(createdBooking?.usesRut ?? estimate.usesRut),
         transport_type: booking.transportType
       });
+      trackEvent('booking_completed');
+      if (booking.attribution.referral === 'referral') trackEvent('referral_booking_completed');
       window.location.href = 'betalning.html';
     } catch (error) {
       console.error('Bokningen kunde inte slutföras:', error);
@@ -1590,6 +1612,7 @@
       trackBeginBooking();
       if (!validateStep(currentStep)) return;
       trackEvent('booking_step_complete', { step: currentStep, total_steps: 4 });
+      trackEvent(`booking_step_${currentStep}_complete`);
       if (currentStep === 3) updateSummary();
       showStep(currentStep + 1);
     });

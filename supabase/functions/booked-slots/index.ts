@@ -46,6 +46,7 @@ Deno.serve(async (req) => {
         ...requestHeaders
       }
     });
+    const capacityOverridesRes = await fetch(`${supabaseUrl}/rest/v1/booking_capacity_overrides?select=booking_date`, { headers: requestHeaders });
 
     if (!bookingsRes.ok) {
       const errorText = await bookingsRes.text();
@@ -58,9 +59,11 @@ Deno.serve(async (req) => {
       console.error('Could not fetch public blocked booking dates', errorText);
       return jsonResponse({ error: 'Could not fetch blocked dates' }, 500);
     }
+    if (!capacityOverridesRes.ok) return jsonResponse({ error: 'Could not fetch booking capacity overrides' }, 500);
 
     const bookings = await bookingsRes.json();
     const blockedDates = await blockedDatesRes.json();
+    const capacityOverrides = await capacityOverridesRes.json();
 
     return jsonResponse({
       bookings: bookings.map((booking: Record<string, unknown>) => ({
@@ -70,7 +73,8 @@ Deno.serve(async (req) => {
       blockedDates: blockedDates.map((blockedDate: Record<string, unknown>) => ({
         date: blockedDate.blocked_date || '',
         reason: blockedDate.reason || ''
-      }))
+      })),
+      capacityOverrideDates: capacityOverrides.map((override: Record<string, unknown>) => override.booking_date || '')
     });
   } catch (error) {
     console.error('Unhandled booked-slots error', error);

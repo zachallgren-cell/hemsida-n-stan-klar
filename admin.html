@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="admin-analytics.css?v=20260721">
   <meta name="robots" content="noindex, nofollow">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Hjq1ytW7/x+c0jml4FneFjWieQVIpP7YU/vn/urHksc='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-muiM/pdof9RjUzPzvY/VRJQq8tU24+QsO+jrFIKZV7o='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
   <link rel="shortcut icon" href="/favicon-48.png" />
@@ -968,6 +968,9 @@
         </form>
         <p class="status-message" id="blockedDateMessage"></p>
         <div class="blocked-dates-list" id="blockedDatesList"></div>
+        <h3>Fullbokade dagar</h3>
+        <p>Här visas dagar som är upptagna av aktiva kundbokningar. Välj <strong>Öppna bokning</strong> för att hantera eller ta bort bokningen och därmed frigöra dagen.</p>
+        <div class="blocked-dates-list" id="fullyBookedDatesList"></div>
       </section>
 
       <section class="card panel hidden" id="discountCodesPanel">
@@ -1110,6 +1113,7 @@
     const blockedDateButton = document.getElementById('blockedDateButton');
     const blockedDateMessage = document.getElementById('blockedDateMessage');
     const blockedDatesList = document.getElementById('blockedDatesList');
+    const fullyBookedDatesList = document.getElementById('fullyBookedDatesList');
     const blockedDateEndInput = document.getElementById('blockedDateEndInput');
     const discountCodeForm = document.getElementById('discountCodeForm');
     const discountCodeInput = document.getElementById('discountCodeInput');
@@ -1555,6 +1559,23 @@
       `).join('');
     }
 
+    function renderFullyBookedDates(bookings) {
+      if (!bookings.length) {
+        fullyBookedDatesList.innerHTML = '<div class="empty-state">Inga aktiva kundbokningar blockerar dagar.</div>';
+        return;
+      }
+
+      fullyBookedDatesList.innerHTML = bookings.map((booking) => `
+        <div class="blocked-date-row" data-booking-id="${escapeHtml(booking.id)}" data-booking-date="${escapeHtml(booking.booking_date)}">
+          <div>
+            <strong>${escapeHtml(formatDate(booking.booking_date))}</strong>
+            <span>${escapeHtml(booking.customer_name || 'Kundbokning')} · ${escapeHtml(booking.booking_time || 'Tid ej angiven')}</span>
+          </div>
+          <div class="button-stack"><button type="button" class="button button-secondary action-open-booking">Öppna bokning</button><button type="button" class="button button-primary action-open-capacity">Öppna för fler</button></div>
+        </div>
+      `).join('');
+    }
+
     function renderDiscountCodes(discountCodes) {
       if (!discountCodes.length) {
         discountCodesList.innerHTML = '<div class="empty-state">Inga rabattkoder har skapats ännu.</div>';
@@ -1620,6 +1641,21 @@
       }
 
       renderBlockedDates(data || []);
+    }
+
+    async function fetchFullyBookedDates() {
+      fullyBookedDatesList.innerHTML = '<div class="empty-state">Hämtar fullbokade dagar...</div>';
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('id, booking_date, booking_time, customer_name, status')
+        .in('status', ['pending', 'confirmed'])
+        .order('booking_date', { ascending: true });
+
+      if (error) {
+        fullyBookedDatesList.innerHTML = `<div class="empty-state">${escapeHtml(`Kunde inte hämta fullbokade dagar: ${error.message}`)}</div>`;
+        return;
+      }
+      renderFullyBookedDates(data || []);
     }
 
     async function fetchBookings() {
@@ -2124,6 +2160,29 @@
       await deleteBlockedDate(id, target);
     });
 
+    fullyBookedDatesList.addEventListener('click', async (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      if (target.classList.contains('action-open-capacity')) {
+        const date = target.closest('[data-booking-date]')?.dataset.bookingDate;
+        if (!date || !window.confirm('Öppna datumet för fler bokningar? Den befintliga kundbokningen behålls.')) return;
+        target.setAttribute('disabled', 'disabled');
+        const { data: sessionData } = await supabase.auth.getSession();
+        const { error } = await supabase.from('booking_capacity_overrides').upsert({ booking_date: date, reason: 'Öppnad för fler bokningar i admin', created_by: sessionData.session?.user?.id || null }, { onConflict: 'booking_date' });
+        if (error) { setBlockedDateMessage(`Kunde inte öppna datumet: ${error.message}`, 'error'); target.removeAttribute('disabled'); return; }
+        setBlockedDateMessage('Datumet är öppet för fler bokningar. Den befintliga bokningen ligger kvar.', 'success');
+        await fetchFullyBookedDates();
+        return;
+      }
+      if (!target.classList.contains('action-open-booking')) return;
+      const id = target.closest('[data-booking-id]')?.dataset.bookingId;
+      if (!id) return;
+      activeAdminView = 'bookings';
+      renderAdminView();
+      await fetchBookings();
+      document.querySelector(`[data-booking-id="${CSS.escape(id)}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
     discountCodeForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       setDiscountCodeMessage('');
@@ -2322,6 +2381,7 @@
 
       if (activeAdminView === 'blockedDates') {
         await fetchBlockedDates();
+        await fetchFullyBookedDates();
       }
       if (activeAdminView === 'discountCodes') {
         await fetchDiscountCodes();
@@ -2334,6 +2394,7 @@
     refreshButton.addEventListener('click', async () => {
       if (activeAdminView === 'blockedDates') {
         await fetchBlockedDates();
+        await fetchFullyBookedDates();
         return;
       }
 
