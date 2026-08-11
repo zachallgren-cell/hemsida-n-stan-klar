@@ -2354,18 +2354,25 @@
       const email = document.getElementById('adminEmail').value.trim();
       const password = document.getElementById('adminPassword').value;
 
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      document.getElementById('adminPassword').value = '';
+      try {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-      loginButton.disabled = false;
+        if (error) {
+          setLoginMessage(`Kunde inte logga in: ${error.message}`, 'error');
+          return;
+        }
 
-      if (error) {
-        setLoginMessage(`Kunde inte logga in: ${error.message}`, 'error');
-        return;
+        setLoginMessage('Inloggning lyckades.', 'success');
+        await refreshSession();
+      } catch (error) {
+        setLoginMessage(
+          `Kunde inte logga in: ${error instanceof Error ? error.message : 'Anslutningen till inloggningstjänsten misslyckades.'}`,
+          'error'
+        );
+      } finally {
+        document.getElementById('adminPassword').value = '';
+        loginButton.disabled = false;
       }
-
-      setLoginMessage('Inloggning lyckades.', 'success');
-      await refreshSession();
     });
 
     logoutButton.addEventListener('click', async () => {
