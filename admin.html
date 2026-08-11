@@ -1441,7 +1441,7 @@
         ].filter(Boolean);
 
         return `
-          <article class="booking-card" data-booking-id="${booking.id}" data-uses-rut="${usesRut}" data-rut-received="${hasRutSubmission}">
+          <article class="booking-card" data-booking-id="${booking.id}" data-uses-rut="${usesRut}" data-rut-received="${hasRutSubmission}" data-work-completed="${workIsCompleted}">
             <div class="booking-top">
               <div>
                 <h3>${escapeHtml(booking.customer_name || 'Namn saknas')}</h3>
@@ -1505,7 +1505,7 @@
             <div class="completion-row">
               <button type="button" class="button button-secondary action-confirm" ${bookingCanBeAdminConfirmed ? '' : 'disabled'}>${bookingStatus === 'confirmed' ? 'Adminbekräftad' : bookingCanBeAdminConfirmed ? 'Bekräfta som admin' : 'Kundbekräftelse krävs'}</button>
               <button type="button" class="button button-secondary action-work-completed" ${workIsCompleted || !bookingCanBeWorked ? 'disabled' : ''}>${workIsCompleted ? 'Arbete utfört' : bookingCanBeWorked ? 'Markera arbete utfört' : 'Kundbekräftelse krävs'}</button>
-              <button type="button" class="button button-success action-complete" ${!workIsCompleted || booking.payment_email_sent ? 'disabled' : ''}>${booking.payment_email_sent ? 'Klartmejl skickat' : workIsCompleted ? 'Klart + skicka Swish' : 'Markera arbete utfört först'}</button>
+              <button type="button" class="button button-success action-complete" ${(!workIsCompleted && !bookingCanBeWorked) || booking.payment_email_sent ? 'disabled' : ''}>${booking.payment_email_sent ? 'Klartmejl skickat' : 'Klart + skicka Swish'}</button>
               <button type="button" class="button button-secondary action-paid" ${paymentIsPaid || !workIsCompleted ? 'disabled' : ''}>${paymentIsPaid ? 'Swish betald' : workIsCompleted ? 'Markera Swish betald' : 'Slutför jobbet först'}</button>
               <button type="button" class="button button-danger action-delete">Ta bort</button>
             </div>
@@ -1795,15 +1795,23 @@
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
       });
-      if (!window.confirm(
-        `Skicka klartmejlet?\n\nSwish: ${swishAmountDisplay} kr till ${SWISH_NUMBER_DISPLAY}\nMottagare: ${SWISH_RECIPIENT_NAME}\nFakturareferens: ${invoiceReference}\n\nKontrollera att uppgifterna stämmer med fakturan.`
-      )) return;
+      const workIsCompleted = card.dataset.workCompleted === 'true';
+      const confirmationText = workIsCompleted
+        ? `Skicka klartmejlet?\n\nSwish: ${swishAmountDisplay} kr till ${SWISH_NUMBER_DISPLAY}\nMottagare: ${SWISH_RECIPIENT_NAME}\nFakturareferens: ${invoiceReference}\n\nKontrollera att uppgifterna stämmer med fakturan.`
+        : `Markera arbetet som utfört och skicka klartmejlet?\n\nSwish: ${swishAmountDisplay} kr till ${SWISH_NUMBER_DISPLAY}\nMottagare: ${SWISH_RECIPIENT_NAME}\nFakturareferens: ${invoiceReference}\n\nKontrollera att uppgifterna stämmer med fakturan.`;
+      if (!window.confirm(confirmationText)) return;
 
       button.disabled = true;
       messageElement.textContent = 'Skickar klartmail...';
       messageElement.className = 'status-message';
 
       try {
+        if (!workIsCompleted) {
+          messageElement.textContent = 'Markerar arbetet som utfört...';
+          await callAdminRutDetails('mark_completed', id);
+        }
+
+        messageElement.textContent = 'Skickar klartmail...';
         const response = await fetch(COMPLETE_BOOKING_URL, {
           method: 'POST',
           headers: {
