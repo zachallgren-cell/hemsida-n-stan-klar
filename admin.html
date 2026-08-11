@@ -904,7 +904,7 @@
       <aside class="card panel" id="loginPanel">
         <h2>Logga in</h2>
         <p>Använd ett Supabase-konto för admin. Efter inloggning kan ni hantera bokningar direkt här.</p>
-        <form class="login-form" id="loginForm">
+        <form class="login-form" id="loginForm" novalidate>
           <label>
             E-post
             <input type="email" id="adminEmail" placeholder="info@bergafonsterputs.se" required>
@@ -2353,6 +2353,14 @@
 
       const email = document.getElementById('adminEmail').value.trim();
       const password = document.getElementById('adminPassword').value;
+
+      if (!email || !password) {
+        setLoginMessage('Fyll i både e-postadress och lösenord.', 'error');
+        loginButton.disabled = false;
+        return;
+      }
+
+      setLoginMessage('Loggar in...');
 
       try {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
