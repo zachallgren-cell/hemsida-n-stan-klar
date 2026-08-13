@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="admin-analytics.css?v=20260721">
   <meta name="robots" content="noindex, nofollow">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-ygrLJ7eCqfY8gKaGvf7KaLdc2N+ILRVozREP68glL5M='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-um1BUX3DXpajuztvbwmM9Jg5HSwS/pYDRZVLgapLHp0='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
   <link rel="shortcut icon" href="/favicon-48.png" />
@@ -1287,6 +1287,9 @@
     const EXTRA_MUNTINS_WINDOW_PRICE = 49;
     const INTERIOR_BASE_ADDON = 320;
     const INTERIOR_EXTRA_WINDOW_PRICE = 39;
+    const FOUR_SIDED_BASE_ADDON = INTERIOR_BASE_ADDON + 300;
+    const FOUR_SIDED_EXTRA_WINDOW_PRICE = INTERIOR_EXTRA_WINDOW_PRICE * 2;
+    const FOUR_SIDED_SERVICE_SCOPE = 'Fyrsidiga fönster';
     const ISLAND_START_PRICE = 799;
     const ISLAND_PRICE_PER_SEA_MILE = 125;
 
@@ -1298,9 +1301,15 @@
       return BASE_LABOR_PRICE_AFTER_RUT + floorAddon;
     }
 
-    function getInteriorAddon(housingTypeLabel, windowCount) {
+    function getServiceScopeAddon(serviceScopeValue, windowCount) {
       const extraWindows = Math.max(0, windowCount - INCLUDED_WINDOWS);
-      return INTERIOR_BASE_ADDON + (extraWindows * INTERIOR_EXTRA_WINDOW_PRICE);
+      if (serviceScopeValue === 'Invändig + utvändig') {
+        return INTERIOR_BASE_ADDON + (extraWindows * INTERIOR_EXTRA_WINDOW_PRICE);
+      }
+      if (serviceScopeValue === FOUR_SIDED_SERVICE_SCOPE) {
+        return FOUR_SIDED_BASE_ADDON + (extraWindows * FOUR_SIDED_EXTRA_WINDOW_PRICE);
+      }
+      return 0;
     }
 
     function getSeaMilesAddon(seaMilesLabel) {
@@ -1355,16 +1364,14 @@
       const housingType = booking.housing_type || '';
       const windowCount = parseWindowCount(booking.window_count);
       const baseLaborAfterRut = getBaseLaborAfterRut(housingType);
-      const interiorAddon = booking.service_scope === 'Invändig + utvändig'
-        ? getInteriorAddon(housingType, windowCount)
-        : 0;
+      const serviceScopeAddon = getServiceScopeAddon(booking.service_scope, windowCount);
       const windowTypePrice = getWindowTypePrice(booking.addons, windowCount);
       const seaMilesAddon = booking.transport_type === 'Båttransport behövs'
         ? getSeaMilesAddon(booking.sea_miles)
         : { price: 0, isQuote: false };
       const legacyLaborBeforeRut = baseLaborAfterRut === null
         ? null
-        : Math.round((baseLaborAfterRut + windowTypePrice + interiorAddon) * 2);
+        : Math.round((baseLaborAfterRut + windowTypePrice + serviceScopeAddon) * 2);
       const discountAmount = parsePriceNumber(booking.discount_amount) ?? 0;
       const legacyLaborAfterDiscount = legacyLaborBeforeRut === null
         ? null

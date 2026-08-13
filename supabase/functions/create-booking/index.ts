@@ -111,6 +111,9 @@ const EXTRA_REGULAR_WINDOW_PRICE = 39;
 const EXTRA_MUNTINS_WINDOW_PRICE = 49;
 const INTERIOR_BASE_ADDON = 320;
 const INTERIOR_EXTRA_WINDOW_PRICE = 39;
+const FOUR_SIDED_BASE_ADDON = INTERIOR_BASE_ADDON + 300;
+const FOUR_SIDED_EXTRA_WINDOW_PRICE = INTERIOR_EXTRA_WINDOW_PRICE * 2;
+const FOUR_SIDED_SERVICE_SCOPE = 'Fyrsidiga fönster';
 const ISLAND_START_PRICE = 799;
 const ISLAND_PRICE_PER_SEA_MILE = 125;
 const MAX_DIRECT_BOOKING_SEA_MILES = 15;
@@ -171,9 +174,12 @@ function calculateBookingPrice(payload: BookingPayload) {
   const extraMuntins = Math.max(0, muntinsWindows - includedMuntins);
   const floorAddon = housingType === 'Två våningar' ? TWO_FLOOR_ADDON : 0;
   const windowPrice = (extraRegular * EXTRA_REGULAR_WINDOW_PRICE) + (extraMuntins * EXTRA_MUNTINS_WINDOW_PRICE);
-  const interiorPrice = payload.serviceScope === 'Invändig + utvändig'
-    ? INTERIOR_BASE_ADDON + (Math.max(0, totalWindows - INCLUDED_WINDOWS) * INTERIOR_EXTRA_WINDOW_PRICE)
-    : payload.serviceScope === 'Endast utvändig' ? 0 : NaN;
+  const extraWindows = Math.max(0, totalWindows - INCLUDED_WINDOWS);
+  const serviceScopePrice = payload.serviceScope === 'Invändig + utvändig'
+    ? INTERIOR_BASE_ADDON + (extraWindows * INTERIOR_EXTRA_WINDOW_PRICE)
+    : payload.serviceScope === FOUR_SIDED_SERVICE_SCOPE
+      ? FOUR_SIDED_BASE_ADDON + (extraWindows * FOUR_SIDED_EXTRA_WINDOW_PRICE)
+      : payload.serviceScope === 'Endast utvändig' ? 0 : NaN;
 
   let transportPrice = 0;
   if (payload.transportType === 'Båttransport behövs') {
@@ -186,7 +192,7 @@ function calculateBookingPrice(payload: BookingPayload) {
     return null;
   }
 
-  const laborCostAfterRut = BASE_LABOR_PRICE_AFTER_RUT + floorAddon + windowPrice + interiorPrice;
+  const laborCostAfterRut = BASE_LABOR_PRICE_AFTER_RUT + floorAddon + windowPrice + serviceScopePrice;
   const laborCostBeforeRut = laborCostAfterRut * 2;
   const materialCost = MATERIAL_FEE;
   const transportCost = transportPrice;

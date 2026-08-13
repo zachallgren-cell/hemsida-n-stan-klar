@@ -24,6 +24,9 @@
   const EXTRA_MUNTINS_WINDOW_PRICE = 49;
   const INTERIOR_BASE_ADDON = 320;
   const INTERIOR_EXTRA_WINDOW_PRICE = 39;
+  const FOUR_SIDED_BASE_ADDON = INTERIOR_BASE_ADDON + 300;
+  const FOUR_SIDED_EXTRA_WINDOW_PRICE = INTERIOR_EXTRA_WINDOW_PRICE * 2;
+  const FOUR_SIDED_SERVICE_SCOPE = 'Fyrsidiga fönster';
   const ISLAND_START_PRICE = 799;
   const ISLAND_PRICE_PER_SEA_MILE = 125;
 
@@ -689,9 +692,15 @@
     return BASE_LABOR_PRICE_AFTER_RUT + (housingTypeLabel === 'Två våningar' ? TWO_FLOOR_ADDON : 0);
   }
 
-  function getInteriorAddon(_housingTypeLabel, windowCount) {
+  function getServiceScopeAddon(serviceScopeValue, windowCount) {
     const extraWindows = Math.max(0, windowCount - INCLUDED_WINDOWS);
-    return INTERIOR_BASE_ADDON + (extraWindows * INTERIOR_EXTRA_WINDOW_PRICE);
+    if (serviceScopeValue === 'Invändig + utvändig') {
+      return INTERIOR_BASE_ADDON + (extraWindows * INTERIOR_EXTRA_WINDOW_PRICE);
+    }
+    if (serviceScopeValue === FOUR_SIDED_SERVICE_SCOPE) {
+      return FOUR_SIDED_BASE_ADDON + (extraWindows * FOUR_SIDED_EXTRA_WINDOW_PRICE);
+    }
+    return 0;
   }
 
   function getSeaMilesAddon() {
@@ -721,9 +730,7 @@
     const baseLaborAfterRut = getBaseLaborPriceAfterRut(housingTypeLabel);
     const windowLaborAfterRut = (extraRegularWindowCount * EXTRA_REGULAR_WINDOW_PRICE)
       + (extraMuntinsCount * EXTRA_MUNTINS_WINDOW_PRICE);
-    const interiorLaborAfterRut = serviceScopeValue === 'Invändig + utvändig'
-      ? getInteriorAddon(housingTypeLabel, windowCount)
-      : 0;
+    const serviceScopeLaborAfterRut = getServiceScopeAddon(serviceScopeValue, windowCount);
     const transportType = checkedValue('transportType');
     const seaMilesAddon = transportType === 'Båttransport behövs'
       ? getSeaMilesAddon()
@@ -731,7 +738,7 @@
     const rutChoiceValue = checkedValue('rutChoice');
     const rutChoiceSelected = Boolean(rutChoiceValue);
     const usesRut = /^Ja\b/i.test(rutChoiceValue.trim());
-    const laborCostAfterRut = baseLaborAfterRut + windowLaborAfterRut + interiorLaborAfterRut;
+    const laborCostAfterRut = baseLaborAfterRut + windowLaborAfterRut + serviceScopeLaborAfterRut;
     const laborCostBeforeRut = laborCostAfterRut * 2;
     const materialCost = MATERIAL_FEE;
     const transportCost = seaMilesAddon.price;
@@ -751,7 +758,7 @@
       rutChoiceSelected,
       baseLaborAfterRut,
       windowLaborAfterRut,
-      interiorLaborAfterRut,
+      serviceScopeLaborAfterRut,
       muntinsCount,
       regularWindowCount,
       extraWindowCount,
@@ -876,7 +883,9 @@
       if (estimate.extraRegularWindowCount) parts.push(`${estimate.extraRegularWindowCount} extra utan spröjs`);
       if (estimate.extraMuntinsCount) parts.push(`${estimate.extraMuntinsCount} extra med spröjs`);
     }
-    if (estimate.interiorLaborAfterRut > 0) parts.push('invändig puts');
+    if (estimate.serviceScopeLaborAfterRut > 0) {
+      parts.push(estimate.serviceScopeValue === FOUR_SIDED_SERVICE_SCOPE ? 'fyrsidig puts' : 'invändig puts');
+    }
     if (estimate.transportCost > 0) parts.push(`transport ${formatSek(estimate.transportCost)}`);
     if (discountedPrice.discountAmount > 0) {
       parts.push(`rabattkod ${appliedDiscount.code}: −${formatSek(discountedPrice.discountAmount)} på din arbetsandel`);

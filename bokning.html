@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="booking.css">
   <script src="cookie-consent.js?v=20260720" defer></script>
   <script src="site.js?v=20260721" defer></script>
-  <script src="booking.js?v=20260801-1" defer></script>
+  <script src="booking.js?v=20260813-1" defer></script>
 </head>
 <body class="booking-page">
   <a class="skip-link" href="#main-content">Hoppa till bokningen</a>
@@ -187,7 +187,7 @@
 
               <fieldset class="choice-group" id="serviceScopeGroup" aria-describedby="serviceScopeError">
                 <legend>Vilka sidor ska putsas?</legend>
-                <div class="choice-grid choice-grid-two">
+                <div class="choice-grid choice-grid-three">
                   <label class="choice-card">
                     <input type="radio" name="serviceScope" value="Endast utvändig">
                     <span><strong>Endast utvändig</strong><small>Utsidan av fönstren</small></span>
@@ -195,6 +195,10 @@
                   <label class="choice-card">
                     <input type="radio" name="serviceScope" value="Invändig + utvändig">
                     <span><strong>Invändig + utvändig</strong><small>Båda sidor, från +320 kr efter RUT</small></span>
+                  </label>
+                  <label class="choice-card">
+                    <input type="radio" name="serviceScope" value="Fyrsidiga fönster">
+                    <span><strong>Fyrsidiga fönster</strong><small>In-, ut- och mellansidor, +300 kr utöver båda sidor</small></span>
                   </label>
                 </div>
                 <p class="field-error" id="serviceScopeError" role="alert" hidden></p>
@@ -270,6 +274,8 @@
                   <li>Extra utan spröjs: +39 kr per fönster efter RUT</li>
                   <li>Extra med spröjs: +49 kr per fönster efter RUT</li>
                   <li>Invändig puts: från +320 kr efter RUT</li>
+                  <li>Fyrsidig puts: +300 kr utöver invändig + utvändig</li>
+                  <li>Fyrsidigt extra fönster: +78 kr per fönster efter RUT, utöver ordinarie fönstertillägg</li>
                 </ul>
               </details>
             </aside>
