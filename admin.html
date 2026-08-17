@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="admin-analytics.css?v=20260721">
   <meta name="robots" content="noindex, nofollow">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-zYRL+RcX8Q4D5UCOyl3xi6+HbmPd1/SzLGSf+AEvwz4='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-ulzgOU/Pu9fICZd1TlhFdENveDPyWfHTgzo3GgHIptA='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
   <link rel="shortcut icon" href="/favicon-48.png" />
@@ -859,20 +859,30 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="admin-v2.css?v=20260818">
 </head>
 <body>
   <a class="admin-skip-link" href="#main-content">Hoppa till admininnehållet</a>
-  <header>
+  <header class="admin-sidebar" id="adminSidebar">
     <div class="container">
       <div class="topbar">
         <a class="brand" href="index.html">
           <img src="logo-compact.png" alt="Berga Fönsterputs" width="256" height="251">
           <span>Berga Fönsterputs<small>Administration</small></span>
         </a>
+        <nav class="admin-tabs hidden" id="adminTabs" aria-label="Adminvyer">
+          <button type="button" class="admin-tab is-active" data-admin-view="overview"><span aria-hidden="true">⌂</span>Översikt</button>
+          <button type="button" class="admin-tab" data-admin-view="calendar"><span aria-hidden="true">▦</span>Kalender</button>
+          <button type="button" class="admin-tab" data-admin-view="bookings"><span aria-hidden="true">≡</span>Bokningar</button>
+          <button type="button" class="admin-tab" data-admin-view="customers"><span aria-hidden="true">◎</span>Kunder</button>
+          <button type="button" class="admin-tab" data-admin-view="followUp"><span aria-hidden="true">✓</span>Uppföljning</button>
+          <button type="button" class="admin-tab" data-admin-view="payments"><span aria-hidden="true">kr</span>Betalningar och RUT</button>
+          <button type="button" class="admin-tab" data-admin-view="discountCodes"><span aria-hidden="true">%</span>Rabattkoder</button>
+          <button type="button" class="admin-tab" data-admin-view="blockedDates"><span aria-hidden="true">⚙</span>Inställningar</button>
+          <button type="button" class="admin-tab admin-tab-secondary" data-admin-view="analytics"><span aria-hidden="true">↗</span>Analys</button>
+        </nav>
         <div class="topbar-links">
-          <a href="index.html">Startsida</a>
-          <a href="var-tjanst.html">Våra tjänster</a>
-          <a href="om-oss.html">Om oss</a>
+          <a href="index.html">Visa webbplatsen</a>
           <button type="button" id="logoutButton" class="hidden">Logga ut</button>
         </div>
       </div>
@@ -899,6 +909,21 @@
         </ul>
       </div>
     </section>
+
+    <div class="workspace-toolbar hidden" id="workspaceToolbar">
+      <button type="button" class="icon-button mobile-nav-button" id="mobileNavButton" aria-label="Öppna adminmenyn" aria-expanded="false">☰</button>
+      <label class="global-search">
+        <span class="sr-only">Sök kunder och bokningar</span>
+        <span aria-hidden="true">⌕</span>
+        <input type="search" id="globalSearch" placeholder="Sök kunder, telefon, mejl eller adress…" autocomplete="off">
+        <kbd>⌘ K</kbd>
+      </label>
+      <div class="workspace-actions">
+        <a class="button button-primary" href="bokning.html">+ Ny bokning</a>
+        <button type="button" class="icon-button" aria-label="Aviseringar"><span aria-hidden="true">○</span><span class="notification-dot"></span></button>
+        <span class="admin-profile" title="Administratör">ZH</span>
+      </div>
+    </div>
 
     <section class="grid">
       <aside class="card panel" id="loginPanel">
@@ -956,17 +981,85 @@
         <p class="status-message" id="mfaMessage"></p>
       </aside>
 
-      <nav class="admin-tabs hidden" id="adminTabs" aria-label="Adminvyer">
-        <button type="button" class="admin-tab is-active" data-admin-view="bookings">Bokningar</button>
-        <button type="button" class="admin-tab" data-admin-view="blockedDates">Spärrade dagar</button>
-        <button type="button" class="admin-tab" data-admin-view="discountCodes">Rabattkoder</button>
-        <button type="button" class="admin-tab" data-admin-view="analytics">Analys</button>
-      </nav>
+      <section class="admin-view hidden" id="overviewPanel">
+        <header class="view-heading">
+          <div>
+            <p class="eyebrow" id="overviewDate">I dag</p>
+            <h1>God morgon</h1>
+            <p>Här är det viktigaste som behöver din uppmärksamhet.</p>
+          </div>
+          <button type="button" class="button button-secondary" data-refresh-view>Uppdatera</button>
+        </header>
+        <div class="metric-strip" id="dashboardMetrics" aria-label="Viktiga nyckeltal"></div>
+        <div class="dashboard-grid">
+          <section class="surface task-surface">
+            <div class="section-heading-row"><div><p class="eyebrow">Arbetslista</p><h2>Att göra i dag</h2></div><button type="button" class="text-button" data-open-view="followUp">Visa alla</button></div>
+            <div class="task-list" id="todayTasks"></div>
+          </section>
+          <section class="surface">
+            <div class="section-heading-row"><div><p class="eyebrow">Schema</p><h2>Dagens bokningar</h2></div><button type="button" class="text-button" data-open-view="calendar">Öppna kalender</button></div>
+            <div class="agenda-list" id="todayBookings"></div>
+          </section>
+        </div>
+        <section class="surface compact-surface">
+          <div class="section-heading-row"><div><p class="eyebrow">Senaste sju dagarna</p><h2>Senaste kundaktivitet</h2></div></div>
+          <div class="activity-list" id="recentActivity"></div>
+        </section>
+      </section>
+
+      <section class="admin-view hidden" id="calendarPanel">
+        <header class="view-heading">
+          <div><p class="eyebrow">Planering</p><h1>Kalender</h1><p>Se bokningar och spärrad tillgänglighet i samma vy.</p></div>
+          <button type="button" class="button button-secondary" data-open-view="blockedDates">+ Blockera tid</button>
+        </header>
+        <div class="surface calendar-surface">
+          <div class="calendar-toolbar">
+            <div class="calendar-period-controls">
+              <button type="button" class="button button-secondary" id="calendarToday">I dag</button>
+              <button type="button" class="icon-button" id="calendarPrevious" aria-label="Föregående period">‹</button>
+              <button type="button" class="icon-button" id="calendarNext" aria-label="Nästa period">›</button>
+              <strong id="calendarPeriodLabel">Denna vecka</strong>
+            </div>
+            <div class="segmented-control" aria-label="Kalendervy">
+              <button type="button" data-calendar-view="day">Dag</button>
+              <button type="button" class="is-active" data-calendar-view="week">Vecka</button>
+              <button type="button" data-calendar-view="month">Månad</button>
+              <button type="button" data-calendar-view="list">Lista</button>
+            </div>
+          </div>
+          <div class="calendar-filters">
+            <label>Status <select id="calendarStatusFilter"><option value="all">Alla statusar</option><option value="pending">Nya</option><option value="confirmed">Bekräftade</option><option value="completed">Utförda</option><option value="cancelled">Avbokade</option></select></label>
+            <label>Typ av jobb <select id="calendarJobFilter"><option value="all">Alla jobb</option><option value="rut">RUT</option><option value="standard">Utan RUT</option></select></label>
+          </div>
+          <div class="calendar-grid" id="calendarGrid" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section class="admin-view hidden" id="customersPanel">
+        <header class="view-heading"><div><p class="eyebrow">CRM</p><h1>Kunder</h1><p>En kompakt kundöversikt härledd från befintliga bokningar.</p></div><a class="button button-primary" href="bokning.html">+ Ny kundbokning</a></header>
+        <div class="surface">
+          <div class="list-toolbar"><label class="inline-search">Sök kund <input type="search" id="customerSearch" placeholder="Namn, telefon eller mejl"></label><select id="customerFilter" aria-label="Filtrera kunder"><option value="all">Alla kunder</option><option value="returning">Återkommande</option><option value="no-upcoming">Utan kommande bokning</option><option value="inactive">Inaktiva 6+ månader</option></select></div>
+          <div class="data-table-wrap" id="customersList"></div>
+        </div>
+      </section>
+
+      <section class="admin-view hidden" id="followUpPanel">
+        <header class="view-heading"><div><p class="eyebrow">Kundvård</p><h1>Uppföljning</h1><p>Arbetslistan visar uppgifter som kan härledas säkert från nuvarande bokningsdata.</p></div></header>
+        <div class="surface">
+          <div class="saved-views" id="followUpViews"><button type="button" class="is-active" data-follow-filter="all">Alla</button><button type="button" data-follow-filter="today">I dag</button><button type="button" data-follow-filter="payment">Betalning</button><button type="button" data-follow-filter="rut">RUT</button><button type="button" data-follow-filter="review">Recension</button></div>
+          <div class="task-table" id="followUpList"></div>
+        </div>
+      </section>
+
+      <section class="admin-view hidden" id="paymentsPanel">
+        <header class="view-heading"><div><p class="eyebrow">Ekonomi</p><h1>Betalningar och RUT</h1><p>Kontrollera Swish och hantera RUT utan att exponera känsliga uppgifter i listan.</p></div></header>
+        <div class="metric-strip" id="paymentMetrics"></div>
+        <div class="surface"><div class="data-table-wrap" id="paymentsList"></div></div>
+      </section>
 
       <section class="card panel hidden" id="blockedDatesPanel">
-        <h2>Spärrade dagar</h2>
-        <p>Hantera manuellt spärrade eller fullbokade dagar. Du kan avblockera en dag här så att den blir bokningsbar igen. Befintliga bekräftade bokningar håller fortfarande sitt datum spärrat.</p>
-        <form class="admin-form" id="blockedDateForm">
+        <header class="view-heading"><div><p class="eyebrow">Inställningar</p><h1>Tillgänglighet</h1><p>Blockera datumintervall. Befintliga bokningar flyttas eller tas aldrig bort automatiskt.</p></div></header>
+        <form class="admin-form surface form-surface" id="blockedDateForm">
           <div class="date-range-grid">
             <label>
               Från datum
@@ -981,18 +1074,17 @@
             Intern orsak
             <textarea id="blockedDateReason" placeholder="Till exempel semester, utbildning eller redan fullbokad dag."></textarea>
           </label>
-          <button type="submit" class="button button-primary" id="blockedDateButton">Lägg till ej bokbara dagar</button>
+          <div class="form-footer"><p>Systemet kontrollerar konflikter innan intervallet sparas.</p><button type="submit" class="button button-primary" id="blockedDateButton">Blockera intervall</button></div>
         </form>
         <p class="status-message" id="blockedDateMessage"></p>
-        <div class="blocked-dates-list" id="blockedDatesList"></div>
-        <h3>Fullbokade dagar</h3>
-        <p>Här visas dagar som är upptagna av aktiva kundbokningar. Välj <strong>Öppna bokning</strong> för att hantera eller ta bort bokningen och därmed frigöra dagen.</p>
-        <div class="blocked-dates-list" id="fullyBookedDatesList"></div>
+        <section class="surface settings-section"><div class="section-heading-row"><div><h2>Spärrade intervall</h2><p>Sammanhängande dagar med samma orsak grupperas.</p></div></div><div class="blocked-dates-list" id="blockedDatesList"></div></section>
+        <section class="surface settings-section"><div class="section-heading-row"><div><h2>Fullbokade dagar</h2><p>Öppna kapacitet utan att påverka den befintliga bokningen.</p></div></div><div class="blocked-dates-list" id="fullyBookedDatesList"></div></section>
       </section>
 
       <section class="card panel hidden" id="discountCodesPanel">
-        <h2>Rabattkoder</h2>
-        <p>Skapa en kod som kunden kan ange i bokningen. Rabatten kan vara procent eller ett fast belopp i kronor.</p>
+        <header class="view-heading"><div><p class="eyebrow">Försäljning</p><h1>Rabattkoder</h1><p>Skapa, pausa och följ användningen i en kompakt vy.</p></div></header>
+        <details class="surface create-panel">
+          <summary class="button button-primary">+ Ny rabattkod</summary>
         <form class="admin-form" id="discountCodeForm">
           <div class="date-range-grid">
             <label>
@@ -1023,19 +1115,38 @@
           </label>
           <button type="submit" class="button button-primary" id="discountCodeButton">Skapa rabattkod</button>
         </form>
+        </details>
         <p class="status-message" id="discountCodeMessage"></p>
-        <div class="discount-codes-list" id="discountCodesList"></div>
+        <div class="discount-codes-list surface" id="discountCodesList"></div>
       </section>
 
       <section class="card panel hidden" id="bookingsPanel">
-        <div class="bookings-header">
+        <div class="view-heading bookings-header">
           <div>
-            <h2>Bokningar</h2>
-            <p>Här visas alla bokningar, även slutförda och betalda, så att inget försvinner ur adminvyn.</p>
+            <p class="eyebrow">Orderhantering</p>
+            <h1>Bokningar</h1>
+            <p>Överblicka många bokningar och öppna full information först när den behövs.</p>
           </div>
           <button type="button" class="button button-secondary" id="refreshButton">Uppdatera</button>
         </div>
-        <div class="bookings-list" id="bookingsList"></div>
+        <div class="surface bookings-surface">
+          <div class="saved-views" id="bookingSavedViews" aria-label="Sparade bokningsvyer">
+            <button type="button" class="is-active" data-booking-filter="all">Alla</button>
+            <button type="button" data-booking-filter="today">I dag</button>
+            <button type="button" data-booking-filter="week">Denna vecka</button>
+            <button type="button" data-booking-filter="unconfirmed">Obekräftade</button>
+            <button type="button" data-booking-filter="unpaid">Utförda men obetalda</button>
+            <button type="button" data-booking-filter="rut">RUT behöver hanteras</button>
+            <button type="button" data-booking-filter="completed">Slutförda</button>
+            <button type="button" data-booking-filter="cancelled">Avbokade</button>
+          </div>
+          <div class="list-toolbar">
+            <label class="inline-search">Sök <input type="search" id="bookingSearch" placeholder="Kund, adress, telefon eller mejl"></label>
+            <label>Status <select id="bookingStatusFilter"><option value="all">Alla statusar</option><option value="awaiting_confirmation">Väntar på kund</option><option value="pending">Ny</option><option value="confirmed">Bekräftad</option><option value="completed">Utförd</option><option value="cancelled">Avbokad</option></select></label>
+            <label>Sortera <select id="bookingSort"><option value="date-asc">Datum, stigande</option><option value="date-desc">Datum, fallande</option><option value="created-desc">Senast skapad</option></select></label>
+          </div>
+          <div class="bookings-list data-table-wrap" id="bookingsList"></div>
+        </div>
       </section>
 
       <section class="card panel hidden" id="analyticsPanel">
@@ -1081,6 +1192,15 @@
     </section>
   </main>
 
+  <div class="drawer-backdrop hidden" id="bookingDrawerBackdrop"></div>
+  <aside class="booking-drawer hidden" id="bookingDrawer" aria-hidden="true" aria-labelledby="bookingDrawerTitle">
+    <header class="drawer-header">
+      <div><p class="eyebrow">Bokningsdetaljer</p><h2 id="bookingDrawerTitle">Bokning</h2></div>
+      <button type="button" class="icon-button" id="bookingDrawerClose" aria-label="Stäng bokningsdetaljer">×</button>
+    </header>
+    <div class="drawer-body" id="bookingDrawerBody"></div>
+  </aside>
+
   <script src="vendor/supabase-js-2.110.1.umd.min.js" integrity="sha384-baNpjjkY1KK3WRj5l8Fkp2P/pd/wQ4dXsejAvxqNeBEugKB7WLjHXreLejokZekT" crossorigin="anonymous"></script>
   <script src="admin-analytics.js?v=20260721"></script>
   <script type="module">
@@ -1106,6 +1226,14 @@
     });
 
     const loginPanel = document.getElementById('loginPanel');
+    const overviewPanel = document.getElementById('overviewPanel');
+    const calendarPanel = document.getElementById('calendarPanel');
+    const customersPanel = document.getElementById('customersPanel');
+    const followUpPanel = document.getElementById('followUpPanel');
+    const paymentsPanel = document.getElementById('paymentsPanel');
+    const workspaceToolbar = document.getElementById('workspaceToolbar');
+    const globalSearch = document.getElementById('globalSearch');
+    const mobileNavButton = document.getElementById('mobileNavButton');
     const passwordSetupPanel = document.getElementById('passwordSetupPanel');
     const passwordSetupForm = document.getElementById('passwordSetupForm');
     const newAdminPassword = document.getElementById('newAdminPassword');
@@ -1150,7 +1278,33 @@
     const discountCodeButton = document.getElementById('discountCodeButton');
     const discountCodeMessage = document.getElementById('discountCodeMessage');
     const discountCodesList = document.getElementById('discountCodesList');
-    let activeAdminView = 'bookings';
+    const bookingSearch = document.getElementById('bookingSearch');
+    const bookingStatusFilter = document.getElementById('bookingStatusFilter');
+    const bookingSort = document.getElementById('bookingSort');
+    const bookingSavedViews = document.getElementById('bookingSavedViews');
+    const bookingDrawer = document.getElementById('bookingDrawer');
+    const bookingDrawerBackdrop = document.getElementById('bookingDrawerBackdrop');
+    const bookingDrawerBody = document.getElementById('bookingDrawerBody');
+    const bookingDrawerTitle = document.getElementById('bookingDrawerTitle');
+    const bookingDrawerClose = document.getElementById('bookingDrawerClose');
+    const customerSearch = document.getElementById('customerSearch');
+    const customerFilter = document.getElementById('customerFilter');
+    const customersList = document.getElementById('customersList');
+    const followUpList = document.getElementById('followUpList');
+    const followUpViews = document.getElementById('followUpViews');
+    const paymentsList = document.getElementById('paymentsList');
+    const calendarGrid = document.getElementById('calendarGrid');
+    const calendarPeriodLabel = document.getElementById('calendarPeriodLabel');
+    const calendarStatusFilter = document.getElementById('calendarStatusFilter');
+    const calendarJobFilter = document.getElementById('calendarJobFilter');
+    let activeAdminView = 'overview';
+    let currentBookings = [];
+    let currentBlockedDates = [];
+    let activeBookingFilter = 'all';
+    let activeFollowUpFilter = 'all';
+    let activeCalendarView = 'week';
+    let calendarAnchor = new Date();
+    let lastDrawerTrigger = null;
     const analyticsController = window.bergaAdminAnalytics?.init?.({
       supabase,
       endpoint: CLARITY_ANALYTICS_URL,
@@ -1220,18 +1374,37 @@
     }
 
     function renderAdminView() {
+      const showOverview = activeAdminView === 'overview';
+      const showCalendar = activeAdminView === 'calendar';
       const showBookings = activeAdminView === 'bookings';
+      const showCustomers = activeAdminView === 'customers';
+      const showFollowUp = activeAdminView === 'followUp';
+      const showPayments = activeAdminView === 'payments';
       const showBlockedDates = activeAdminView === 'blockedDates';
       const showDiscountCodes = activeAdminView === 'discountCodes';
       const showAnalytics = activeAdminView === 'analytics';
+      overviewPanel.classList.toggle('hidden', !showOverview);
+      calendarPanel.classList.toggle('hidden', !showCalendar);
       bookingsPanel.classList.toggle('hidden', !showBookings);
+      customersPanel.classList.toggle('hidden', !showCustomers);
+      followUpPanel.classList.toggle('hidden', !showFollowUp);
+      paymentsPanel.classList.toggle('hidden', !showPayments);
       blockedDatesPanel.classList.toggle('hidden', !showBlockedDates);
       discountCodesPanel.classList.toggle('hidden', !showDiscountCodes);
       analyticsPanel.classList.toggle('hidden', !showAnalytics);
+      document.body.classList.remove('nav-open');
+      mobileNavButton.setAttribute('aria-expanded', 'false');
 
       adminTabs.querySelectorAll('.admin-tab').forEach((button) => {
         button.classList.toggle('is-active', button.dataset.adminView === activeAdminView);
       });
+
+      if (showOverview) renderDashboard(currentBookings);
+      if (showCalendar) renderCalendar();
+      if (showBookings) renderBookingTable();
+      if (showCustomers) renderCustomers();
+      if (showFollowUp) renderFollowUp();
+      if (showPayments) renderPayments();
     }
 
     function escapeHtml(value) {
@@ -1295,12 +1468,12 @@
     function formatBookingStatus(value) {
       const normalized = String(value || 'pending').toLowerCase();
       const labels = {
-        awaiting_confirmation: 'Väntar på kundens mejlbekräftelse',
-        pending: 'Kundbekräftad',
-        confirmed: 'Bekräftad av admin',
-        completed: 'Slutförd',
+        awaiting_confirmation: 'Väntar på kund',
+        pending: 'Ny',
+        confirmed: 'Bekräftad',
+        completed: 'Arbete utfört',
         cancelled: 'Avbokad',
-        expired: 'Bekräftelselänk utgången'
+        expired: 'Utgången'
       };
       return labels[normalized] || normalized;
     }
@@ -1433,7 +1606,7 @@
       };
     }
 
-    function renderBookings(bookings) {
+    function renderLegacyBookings(bookings) {
       bookingsList.querySelectorAll('.booking-card').forEach((card) => hideRutNumber(card));
 
       if (!bookings.length) {
@@ -1580,19 +1753,408 @@
       }).join('');
     }
 
+    function stockholmToday() {
+      return new Intl.DateTimeFormat('sv-SE', {
+        timeZone: 'Europe/Stockholm', year: 'numeric', month: '2-digit', day: '2-digit'
+      }).format(new Date());
+    }
+
+    function formatShortDate(value) {
+      if (!value) return 'Datum saknas';
+      return new Date(`${value}T12:00:00`).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' });
+    }
+
+    function formatPaymentStatus(value) {
+      return String(value || 'unpaid').toLowerCase() === 'paid' ? 'Betald' : 'Obetald';
+    }
+
+    function bookingTimestamp(booking) {
+      const timeMatch = String(booking.booking_time || '').match(/(\d{1,2})(?::(\d{2}))?/);
+      const hours = timeMatch ? Number(timeMatch[1]) : 9;
+      const minutes = timeMatch ? Number(timeMatch[2] || 0) : 0;
+      return new Date(`${booking.booking_date || '1970-01-01'}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`).getTime();
+    }
+
+    function getNextAction(booking) {
+      const status = String(booking.status || '').toLowerCase();
+      const paymentPaid = String(booking.payment_status || '').toLowerCase() === 'paid';
+      const workCompleted = Boolean(booking.completed_at);
+      const usesRut = isRutBooking(booking);
+      const rutStatus = String(booking.rut_application_status || 'not_ready').toLowerCase();
+
+      if (['cancelled', 'expired'].includes(status)) return { label: 'Ingen åtgärd', tone: 'neutral', action: '' };
+      if (status === 'awaiting_confirmation') return { label: 'Vänta på kund', tone: 'warning', action: '' };
+      if (status === 'pending' && booking.email_confirmed_at) return { label: 'Bekräfta bokning', tone: 'primary', action: 'action-confirm' };
+      if (!workCompleted && ['pending', 'confirmed'].includes(status)) return { label: 'Markera arbete utfört', tone: 'primary', action: 'action-work-completed' };
+      if (workCompleted && !booking.payment_email_sent) return { label: 'Skicka betalningsmejl', tone: 'primary', action: 'action-complete' };
+      if (workCompleted && !paymentPaid) return { label: 'Kontrollera betalning', tone: 'payment', action: 'action-paid' };
+      if (paymentPaid && usesRut && booking.rut_submission_available && ['ready', 'rejected'].includes(rutStatus)) {
+        return { label: 'Markera RUT ansökt', tone: 'rut', action: 'action-rut-applied' };
+      }
+      if (paymentPaid && usesRut && rutStatus === 'submitted') return { label: 'Registrera RUT-beslut', tone: 'rut', action: '' };
+      if (paymentPaid && usesRut && !booking.rut_submission_available && !['approved'].includes(rutStatus)) {
+        return { label: 'Skicka RUT-länk', tone: 'rut', action: 'action-resend-rut' };
+      }
+      if (paymentPaid && (!usesRut || rutStatus === 'approved')) return { label: 'Slutförd', tone: 'success', action: '' };
+      return { label: 'Öppna bokning', tone: 'neutral', action: '' };
+    }
+
+    function getBookingService(booking) {
+      return [booking.service_scope, booking.housing_type, booking.window_count].filter(Boolean).join(' · ') || 'Fönsterputs';
+    }
+
+    function buildBookingDetail(booking) {
+      const priceParts = getBookingPriceParts(booking);
+      const usesRut = isRutBooking(booking);
+      const rutWorkflowStatus = formatRutWorkflowStatus(booking.rut_application_status || booking.rut_status || (usesRut ? 'not_ready' : 'Ej RUT'));
+      const rutWorkflowStatusKey = String(booking.rut_application_status || 'not_ready').toLowerCase();
+      const paymentIsPaid = String(booking.payment_status || '').toLowerCase() === 'paid';
+      const workIsCompleted = Boolean(booking.completed_at);
+      const bookingStatus = String(booking.status || '').toLowerCase();
+      const bookingCanBeWorked = ['pending', 'confirmed'].includes(bookingStatus);
+      const bookingCanBeAdminConfirmed = bookingStatus === 'pending' && Boolean(booking.email_confirmed_at);
+      const hasRutSubmission = booking.rut_submission_available === true;
+      const rutLinkCanBeIssued = Boolean(booking.email_confirmed_at) && ['pending', 'confirmed', 'completed'].includes(bookingStatus);
+      const canResendRut = rutLinkCanBeIssued && !hasRutSubmission && !['submitted', 'approved'].includes(rutWorkflowStatusKey);
+      const completionReference = booking.invoice_reference || booking.swish_reference || '';
+      const completionAmount = priceParts.customerToPay ?? '';
+      const nextAction = getNextAction(booking);
+      const packageParts = [
+        booking.housing_type, booking.window_count, booking.service_scope, booking.addons,
+        booking.transport_type, booking.sea_miles ? `Sjömil: ${booking.sea_miles}` : '',
+        booking.coordinates ? `Koordinater: ${booking.coordinates}` : ''
+      ].filter(Boolean);
+      const primaryClass = nextAction.tone === 'payment' || nextAction.tone === 'success' ? 'button-success' : 'button-primary';
+      const primaryButton = nextAction.action
+        ? `<button type="button" class="button ${primaryClass} ${nextAction.action}">${escapeHtml(nextAction.label)}</button>`
+        : `<span class="badge ${nextAction.tone === 'success' ? 'completed' : getBadgeClass(booking.status)}">${escapeHtml(nextAction.label)}</span>`;
+
+      return `
+        <article class="booking-card" data-booking-id="${escapeHtml(booking.id)}" data-uses-rut="${usesRut}" data-rut-received="${hasRutSubmission}" data-work-completed="${workIsCompleted}">
+          <div class="booking-top">
+            <div><h3>${escapeHtml(booking.customer_name || 'Namn saknas')}</h3><div class="booking-meta">${escapeHtml(formatDate(booking.booking_date))} · ${escapeHtml(booking.booking_time || 'Tid ej vald')}<br>${escapeHtml(booking.address || 'Adress saknas')}</div></div>
+            <div class="badge-row"><span class="badge ${getBadgeClass(booking.status)}">${escapeHtml(formatBookingStatus(booking.status))}</span><span class="badge ${getBadgeClass(booking.payment_status)}">${escapeHtml(formatPaymentStatus(booking.payment_status))}</span>${usesRut ? `<span class="badge pending">RUT: ${escapeHtml(rutWorkflowStatus)}</span>` : ''}</div>
+          </div>
+          <nav class="drawer-tabs" aria-label="Bokningsdetaljer"><button type="button" class="is-active" data-drawer-target="overview">Översikt</button><button type="button" data-drawer-target="customer">Kund</button><button type="button" data-drawer-target="job">Jobbuppgifter</button><button type="button" data-drawer-target="payment">Betalning och Swish</button>${usesRut ? '<button type="button" data-drawer-target="rut">RUT</button>' : ''}<button type="button" data-drawer-target="communication">Kommunikation</button><button type="button" data-drawer-target="history">Historik</button></nav>
+
+          <section class="drawer-section" data-drawer-section="overview"><h4>Översikt</h4><div class="booking-grid">
+            <div class="detail"><strong>Datum och tid</strong><span>${escapeHtml(formatDate(booking.booking_date))} · ${escapeHtml(booking.booking_time || 'Ej valt')}</span></div>
+            <div class="detail"><strong>Nästa åtgärd</strong><span>${escapeHtml(nextAction.label)}</span></div>
+            <div class="detail"><strong>Tjänst</strong><span>${escapeHtml(getBookingService(booking))}</span></div>
+            <div class="detail"><strong>Pris för kund</strong><span>${escapeHtml(priceParts.isQuote ? 'Enligt offert' : formatMoney(priceParts.customerToPay))}</span></div>
+          </div></section>
+
+          <section class="drawer-section" data-drawer-section="customer"><h4>Kund</h4><div class="booking-grid">
+            <div class="detail"><strong>Namn</strong><span>${escapeHtml(booking.customer_name || 'Ej angivet')}</span></div>
+            <div class="detail"><strong>Telefon</strong><span>${escapeHtml(booking.phone || 'Ej angivet')}</span></div>
+            <div class="detail"><strong>Mejl</strong><span>${escapeHtml(booking.email || 'Ej angivet')}</span></div>
+            <div class="detail"><strong>Adress</strong><span>${escapeHtml([booking.address, booking.postal_code].filter(Boolean).join(', ') || 'Ej angiven')}</span></div>
+            <div class="detail"><strong>Kommunikationsval</strong><span>${escapeHtml(booking.recurrence_weeks ? `Återkommande var ${booking.recurrence_weeks}:e vecka` : 'Engångsbesök')}</span></div>
+            <div class="detail"><strong>Intern information</strong><span>${escapeHtml(booking.internal_note || booking.message || 'Ingen anteckning')}</span></div>
+          </div></section>
+
+          <section class="drawer-section" data-drawer-section="job"><h4>Jobbuppgifter</h4><div class="booking-grid">
+            <div class="detail"><strong>Paket</strong><span>${escapeHtml(packageParts.join(' · ') || 'Ej angivet')}</span></div>
+            <div class="detail"><strong>Övrig information</strong><span>${escapeHtml(booking.message || 'Ingen extra information')}</span></div>
+            <div class="detail"><strong>Mejlbekräftelse</strong><span>${escapeHtml(booking.email_confirmed_at ? `Bekräftad ${formatDateTime(booking.email_confirmed_at)}` : 'Inte bekräftad')}</span></div>
+            <div class="detail"><strong>Arbete utfört</strong><span>${escapeHtml(formatDateTime(booking.completed_at, 'Inte markerat'))}</span></div>
+          </div></section>
+
+          <section class="drawer-section" data-drawer-section="payment"><h4>Betalning och Swish</h4><div class="booking-grid">
+            <div class="detail"><strong>Swish Företag</strong><span>${SWISH_NUMBER_DISPLAY} · ${SWISH_RECIPIENT_NAME}</span></div>
+            <div class="detail"><strong>Betalningsstatus</strong><span>${escapeHtml(formatPaymentStatus(booking.payment_status))}</span></div>
+            <div class="detail"><strong>Pris före RUT</strong><span>${escapeHtml(formatMoney(priceParts.priceBeforeRut))}</span></div>
+            <div class="detail"><strong>Kund att Swisha</strong><span>${escapeHtml(formatMoney(priceParts.customerToPay))}</span></div>
+            <div class="detail"><strong>Arbetskostnad</strong><span>${escapeHtml(formatMoney(priceParts.laborBeforeRut))}</span></div>
+            <div class="detail"><strong>Material + transport</strong><span>${escapeHtml(`${formatMoney(priceParts.materialCost)} + ${formatMoney(priceParts.transportCost, '0 kr')}`)}</span></div>
+          </div>
+          <div class="completion-fields">
+            <label class="field-wide">Fakturareferens<input type="text" class="completion-invoice-reference" value="${escapeHtml(completionReference)}" maxlength="35" placeholder="Fakturanummer eller referens" autocomplete="off" required></label>
+            <label>Swishbelopp<input type="number" class="completion-swish-amount" value="${escapeHtml(completionAmount)}" min="1" step="1" inputmode="numeric"></label>
+            <label>Faktisk arbetstid<input type="number" class="completion-work-hours" value="${escapeHtml(booking.actual_work_hours ?? '')}" min="0.25" max="999" step="0.25" inputmode="decimal" ${usesRut ? 'required' : ''}></label>
+            <label>Arbetskostnad före RUT<input type="number" class="completion-labor-cost" value="${escapeHtml(priceParts.laborBeforeRut ?? '')}" min="0" step="1" inputmode="numeric"></label>
+            <label>Material<input type="number" class="completion-material-cost" value="${escapeHtml(priceParts.materialCost)}" min="0" step="1" inputmode="numeric"></label>
+            <label>Transport<input type="number" class="completion-transport-cost" value="${escapeHtml(priceParts.transportCost)}" min="0" step="1" inputmode="numeric"></label>
+            <label>RUT-avdrag<input type="number" class="completion-rut-deduction" value="${escapeHtml(priceParts.rutDeduction)}" min="0" step="1" inputmode="numeric" ${usesRut ? '' : 'readonly'}></label>
+            <p class="completion-help">Kontrollera uppgifterna mot den egna fakturan innan betalningsmejlet skickas.</p>
+          </div></section>
+
+          ${usesRut ? `<section class="drawer-section rut-panel" data-drawer-section="rut"><h4>Manuellt RUT-underlag</h4><p>Personnumret är krypterat, hämtas via den skyddade Edge Functionen och döljs automatiskt efter en minut.</p><div class="booking-grid">
+            <div class="detail"><strong>RUT-status</strong><span>${escapeHtml(rutWorkflowStatus)}</span></div><div class="detail"><strong>Begärt RUT</strong><span>${escapeHtml(formatMoney(booking.rut_requested_amount ?? booking.rut_deduction ?? priceParts.rutDeduction))}</span></div><div class="detail"><strong>Betalningsdatum</strong><span>${escapeHtml(formatDateTime(booking.paid_at))}</span></div><div class="detail"><strong>Fakturareferens</strong><span>${escapeHtml(completionReference || 'Ej angiven')}</span></div>
+          </div><div class="rut-sensitive-value hidden" aria-live="polite"></div><div class="completion-row"><button type="button" class="button button-secondary button-small action-resend-rut" ${canResendRut ? '' : 'disabled'}>${hasRutSubmission ? 'RUT-underlag mottaget' : 'Skicka ny RUT-länk'}</button><button type="button" class="button button-secondary button-small action-show-rut" ${!workIsCompleted || !hasRutSubmission ? 'disabled' : ''}>Visa personnummer</button><button type="button" class="button button-secondary button-small action-copy-rut hidden">Kopiera</button><button type="button" class="button button-success button-small action-rut-applied" ${!paymentIsPaid || !workIsCompleted || !hasRutSubmission || !['ready', 'rejected'].includes(rutWorkflowStatusKey) ? 'disabled' : ''}>Markera RUT ansökt</button><button type="button" class="button button-success button-small action-rut-approved" ${rutWorkflowStatusKey !== 'submitted' ? 'disabled' : ''}>Godkänt</button><button type="button" class="button button-secondary button-small action-rut-rejected" ${rutWorkflowStatusKey !== 'submitted' ? 'disabled' : ''}>Avslag</button></div></section>` : ''}
+
+          <section class="drawer-section" data-drawer-section="communication"><h4>Kommunikation</h4><div class="activity-list">
+            ${booking.customer_confirmation_email_sent_at ? `<div class="activity-item"><i class="activity-dot"></i><div class="activity-copy"><strong>Bekräftelsemejl skickat</strong><span>Kundens bokningsbekräftelse</span></div><time>${escapeHtml(formatDateTime(booking.customer_confirmation_email_sent_at))}</time></div>` : ''}
+            ${booking.reminder_sent_at ? `<div class="activity-item"><i class="activity-dot"></i><div class="activity-copy"><strong>Påminnelse skickad</strong><span>Automatisk bokningspåminnelse</span></div><time>${escapeHtml(formatDateTime(booking.reminder_sent_at))}</time></div>` : ''}
+            ${booking.payment_email_sent_at ? `<div class="activity-item"><i class="activity-dot"></i><div class="activity-copy"><strong>Betalningsmejl skickat</strong><span>Swishuppgifter och fakturareferens</span></div><time>${escapeHtml(formatDateTime(booking.payment_email_sent_at))}</time></div>` : ''}
+            ${booking.review_email_sent_at ? `<div class="activity-item"><i class="activity-dot"></i><div class="activity-copy"><strong>Recensionsförfrågan skickad</strong><span>Registrerad i befintlig bokningshistorik</span></div><time>${escapeHtml(formatDateTime(booking.review_email_sent_at))}</time></div>` : '<div class="empty-state">Ingen recensionsförfrågan är registrerad.</div>'}
+          </div></section>
+
+          <section class="drawer-section" data-drawer-section="history"><h4>Historik</h4><div class="activity-list"><div class="activity-item"><i class="activity-dot"></i><div class="activity-copy"><strong>Bokning skapad</strong><span>${escapeHtml(formatBookingStatus(booking.status))}</span></div><time>${escapeHtml(formatDateTime(booking.created_at))}</time></div>${workIsCompleted ? `<div class="activity-item"><i class="activity-dot"></i><div class="activity-copy"><strong>Arbete markerat som utfört</strong><span>Av administratör</span></div><time>${escapeHtml(formatDateTime(booking.completed_at))}</time></div>` : ''}${paymentIsPaid ? `<div class="activity-item"><i class="activity-dot"></i><div class="activity-copy"><strong>Betalning kontrollerad</strong><span>Swish markerad som betald</span></div><time>${escapeHtml(formatDateTime(booking.paid_at))}</time></div>` : ''}</div></section>
+
+          <details class="secondary-actions"><summary>Fler alternativ</summary><div class="completion-row"><button type="button" class="button button-secondary action-confirm" ${bookingCanBeAdminConfirmed ? '' : 'disabled'}>Bekräfta som admin</button><button type="button" class="button button-secondary action-work-completed" ${workIsCompleted || !bookingCanBeWorked ? 'disabled' : ''}>Markera arbete utfört</button><button type="button" class="button button-secondary action-complete" ${booking.payment_email_sent ? 'disabled' : ''}>Skicka betalningsmejl</button><button type="button" class="button button-secondary action-paid" ${paymentIsPaid || !workIsCompleted ? 'disabled' : ''}>Markera Swish betald</button>${usesRut ? `<button type="button" class="button button-danger action-purge-rut" ${!hasRutSubmission ? 'disabled' : ''}>Gallra personnummer</button>` : ''}<button type="button" class="button button-danger action-delete">Ta bort bokning</button></div></details>
+          <p class="status-message" role="status" aria-live="polite"></p>
+          <div class="primary-action-row">${primaryButton}</div>
+        </article>`;
+    }
+
+    function openBookingDrawer(id, trigger = null) {
+      const booking = currentBookings.find((item) => String(item.id) === String(id));
+      if (!booking) return;
+      lastDrawerTrigger = trigger instanceof HTMLElement ? trigger : document.activeElement;
+      hideAllRutNumbers();
+      bookingDrawerTitle.textContent = booking.customer_name || 'Bokning';
+      bookingDrawerBody.innerHTML = buildBookingDetail(booking);
+      bookingDrawer.classList.remove('hidden');
+      bookingDrawerBackdrop.classList.remove('hidden');
+      bookingDrawer.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('drawer-open');
+      bookingDrawerClose.focus();
+    }
+
+    function closeBookingDrawer() {
+      hideAllRutNumbers();
+      bookingDrawer.classList.add('hidden');
+      bookingDrawerBackdrop.classList.add('hidden');
+      bookingDrawer.setAttribute('aria-hidden', 'true');
+      bookingDrawerBody.replaceChildren();
+      document.body.classList.remove('drawer-open');
+      if (lastDrawerTrigger instanceof HTMLElement) lastDrawerTrigger.focus();
+      lastDrawerTrigger = null;
+    }
+
+    function bookingMatchesSavedView(booking, filter) {
+      const today = stockholmToday();
+      const sevenDays = addDaysToDateString(today, 7);
+      const status = String(booking.status || '').toLowerCase();
+      const paid = String(booking.payment_status || '').toLowerCase() === 'paid';
+      const rutStatus = String(booking.rut_application_status || '').toLowerCase();
+      if (filter === 'today') return booking.booking_date === today;
+      if (filter === 'week') return booking.booking_date >= today && booking.booking_date <= sevenDays;
+      if (filter === 'unconfirmed') return ['awaiting_confirmation', 'pending'].includes(status);
+      if (filter === 'unpaid') return Boolean(booking.completed_at) && !paid;
+      if (filter === 'rut') return isRutBooking(booking) && paid && !['approved'].includes(rutStatus);
+      if (filter === 'completed') return paid && (!isRutBooking(booking) || rutStatus === 'approved');
+      if (filter === 'cancelled') return status === 'cancelled';
+      return true;
+    }
+
+    function getVisibleBookings() {
+      const query = String(bookingSearch.value || globalSearch.value || '').trim().toLocaleLowerCase('sv-SE');
+      const statusFilter = bookingStatusFilter.value;
+      const filtered = currentBookings.filter((booking) => {
+        const haystack = [booking.customer_name, booking.email, booking.phone, booking.address, booking.postal_code, booking.booking_date].join(' ').toLocaleLowerCase('sv-SE');
+        return bookingMatchesSavedView(booking, activeBookingFilter)
+          && (statusFilter === 'all' || String(booking.status || '').toLowerCase() === statusFilter)
+          && (!query || haystack.includes(query));
+      });
+      return filtered.sort((a, b) => {
+        if (bookingSort.value === 'created-desc') return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+        return bookingSort.value === 'date-desc' ? bookingTimestamp(b) - bookingTimestamp(a) : bookingTimestamp(a) - bookingTimestamp(b);
+      });
+    }
+
+    function renderBookingTable() {
+      const bookings = getVisibleBookings();
+      if (!bookings.length) {
+        bookingsList.innerHTML = '<div class="empty-state">Inga bokningar matchar den valda vyn.</div>';
+        return;
+      }
+      bookingsList.innerHTML = `<table class="admin-table"><thead><tr><th style="width:12%">Datum</th><th style="width:17%">Kund</th><th style="width:17%">Adress</th><th style="width:16%">Tjänst</th><th style="width:11%">Status</th><th style="width:10%">Betalning</th><th style="width:17%">Nästa åtgärd</th></tr></thead><tbody>${bookings.map((booking) => {
+        const next = getNextAction(booking);
+        return `<tr data-open-booking="${escapeHtml(booking.id)}" tabindex="0"><td class="primary-cell"><strong>${escapeHtml(formatShortDate(booking.booking_date))} · ${escapeHtml(booking.booking_time || '–')}</strong><span>${escapeHtml(booking.booking_date || '')}</span></td><td class="primary-cell"><strong>${escapeHtml(booking.customer_name || 'Namn saknas')}</strong><span>${escapeHtml(booking.phone || booking.email || 'Kontakt saknas')}</span></td><td class="primary-cell"><strong>${escapeHtml(booking.address || 'Adress saknas')}</strong><span>${escapeHtml(booking.postal_code || '')}</span></td><td class="muted-cell">${escapeHtml(getBookingService(booking))}</td><td><span class="badge ${getBadgeClass(booking.status)}">${escapeHtml(formatBookingStatus(booking.status))}</span></td><td><span class="badge ${getBadgeClass(booking.payment_status)}">${escapeHtml(formatPaymentStatus(booking.payment_status))}</span></td><td class="action-cell"><span class="row-actions"><button type="button" class="button ${next.tone === 'payment' ? 'button-success' : 'button-secondary'}" data-open-booking="${escapeHtml(booking.id)}">${escapeHtml(next.label)}</button><button type="button" class="more-button" data-open-booking="${escapeHtml(booking.id)}" aria-label="Fler alternativ för ${escapeHtml(booking.customer_name || 'bokning')}">···</button></span></td></tr>`;
+      }).join('')}</tbody></table>`;
+    }
+
+    function getActionableBookings(bookings) {
+      return bookings.filter((booking) => !['Ingen åtgärd', 'Slutförd', 'Öppna bokning'].includes(getNextAction(booking).label));
+    }
+
+    function renderDashboard(bookings) {
+      const today = stockholmToday();
+      const weekEnd = addDaysToDateString(today, 7);
+      const todayItems = bookings.filter((booking) => booking.booking_date === today && !['cancelled', 'expired'].includes(String(booking.status || '').toLowerCase()));
+      const unconfirmed = bookings.filter((booking) => ['awaiting_confirmation', 'pending'].includes(String(booking.status || '').toLowerCase())).length;
+      const unpaid = bookings.filter((booking) => booking.completed_at && String(booking.payment_status || '').toLowerCase() !== 'paid').length;
+      const rut = bookings.filter((booking) => isRutBooking(booking) && String(booking.payment_status || '').toLowerCase() === 'paid' && String(booking.rut_application_status || '') !== 'approved').length;
+      document.getElementById('overviewDate').textContent = new Date(`${today}T12:00:00`).toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long' });
+      document.getElementById('dashboardMetrics').innerHTML = [
+        ['Bokningar i dag', todayItems.length, `${bookings.filter((booking) => booking.booking_date > today && booking.booking_date <= weekEnd).length} kommande sju dagar`, ''],
+        ['Obekräftade', unconfirmed, 'Behöver granskas', unconfirmed ? 'warning' : ''],
+        ['Utförda men obetalda', unpaid, 'Kontrollera i Swish Företag', unpaid ? 'warning' : ''],
+        ['RUT att hantera', rut, 'Betalda jobb med nästa RUT-steg', rut ? 'warning' : 'success']
+      ].map(([label, value, detail, tone]) => `<article class="metric-card" data-tone="${tone}"><span>${escapeHtml(label)}</span><strong>${value}</strong><small>${escapeHtml(detail)}</small></article>`).join('');
+
+      const tasks = getActionableBookings(bookings).sort((a, b) => bookingTimestamp(a) - bookingTimestamp(b)).slice(0, 6);
+      document.getElementById('todayTasks').innerHTML = tasks.length ? tasks.map((booking) => {
+        const next = getNextAction(booking);
+        return `<div class="task-item"><span class="task-icon" data-tone="${escapeHtml(next.tone)}">${next.tone === 'payment' ? 'kr' : next.tone === 'rut' ? 'R' : '!'}</span><div class="task-copy"><strong>${escapeHtml(next.label)} · ${escapeHtml(booking.customer_name || 'Kund')}</strong><span>${escapeHtml(formatShortDate(booking.booking_date))} · ${escapeHtml(booking.address || 'Adress saknas')}</span></div><button type="button" class="button button-secondary" data-open-booking="${escapeHtml(booking.id)}">Öppna</button></div>`;
+      }).join('') : '<div class="empty-state">Bra jobbat – inga akuta uppgifter just nu.</div>';
+
+      document.getElementById('todayBookings').innerHTML = todayItems.length ? todayItems.sort((a, b) => bookingTimestamp(a) - bookingTimestamp(b)).map((booking) => `<button type="button" class="agenda-item" data-open-booking="${escapeHtml(booking.id)}"><span class="agenda-time">${escapeHtml(booking.booking_time || '–')}</span><span class="agenda-copy"><strong>${escapeHtml(booking.customer_name || 'Kund')}</strong><span>${escapeHtml(booking.address || getBookingService(booking))}</span></span><span class="badge ${getBadgeClass(booking.status)}">${escapeHtml(formatBookingStatus(booking.status))}</span></button>`).join('') : '<div class="empty-state">Inga bokningar i dag.</div>';
+
+      const activities = [...bookings].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)).slice(0, 5);
+      document.getElementById('recentActivity').innerHTML = activities.length ? activities.map((booking) => `<button type="button" class="activity-item" data-open-booking="${escapeHtml(booking.id)}"><i class="activity-dot"></i><span class="activity-copy"><strong>${escapeHtml(booking.customer_name || 'Kund')} · bokning ${escapeHtml(formatBookingStatus(booking.status).toLowerCase())}</strong><span>${escapeHtml(getBookingService(booking))}</span></span><time>${escapeHtml(formatDateTime(booking.created_at))}</time></button>`).join('') : '<div class="empty-state">Ingen aktivitet att visa.</div>';
+    }
+
+    function customerKey(booking) {
+      return String(booking.email || booking.phone || booking.customer_name || booking.id).trim().toLocaleLowerCase('sv-SE');
+    }
+
+    function getCustomers() {
+      const groups = new Map();
+      currentBookings.forEach((booking) => {
+        const key = customerKey(booking);
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(booking);
+      });
+      const today = stockholmToday();
+      return [...groups.values()].map((bookings) => {
+        const sorted = [...bookings].sort((a, b) => bookingTimestamp(b) - bookingTimestamp(a));
+        const future = sorted.filter((booking) => booking.booking_date >= today && !['cancelled', 'expired'].includes(String(booking.status || '').toLowerCase())).sort((a, b) => bookingTimestamp(a) - bookingTimestamp(b));
+        const completed = sorted.filter((booking) => Boolean(booking.completed_at));
+        return { booking: sorted[0], bookings: sorted, latest: sorted[0], next: future[0] || null, completed: completed.length };
+      });
+    }
+
+    function renderCustomers() {
+      const query = customerSearch.value.trim().toLocaleLowerCase('sv-SE');
+      const today = stockholmToday();
+      const inactiveBoundary = addDaysToDateString(today, -183);
+      const customers = getCustomers().filter((customer) => {
+        const haystack = [customer.booking.customer_name, customer.booking.email, customer.booking.phone, customer.booking.address].join(' ').toLocaleLowerCase('sv-SE');
+        if (query && !haystack.includes(query)) return false;
+        if (customerFilter.value === 'returning') return customer.completed > 1;
+        if (customerFilter.value === 'no-upcoming') return !customer.next;
+        if (customerFilter.value === 'inactive') return !customer.next && customer.latest.booking_date < inactiveBoundary;
+        return true;
+      });
+      customersList.innerHTML = customers.length ? `<table class="admin-table"><thead><tr><th>Kund</th><th>Senaste bokning</th><th>Nästa bokning</th><th>Genomförda jobb</th><th>Senaste kontakt</th><th>Nästa rekommenderade åtgärd</th></tr></thead><tbody>${customers.map((customer) => {
+        const actionBooking = customer.next || customer.latest;
+        return `<tr data-open-booking="${escapeHtml(actionBooking.id)}" tabindex="0"><td class="primary-cell"><strong>${escapeHtml(customer.booking.customer_name || 'Namn saknas')}</strong><span>${escapeHtml(customer.booking.phone || customer.booking.email || 'Kontakt saknas')}</span></td><td>${escapeHtml(formatShortDate(customer.latest.booking_date))}</td><td>${customer.next ? escapeHtml(`${formatShortDate(customer.next.booking_date)} · ${customer.next.booking_time || ''}`) : 'Ingen'}</td><td>${customer.completed}</td><td>${escapeHtml(formatDateTime(customer.latest.payment_email_sent_at || customer.latest.reminder_sent_at || customer.latest.created_at))}</td><td><span class="badge ${getBadgeClass(actionBooking.status)}">${escapeHtml(customer.next ? getNextAction(customer.next).label : 'Planera återbokning')}</span></td></tr>`;
+      }).join('')}</tbody></table>` : '<div class="empty-state">Inga kunder matchar filtret.</div>';
+    }
+
+    function buildFollowUpTasks() {
+      const tasks = [];
+      currentBookings.forEach((booking) => {
+        const next = getNextAction(booking);
+        if (['Bekräfta bokning', 'Vänta på kund'].includes(next.label)) tasks.push({ booking, type: 'today', reason: 'Bokning behöver bekräftas', action: next.label });
+        if (next.tone === 'payment') tasks.push({ booking, type: 'payment', reason: 'Utfört jobb saknar kontrollerad betalning', action: next.label });
+        if (next.tone === 'rut') tasks.push({ booking, type: 'rut', reason: 'RUT-flödet har ett väntande steg', action: next.label });
+        if (booking.completed_at && String(booking.payment_status || '').toLowerCase() === 'paid' && !booking.review_email_sent) tasks.push({ booking, type: 'review', reason: 'Ingen recensionsförfrågan är registrerad', action: 'Granska recensionsflöde' });
+      });
+      return tasks;
+    }
+
+    function renderFollowUp() {
+      const tasks = buildFollowUpTasks().filter((task) => activeFollowUpFilter === 'all' || task.type === activeFollowUpFilter);
+      followUpList.innerHTML = tasks.length ? `<table class="admin-table"><thead><tr><th>Kund</th><th>Orsak</th><th>Rekommenderad åtgärd</th><th>Förfallodatum</th><th>Status</th><th></th></tr></thead><tbody>${tasks.map((task) => `<tr data-open-booking="${escapeHtml(task.booking.id)}" tabindex="0"><td class="primary-cell"><strong>${escapeHtml(task.booking.customer_name || 'Kund')}</strong><span>${escapeHtml(task.booking.phone || task.booking.email || '')}</span></td><td>${escapeHtml(task.reason)}</td><td>${escapeHtml(task.action)}</td><td>${escapeHtml(formatShortDate(task.booking.booking_date))}</td><td><span class="badge pending">Öppen</span></td><td class="action-cell"><button type="button" class="button button-secondary" data-open-booking="${escapeHtml(task.booking.id)}">Öppna</button></td></tr>`).join('')}</tbody></table>` : '<div class="empty-state">Inga uppgifter i den valda kön.</div>';
+    }
+
+    function renderPayments() {
+      const rows = currentBookings.filter((booking) => booking.completed_at || booking.payment_email_sent || isRutBooking(booking));
+      const unpaid = rows.filter((booking) => String(booking.payment_status || '').toLowerCase() !== 'paid').length;
+      const rutReady = rows.filter((booking) => isRutBooking(booking) && String(booking.rut_application_status || '') === 'ready').length;
+      const submitted = rows.filter((booking) => String(booking.rut_application_status || '') === 'submitted').length;
+      const rejected = rows.filter((booking) => String(booking.rut_application_status || '') === 'rejected').length;
+      document.getElementById('paymentMetrics').innerHTML = [['Obetalda', unpaid, 'Swish att kontrollera'], ['RUT redo', rutReady, 'Klara att ansöka'], ['RUT ansökta', submitted, 'Inväntar beslut'], ['Avslag', rejected, 'Behöver åtgärdas']].map(([label, value, detail]) => `<article class="metric-card" data-tone="${value ? 'warning' : 'success'}"><span>${label}</span><strong>${value}</strong><small>${detail}</small></article>`).join('');
+      paymentsList.innerHTML = rows.length ? `<table class="admin-table"><thead><tr><th>Kund</th><th>Fakturareferens</th><th>Belopp</th><th>Betalning</th><th>RUT</th><th>Nästa åtgärd</th></tr></thead><tbody>${rows.map((booking) => { const next = getNextAction(booking); return `<tr data-open-booking="${escapeHtml(booking.id)}" tabindex="0"><td class="primary-cell"><strong>${escapeHtml(booking.customer_name || 'Kund')}</strong><span>${escapeHtml(formatShortDate(booking.booking_date))}</span></td><td>${escapeHtml(booking.invoice_reference || booking.swish_reference || '–')}</td><td>${escapeHtml(formatMoney(booking.swish_amount ?? getBookingPriceParts(booking).customerToPay))}</td><td><span class="badge ${getBadgeClass(booking.payment_status)}">${escapeHtml(formatPaymentStatus(booking.payment_status))}</span></td><td>${isRutBooking(booking) ? `<span class="badge pending">${escapeHtml(formatRutWorkflowStatus(booking.rut_application_status))}</span>` : 'Ej RUT'}</td><td class="action-cell"><button type="button" class="button button-secondary" data-open-booking="${escapeHtml(booking.id)}">${escapeHtml(next.label)}</button></td></tr>`; }).join('')}</tbody></table>` : '<div class="empty-state">Inga betalnings- eller RUT-ärenden.</div>';
+    }
+
+    function startOfWeek(date) {
+      const result = new Date(date);
+      result.setHours(12, 0, 0, 0);
+      const day = result.getDay() || 7;
+      result.setDate(result.getDate() - day + 1);
+      return result;
+    }
+
+    function dateToString(date) {
+      const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+      return local.toISOString().slice(0, 10);
+    }
+
+    function renderCalendarList(dates, sourceBookings = currentBookings) {
+      const dateSet = new Set(dates);
+      const items = sourceBookings.filter((booking) => dateSet.has(booking.booking_date)).sort((a, b) => bookingTimestamp(a) - bookingTimestamp(b));
+      calendarGrid.innerHTML = `<div class="calendar-list">${items.length ? items.map((booking) => `<button type="button" class="agenda-item" data-open-booking="${escapeHtml(booking.id)}"><span class="agenda-time">${escapeHtml(formatShortDate(booking.booking_date))}<br>${escapeHtml(booking.booking_time || '')}</span><span class="agenda-copy"><strong>${escapeHtml(booking.customer_name || 'Kund')}</strong><span>${escapeHtml(booking.address || getBookingService(booking))}</span></span><span class="badge ${getBadgeClass(booking.status)}">${escapeHtml(formatBookingStatus(booking.status))}</span></button>`).join('') : '<div class="empty-state">Inga bokningar i perioden.</div>'}</div>`;
+    }
+
+    function renderCalendarMonth(sourceBookings = currentBookings) {
+      const first = new Date(calendarAnchor.getFullYear(), calendarAnchor.getMonth(), 1, 12);
+      const gridStart = startOfWeek(first);
+      const days = Array.from({ length: 42 }, (_, index) => { const date = new Date(gridStart); date.setDate(date.getDate() + index); return date; });
+      calendarPeriodLabel.textContent = calendarAnchor.toLocaleDateString('sv-SE', { month: 'long', year: 'numeric' });
+      calendarGrid.innerHTML = `<div class="calendar-month"><div class="calendar-month-head">Mån</div><div class="calendar-month-head">Tis</div><div class="calendar-month-head">Ons</div><div class="calendar-month-head">Tor</div><div class="calendar-month-head">Fre</div><div class="calendar-month-head">Lör</div><div class="calendar-month-head">Sön</div>${days.map((date) => {
+        const dateString = dateToString(date);
+        const bookings = sourceBookings.filter((booking) => booking.booking_date === dateString);
+        const blocked = currentBlockedDates.find((item) => item.blocked_date === dateString);
+        return `<div class="calendar-month-day ${date.getMonth() !== calendarAnchor.getMonth() ? 'is-outside' : ''}"><strong>${date.getDate()}</strong>${blocked ? `<span class="calendar-block">${escapeHtml(blocked.reason || 'Spärrat')}</span>` : ''}${bookings.slice(0, 3).map((booking) => `<button type="button" class="calendar-event ${booking.completed_at ? 'is-completed' : ''}" data-open-booking="${escapeHtml(booking.id)}"><strong>${escapeHtml(booking.booking_time || '')} ${escapeHtml(booking.customer_name || 'Kund')}</strong></button>`).join('')}${bookings.length > 3 ? `<small>+${bookings.length - 3} till</small>` : ''}</div>`;
+      }).join('')}</div>`;
+    }
+
+    function renderCalendar() {
+      const statusFilter = calendarStatusFilter.value;
+      const jobFilter = calendarJobFilter.value;
+      const original = currentBookings;
+      const filtered = original.filter((booking) => (statusFilter === 'all' || String(booking.status || '') === statusFilter) && (jobFilter === 'all' || (jobFilter === 'rut' ? isRutBooking(booking) : !isRutBooking(booking))));
+      if (activeCalendarView === 'month') { renderCalendarMonth(filtered); return; }
+      const weekStart = startOfWeek(calendarAnchor);
+      const dayCount = activeCalendarView === 'day' ? 1 : 7;
+      const days = Array.from({ length: dayCount }, (_, index) => { const date = new Date(activeCalendarView === 'day' ? calendarAnchor : weekStart); date.setDate(date.getDate() + index); return date; });
+      const dateStrings = days.map(dateToString);
+      if (activeCalendarView === 'list') { calendarPeriodLabel.textContent = 'Kommande 30 dagar'; renderCalendarList(Array.from({ length: 30 }, (_, index) => addDaysToDateString(stockholmToday(), index)), filtered); return; }
+      calendarPeriodLabel.textContent = activeCalendarView === 'day' ? days[0].toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long' }) : `${formatShortDate(dateStrings[0])}–${formatShortDate(dateStrings[dateStrings.length - 1])}`;
+      const hours = Array.from({ length: 11 }, (_, index) => index + 8);
+      const columns = `62px repeat(${dayCount}, minmax(${dayCount === 1 ? '220px' : '104px'}, 1fr))`;
+      calendarGrid.innerHTML = `<div class="calendar-week" style="grid-template-columns:${columns}"><div class="calendar-corner"></div>${days.map((date) => { const value = dateToString(date); return `<div class="calendar-day-head ${value === stockholmToday() ? 'is-today' : ''}"><span>${date.toLocaleDateString('sv-SE', { weekday: 'short' })}</span><strong>${date.getDate()}</strong></div>`; }).join('')}${hours.map((hour) => `<div class="calendar-time">${String(hour).padStart(2, '0')}:00</div>${dateStrings.map((dateString) => {
+        const events = filtered.filter((booking) => booking.booking_date === dateString && Math.max(8, Math.min(18, new Date(bookingTimestamp(booking)).getHours())) === hour);
+        const blocked = currentBlockedDates.find((item) => item.blocked_date === dateString);
+        return `<div class="calendar-slot" data-calendar-date="${dateString}" data-calendar-hour="${hour}">${blocked && hour === 8 ? `<span class="calendar-block">Spärrat · ${escapeHtml(blocked.reason || '')}</span>` : ''}${events.map((booking) => `<button type="button" class="calendar-event ${booking.completed_at ? 'is-completed' : ''} ${String(booking.status || '') === 'cancelled' ? 'is-cancelled' : ''}" data-open-booking="${escapeHtml(booking.id)}"><strong>${escapeHtml(booking.booking_time || `${hour}:00`)} · ${escapeHtml(booking.customer_name || 'Kund')}</strong><span>${escapeHtml(booking.address || formatBookingStatus(booking.status))}</span></button>`).join('')}</div>`;
+      }).join('')}`).join('')}</div>`;
+    }
+
+    function renderBookings(bookings) {
+      currentBookings = bookings;
+      renderDashboard(bookings);
+      renderBookingTable();
+      renderCustomers();
+      renderFollowUp();
+      renderPayments();
+      renderCalendar();
+    }
+
+    function groupBlockedDates(blockedDates) {
+      const sorted = [...blockedDates].sort((a, b) => a.blocked_date.localeCompare(b.blocked_date));
+      return sorted.reduce((groups, item) => {
+        const previous = groups[groups.length - 1];
+        const isConsecutive = previous && addDaysToDateString(previous.end, 1) === item.blocked_date;
+        if (previous && isConsecutive && (previous.reason || '') === (item.reason || '')) {
+          previous.end = item.blocked_date;
+          previous.ids.push(item.id);
+        } else {
+          groups.push({ start: item.blocked_date, end: item.blocked_date, reason: item.reason || 'Ingen orsak angiven', ids: [item.id] });
+        }
+        return groups;
+      }, []);
+    }
+
     function renderBlockedDates(blockedDates) {
+      currentBlockedDates = blockedDates;
+      if (activeAdminView === 'calendar') renderCalendar();
       if (!blockedDates.length) {
         blockedDatesList.innerHTML = '<div class="empty-state">Inga semesterdagar eller spärrade datum är inlagda.</div>';
         return;
       }
 
-      blockedDatesList.innerHTML = blockedDates.map((blockedDate) => `
-        <div class="blocked-date-row" data-blocked-date-id="${blockedDate.id}">
+      blockedDatesList.innerHTML = groupBlockedDates(blockedDates).map((range) => `
+        <div class="blocked-date-row" data-blocked-date-ids="${range.ids.join(',')}">
           <div>
-            <strong>${escapeHtml(formatDate(blockedDate.blocked_date))}</strong>
-            <span>${escapeHtml(blockedDate.reason || 'Ingen orsak angiven')}</span>
+            <strong>${escapeHtml(range.start === range.end ? formatDate(range.start) : `${formatShortDate(range.start)}–${formatShortDate(range.end)} ${range.end.slice(0, 4)}`)}</strong>
+            <span>${escapeHtml(range.reason)} · ${range.ids.length} ${range.ids.length === 1 ? 'dag' : 'dagar'}</span>
           </div>
-          <button type="button" class="button button-secondary action-delete-blocked-date">Avblockera</button>
+          <button type="button" class="button button-danger action-delete-blocked-range">Ta bort intervallet</button>
         </div>
       `).join('');
     }
@@ -1620,30 +2182,29 @@
         return;
       }
 
-      discountCodesList.innerHTML = discountCodes.map((discountCode) => {
+      discountCodesList.innerHTML = `<div class="data-table-wrap"><table class="admin-table"><thead><tr><th>Kod</th><th>Rabattyp</th><th>Värde</th><th>Användningar</th><th>Giltighet</th><th>Status</th><th>Åtgärder</th></tr></thead><tbody>${discountCodes.map((discountCode) => {
         const value = discountCode.discount_type === 'percentage'
           ? `${discountCode.discount_value} %`
           : `${discountCode.discount_value} kr`;
-        const usage = discountCode.max_uses
-          ? `${discountCode.times_used} av ${discountCode.max_uses} använda`
-          : `${discountCode.times_used} använda • obegränsad`;
         const expiry = discountCode.expires_at
-          ? `Gäller till ${new Date(discountCode.expires_at).toLocaleDateString('sv-SE')}`
+          ? new Date(discountCode.expires_at).toLocaleDateString('sv-SE')
           : 'Ingen slutdag';
 
         return `
-          <div class="discount-code-row" data-discount-code-id="${discountCode.id}">
-            <div>
-              <strong>${escapeHtml(discountCode.code)} — ${escapeHtml(value)}</strong>
-              <span>${escapeHtml(usage)} • ${escapeHtml(expiry)} • ${discountCode.active ? 'Aktiv' : 'Pausad'}</span>
-            </div>
-            <div class="button-stack">
+          <tr class="discount-code-row" data-discount-code-id="${discountCode.id}">
+            <td class="primary-cell"><strong>${escapeHtml(discountCode.code)}</strong></td>
+            <td>${discountCode.discount_type === 'percentage' ? 'Procent' : 'Fast belopp'}</td>
+            <td>${escapeHtml(value)}</td>
+            <td>${escapeHtml(`${discountCode.times_used} / ${discountCode.max_uses ?? '∞'}`)}</td>
+            <td>${escapeHtml(expiry)}</td>
+            <td><span class="badge ${discountCode.active ? 'paid' : 'cancelled'}">${discountCode.active ? 'Aktiv' : 'Pausad'}</span></td>
+            <td class="action-cell"><div class="button-stack">
               <button type="button" class="button button-secondary action-toggle-discount-code" data-active="${discountCode.active}">${discountCode.active ? 'Pausa' : 'Aktivera'}</button>
               <button type="button" class="button button-danger action-delete-discount-code">Ta bort</button>
-            </div>
-          </div>
+            </div></td>
+          </tr>
         `;
-      }).join('');
+      }).join('')}</tbody></table></div>`;
     }
 
     async function fetchDiscountCodes() {
@@ -1698,6 +2259,7 @@
 
     async function fetchBookings() {
       bookingsList.innerHTML = '<div class="empty-state">Hämtar bokningar...</div>';
+      const openBookingId = bookingDrawerBody.querySelector('.booking-card')?.dataset.bookingId || '';
 
       const { data, error } = await supabase
         .from('bookings')
@@ -1714,6 +2276,16 @@
       }
 
       renderBookings(data || []);
+      if (openBookingId && !bookingDrawer.classList.contains('hidden')) {
+        const updatedBooking = currentBookings.find((booking) => String(booking.id) === String(openBookingId));
+        if (updatedBooking) {
+          bookingDrawerTitle.textContent = updatedBooking.customer_name || 'Bokning';
+          bookingDrawerBody.innerHTML = buildBookingDetail(updatedBooking);
+        } else {
+          closeBookingDrawer();
+        }
+      }
+      await fetchBlockedDates();
     }
 
     async function deleteBooking(id, messageElement, button) {
@@ -1744,8 +2316,8 @@
       await fetchBookings();
     }
 
-    async function deleteBlockedDate(id, button) {
-      if (!window.confirm('Avblockera den här dagen? Den blir bokningsbar igen om det inte redan finns en aktiv bokning den dagen.')) {
+    async function deleteBlockedDate(ids, button) {
+      if (!window.confirm(`Ta bort hela det spärrade intervallet (${ids.length} ${ids.length === 1 ? 'dag' : 'dagar'})? Datumen blir bokningsbara igen om de inte har aktiva bokningar.`)) {
         return;
       }
 
@@ -1755,7 +2327,7 @@
       const { error } = await supabase
         .from('booking_blocked_dates')
         .delete()
-        .eq('id', id);
+        .in('id', ids);
 
       if (error) {
         setBlockedDateMessage(`Kunde inte ta bort datumet: ${error.message}`, 'error');
@@ -1763,7 +2335,7 @@
         return;
       }
 
-      setBlockedDateMessage('Datumet har avblockerats. Det är bokbart igen om ingen aktiv bokning finns den dagen.', 'success');
+      setBlockedDateMessage(ids.length === 1 ? 'Datumet har avblockerats.' : 'Hela intervallet har avblockerats.', 'success');
       await fetchBlockedDates();
     }
 
@@ -1904,7 +2476,7 @@
     }
 
     function hideAllRutNumbers() {
-      bookingsList.querySelectorAll('.booking-card').forEach((card) => hideRutNumber(card));
+      bookingDrawerBody.querySelectorAll('.booking-card').forEach((card) => hideRutNumber(card));
     }
 
     async function callAdminRutDetails(action, bookingId) {
@@ -2047,7 +2619,7 @@
       }
     }
 
-    bookingsList.addEventListener('click', async (event) => {
+    bookingDrawerBody.addEventListener('click', async (event) => {
       const target = event.target;
       if (!(target instanceof HTMLElement)) return;
 
@@ -2145,6 +2717,112 @@
       }
     });
 
+    document.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+
+      const bookingTrigger = target.closest('[data-open-booking]');
+      if (bookingTrigger instanceof HTMLElement && !bookingDrawerBody.contains(bookingTrigger)) {
+        event.preventDefault();
+        openBookingDrawer(bookingTrigger.dataset.openBooking, bookingTrigger);
+        return;
+      }
+
+      const viewTrigger = target.closest('[data-open-view]');
+      if (viewTrigger instanceof HTMLElement) {
+        activeAdminView = viewTrigger.dataset.openView || 'overview';
+        renderAdminView();
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        globalSearch.focus();
+      }
+      if (event.key === 'Escape' && !bookingDrawer.classList.contains('hidden')) closeBookingDrawer();
+      const target = event.target;
+      if (target instanceof HTMLElement && target.matches('tr[data-open-booking]') && ['Enter', ' '].includes(event.key)) {
+        event.preventDefault();
+        openBookingDrawer(target.dataset.openBooking, target);
+      }
+    });
+
+    bookingDrawerClose.addEventListener('click', closeBookingDrawer);
+    bookingDrawerBackdrop.addEventListener('click', closeBookingDrawer);
+
+    bookingDrawerBody.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      const tab = target.closest('[data-drawer-target]');
+      if (!(tab instanceof HTMLElement)) return;
+      bookingDrawerBody.querySelectorAll('[data-drawer-target]').forEach((button) => button.classList.toggle('is-active', button === tab));
+      bookingDrawerBody.querySelector(`[data-drawer-section="${CSS.escape(tab.dataset.drawerTarget || '')}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    mobileNavButton.addEventListener('click', () => {
+      const open = document.body.classList.toggle('nav-open');
+      mobileNavButton.setAttribute('aria-expanded', String(open));
+    });
+
+    globalSearch.addEventListener('input', () => {
+      bookingSearch.value = globalSearch.value;
+      if (activeAdminView === 'bookings') renderBookingTable();
+    });
+
+    globalSearch.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter') return;
+      activeAdminView = 'bookings';
+      renderAdminView();
+      bookingSearch.focus();
+    });
+
+    bookingSearch.addEventListener('input', renderBookingTable);
+    bookingStatusFilter.addEventListener('change', renderBookingTable);
+    bookingSort.addEventListener('change', renderBookingTable);
+    bookingSavedViews.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement) || !target.matches('[data-booking-filter]')) return;
+      activeBookingFilter = target.dataset.bookingFilter || 'all';
+      bookingSavedViews.querySelectorAll('[data-booking-filter]').forEach((button) => button.classList.toggle('is-active', button === target));
+      renderBookingTable();
+    });
+
+    customerSearch.addEventListener('input', renderCustomers);
+    customerFilter.addEventListener('change', renderCustomers);
+    followUpViews.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement) || !target.matches('[data-follow-filter]')) return;
+      activeFollowUpFilter = target.dataset.followFilter || 'all';
+      followUpViews.querySelectorAll('[data-follow-filter]').forEach((button) => button.classList.toggle('is-active', button === target));
+      renderFollowUp();
+    });
+
+    document.getElementById('calendarToday').addEventListener('click', () => { calendarAnchor = new Date(); renderCalendar(); });
+    document.getElementById('calendarPrevious').addEventListener('click', () => {
+      calendarAnchor = new Date(calendarAnchor);
+      if (activeCalendarView === 'month') calendarAnchor.setMonth(calendarAnchor.getMonth() - 1);
+      else calendarAnchor.setDate(calendarAnchor.getDate() - (activeCalendarView === 'day' ? 1 : 7));
+      renderCalendar();
+    });
+    document.getElementById('calendarNext').addEventListener('click', () => {
+      calendarAnchor = new Date(calendarAnchor);
+      if (activeCalendarView === 'month') calendarAnchor.setMonth(calendarAnchor.getMonth() + 1);
+      else calendarAnchor.setDate(calendarAnchor.getDate() + (activeCalendarView === 'day' ? 1 : 7));
+      renderCalendar();
+    });
+    calendarPanel.querySelector('.segmented-control').addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement) || !target.matches('[data-calendar-view]')) return;
+      activeCalendarView = target.dataset.calendarView || 'week';
+      calendarPanel.querySelectorAll('[data-calendar-view]').forEach((button) => button.classList.toggle('is-active', button === target));
+      renderCalendar();
+    });
+    calendarStatusFilter.addEventListener('change', renderCalendar);
+    calendarJobFilter.addEventListener('change', renderCalendar);
+
+    document.querySelectorAll('[data-refresh-view]').forEach((button) => button.addEventListener('click', () => fetchBookings()));
+
     blockedDateForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       setBlockedDateMessage('');
@@ -2174,6 +2852,25 @@
         return;
       }
 
+      const { data: conflicts, error: conflictError } = await supabase
+        .from('bookings')
+        .select('id, booking_date, booking_time, customer_name, status')
+        .in('booking_date', dates)
+        .in('status', ['pending', 'confirmed']);
+
+      if (conflictError) {
+        setBlockedDateMessage(`Kunde inte kontrollera befintliga bokningar: ${conflictError.message}`, 'error');
+        blockedDateButton.disabled = false;
+        return;
+      }
+
+      if (conflicts?.length) {
+        const examples = conflicts.slice(0, 3).map((booking) => `${formatShortDate(booking.booking_date)} · ${booking.customer_name || 'Kund'}`).join(', ');
+        setBlockedDateMessage(`Intervallet innehåller ${conflicts.length} aktiv ${conflicts.length === 1 ? 'bokning' : 'bokningar'} (${examples}). Ingen bokning har flyttats eller tagits bort. Hantera konflikten innan intervallet spärras.`, 'error');
+        blockedDateButton.disabled = false;
+        return;
+      }
+
       const { error } = await supabase
         .from('booking_blocked_dates')
         .upsert(dates.map((date) => ({
@@ -2197,13 +2894,13 @@
     blockedDatesList.addEventListener('click', async (event) => {
       const target = event.target;
       if (!(target instanceof HTMLElement)) return;
-      if (!target.classList.contains('action-delete-blocked-date')) return;
+      if (!target.classList.contains('action-delete-blocked-range')) return;
 
       const row = target.closest('.blocked-date-row');
-      const id = Number(row?.dataset.blockedDateId);
-      if (!id) return;
+      const ids = String(row?.dataset.blockedDateIds || '').split(',').map(Number).filter(Number.isInteger);
+      if (!ids.length) return;
 
-      await deleteBlockedDate(id, target);
+      await deleteBlockedDate(ids, target);
     });
 
     fullyBookedDatesList.addEventListener('click', async (event) => {
@@ -2228,7 +2925,7 @@
       activeAdminView = 'bookings';
       renderAdminView();
       await fetchBookings();
-      document.querySelector(`[data-booking-id="${CSS.escape(id)}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      openBookingDrawer(id, target);
     });
 
     discountCodeForm.addEventListener('submit', async (event) => {
@@ -2527,6 +3224,14 @@
       mfaPanel.classList.toggle('hidden', !isLoggedIn || isMfaVerified || mustSetPassword);
       adminTabs.classList.toggle('hidden', !isMfaVerified || mustSetPassword);
       logoutButton.classList.toggle('hidden', !isLoggedIn);
+      document.body.classList.toggle('is-admin-ready', isMfaVerified && !mustSetPassword);
+      workspaceToolbar.classList.toggle('hidden', !isMfaVerified || mustSetPassword);
+
+      if (!isMfaVerified || mustSetPassword) {
+        [overviewPanel, calendarPanel, bookingsPanel, customersPanel, followUpPanel, paymentsPanel, blockedDatesPanel, discountCodesPanel, analyticsPanel]
+          .forEach((panel) => panel.classList.add('hidden'));
+        closeBookingDrawer();
+      }
 
       if (mustSetPassword) {
         hideAllRutNumbers();
@@ -2551,7 +3256,7 @@
         passwordSetupPanel.classList.add('hidden');
         clearMfaSetup();
         verifiedMfaFactorId = '';
-        activeAdminView = 'bookings';
+        activeAdminView = 'overview';
         bookingsPanel.classList.add('hidden');
         blockedDatesPanel.classList.add('hidden');
         discountCodesPanel.classList.add('hidden');
