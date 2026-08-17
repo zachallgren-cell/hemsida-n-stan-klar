@@ -440,6 +440,39 @@ body.booking-page :focus-visible {
   background: #f9fcfd;
 }
 
+.weekday-booking-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  max-width: 880px;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border: 1px solid #badbe9;
+  border-radius: 14px;
+  color: var(--booking-blue-dark);
+  background: #eaf7fc;
+}
+
+.weekday-booking-notice div,
+.weekday-booking-notice strong,
+.weekday-booking-notice span {
+  display: block;
+}
+
+.weekday-booking-notice span {
+  margin-top: 3px;
+  color: var(--booking-muted);
+  font-size: 0.9rem;
+}
+
+.weekday-booking-notice a {
+  flex: 0 0 auto;
+  color: var(--booking-blue-dark);
+  font-weight: 900;
+  text-underline-offset: 3px;
+}
+
 .calendar-header {
   display: grid;
   grid-template-columns: 48px 1fr 48px;
@@ -762,12 +795,36 @@ body.booking-page :focus-visible {
   font-weight: 900;
 }
 
-.stepper output {
-  display: grid;
+.stepper-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.stepper-value {
   min-width: 0;
-  place-items: center;
+  width: 100%;
+  border: 0;
+  border-radius: 0;
+  padding: 0 6px;
+  color: var(--booking-ink);
+  background: #fff;
   font-size: 1.08rem;
   font-weight: 900;
+  text-align: center;
+  appearance: textfield;
+}
+
+.stepper-value::-webkit-inner-spin-button,
+.stepper-value::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+.stepper-value:focus {
+  position: relative;
+  z-index: 1;
+  outline: 3px solid rgba(20, 113, 154, 0.24);
+  outline-offset: -3px;
 }
 
 .field-grid {
@@ -1145,6 +1202,12 @@ body.booking-page :focus-visible {
 }
 
 @media (max-width: 720px) {
+  .weekday-booking-notice {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
   .booking-shell {
     width: min(calc(100% - 28px), 1160px);
   }

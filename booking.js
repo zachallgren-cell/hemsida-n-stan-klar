@@ -8,7 +8,6 @@
   const BOOKED_SLOTS_FUNCTION_URL = `${SUPABASE_FUNCTIONS_URL}/booked-slots`;
   const AVAILABILITY_TIMEOUT_MS = 20_000;
   const BOOKABLE_TIMES = ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
-  const WEEKDAY_BOOKABLE_TIMES = ['16:00', '17:00'];
   const MONTH_NAMES = ['januari', 'februari', 'mars', 'april', 'maj', 'juni', 'juli', 'augusti', 'september', 'oktober', 'november', 'december'];
   const DRAFT_KEY = 'bergaBookingDraft';
   const CONFIRMATION_KEY = 'bergaBookingConfirmation';
@@ -18,7 +17,7 @@
   const BASE_LABOR_PRICE_AFTER_RUT = 799;
   const MATERIAL_FEE = 150;
   const INCLUDED_WINDOWS = 15;
-  const MAX_TOTAL_WINDOWS = 60;
+  const MAX_TOTAL_WINDOWS = 250;
   const TWO_FLOOR_ADDON = 200;
   const EXTRA_REGULAR_WINDOW_PRICE = 39;
   const EXTRA_MUNTINS_WINDOW_PRICE = 49;
@@ -144,49 +143,13 @@
     return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
   }
 
-  function getEasterSunday(year) {
-    const a = year % 19;
-    const b = Math.floor(year / 100);
-    const c = year % 100;
-    const d = Math.floor(b / 4);
-    const e = b % 4;
-    const f = Math.floor((b + 8) / 25);
-    const g = Math.floor((b - f + 1) / 3);
-    const h = (19 * a + b - d - g + 15) % 30;
-    const i = Math.floor(c / 4);
-    const k = c % 4;
-    const l = (32 + 2 * e + 2 * i - h - k) % 7;
-    const m = Math.floor((a + 11 * h + 22 * l) / 451);
-    const month = Math.floor((h + l - 7 * m + 114) / 31);
-    const day = ((h + l - 7 * m + 114) % 31) + 1;
-    return new Date(Date.UTC(year, month - 1, day, 12));
-  }
-
-  function dateStringFromUtc(date) {
-    return date.toISOString().slice(0, 10);
-  }
-
-  function offsetDateString(date, days) {
-    const result = new Date(date);
-    result.setUTCDate(result.getUTCDate() + days);
-    return dateStringFromUtc(result);
-  }
-
-  function isSwedishPublicHoliday(dateString) {
-    const year = Number(dateString.slice(0, 4));
-    const easter = getEasterSunday(year);
-    return new Set([
-      `${year}-01-01`, `${year}-01-06`, `${year}-05-01`, `${year}-06-06`,
-      `${year}-12-25`, `${year}-12-26`,
-      offsetDateString(easter, -2), offsetDateString(easter, 0),
-      offsetDateString(easter, 1), offsetDateString(easter, 39), offsetDateString(easter, 49)
-    ]).has(dateString);
+  function isWeekendDate(dateString) {
+    const date = new Date(`${dateString}T12:00:00Z`);
+    return !Number.isNaN(date.getTime()) && [0, 6].includes(date.getUTCDay());
   }
 
   function getBookableTimes(dateString) {
-    const date = new Date(`${dateString}T12:00:00Z`);
-    const weekend = date.getUTCDay() === 0 || date.getUTCDay() === 6;
-    return weekend || isSwedishPublicHoliday(dateString) ? BOOKABLE_TIMES : WEEKDAY_BOOKABLE_TIMES;
+    return isWeekendDate(dateString) ? BOOKABLE_TIMES : [];
   }
 
   function formatDateForDisplay(dateString) {
@@ -230,24 +193,37 @@
   }
 
   function getWindowCountValue() {
-    return Number(byId('windowCount')?.textContent || 0) || 0;
+    return Number(byId('windowCount')?.value || 0) || 0;
   }
 
   function getMuntinsCountValue() {
-    return Number(byId('muntinsCount')?.textContent || 0) || 0;
+    return Number(byId('muntinsCount')?.value || 0) || 0;
+  }
+
+  function syncWindowCountControls() {
+    const regularCount = getWindowCountValue();
+    const muntinsCount = getMuntinsCountValue();
+    byId('windowCount').max = String(MAX_TOTAL_WINDOWS - muntinsCount);
+    byId('muntinsCount').max = String(MAX_TOTAL_WINDOWS - regularCount);
+    byId('windowCountDecrease').disabled = regularCount <= 0;
+    byId('muntinsCountDecrease').disabled = muntinsCount <= 0;
+    byId('windowCountIncrease').disabled = regularCount + muntinsCount >= MAX_TOTAL_WINDOWS;
+    byId('muntinsCountIncrease').disabled = regularCount + muntinsCount >= MAX_TOTAL_WINDOWS;
   }
 
   function setWindowCountValue(nextValue, shouldRefresh = true) {
     const maximum = Math.max(0, MAX_TOTAL_WINDOWS - getMuntinsCountValue());
     const safeValue = Math.max(0, Math.min(maximum, Number(nextValue) || 0));
-    byId('windowCount').textContent = String(safeValue);
+    byId('windowCount').value = String(Math.trunc(safeValue));
+    syncWindowCountControls();
     if (shouldRefresh) refreshBookingState();
   }
 
   function setMuntinsCountValue(nextValue, shouldRefresh = true) {
     const maximum = Math.max(0, MAX_TOTAL_WINDOWS - getWindowCountValue());
     const safeValue = Math.max(0, Math.min(maximum, Number(nextValue) || 0));
-    byId('muntinsCount').textContent = String(safeValue);
+    byId('muntinsCount').value = String(Math.trunc(safeValue));
+    syncWindowCountControls();
     if (shouldRefresh) refreshBookingState();
   }
 
@@ -444,7 +420,7 @@
   }
 
   function isDateSelectable(date) {
-    return calendarReady && isDateWithinBookableRange(date) && !isFullyBooked(date);
+    return calendarReady && isWeekendDate(date) && isDateWithinBookableRange(date) && !isFullyBooked(date);
   }
 
   function findFirstAvailableDate() {
@@ -569,7 +545,8 @@
       const tooLate = date > lastBookableString;
       const blocked = Boolean(getBlockedDate(date));
       const booked = getBookedTimes(date).length >= getCapacity(date);
-      const selectable = calendarReady && !past && !tooSoon && !tooLate && !blocked && !booked;
+      const weekend = isWeekendDate(date);
+      const selectable = calendarReady && weekend && !past && !tooSoon && !tooLate && !blocked && !booked;
 
       if (date === todayString) {
         button.classList.add('today');
@@ -577,7 +554,7 @@
       }
       if (selectedDate === date) button.classList.add('selected');
       if (blocked || booked) button.classList.add('fully-booked');
-      if (past || tooLate || !calendarReady) button.classList.add('past');
+      if (past || tooLate || !calendarReady || !weekend) button.classList.add('past');
       if (tooSoon) button.classList.add('advance-notice');
       button.setAttribute('aria-pressed', selectedDate === date ? 'true' : 'false');
       button.disabled = !selectable;
@@ -586,7 +563,8 @@
         ? 'tillgänglighet ej kontrollerad'
         : blocked ? 'ej bokbar'
           : booked ? 'bokad'
-            : past || tooSoon || tooLate ? 'inte valbar' : 'ledig';
+            : !weekend ? 'vardag, kontakta oss för bokning'
+              : past || tooSoon || tooLate ? 'inte valbar' : 'ledig';
       button.setAttribute('aria-label', `${formatDateForDisplay(date)}: ${state}`);
 
       if (selectable) {
@@ -1612,6 +1590,14 @@
   byId('muntinsCountIncrease').addEventListener('click', () => {
     clearControlError('windowCountGroup', 'windowCountError');
     setMuntinsCountValue(getMuntinsCountValue() + 1);
+  });
+  byId('windowCount').addEventListener('input', () => {
+    clearControlError('windowCountGroup', 'windowCountError');
+    setWindowCountValue(getWindowCountValue());
+  });
+  byId('muntinsCount').addEventListener('input', () => {
+    clearControlError('windowCountGroup', 'windowCountError');
+    setMuntinsCountValue(getMuntinsCountValue());
   });
 
   const radioErrorMap = {

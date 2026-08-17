@@ -105,7 +105,7 @@ function formatSek(value: number | null) {
 const BASE_LABOR_PRICE_AFTER_RUT = 799;
 const MATERIAL_FEE = 150;
 const INCLUDED_WINDOWS = 15;
-const MAX_TOTAL_WINDOWS = 60;
+const MAX_TOTAL_WINDOWS = 250;
 const TWO_FLOOR_ADDON = 200;
 const EXTRA_REGULAR_WINDOW_PRICE = 39;
 const EXTRA_MUNTINS_WINDOW_PRICE = 49;
@@ -321,40 +321,11 @@ function isSuspiciouslyFastSubmission(startedAt: string | undefined) {
     || elapsed > 2 * 60 * 60 * 1000;
 }
 
-function getEasterSunday(year: number) {
-  const a = year % 19, b = Math.floor(year / 100), c = year % 100;
-  const d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25);
-  const g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;
-  const i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7;
-  const m = Math.floor((a + 11 * h + 22 * l) / 451);
-  const month = Math.floor((h + l - 7 * m + 114) / 31);
-  const day = ((h + l - 7 * m + 114) % 31) + 1;
-  return new Date(Date.UTC(year, month - 1, day, 12));
-}
-
-function offsetUtcDate(date: Date, days: number) {
-  const result = new Date(date);
-  result.setUTCDate(result.getUTCDate() + days);
-  return result.toISOString().slice(0, 10);
-}
-
-function isSwedishPublicHoliday(dateString: string) {
-  const year = Number(dateString.slice(0, 4));
-  const easter = getEasterSunday(year);
-  return new Set([
-    `${year}-01-01`, `${year}-01-06`, `${year}-05-01`, `${year}-06-06`,
-    `${year}-12-25`, `${year}-12-26`,
-    offsetUtcDate(easter, -2), offsetUtcDate(easter, 0), offsetUtcDate(easter, 1),
-    offsetUtcDate(easter, 39), offsetUtcDate(easter, 49)
-  ]).has(dateString);
-}
-
 function isBookableTime(value: string, dateString: string) {
   const date = new Date(`${dateString}T12:00:00Z`);
-  const weekendOrHoliday = [0, 6].includes(date.getUTCDay()) || isSwedishPublicHoliday(dateString);
-  const allowedTimes = weekendOrHoliday
+  const allowedTimes = [0, 6].includes(date.getUTCDay())
     ? ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00']
-    : ['16:00', '17:00'];
+    : [];
   return allowedTimes.includes(value);
 }
 
@@ -531,7 +502,7 @@ Deno.serve(async (req) => {
     }
 
     if (!isBookableTime(payload.time, payload.date)) {
-      return jsonResponse({ error: 'Den valda tiden går inte att boka. På vardagar börjar bokningstiderna kl. 16:00.' }, 400);
+      return jsonResponse({ error: 'Onlinebokning är endast tillgänglig på lördagar och söndagar. Kontakta oss om du vill boka på en vardag.' }, 400);
     }
 
     if (payload.transportType === 'Båttransport behövs') {

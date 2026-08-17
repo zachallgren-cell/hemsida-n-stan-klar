@@ -12,10 +12,10 @@
   <link rel="manifest" href="/site.webmanifest">
   <link rel="stylesheet" href="cookie-consent.css?v=20260720">
   <link rel="stylesheet" href="site.css">
-  <link rel="stylesheet" href="booking.css">
+  <link rel="stylesheet" href="booking.css?v=20260817-1">
   <script src="cookie-consent.js?v=20260720" defer></script>
   <script src="site.js?v=20260721" defer></script>
-  <script src="booking.js?v=20260813-1" defer></script>
+  <script src="booking.js?v=20260817-1" defer></script>
 </head>
 <body class="booking-page">
   <a class="skip-link" href="#main-content">Hoppa till bokningen</a>
@@ -81,8 +81,16 @@
           <div class="step-heading">
             <p class="step-kicker">Steg 1 av 4</p>
             <h2 id="step1Title" tabindex="-1">Välj datum och tid</h2>
-            <p>Lediga dagar visas direkt. En bokning gäller ett besök och reserverar hela dagen.</p>
+            <p>Lediga tider på lördagar och söndagar visas direkt. En bokning gäller ett besök och reserverar hela dagen.</p>
           </div>
+
+          <aside class="weekday-booking-notice" aria-label="Bokning på vardagar">
+            <div>
+              <strong>Onlinebokning gäller lördagar och söndagar</strong>
+              <span>Vill du boka på en vardag? Kontakta oss så hjälper vi dig att hitta en tid.</span>
+            </div>
+            <a href="kontakt.html">Kontakta oss</a>
+          </aside>
 
           <div class="calendar-card">
             <div class="calendar-header">
@@ -162,13 +170,13 @@
 
               <fieldset class="choice-group" id="windowCountGroup" aria-describedby="windowCountHelp windowCountError">
                 <legend>Hur många fönster har du?</legend>
-                <p class="field-help" id="windowCountHelp">Räkna varje separat öppningsbar del eller fast glasparti som ett fönster. Upp till 15 fönster ingår i startpriset.</p>
+                <p class="field-help" id="windowCountHelp">Räkna varje separat öppningsbar del eller fast glasparti som ett fönster. Upp till 15 fönster ingår i startpriset och du kan boka högst 250 fönster totalt.</p>
                 <div class="counter-grid">
                   <div class="counter-field">
                     <span class="counter-label">Utan spröjs</span>
                     <div class="stepper">
                       <button type="button" class="stepper-button" id="windowCountDecrease" aria-label="Minska antal fönster utan spröjs">−</button>
-                      <output id="windowCount" aria-live="polite">0</output>
+                      <input type="number" id="windowCount" class="stepper-value" value="0" min="0" max="250" step="1" inputmode="numeric" aria-label="Antal fönster utan spröjs" aria-describedby="windowCountHelp">
                       <button type="button" class="stepper-button" id="windowCountIncrease" aria-label="Öka antal fönster utan spröjs">+</button>
                     </div>
                   </div>
@@ -176,7 +184,7 @@
                     <span class="counter-label">Med spröjs</span>
                     <div class="stepper">
                       <button type="button" class="stepper-button" id="muntinsCountDecrease" aria-label="Minska antal fönster med spröjs">−</button>
-                      <output id="muntinsCount" aria-live="polite">0</output>
+                      <input type="number" id="muntinsCount" class="stepper-value" value="0" min="0" max="250" step="1" inputmode="numeric" aria-label="Antal fönster med spröjs" aria-describedby="windowCountHelp">
                       <button type="button" class="stepper-button" id="muntinsCountIncrease" aria-label="Öka antal fönster med spröjs">+</button>
                     </div>
                   </div>
