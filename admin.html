@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="admin-analytics.css?v=20260721">
   <meta name="robots" content="noindex, nofollow">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-um1BUX3DXpajuztvbwmM9Jg5HSwS/pYDRZVLgapLHp0='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-zYRL+RcX8Q4D5UCOyl3xi6+HbmPd1/SzLGSf+AEvwz4='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
   <link rel="shortcut icon" href="/favicon-48.png" />
@@ -918,6 +918,23 @@
         <p class="status-message" id="loginMessage"></p>
       </aside>
 
+      <aside class="card panel hidden" id="passwordSetupPanel">
+        <h2>Skapa ditt adminlösenord</h2>
+        <p>Välj ett eget lösenord för ditt personliga adminkonto. Därefter registrerar du din Authenticator-app.</p>
+        <form class="login-form" id="passwordSetupForm" novalidate>
+          <label>
+            Nytt lösenord
+            <input type="password" id="newAdminPassword" autocomplete="new-password" minlength="12" placeholder="Minst 12 tecken" required>
+          </label>
+          <label>
+            Upprepa lösenordet
+            <input type="password" id="confirmAdminPassword" autocomplete="new-password" minlength="12" placeholder="Upprepa lösenordet" required>
+          </label>
+          <button type="submit" class="button button-primary" id="passwordSetupButton">Spara lösenord och fortsätt</button>
+        </form>
+        <p class="status-message" id="passwordSetupMessage"></p>
+      </aside>
+
       <aside class="card panel hidden" id="mfaPanel">
         <h2>Tvåstegsverifiering</h2>
         <p id="mfaIntro">Admin innehåller känsliga kunduppgifter. Bekräfta därför inloggningen med en kod från din authenticator-app.</p>
@@ -1076,16 +1093,25 @@
     const CLARITY_ANALYTICS_URL = `${SUPABASE_URL}/functions/v1/clarity-analytics`;
     const SWISH_NUMBER_DISPLAY = '123 677 43 84';
     const SWISH_RECIPIENT_NAME = 'Zac Hallgren';
+    const authHashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    const authQueryParams = new URLSearchParams(window.location.search);
+    let needsPasswordSetup = ['invite', 'recovery'].includes(authHashParams.get('type') || authQueryParams.get('type') || '');
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: {
         persistSession: false,
         autoRefreshToken: true,
-        detectSessionInUrl: false
+        detectSessionInUrl: true
       }
     });
 
     const loginPanel = document.getElementById('loginPanel');
+    const passwordSetupPanel = document.getElementById('passwordSetupPanel');
+    const passwordSetupForm = document.getElementById('passwordSetupForm');
+    const newAdminPassword = document.getElementById('newAdminPassword');
+    const confirmAdminPassword = document.getElementById('confirmAdminPassword');
+    const passwordSetupButton = document.getElementById('passwordSetupButton');
+    const passwordSetupMessage = document.getElementById('passwordSetupMessage');
     const adminTabs = document.getElementById('adminTabs');
     const blockedDatesPanel = document.getElementById('blockedDatesPanel');
     const discountCodesPanel = document.getElementById('discountCodesPanel');
@@ -1141,6 +1167,11 @@
     function setMfaMessage(text, type = '') {
       mfaMessage.textContent = text;
       mfaMessage.className = `status-message ${type}`.trim();
+    }
+
+    function setPasswordSetupMessage(text, type = '') {
+      passwordSetupMessage.textContent = text;
+      passwordSetupMessage.className = `status-message ${type}`.trim();
     }
 
     function clearMfaSetup() {
@@ -2353,6 +2384,38 @@
       await refreshSession();
     });
 
+    passwordSetupForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const password = newAdminPassword.value;
+      const confirmation = confirmAdminPassword.value;
+
+      if (password.length < 12) {
+        setPasswordSetupMessage('Lösenordet måste vara minst 12 tecken.', 'error');
+        return;
+      }
+      if (password !== confirmation) {
+        setPasswordSetupMessage('Lösenorden stämmer inte överens.', 'error');
+        return;
+      }
+
+      passwordSetupButton.disabled = true;
+      setPasswordSetupMessage('Sparar lösenordet...');
+      const { error } = await supabase.auth.updateUser({ password });
+      passwordSetupButton.disabled = false;
+
+      if (error) {
+        setPasswordSetupMessage(`Kunde inte spara lösenordet: ${error.message}`, 'error');
+        return;
+      }
+
+      newAdminPassword.value = '';
+      confirmAdminPassword.value = '';
+      needsPasswordSetup = false;
+      window.history.replaceState({}, '', window.location.pathname);
+      setPasswordSetupMessage('Lösenordet är sparat. Fortsätt med Authenticator.', 'success');
+      await refreshSession();
+    });
+
     loginForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       setLoginMessage('');
@@ -2447,6 +2510,7 @@
       const { data } = await supabase.auth.getSession();
       const session = data.session;
       const isLoggedIn = Boolean(session);
+      const mustSetPassword = isLoggedIn && needsPasswordSetup;
       let isMfaVerified = false;
 
       if (isLoggedIn) {
@@ -2459,11 +2523,19 @@
       }
 
       loginPanel.classList.toggle('hidden', isLoggedIn);
-      mfaPanel.classList.toggle('hidden', !isLoggedIn || isMfaVerified);
-      adminTabs.classList.toggle('hidden', !isMfaVerified);
+      passwordSetupPanel.classList.toggle('hidden', !mustSetPassword);
+      mfaPanel.classList.toggle('hidden', !isLoggedIn || isMfaVerified || mustSetPassword);
+      adminTabs.classList.toggle('hidden', !isMfaVerified || mustSetPassword);
       logoutButton.classList.toggle('hidden', !isLoggedIn);
 
-      if (isMfaVerified) {
+      if (mustSetPassword) {
+        hideAllRutNumbers();
+        bookingsPanel.classList.add('hidden');
+        blockedDatesPanel.classList.add('hidden');
+        discountCodesPanel.classList.add('hidden');
+        analyticsPanel.classList.add('hidden');
+        newAdminPassword.focus();
+      } else if (isMfaVerified) {
         clearMfaSetup();
         renderAdminView();
         await fetchBookings();
@@ -2476,6 +2548,7 @@
         await prepareMfaPanel();
       } else {
         hideAllRutNumbers();
+        passwordSetupPanel.classList.add('hidden');
         clearMfaSetup();
         verifiedMfaFactorId = '';
         activeAdminView = 'bookings';
