@@ -17,7 +17,10 @@ document.documentElement.classList.add('js');
   }
 
   window.bergaTrack = function bergaTrack(eventName, parameters = {}) {
-    if (!consentAccepted() || typeof window.gtag !== 'function') return false;
+    if (!consentAccepted()) return false;
+
+    const safeEventName = cleanEventValue(eventName, 80).replace(/[^a-zA-Z0-9_.-]/g, '_');
+    if (!safeEventName) return false;
 
     const safeParameters = {};
     Object.entries(parameters).forEach(([key, value]) => {
@@ -25,8 +28,18 @@ document.documentElement.classList.add('js');
       else if (typeof value === 'number' || typeof value === 'boolean') safeParameters[key] = value;
     });
 
-    window.gtag('event', cleanEventValue(eventName, 80), safeParameters);
-    return true;
+    let tracked = false;
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', safeEventName, safeParameters);
+      tracked = true;
+    }
+    if (typeof window.clarity === 'function') {
+      // Clarity får endast eventnamnet. Parametrar kan innehålla bokningsdata och
+      // skickas därför aldrig vidare till Clarity.
+      window.clarity('event', safeEventName);
+      tracked = true;
+    }
+    return tracked;
   };
 
   function captureCampaignAttribution() {
@@ -43,6 +56,7 @@ document.documentElement.classList.add('js');
         utmCampaign: cleanEventValue(params.get('utm_campaign'), 160),
         utmContent: cleanEventValue(params.get('utm_content'), 160),
         utmTerm: cleanEventValue(params.get('utm_term'), 160),
+        referral: params.has('ref') ? 'referral' : '',
         landingPage: cleanEventValue(window.location.pathname, 160)
       };
 
@@ -50,10 +64,15 @@ document.documentElement.classList.add('js');
         || attribution.utmMedium
         || attribution.utmCampaign
         || attribution.utmContent
-        || attribution.utmTerm;
+        || attribution.utmTerm
+        || attribution.referral;
 
       if (hasCampaignData) {
         window.sessionStorage.setItem(ATTRIBUTION_KEY, JSON.stringify(attribution));
+        if (attribution.referral && !window.sessionStorage.getItem('bergaReferralLandingTracked')) {
+          window.sessionStorage.setItem('bergaReferralLandingTracked', '1');
+          window.bergaTrack('referral_landing_view');
+        }
       }
     } catch {
       // Kampanjmätning får aldrig hindra navigation eller bokning.

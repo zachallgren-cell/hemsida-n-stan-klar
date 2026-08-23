@@ -18,7 +18,7 @@
   <link rel="manifest" href="/site.webmanifest">
   <link rel="stylesheet" href="cookie-consent.css?v=20260720">
   <script src="cookie-consent.js?v=20260720" defer></script>
-  <script src="site.js" defer></script>
+  <script src="site.js?v=20260721" defer></script>
   <style>
     :root {
       --primary: #0b6fa4;
@@ -499,7 +499,7 @@
       </div>
 
       <div class="content-layout">
-        <form class="form-card" id="quoteForm" enctype="multipart/form-data">
+        <form class="form-card" id="quoteForm" enctype="multipart/form-data" data-clarity-mask="true">
           <div class="form-grid">
             <div>
               <label for="name">Namn *</label>
@@ -598,6 +598,13 @@
     const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
     const quoteForm = document.getElementById('quoteForm');
+    let quoteStartedTracked = false;
+
+    quoteForm.addEventListener('focusin', function () {
+      if (quoteStartedTracked) return;
+      quoteStartedTracked = true;
+      window.bergaTrack?.('quote_request_started');
+    });
     const photosInput = document.getElementById('photos');
     const photoList = document.getElementById('photoList');
     const formStatus = document.getElementById('formStatus');
@@ -728,6 +735,7 @@
           : ' Förfrågan är mottagen, men e-postkvittot kunde inte levereras.';
         setStatus('Tack! Din offertförfrågan är skickad.' + receiptMessage, 'success');
         quoteForm.reset();
+        window.bergaTrack?.('quote_request_sent');
         photoList.innerHTML = '<span>Inga bilder valda.</span>';
         resetRequestGuards();
       } catch (error) {
