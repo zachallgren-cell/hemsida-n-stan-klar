@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="booking.css?v=20260817-1">
   <script src="cookie-consent.js?v=20260720" defer></script>
   <script src="site.js?v=20260721" defer></script>
-  <script src="booking.js?v=20260817-1" defer></script>
+  <script src="booking.js?v=20260826-2" defer></script>
 </head>
 <body class="booking-page">
   <a class="skip-link" href="#main-content">Hoppa till bokningen</a>
@@ -155,22 +155,42 @@
 
               <fieldset class="choice-group" id="housingTypeGroup" aria-describedby="housingTypeError">
                 <legend>Vilken typ av bostad gäller det?</legend>
-                <div class="choice-grid choice-grid-two">
+                <div class="choice-grid choice-grid-three">
                   <label class="choice-card">
                     <input type="radio" name="housingType" value="En våning">
-                    <span><strong>En våning</strong><small>Fönster på markplan</small></span>
+                    <span><strong>Enplansvilla</strong><small>Fönster på markplan</small></span>
                   </label>
                   <label class="choice-card">
                     <input type="radio" name="housingType" value="Två våningar">
-                    <span><strong>Två våningar</strong><small>Pristillägg 200 kr efter RUT</small></span>
+                    <span><strong>Flerplansvilla</strong><small>Pristillägg 200 kr efter RUT</small></span>
+                  </label>
+                  <label class="choice-card">
+                    <input type="radio" name="housingType" value="Lägenhet" aria-controls="apartmentWindowOpeningGroup" aria-expanded="false">
+                    <span><strong>Lägenhet</strong><small>Priset beror på hur fönstren öppnas</small></span>
                   </label>
                 </div>
                 <p class="field-error" id="housingTypeError" role="alert" hidden></p>
               </fieldset>
 
+              <fieldset class="choice-group" id="apartmentWindowOpeningGroup" aria-describedby="apartmentWindowOpeningHelp apartmentWindowOpeningError" hidden>
+                <legend>Hur öppnas lägenhetens fönster?</legend>
+                <div class="choice-grid choice-grid-two">
+                  <label class="choice-card">
+                    <input type="radio" name="apartmentWindowOpening" value="Fönstren öppnas inåt">
+                    <span><strong>De öppnas inåt</strong><small>Samma pris som för en enplansvilla</small></span>
+                  </label>
+                  <label class="choice-card">
+                    <input type="radio" name="apartmentWindowOpening" value="Fönstren öppnas utåt">
+                    <span><strong>De öppnas utåt</strong><small>Samma pris som för en flerplansvilla</small></span>
+                  </label>
+                </div>
+                <p class="field-help" id="apartmentWindowOpeningHelp">Välj utåt om fönstrens utsida inte kan putsas säkert inifrån lägenheten.</p>
+                <p class="field-error" id="apartmentWindowOpeningError" role="alert" hidden></p>
+              </fieldset>
+
               <fieldset class="choice-group" id="windowCountGroup" aria-describedby="windowCountHelp windowCountError">
                 <legend>Hur många fönster har du?</legend>
-                <p class="field-help" id="windowCountHelp">Räkna varje separat öppningsbar del eller fast glasparti som ett fönster. Upp till 15 fönster ingår i startpriset och du kan boka högst 250 fönster totalt.</p>
+                <p class="field-help" id="windowCountHelp">Räkna varje separat öppningsbar del eller fast glasparti som ett fönster. Upp till 10 fönster ingår i startpriset och du kan boka högst 250 fönster totalt.</p>
                 <div class="counter-grid">
                   <div class="counter-field">
                     <span class="counter-label">Utan spröjs</span>
@@ -276,9 +296,10 @@
               <details class="price-details">
                 <summary>Se vad som ingår och alla tillägg</summary>
                 <ul>
-                  <li>Utvändig puts av upp till 15 fönster</li>
+                  <li>Utvändig puts av upp till 10 fönster</li>
                   <li>Material: 150 kr</li>
-                  <li>Två våningar: +200 kr efter RUT</li>
+                  <li>Flerplansvilla: +200 kr efter RUT</li>
+                  <li>Lägenhet: enplanspris när fönstren öppnas inåt, flerplanspris när de öppnas utåt</li>
                   <li>Extra utan spröjs: +39 kr per fönster efter RUT</li>
                   <li>Extra med spröjs: +49 kr per fönster efter RUT</li>
                   <li>Invändig puts: från +320 kr efter RUT</li>

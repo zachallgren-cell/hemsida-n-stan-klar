@@ -104,7 +104,7 @@ function formatSek(value: number | null) {
 
 const BASE_LABOR_PRICE_AFTER_RUT = 799;
 const MATERIAL_FEE = 150;
-const INCLUDED_WINDOWS = 15;
+const INCLUDED_WINDOWS = 10;
 const MAX_TOTAL_WINDOWS = 250;
 const TWO_FLOOR_ADDON = 200;
 const EXTRA_REGULAR_WINDOW_PRICE = 39;
@@ -155,7 +155,13 @@ function getRutMode(payload: BookingPayload): RutMode | null {
 
 function calculateBookingPrice(payload: BookingPayload) {
   const housingType = payload.housingType || payload.boatSize;
-  if (!['En våning', 'Två våningar'].includes(housingType)) return null;
+  const validHousingTypes = [
+    'En våning',
+    'Två våningar',
+    'Lägenhet – fönstren öppnas inåt',
+    'Lägenhet – fönstren öppnas utåt'
+  ];
+  if (!validHousingTypes.includes(housingType)) return null;
 
   const rutMode = getRutMode(payload);
   if (!rutMode) return null;
@@ -172,7 +178,9 @@ function calculateBookingPrice(payload: BookingPayload) {
   const includedMuntins = Math.min(muntinsWindows, Math.max(0, INCLUDED_WINDOWS - includedRegular));
   const extraRegular = Math.max(0, regularWindows - includedRegular);
   const extraMuntins = Math.max(0, muntinsWindows - includedMuntins);
-  const floorAddon = housingType === 'Två våningar' ? TWO_FLOOR_ADDON : 0;
+  const usesMultiFloorPrice = housingType === 'Två våningar'
+    || housingType === 'Lägenhet – fönstren öppnas utåt';
+  const floorAddon = usesMultiFloorPrice ? TWO_FLOOR_ADDON : 0;
   const windowPrice = (extraRegular * EXTRA_REGULAR_WINDOW_PRICE) + (extraMuntins * EXTRA_MUNTINS_WINDOW_PRICE);
   const extraWindows = Math.max(0, totalWindows - INCLUDED_WINDOWS);
   const serviceScopePrice = payload.serviceScope === 'Invändig + utvändig'

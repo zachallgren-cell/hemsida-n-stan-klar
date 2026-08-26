@@ -16,7 +16,7 @@
 
   const BASE_LABOR_PRICE_AFTER_RUT = 799;
   const MATERIAL_FEE = 150;
-  const INCLUDED_WINDOWS = 15;
+  const INCLUDED_WINDOWS = 10;
   const MAX_TOTAL_WINDOWS = 250;
   const TWO_FLOOR_ADDON = 200;
   const EXTRA_REGULAR_WINDOW_PRICE = 39;
@@ -54,6 +54,7 @@
   const timeSlots = byId('timeSlots');
   const dateTimeError = byId('dateTimeError');
   const boatFields = byId('boatFields');
+  const apartmentWindowOpeningGroup = byId('apartmentWindowOpeningGroup');
   const seaMilesInput = byId('seaMiles');
   const coordinatesInput = byId('coordinates');
   const boatQuoteNotice = byId('boatQuoteNotice');
@@ -178,6 +179,22 @@
     if (option) option.checked = true;
   }
 
+  function setHousingSelection(housingType, apartmentWindowOpening = '') {
+    const normalizedHousingType = String(housingType || '');
+    const normalizedOpening = String(apartmentWindowOpening || '');
+    const isApartment = normalizedHousingType.startsWith('Lägenhet');
+    setCheckedValue('housingType', isApartment ? 'Lägenhet' : normalizedHousingType);
+
+    if (!isApartment) return;
+    if (normalizedOpening) {
+      setCheckedValue('apartmentWindowOpening', normalizedOpening);
+    } else if (/inåt/i.test(normalizedHousingType)) {
+      setCheckedValue('apartmentWindowOpening', 'Fönstren öppnas inåt');
+    } else if (/utåt/i.test(normalizedHousingType)) {
+      setCheckedValue('apartmentWindowOpening', 'Fönstren öppnas utåt');
+    }
+  }
+
   function setSelectValue(id, value) {
     const select = byId(id);
     const normalized = String(value ?? '');
@@ -251,6 +268,7 @@
       time: selectedTime,
       rutChoice: checkedValue('rutChoice'),
       housingType: checkedValue('housingType'),
+      apartmentWindowOpening: checkedValue('apartmentWindowOpening'),
       regularWindowCount: getWindowCountValue(),
       muntinsCount: getMuntinsCountValue(),
       serviceScope: checkedValue('serviceScope'),
@@ -287,7 +305,7 @@
     selectedDate = /^\d{4}-\d{2}-\d{2}$/.test(String(draft.date || '')) ? String(draft.date) : '';
     selectedTime = getBookableTimes(selectedDate).includes(String(draft.time || '')) ? String(draft.time) : '';
     setCheckedValue('rutChoice', draft.rutChoice);
-    setCheckedValue('housingType', draft.housingType);
+    setHousingSelection(draft.housingType, draft.apartmentWindowOpening);
     setWindowCountValue(Number(draft.regularWindowCount), false);
     setMuntinsCountValue(Number(draft.muntinsCount), false);
     setCheckedValue('serviceScope', draft.serviceScope);
@@ -324,7 +342,7 @@
     setInputValue('phone', prefill.phone, 24);
     setInputValue('location', prefill.location, 240);
     setInputValue('postalCode', String(prefill.postalCode || '').replace(/\D/g, '').slice(0, 5), 5);
-    setCheckedValue('housingType', prefill.housingType);
+    setHousingSelection(prefill.housingType, prefill.apartmentWindowOpening);
     setCheckedValue('rutChoice', prefill.rutChoice);
     setCheckedValue('serviceScope', prefill.serviceScope);
     setCheckedValue('transportType', prefill.transportType);
@@ -663,11 +681,16 @@
   }
 
   function getHousingTypeLabel() {
-    return checkedValue('housingType');
+    const housingType = checkedValue('housingType');
+    if (housingType !== 'Lägenhet') return housingType;
+    const opening = checkedValue('apartmentWindowOpening');
+    return opening ? `Lägenhet – ${opening.toLowerCase()}` : '';
   }
 
   function getBaseLaborPriceAfterRut(housingTypeLabel) {
-    return BASE_LABOR_PRICE_AFTER_RUT + (housingTypeLabel === 'Två våningar' ? TWO_FLOOR_ADDON : 0);
+    const usesMultiFloorPrice = housingTypeLabel === 'Två våningar'
+      || housingTypeLabel === 'Lägenhet – fönstren öppnas utåt';
+    return BASE_LABOR_PRICE_AFTER_RUT + (usesMultiFloorPrice ? TWO_FLOOR_ADDON : 0);
   }
 
   function getServiceScopeAddon(serviceScopeValue, windowCount) {
@@ -974,6 +997,14 @@
 
     if (!checkedValue('rutChoice')) add('rutChoiceGroup', 'rutChoiceError', 'Välj om du vill använda RUT-avdrag.', 'rut_choice');
     if (!checkedValue('housingType')) add('housingTypeGroup', 'housingTypeError', 'Välj vilken typ av bostad det gäller.', 'housing_type');
+    if (checkedValue('housingType') === 'Lägenhet' && !checkedValue('apartmentWindowOpening')) {
+      add(
+        'apartmentWindowOpeningGroup',
+        'apartmentWindowOpeningError',
+        'Välj om lägenhetens fönster öppnas inåt eller utåt.',
+        'apartment_window_opening'
+      );
+    }
     if (getWindowCountValue() + getMuntinsCountValue() < 1) {
       add('windowCountGroup', 'windowCountError', 'Ange minst ett fönster.', 'window_count');
     }
@@ -1276,7 +1307,18 @@
     coordinatesInput.required = boatRequired;
   }
 
+  function updateApartmentWindowOpeningFields() {
+    const apartmentSelected = checkedValue('housingType') === 'Lägenhet';
+    apartmentWindowOpeningGroup.hidden = !apartmentSelected;
+    apartmentWindowOpeningGroup.querySelectorAll('input').forEach((input) => {
+      input.required = apartmentSelected;
+    });
+    const apartmentChoice = form.querySelector('input[name="housingType"][value="Lägenhet"]');
+    apartmentChoice?.setAttribute('aria-expanded', String(apartmentSelected));
+  }
+
   function refreshBookingState() {
+    updateApartmentWindowOpeningFields();
     updateBoatFields();
     updateLivePrice();
     saveDraft();
@@ -1603,6 +1645,7 @@
   const radioErrorMap = {
     rutChoice: ['rutChoiceGroup', 'rutChoiceError'],
     housingType: ['housingTypeGroup', 'housingTypeError'],
+    apartmentWindowOpening: ['apartmentWindowOpeningGroup', 'apartmentWindowOpeningError'],
     serviceScope: ['serviceScopeGroup', 'serviceScopeError'],
     transportType: ['transportTypeGroup', 'transportTypeError']
   };
@@ -1610,6 +1653,9 @@
     radio.addEventListener('change', () => {
       const mapping = radioErrorMap[radio.name];
       if (mapping) clearControlError(mapping[0], mapping[1]);
+      if (radio.name === 'housingType') {
+        clearControlError('apartmentWindowOpeningGroup', 'apartmentWindowOpeningError');
+      }
       refreshBookingState();
     });
   });
@@ -1689,6 +1735,7 @@
   applyRebookPrefill();
   applyQuerySelection();
   formStartedAtInput.value = String(Date.now());
+  updateApartmentWindowOpeningFields();
   updateBoatFields();
   updateLivePrice();
   showStep(1, false);

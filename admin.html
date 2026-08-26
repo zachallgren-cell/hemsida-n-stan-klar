@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="admin-analytics.css?v=20260721">
   <meta name="robots" content="noindex, nofollow">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-ulzgOU/Pu9fICZd1TlhFdENveDPyWfHTgzo3GgHIptA='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-60MEkeGV62JWAeKeAfFZMRrtOfTzSMmohNXYcL/kyps='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
   <link rel="shortcut icon" href="/favicon-48.png" />
@@ -1485,7 +1485,7 @@
 
     const BASE_LABOR_PRICE_AFTER_RUT = 799;
     const MATERIAL_FEE = 150;
-    const INCLUDED_WINDOWS = 15;
+    const INCLUDED_WINDOWS = 10;
     const TWO_FLOOR_ADDON = 200;
     const EXTRA_REGULAR_WINDOW_PRICE = 39;
     const EXTRA_MUNTINS_WINDOW_PRICE = 49;
@@ -1499,7 +1499,9 @@
 
     function getBaseLaborAfterRut(housingTypeLabel) {
       if (!housingTypeLabel) return null;
-      const floorAddon = housingTypeLabel === 'Två våningar' || housingTypeLabel === 'Tvåplansvilla'
+      const floorAddon = housingTypeLabel === 'Två våningar'
+        || housingTypeLabel === 'Tvåplansvilla'
+        || housingTypeLabel === 'Lägenhet – fönstren öppnas utåt'
         ? TWO_FLOOR_ADDON
         : 0;
       return BASE_LABOR_PRICE_AFTER_RUT + floorAddon;
