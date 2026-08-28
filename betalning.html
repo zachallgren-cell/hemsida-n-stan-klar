@@ -32,8 +32,8 @@
       </div>
 
       <div class="flow-hero">
-        <p class="flow-eyebrow">Bokningsförfrågan mottagen</p>
-        <h1>Nästa steg för din bokning</h1>
+        <p class="flow-eyebrow" id="heroEyebrow">Bokningsförfrågan mottagen</p>
+        <h1 id="heroTitle">Nästa steg för din bokning</h1>
         <p id="heroIntroText">Vi har skickat en personlig bekräftelselänk till din e-post. Dagen reserveras först när du öppnar länken och bekräftar.</p>
       </div>
     </div>
@@ -46,7 +46,7 @@
         <p class="section-subtitle" id="bookingIntroSubtitle">Kontrollera uppgifterna i din bokning.</p>
 
         <div class="summary-box">
-          <p><strong>Bokningsförfrågan är mottagen</strong></p>
+          <p><strong id="bookingSummaryTitle">Bokningsförfrågan är mottagen</strong></p>
           <p id="bookingSummaryText">Kontrollera uppgifterna och bekräfta sedan via länken i mejlet. Länken gäller i 24 timmar.</p>
           <div class="summary-grid">
             <div class="summary-item">
@@ -89,7 +89,8 @@
           <h3>Det här händer nu</h3>
           <ul>
             <li id="nextStepChoiceText">Öppna bekräftelsemejlet och klicka på knappen för att reservera dagen.</li>
-            <li>Efter bekräftelsen kan du på den personliga bekräftelsesidan ladda ner en kalenderfil, fylla i RUT-uppgifter om du valt RUT och hantera bokningen.</li>
+            <li id="bookingManagementStepText">Efter bekräftelsen kan du på den personliga bekräftelsesidan ladda ner en kalenderfil, fylla i RUT-uppgifter om du valt RUT och hantera bokningen.</li>
+            <li><strong>Inför besöket:</strong> töm alla fönsterbrädor och flytta undan sådant som blockerar, så att samtliga fönster är åtkomliga och går att öppna.</li>
             <li id="nextStepInvoiceText">När jobbet är klart skickar vi ett klartmejl med exakt belopp, referens och Swishuppgifter.</li>
           </ul>
         </div>
@@ -98,9 +99,9 @@
 
       <section class="card">
         <h2 class="section-title">Nästa steg</h2>
-        <p class="section-subtitle">Bekräfta först. Du betalar efter att fönsterputsen är utförd.</p>
+        <p class="section-subtitle" id="paymentSectionSubtitle">Bekräfta först. Du betalar efter att fönsterputsen är utförd.</p>
         <div class="payment-trust-row">
-          <span class="trust-pill">Bekräftelselänk via mejl</span>
+          <span class="trust-pill" id="confirmationTrustPill">Bekräftelselänk via mejl</span>
           <span class="trust-pill">Smidig betalning med Swish</span>
           <span class="trust-pill">Swishuppgifter i klartmejlet</span>
           <span class="trust-pill">Betala efter putsning</span>
@@ -155,10 +156,16 @@
     const topbarToggleButton = document.getElementById('topbarToggleButton');
     const topbarShowButton = document.getElementById('topbarShowButton');
     const heroIntroText = document.getElementById('heroIntroText');
+    const heroEyebrow = document.getElementById('heroEyebrow');
+    const heroTitle = document.getElementById('heroTitle');
     const bookingIntroSubtitle = document.getElementById('bookingIntroSubtitle');
     const bookingSummaryText = document.getElementById('bookingSummaryText');
+    const bookingSummaryTitle = document.getElementById('bookingSummaryTitle');
     const nextStepChoiceText = document.getElementById('nextStepChoiceText');
+    const bookingManagementStepText = document.getElementById('bookingManagementStepText');
     const nextStepInvoiceText = document.getElementById('nextStepInvoiceText');
+    const paymentSectionSubtitle = document.getElementById('paymentSectionSubtitle');
+    const confirmationTrustPill = document.getElementById('confirmationTrustPill');
 
     let storedConfirmation = {};
 
@@ -203,6 +210,9 @@
     const rutDeduction = String(confirmationValue('rutDeduction'));
     const usesRutValue = confirmationValue('usesRut', false);
     const usesRut = usesRutValue === true || String(usesRutValue).toLowerCase() === 'true';
+    const requiresEmailConfirmationValue = confirmationValue('requiresEmailConfirmation', true);
+    const requiresEmailConfirmation = requiresEmailConfirmationValue === true
+      || String(requiresEmailConfirmationValue).toLowerCase() === 'true';
 
     function formatCurrency(value, prefixMinus = false) {
       const number = Number(value);
@@ -292,15 +302,34 @@
       bookingPrice.textContent = 'Se bekräftelsemejlet';
       bookingPriceBreakdown.hidden = true;
     }
+
+    if (hasBookingSummary && !requiresEmailConfirmation) {
+      heroEyebrow.textContent = 'Bokning klar';
+      heroTitle.textContent = 'Ditt datum är reserverat';
+      heroIntroText.textContent = 'Du har slutfört din personliga bokningsinbjudan. Datumet ligger nu reserverat i kalendern.';
+      bookingSummaryTitle.textContent = 'Bokningen är klar';
+      bookingSummaryText.textContent = 'Ditt reserverade datum och din valda starttid är bekräftade. Ett bokningsmejl har skickats med din personliga hanteringslänk.';
+      nextStepChoiceText.textContent = 'Datumet är redan reserverat – du behöver inte bekräfta bokningen en gång till.';
+      bookingManagementStepText.textContent = 'I bokningsmejlet finns din personliga sida där du kan ladda ner en kalenderfil, fylla i RUT-uppgifter och hantera bokningen.';
+      paymentSectionSubtitle.textContent = 'Bokningen är klar. Du betalar efter att fönsterputsen är utförd.';
+      confirmationTrustPill.textContent = 'Datumet är reserverat';
+    }
     setStatus(
       hasBookingSummary
-        ? 'Öppna bekräftelsemejlet inom 24 timmar för att reservera dagen. På den personliga bekräftelsesidan kan du sedan ladda ner kalenderfilen och fylla i RUT-uppgifter om du valt RUT.'
+        ? requiresEmailConfirmation
+          ? 'Öppna bekräftelsemejlet inom 24 timmar för att reservera dagen. På den personliga bekräftelsesidan kan du sedan ladda ner kalenderfilen och fylla i RUT-uppgifter om du valt RUT.'
+          : 'Datumet är reserverat. Kontrollera bokningsmejlet för länken till din personliga bokningssida.'
         : 'Av integritetsskäl visas bokningsuppgifter bara direkt efter att formuläret skickats. Kontrollera din inkorg och bekräfta via mejlet.',
-      'Bekräftelsemejl skickat'
+      hasBookingSummary && !requiresEmailConfirmation ? 'Bokning klar' : 'Bekräftelsemejl skickat'
     );
 
     payLaterButton.addEventListener('click', () => {
-      setStatus('Bekräfta först via mejlet. När fönsterputsen sedan är slutförd skickar vi Swishuppgifterna i klartmejlet.', 'Nästa steg');
+      setStatus(
+        requiresEmailConfirmation
+          ? 'Bekräfta först via mejlet. När fönsterputsen sedan är slutförd skickar vi Swishuppgifterna i klartmejlet.'
+          : 'Datumet är reserverat. När fönsterputsen är slutförd skickar vi Swishuppgifterna i klartmejlet.',
+        'Nästa steg'
+      );
       statusBox.scrollIntoView({
         behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
         block: 'center'

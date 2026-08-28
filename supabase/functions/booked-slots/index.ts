@@ -47,6 +47,10 @@ Deno.serve(async (req) => {
       }
     });
     const capacityOverridesRes = await fetch(`${supabaseUrl}/rest/v1/booking_capacity_overrides?select=booking_date,extra_bookings`, { headers: requestHeaders });
+    const activeInvitationsRes = await fetch(
+      `${supabaseUrl}/rest/v1/booking_invitations?select=booking_date&status=eq.active&expires_at=gt.${encodeURIComponent(new Date().toISOString())}`,
+      { headers: requestHeaders }
+    );
 
     if (!bookingsRes.ok) {
       const errorText = await bookingsRes.text();
@@ -60,16 +64,24 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'Could not fetch blocked dates' }, 500);
     }
     if (!capacityOverridesRes.ok) return jsonResponse({ error: 'Could not fetch booking capacity overrides' }, 500);
+    if (!activeInvitationsRes.ok) return jsonResponse({ error: 'Could not fetch active booking invitations' }, 500);
 
     const bookings = await bookingsRes.json();
     const blockedDates = await blockedDatesRes.json();
     const capacityOverrides = await capacityOverridesRes.json();
+    const activeInvitations = await activeInvitationsRes.json();
 
     return jsonResponse({
-      bookings: bookings.map((booking: Record<string, unknown>) => ({
-        date: booking.booking_date || '',
-        time: booking.booking_time || ''
-      })),
+      bookings: [
+        ...bookings.map((booking: Record<string, unknown>) => ({
+          date: booking.booking_date || '',
+          time: booking.booking_time || ''
+        })),
+        ...activeInvitations.map((invitation: Record<string, unknown>) => ({
+          date: invitation.booking_date || '',
+          time: ''
+        }))
+      ],
       blockedDates: blockedDates.map((blockedDate: Record<string, unknown>) => ({
         date: blockedDate.blocked_date || '',
         reason: blockedDate.reason || ''

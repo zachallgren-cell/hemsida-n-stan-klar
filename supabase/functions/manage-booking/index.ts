@@ -649,7 +649,8 @@ function customerEmailHtml(
   title: string,
   intro: string,
   row: BookingRow,
-  manageUrl: string
+  manageUrl: string,
+  includePreparation: boolean
 ) {
   return `
     <div style="margin:0;padding:28px 12px;background:#f2f6f8;font-family:Arial,Helvetica,sans-serif;color:#102d3e;">
@@ -661,6 +662,15 @@ function customerEmailHtml(
           <h1 style="margin:0 0 12px;font-size:28px;line-height:1.2;color:#102d3e;">${escapeHtml(title)}</h1>
           <p style="margin:0 0 20px;color:#526674;line-height:1.7;">Hej ${escapeHtml(row.customer_name)}, ${escapeHtml(intro)}</p>
           <table role="presentation" style="width:100%;border-collapse:collapse;">${bookingDetailRows(row)}</table>
+          ${includePreparation ? `
+          <div style="margin-top:22px;padding:18px;background:#fff4df;border:2px solid #e6a23c;border-radius:14px;color:#3f321f;line-height:1.7;">
+            <strong style="color:#173042;">Viktigt inför besöket</strong>
+            <ul style="margin:8px 0 0;padding-left:20px;">
+              <li><strong>Töm alla fönsterbrädor helt.</strong></li>
+              <li>Flytta undan möbler, växter, gardiner och annat som står i vägen.</li>
+              <li>Se till att alla fönster är fria, åtkomliga och går att öppna.</li>
+            </ul>
+          </div>` : ''}
           <div style="margin-top:22px;padding:18px;background:#fff8ec;border:1px solid #f2d298;border-radius:14px;">
             <strong>Betalning efter utfört arbete</strong>
             <p style="margin:7px 0 0;color:#665332;line-height:1.6;">När jobbet är klart får du ett separat klartmejl med belopp, Swish-nummer och referens.</p>
@@ -677,7 +687,8 @@ function customerEmailText(
   title: string,
   intro: string,
   row: BookingRow,
-  manageUrl: string
+  manageUrl: string,
+  includePreparation: boolean
 ) {
   return [
     title,
@@ -689,6 +700,13 @@ function customerEmailText(
     `Adress: ${limitedText(row.address, 300)}`,
     `Pris: ${formatPrice(row.price)}`,
     '',
+    ...(includePreparation ? [
+      'VIKTIGT INFÖR BESÖKET:',
+      '• Töm alla fönsterbrädor helt.',
+      '• Flytta undan möbler, växter, gardiner och annat som står i vägen.',
+      '• Se till att alla fönster är fria, åtkomliga och går att öppna.',
+      ''
+    ] : []),
     'Hantera bokningen:',
     manageUrl,
     '',
@@ -786,8 +804,8 @@ async function sendCustomerChangeEmail(
     to: [limitedText(row.email, 254)],
     reply_to: config.contactEmail,
     subject: content.subject,
-    html: customerEmailHtml(content.title, content.intro, row, manageUrl),
-    text: customerEmailText(content.title, content.intro, row, manageUrl),
+    html: customerEmailHtml(content.title, content.intro, row, manageUrl, action === 'reschedule'),
+    text: customerEmailText(content.title, content.intro, row, manageUrl, action === 'reschedule'),
     ...(calendar ? {
       attachments: [{
         filename: `berga-fonsterputs-${limitedText(row.id, 80)}.ics`,

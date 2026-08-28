@@ -6,16 +6,17 @@
   <title>Se pris och boka fönsterputs | Berga Fönsterputs</title>
   <meta name="description" content="Se ditt pris och boka fönsterputs hos Berga Fönsterputs. Välj tid, tjänst och RUT-avdrag i fyra enkla steg.">
   <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
   <link rel="apple-touch-icon" sizes="192x192" href="/favicon-192.png">
   <link rel="manifest" href="/site.webmanifest">
   <link rel="stylesheet" href="cookie-consent.css?v=20260720">
   <link rel="stylesheet" href="site.css">
-  <link rel="stylesheet" href="booking.css?v=20260817-1">
+  <link rel="stylesheet" href="booking.css?v=20260828-2">
   <script src="cookie-consent.js?v=20260720" defer></script>
   <script src="site.js?v=20260721" defer></script>
-  <script src="booking.js?v=20260826-2" defer></script>
+  <script src="booking.js?v=20260828-1" defer></script>
 </head>
 <body class="booking-page">
   <a class="skip-link" href="#main-content">Hoppa till bokningen</a>
@@ -84,7 +85,7 @@
             <p>Lediga tider på lördagar och söndagar visas direkt. En bokning gäller ett besök och reserverar hela dagen.</p>
           </div>
 
-          <aside class="weekday-booking-notice" aria-label="Bokning på vardagar">
+          <aside class="weekday-booking-notice" id="weekdayBookingNotice" aria-label="Bokning på vardagar">
             <div>
               <strong>Onlinebokning gäller lördagar och söndagar</strong>
               <span>Vill du boka på en vardag? Kontakta oss så hjälper vi dig att hitta en tid.</span>
@@ -92,8 +93,15 @@
             <a href="kontakt.html">Kontakta oss</a>
           </aside>
 
+          <aside class="weekday-booking-notice" id="invitationBookingNotice" aria-label="Reserverat bokningsdatum" hidden>
+            <div>
+              <strong>Ditt datum är redan reserverat</strong>
+              <span id="invitationBookingText">Välj en starttid och fyll sedan i resten av bokningen.</span>
+            </div>
+          </aside>
+
           <div class="calendar-card">
-            <div class="calendar-header">
+            <div class="calendar-header" id="calendarHeader">
               <button type="button" class="calendar-nav" id="prevMonth" aria-label="Visa föregående månad" aria-controls="calendarGrid">←</button>
               <h3 id="calendarTitle" aria-live="polite">Laddar kalender…</h3>
               <button type="button" class="calendar-nav" id="nextMonth" aria-label="Visa nästa månad" aria-controls="calendarGrid">→</button>
@@ -104,7 +112,7 @@
               <button type="button" class="text-button" id="retryCalendarButton" hidden>Försök igen</button>
             </div>
 
-            <div class="calendar-weekdays" aria-hidden="true">
+            <div class="calendar-weekdays" id="calendarWeekdays" aria-hidden="true">
               <span>Mån</span><span>Tis</span><span>Ons</span><span>Tor</span><span>Fre</span><span>Lör</span><span>Sön</span>
             </div>
             <div class="calendar-grid" id="calendarGrid" role="group" aria-labelledby="calendarTitle" aria-busy="true"></div>
@@ -337,7 +345,8 @@
               </div>
               <div class="field" id="emailField">
                 <label for="email">E-postadress</label>
-                <input type="email" id="email" name="email" autocomplete="email" maxlength="254" placeholder="namn@exempel.se" aria-describedby="emailError">
+                <input type="email" id="email" name="email" autocomplete="email" maxlength="254" placeholder="namn@exempel.se" aria-describedby="emailInviteHelp emailError">
+                <p class="field-help" id="emailInviteHelp" hidden>Inbjudan är personlig och kopplad till den här e-postadressen.</p>
                 <p class="field-error" id="emailError" role="alert" hidden></p>
               </div>
               <div class="field" id="postalCodeField">
@@ -366,6 +375,15 @@
                 <textarea id="message" name="message" rows="4" maxlength="2000" placeholder="Till exempel parkering, portkod eller svåråtkomliga fönster" aria-describedby="messageError"></textarea>
                 <p class="field-error" id="messageError" role="alert" hidden></p>
               </div>
+            </div>
+
+            <div class="confirmation-note preparation-note" role="note">
+              <strong>Viktigt inför besöket</strong>
+              <ul>
+                <li><strong>Töm alla fönsterbrädor helt.</strong></li>
+                <li>Flytta undan möbler, växter, gardiner och andra saker som står i vägen.</li>
+                <li>Se till att alla fönster är fria, åtkomliga och går att öppna när vi kommer.</li>
+              </ul>
             </div>
 
             <div class="consent-field" id="consentField">
@@ -427,6 +445,11 @@
               <li>På bekräftelsesidan kan du ladda ner en kalenderfil och, om du valt RUT, öppna det säkra RUT-formuläret.</li>
               <li>Vi putsar fönstren och skickar Swishuppgifterna efter utfört arbete.</li>
             </ol>
+          </div>
+
+          <div class="confirmation-note preparation-note" role="note">
+            <strong>Förbered alla fönster innan vi kommer</strong>
+            <p>Töm fönsterbrädorna helt och flytta undan sådant som blockerar, så att samtliga fönster är fria, åtkomliga och går att öppna.</p>
           </div>
 
           <div class="step-actions">

@@ -6,12 +6,14 @@
   const BOOKING_FUNCTION_URL = `${SUPABASE_FUNCTIONS_URL}/create-booking`;
   const VALIDATE_DISCOUNT_URL = `${SUPABASE_FUNCTIONS_URL}/validate-discount`;
   const BOOKED_SLOTS_FUNCTION_URL = `${SUPABASE_FUNCTIONS_URL}/booked-slots`;
+  const BOOKING_INVITATION_URL = `${SUPABASE_FUNCTIONS_URL}/booking-invitation`;
   const AVAILABILITY_TIMEOUT_MS = 20_000;
   const BOOKABLE_TIMES = ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
   const MONTH_NAMES = ['januari', 'februari', 'mars', 'april', 'maj', 'juni', 'juli', 'augusti', 'september', 'oktober', 'november', 'december'];
   const DRAFT_KEY = 'bergaBookingDraft';
   const CONFIRMATION_KEY = 'bergaBookingConfirmation';
   const REBOOK_KEY = 'bergaRebookPrefill';
+  const INVITATION_SESSION_KEY = 'bergaBookingInvitationToken';
   const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
 
   const BASE_LABOR_PRICE_AFTER_RUT = 799;
@@ -53,6 +55,11 @@
   const timePicker = byId('timePicker');
   const timeSlots = byId('timeSlots');
   const dateTimeError = byId('dateTimeError');
+  const weekdayBookingNotice = byId('weekdayBookingNotice');
+  const invitationBookingNotice = byId('invitationBookingNotice');
+  const invitationBookingText = byId('invitationBookingText');
+  const calendarHeader = byId('calendarHeader');
+  const calendarWeekdays = byId('calendarWeekdays');
   const boatFields = byId('boatFields');
   const apartmentWindowOpeningGroup = byId('apartmentWindowOpeningGroup');
   const seaMilesInput = byId('seaMiles');
@@ -114,6 +121,9 @@
   let beginTracked = false;
   let priceShownTracked = false;
   let rebookPrefillApplied = false;
+  let invitationToken = '';
+  let activeInvitation = null;
+  let invitationLoadError = '';
 
   function getHeaders() {
     return {
@@ -150,6 +160,7 @@
   }
 
   function getBookableTimes(dateString) {
+    if (activeInvitation?.date === dateString) return BOOKABLE_TIMES;
     return isWeekendDate(dateString) ? BOOKABLE_TIMES : [];
   }
 
@@ -260,6 +271,79 @@
     }
   }
 
+  async function loadBookingInvitation() {
+    const url = new URL(window.location.href);
+    const queryToken = String(url.searchParams.get('invite') || '').trim();
+    let storedToken = '';
+    try {
+      storedToken = String(sessionStorage.getItem(INVITATION_SESSION_KEY) || '');
+    } catch {
+      storedToken = '';
+    }
+
+    invitationToken = queryToken || storedToken;
+    if (!invitationToken) return false;
+
+    url.searchParams.delete('invite');
+    window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
+
+    if (!/^[A-Za-z0-9_-]{43}$/.test(invitationToken)) {
+      invitationToken = '';
+      safelyRemoveSession(INVITATION_SESSION_KEY);
+      invitationLoadError = 'Inbjudningslänken är ogiltig. Kontakta oss om du fortfarande vill använda det reserverade datumet.';
+      return false;
+    }
+
+    try {
+      const response = await fetch(BOOKING_INVITATION_URL, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({ action: 'details', token: invitationToken })
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok || !body.active) throw new Error(body.error || 'Inbjudningslänken kunde inte öppnas.');
+
+      activeInvitation = {
+        date: String(body.date || ''),
+        email: String(body.email || '').toLowerCase(),
+        expiresAt: String(body.expiresAt || '')
+      };
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(activeInvitation.date) || !activeInvitation.email) {
+        throw new Error('Inbjudningen innehåller ogiltiga uppgifter.');
+      }
+
+      try {
+        sessionStorage.setItem(INVITATION_SESSION_KEY, invitationToken);
+      } catch {
+        // Länken fungerar fortfarande i den öppna fliken.
+      }
+      safelyRemoveSession(DRAFT_KEY);
+      safelyRemoveSession(REBOOK_KEY);
+      selectedDate = activeInvitation.date;
+      selectedTime = '';
+      desiredInitialStep = 1;
+      setInputValue('email', activeInvitation.email, 254);
+      byId('email').readOnly = true;
+      byId('emailInviteHelp').hidden = false;
+      weekdayBookingNotice.hidden = true;
+      invitationBookingNotice.hidden = false;
+      invitationBookingText.textContent = `${formatDateForDisplay(activeInvitation.date)} är reserverad åt dig. Välj en starttid och fyll sedan i resten.`;
+      calendarHeader.hidden = true;
+      calendarWeekdays.hidden = true;
+      calendarGrid.hidden = true;
+      byId('bookingTitle').textContent = 'Slutför din reserverade bokning';
+      byId('step1Title').textContent = 'Välj starttid för ditt reserverade datum';
+      document.body.classList.add('is-invited-booking');
+      return true;
+    } catch (error) {
+      invitationToken = '';
+      activeInvitation = null;
+      safelyRemoveSession(INVITATION_SESSION_KEY);
+      invitationLoadError = error instanceof Error ? error.message : 'Inbjudningslänken kunde inte öppnas.';
+      return false;
+    }
+  }
+
   function collectDraft() {
     return {
       version: 1,
@@ -365,6 +449,7 @@
   }
 
   function applyQuerySelection() {
+    if (activeInvitation) return;
     const params = new URLSearchParams(window.location.search);
     const queryDate = params.get('date') || params.get('booking_date') || '';
     const queryTime = params.get('time') || params.get('booking_time') || '';
@@ -438,10 +523,14 @@
   }
 
   function isDateSelectable(date) {
+    if (activeInvitation?.date === date) {
+      return calendarReady && date >= todayString && date <= lastBookableString && !getBlockedDate(date);
+    }
     return calendarReady && isWeekendDate(date) && isDateWithinBookableRange(date) && !isFullyBooked(date);
   }
 
   function findFirstAvailableDate() {
+    if (activeInvitation?.date) return activeInvitation.date;
     const cursor = new Date(minBookableDate);
 
     while (cursor <= lastBookableDate) {
@@ -482,7 +571,9 @@
     } else if (!selectedDate) {
       selectedDateBox.textContent = 'Välj en ledig dag i kalendern.';
     } else if (!selectedTime) {
-      selectedDateBox.textContent = `Valt datum: ${formatDateForDisplay(selectedDate)}. Välj en starttid.`;
+      selectedDateBox.textContent = activeInvitation
+        ? `Reserverat datum: ${formatDateForDisplay(selectedDate)}. Välj en starttid.`
+        : `Valt datum: ${formatDateForDisplay(selectedDate)}. Välj en starttid.`;
     } else {
       selectedDateBox.textContent = `Vald tid: ${formatDateForDisplay(selectedDate)} kl. ${selectedTime}.`;
     }
@@ -564,7 +655,10 @@
       const blocked = Boolean(getBlockedDate(date));
       const booked = getBookedTimes(date).length >= getCapacity(date);
       const weekend = isWeekendDate(date);
-      const selectable = calendarReady && weekend && !past && !tooSoon && !tooLate && !blocked && !booked;
+      const invitationDate = activeInvitation?.date === date;
+      const selectable = invitationDate
+        ? calendarReady && !past && !tooLate && !blocked
+        : calendarReady && weekend && !past && !tooSoon && !tooLate && !blocked && !booked;
 
       if (date === todayString) {
         button.classList.add('today');
@@ -572,14 +666,15 @@
       }
       if (selectedDate === date) button.classList.add('selected');
       if (blocked || booked) button.classList.add('fully-booked');
-      if (past || tooLate || !calendarReady || !weekend) button.classList.add('past');
-      if (tooSoon) button.classList.add('advance-notice');
+      if (past || tooLate || !calendarReady || (!weekend && !invitationDate)) button.classList.add('past');
+      if (tooSoon && !invitationDate) button.classList.add('advance-notice');
       button.setAttribute('aria-pressed', selectedDate === date ? 'true' : 'false');
       button.disabled = !selectable;
 
       const state = !calendarReady
         ? 'tillgänglighet ej kontrollerad'
         : blocked ? 'ej bokbar'
+          : invitationDate ? 'reserverad åt dig'
           : booked ? 'bokad'
             : !weekend ? 'vardag, kontakta oss för bokning'
               : past || tooSoon || tooLate ? 'inte valbar' : 'ledig';
@@ -658,13 +753,19 @@
       blockedDatesCache = normalized.blockedDates;
       capacityOverridesCache = normalized.capacityOverrides;
       calendarReady = true;
-      setCalendarState('ready', 'Kalendern är uppdaterad. Välj en ledig dag.');
+      setCalendarState(
+        'ready',
+        activeInvitation
+          ? 'Det reserverade datumet är kontrollerat. Välj en starttid.'
+          : 'Kalendern är uppdaterad. Välj en ledig dag.'
+      );
       applyAvailableInitialSelection();
       updateSelectedDateBox();
       renderCalendar();
       renderTimes();
       saveDraft();
       restoreInitialStep();
+      if (invitationLoadError) setStatus(invitationLoadError);
     } catch (error) {
       console.error('Bokningskalendern kunde inte laddas:', error);
       selectedDate = '';
@@ -675,6 +776,7 @@
       renderTimes();
       updateSelectedDateBox();
       showStep(1, false);
+      if (invitationLoadError) setStatus(invitationLoadError);
     } finally {
       window.clearTimeout(timeoutId);
     }
@@ -1365,6 +1467,7 @@
       postalCode: normalizePostalCode(byId('postalCode').value),
       recurrenceWeeks: byId('recurrenceWeeks').value || null,
       rebookedFromBookingId,
+      invitationToken: activeInvitation ? invitationToken : '',
       attribution: getCampaignAttribution(),
       message: byId('message').value.trim(),
       price: discountedPrice.customerPrice,
@@ -1404,6 +1507,7 @@
       postalCode: booking.postalCode,
       recurrenceWeeks: booking.recurrenceWeeks || null,
       rebookedFromBookingId: booking.rebookedFromBookingId || null,
+      invitationToken: booking.invitationToken || null,
       utmSource: booking.attribution.utmSource || null,
       utmMedium: booking.attribution.utmMedium || null,
       utmCampaign: booking.attribution.utmCampaign || null,
@@ -1484,6 +1588,13 @@
       return;
     }
     if (message.includes('datum') || message.includes('valda tiden') || message.includes('bokad') || message.includes('slot')) {
+      if (activeInvitation) {
+        showStep(1);
+        dateTimeError.textContent = 'Det reserverade datumet kunde inte användas. Kontakta oss så hjälper vi dig med reservationen.';
+        dateTimeError.hidden = false;
+        setStatus(rawMessage || 'Det reserverade datumet kunde inte användas. Kontakta oss så hjälper vi dig.');
+        return;
+      }
       showStep(1);
       dateTimeError.textContent = 'Den valda tiden kunde inte bokas. Kalendern uppdateras så att du kan välja en ny ledig dag.';
       dateTimeError.hidden = false;
@@ -1580,6 +1691,8 @@
       saveConfirmationSummary(createdBooking, booking, estimate, discountedPrice);
       safelyRemoveSession(DRAFT_KEY);
       safelyRemoveSession(REBOOK_KEY);
+      safelyRemoveSession(INVITATION_SESSION_KEY);
+      invitationToken = '';
       trackEvent('booking_step_complete', { step: 4, total_steps: 4 });
       trackEvent('booking_step_4_complete');
       trackEvent('booking_submitted', {
@@ -1731,13 +1844,21 @@
     }
   });
 
-  restoreDraft();
-  applyRebookPrefill();
-  applyQuerySelection();
-  formStartedAtInput.value = String(Date.now());
-  updateApartmentWindowOpeningFields();
-  updateBoatFields();
-  updateLivePrice();
-  showStep(1, false);
-  fetchAvailability();
+  async function initializeBooking() {
+    const hasInvitation = await loadBookingInvitation();
+    if (!hasInvitation) {
+      restoreDraft();
+      applyRebookPrefill();
+      applyQuerySelection();
+    }
+    formStartedAtInput.value = String(Date.now());
+    updateApartmentWindowOpeningFields();
+    updateBoatFields();
+    updateLivePrice();
+    showStep(1, false);
+    if (invitationLoadError) setStatus(invitationLoadError);
+    fetchAvailability();
+  }
+
+  void initializeBooking();
 })();

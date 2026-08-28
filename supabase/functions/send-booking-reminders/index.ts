@@ -224,11 +224,19 @@ function buildReminderEmail(booking: BookingRow, contactEmail: string) {
         <td style="padding:12px 16px;text-align:right;font-weight:700;">${escapeHtml(address)}</td>
       </tr>
     </table>
+    <div style="margin:22px 0 0;padding:20px;background:#fff4df;border:2px solid #e6a23c;border-radius:12px;color:#3f321f;">
+      <h2 style="margin:0 0 10px;font-size:19px;color:#173042;">Viktigt att göra innan vi kommer</h2>
+      <ul style="margin:0;padding-left:22px;line-height:1.75;">
+        <li><strong>Töm alla fönsterbrädor helt.</strong></li>
+        <li>Flytta undan möbler, växter, gardiner och andra saker som står i vägen.</li>
+        <li>Se till att <strong>alla fönster är fria, åtkomliga och går att öppna</strong> när vi kommer.</li>
+      </ul>
+    </div>
     <p style="margin:20px 0 0;">Vi ses snart!</p>`;
 
-  const subject = `Påminnelse: fönsterputs ${dateValue} kl. ${time}`;
+  const subject = `Påminnelse inför fönsterputs – förbered fönstren ${dateValue}`;
   const html = emailShell(
-    `Din fönsterputsning är bokad ${date} klockan ${time}.`,
+    `Töm fönsterbrädorna och gör alla fönster åtkomliga inför besöket ${date}.`,
     'Påminnelse om din bokning',
     content,
     contactEmail
@@ -240,6 +248,11 @@ function buildReminderEmail(booking: BookingRow, contactEmail: string) {
     `Datum: ${date}`,
     `Tid: ${time}`,
     `Adress: ${address}`,
+    '',
+    'VIKTIGT ATT GÖRA INNAN VI KOMMER:',
+    '• Töm alla fönsterbrädor helt.',
+    '• Flytta undan möbler, växter, gardiner och andra saker som står i vägen.',
+    '• Se till att alla fönster är fria, åtkomliga och går att öppna när vi kommer.',
     '',
     'Vi ses snart!',
     `Frågor? Svara på mejlet eller kontakta ${contactEmail}.`

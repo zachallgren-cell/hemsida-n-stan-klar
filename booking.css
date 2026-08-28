@@ -1146,9 +1146,20 @@ body.booking-page :focus-visible {
   background: var(--booking-success-soft);
 }
 
-.confirmation-note ol {
+.confirmation-note ol,
+.confirmation-note ul {
   margin: 9px 0 0;
   padding-left: 22px;
+}
+
+.confirmation-note p {
+  margin: 9px 0 0;
+}
+
+.preparation-note {
+  border-color: #e6a23c;
+  background: #fff4df;
+  color: #4a3820;
 }
 
 .button-confirm {

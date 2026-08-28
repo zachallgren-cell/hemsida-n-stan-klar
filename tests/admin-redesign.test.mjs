@@ -7,7 +7,7 @@ const root = new URL('../', import.meta.url);
 test('adminen använder arbetsnavigation och progressiv informationsvisning', async () => {
   const html = await readFile(new URL('admin.html', root), 'utf8');
 
-  for (const view of ['overview', 'calendar', 'bookings', 'customers', 'followUp', 'payments', 'discountCodes', 'blockedDates']) {
+  for (const view of ['overview', 'calendar', 'invitations', 'bookings', 'customers', 'followUp', 'payments', 'discountCodes', 'blockedDates']) {
     assert.match(html, new RegExp(`data-admin-view="${view}"`));
   }
 

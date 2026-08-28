@@ -32,6 +32,7 @@ type BookingPayload = {
   recurrenceWeeks?: number | string | null;
   recurrence_weeks?: number | string | null;
   rebookedFromBookingId?: string | null;
+  invitationToken?: string | null;
   utmSource?: string;
   utmMedium?: string;
   utmCampaign?: string;
@@ -293,7 +294,7 @@ async function consumeDiscountCode(
 async function callServiceBooleanRpc(
   supabaseUrl: string,
   serviceRoleKey: string,
-  functionName: 'release_discount_code_usage' | 'discard_unconfirmed_booking',
+  functionName: 'release_discount_code_usage' | 'discard_unconfirmed_booking' | 'finalize_booking_invitation',
   body: Record<string, unknown>
 ) {
   try {
@@ -335,6 +336,10 @@ function isBookableTime(value: string, dateString: string) {
     ? ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00']
     : [];
   return allowedTimes.includes(value);
+}
+
+function isAllowedStartTime(value: string) {
+  return ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'].includes(value);
 }
 
 function getStockholmDateString(date = new Date()) {
@@ -464,6 +469,7 @@ Deno.serve(async (req) => {
     const normalizedPostalCode = normalizePostalCode(payload.postalCode || payload.postal_code);
     const recurrenceWeeks = getRecurrenceWeeks(payload);
     const rebookedFromBookingId = String(payload.rebookedFromBookingId || '').trim();
+    const invitationToken = String(payload.invitationToken || '').trim();
 
     if (payload.name.length < 2 || payload.name.length > 100) {
       return jsonResponse({ error: 'Ange ett giltigt namn med högst 100 tecken.' }, 400);
@@ -505,12 +511,12 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'Du behöver bekräfta integritetsinformationen innan bokningen skickas.' }, 400);
     }
 
-    if (!isBookableDate(payload.date)) {
-      return jsonResponse({ error: 'Välj ett giltigt datum mellan två dagar och tolv månader framåt.' }, 400);
+    if (!isAllowedStartTime(payload.time)) {
+      return jsonResponse({ error: 'Välj en giltig starttid mellan 10:00 och 17:00.' }, 400);
     }
 
-    if (!isBookableTime(payload.time, payload.date)) {
-      return jsonResponse({ error: 'Onlinebokning är endast tillgänglig på lördagar och söndagar. Kontakta oss om du vill boka på en vardag.' }, 400);
+    if (invitationToken && !/^[A-Za-z0-9_-]{43}$/.test(invitationToken)) {
+      return jsonResponse({ error: 'Inbjudningslänken är ogiltig eller har gått ut.' }, 400);
     }
 
     if (payload.transportType === 'Båttransport behövs') {
@@ -563,6 +569,51 @@ Deno.serve(async (req) => {
         contactEmail
       });
       return jsonResponse({ error: 'Email secrets are missing' }, 500);
+    }
+
+    let invitationRecord: {
+      id: number;
+      email: string;
+      booking_date: string;
+      status: string;
+      expires_at: string;
+    } | null = null;
+    let invitationTokenHash = '';
+
+    if (invitationToken) {
+      invitationTokenHash = await sha256Hex(invitationToken);
+      const invitationRes = await fetchSupabaseRows(
+        `${supabaseUrl}/rest/v1/booking_invitations?select=id,email,booking_date,status,expires_at&token_hash=eq.${encodeURIComponent(invitationTokenHash)}&limit=1`,
+        serviceRoleKey
+      );
+      if (!invitationRes.ok) {
+        console.error('Could not validate booking invitation', await invitationRes.text());
+        return jsonResponse({ error: 'Inbjudningen kunde inte kontrolleras just nu. Försök igen.' }, 500);
+      }
+
+      const invitations = await invitationRes.json();
+      invitationRecord = Array.isArray(invitations) && invitations.length ? invitations[0] : null;
+      if (!invitationRecord
+        || invitationRecord.status !== 'active'
+        || new Date(invitationRecord.expires_at).getTime() <= Date.now()) {
+        return jsonResponse({ error: 'Inbjudningslänken är ogiltig, använd eller har gått ut.' }, 409);
+      }
+      if (String(invitationRecord.email).toLowerCase() !== payload.email || invitationRecord.booking_date !== payload.date) {
+        return jsonResponse({ error: 'Mejladressen eller datumet stämmer inte med bokningsinbjudan.' }, 409);
+      }
+    }
+
+    if (invitationRecord) {
+      const today = getStockholmDateString();
+      if (payload.date < today || payload.date > addDaysToDateString(today, MAX_BOOKING_HORIZON_DAYS)) {
+        return jsonResponse({ error: 'Det reserverade datumet har passerat eller ligger utanför bokningsperioden.' }, 409);
+      }
+    } else if (!isBookableDate(payload.date)) {
+      return jsonResponse({ error: 'Välj ett giltigt datum mellan två dagar och tolv månader framåt.' }, 400);
+    }
+
+    if (!invitationRecord && !isBookableTime(payload.time, payload.date)) {
+      return jsonResponse({ error: 'Onlinebokning är endast tillgänglig på lördagar och söndagar. Kontakta oss om du vill boka på en vardag.' }, 400);
     }
 
     const clientIp = String(
@@ -628,7 +679,20 @@ Deno.serve(async (req) => {
     }
 
     const existingBookings = await existingBookingRes.json();
-    if (Array.isArray(existingBookings) && existingBookings.length >= 1 + extraBookings) {
+    const activeInvitationRes = await fetchSupabaseRows(
+      `${supabaseUrl}/rest/v1/booking_invitations?select=id&booking_date=eq.${encodeURIComponent(payload.date)}&status=eq.active&expires_at=gt.${encodeURIComponent(new Date().toISOString())}&limit=4`,
+      serviceRoleKey
+    );
+    if (!activeInvitationRes.ok) {
+      console.error('Could not check booking invitation reservations', await activeInvitationRes.text());
+      return jsonResponse({ error: 'Could not check booking availability' }, 500);
+    }
+    const activeInvitations = await activeInvitationRes.json();
+    const otherInvitationCount = Array.isArray(activeInvitations)
+      ? activeInvitations.filter((invitation) => Number(invitation?.id) !== Number(invitationRecord?.id)).length
+      : 0;
+    const usedCapacity = (Array.isArray(existingBookings) ? existingBookings.length : 0) + otherInvitationCount;
+    if (usedCapacity >= 1 + extraBookings) {
       return jsonResponse({ error: 'Det valda datumet är redan bokat. Välj en annan dag.' }, 409);
     }
 
@@ -787,6 +851,32 @@ Deno.serve(async (req) => {
     }
 
     const [savedBooking] = await bookingRes.json();
+    const requiresEmailConfirmation = !invitationRecord;
+
+    if (invitationRecord) {
+      const invitationFinalized = await callServiceBooleanRpc(
+        supabaseUrl,
+        serviceRoleKey,
+        'finalize_booking_invitation',
+        {
+          p_token_hash: invitationTokenHash,
+          p_booking_id: String(savedBooking?.id || '')
+        }
+      );
+      if (!invitationFinalized) {
+        if (savedBooking?.id) {
+          await callServiceBooleanRpc(
+            supabaseUrl,
+            serviceRoleKey,
+            'discard_unconfirmed_booking',
+            { p_booking_id: String(savedBooking.id) }
+          );
+        }
+        return jsonResponse({
+          error: 'Det reserverade datumet kunde inte slutföras. Kontakta oss så hjälper vi dig med inbjudningen.'
+        }, 409);
+      }
+    }
 
     const safeMessage = payload.message ? escapeHtml(payload.message).replaceAll('\n', '<br>') : 'Ingen extra information';
     const safeHousingType = payload.housingType ? escapeHtml(payload.housingType) : escapeHtml(payload.boatSize);
@@ -827,9 +917,9 @@ Deno.serve(async (req) => {
     const laborCostLabel = appliedDiscount ? 'Arbetskostnad efter rabatt, före RUT' : 'Arbetskostnad före RUT';
     const managementFragment = new URLSearchParams({
       bookingId: String(savedBooking?.id || ''),
-      token: managementToken,
-      action: 'confirm'
+      token: managementToken
     });
+    if (requiresEmailConfirmation) managementFragment.set('action', 'confirm');
     const manageUrl = `${siteUrl}/hantera-bokning.html#${managementFragment.toString()}`;
     const safeManageUrl = escapeHtml(manageUrl);
     const customerDetailRows = [
@@ -856,7 +946,7 @@ Deno.serve(async (req) => {
             <td width="58%" style="width: 58%; padding: 12px 0; border-bottom: 1px solid #e6edf3; color: #0f2638; font-size: 14px; font-weight: 700; text-align: right; vertical-align: top;">${value || 'Ej angivet'}</td>
           </tr>
         `).join('');
-    const confirmationSection = `
+    const confirmationSection = requiresEmailConfirmation ? `
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; background: #fff8ec; border: 1px solid #ffd08b; border-radius: 14px;">
         <tr>
           <td style="padding: 20px;">
@@ -867,6 +957,23 @@ Deno.serve(async (req) => {
               <tr>
                 <td align="center" style="background: #247a43; border-radius: 999px;">
                   <a href="${safeManageUrl}" style="display: block; padding: 14px 20px; color: #ffffff; font-size: 13px; font-weight: 800; letter-spacing: .04em; text-decoration: none;">BEKRÄFTA BOKNINGEN</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    ` : `
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; background: #f7fbf8; border: 1px solid #b9dec5; border-radius: 14px;">
+        <tr>
+          <td style="padding: 20px;">
+            <p style="margin: 0 0 8px; color: #287a45; font-size: 12px; line-height: 1.3; font-weight: 800; text-transform: uppercase; letter-spacing: .05em;">Datumet är reserverat</p>
+            <h2 style="margin: 0 0 10px; color: #0f2638; font-size: 20px; line-height: 1.25;">Din bokning är klar</h2>
+            <p style="margin: 0 0 14px; color: #536574; font-size: 14px; line-height: 1.7;">Din personliga inbjudan är slutförd och dagen är reserverad i kalendern. På bokningssidan kan du hantera bokningen, ladda ner en kalenderfil och öppna RUT-formuläret om du valt RUT.</p>
+            <table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+              <tr>
+                <td align="center" style="background: #247a43; border-radius: 999px;">
+                  <a href="${safeManageUrl}" style="display: block; padding: 14px 20px; color: #ffffff; font-size: 13px; font-weight: 800; letter-spacing: .04em; text-decoration: none;">ÖPPNA BOKNINGEN</a>
                 </td>
               </tr>
             </table>
@@ -891,7 +998,9 @@ Deno.serve(async (req) => {
                   </td>
                 </tr>
               </table>`
-            : '<p style="margin: 0; color: #536574; font-size: 14px; line-height: 1.7;">Bekräfta först bokningen via knappen ovan. Därefter kan du öppna det säkra RUT-formuläret på din personliga bekräftelsesida.</p>'}
+            : `<p style="margin: 0; color: #536574; font-size: 14px; line-height: 1.7;">${requiresEmailConfirmation
+              ? 'Bekräfta först bokningen via knappen ovan. Därefter kan du öppna det säkra RUT-formuläret på din personliga bekräftelsesida.'
+              : 'Öppna din personliga bokningssida via knappen ovan för att fylla i det säkra RUT-formuläret.'}</p>`}
             </td>
           </tr>
         </table>
@@ -918,8 +1027,10 @@ Deno.serve(async (req) => {
 
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; color: #173042; line-height: 1.6;">
-        <h2 style="margin-bottom: 12px;">Ny obekräftad bokning</h2>
-        <p>Kunden har skickat bokningen men behöver fortfarande bekräfta sin e-post. Dagen blockeras först efter bekräftelsen.</p>
+        <h2 style="margin-bottom: 12px;">${requiresEmailConfirmation ? 'Ny obekräftad bokning' : 'Reserverad bokningsinbjudan slutförd'}</h2>
+        <p>${requiresEmailConfirmation
+          ? 'Kunden har skickat bokningen men behöver fortfarande bekräfta sin e-post. Dagen blockeras först efter bekräftelsen.'
+          : 'Kunden har slutfört den personliga bokningsinbjudan. Dagen är reserverad och bokningen ligger som väntande.'}</p>
         <table style="border-collapse: collapse; width: 100%; max-width: 680px;">
           <tr><td style="padding: 8px 0; font-weight: 700;">Namn</td><td style="padding: 8px 0;">${escapeHtml(payload.name)}</td></tr>
           <tr><td style="padding: 8px 0; font-weight: 700;">E-post</td><td style="padding: 8px 0;">${escapeHtml(payload.email)}</td></tr>
@@ -1000,8 +1111,9 @@ Deno.serve(async (req) => {
                         <td style="padding: 20px; background: #f8fafb; border: 1px solid #e6edf3; border-radius: 14px;">
                           <h2 style="margin: 0 0 12px; color: #0f2638; font-size: 18px;">Inför besöket</h2>
                           <ul style="margin: 0; padding-left: 20px; color: #536574; font-size: 14px; line-height: 1.7;">
-                            <li>Plocka undan föremål nära fönster.</li>
-                            <li>Säkerställ att vi kommer åt fönstren.</li>
+                            <li><strong>Töm alla fönsterbrädor helt.</strong></li>
+                            <li>Flytta undan möbler, växter, gardiner och andra saker som står i vägen.</li>
+                            <li>Se till att <strong>alla fönster är fria, åtkomliga och går att öppna</strong> när vi kommer.</li>
                             <li>Meddela oss om något fönster är skadat eller svårt att nå.</li>
                           </ul>
                           <p style="margin: 14px 0 0; padding: 12px 14px; background: #eef3f6; border-left: 4px solid #0f2638; color: #173042; font-size: 13px; line-height: 1.6;">Vi utför endast arbete som kan genomföras säkert från mark, normal hushållsstege eller inifrån bostaden.</p>
@@ -1118,7 +1230,7 @@ Deno.serve(async (req) => {
     const emailPayload: Record<string, unknown> = {
       from: fromEmail,
       to: [notificationEmail],
-      subject: `Obekräftad bokning ${payload.date} ${payload.time} - ${payload.name}`,
+      subject: `${requiresEmailConfirmation ? 'Obekräftad bokning' : 'Reserverad bokning klar'} ${payload.date} ${payload.time} - ${payload.name}`,
       html: emailHtml
     };
 
@@ -1141,7 +1253,7 @@ Deno.serve(async (req) => {
           body: JSON.stringify({
             from: fromEmail,
             to: [payload.email.trim()],
-            subject: `Bekräfta din bokning hos Berga Fönsterputs ${payload.date}`,
+            subject: `${requiresEmailConfirmation ? 'Bekräfta din bokning' : 'Din bokning är reserverad'} hos Berga Fönsterputs ${payload.date}`,
             html: customerEmailHtml,
             reply_to: contactEmail
           })
@@ -1158,7 +1270,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    if (!customerEmailSent) {
+    if (!customerEmailSent && requiresEmailConfirmation) {
       const rolledBack = customerEmailRes && savedBooking?.id
         ? await callServiceBooleanRpc(
             supabaseUrl,
@@ -1223,7 +1335,7 @@ Deno.serve(async (req) => {
       discountAmount: customerDiscountAmount,
       discountCode: appliedDiscount?.normalized_code || null,
       customerEmailSent,
-      requiresEmailConfirmation: true,
+      requiresEmailConfirmation,
       stripeCheckoutUrl: null,
       stripeCheckoutSessionId: null
     });

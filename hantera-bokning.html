@@ -138,6 +138,11 @@
             </form>
           </article>
 
+          <article class="action-card wide" id="preparationCard" hidden>
+            <h3>Viktigt inför besöket</h3>
+            <p><strong>Töm alla fönsterbrädor helt.</strong> Flytta undan möbler, växter, gardiner och andra saker som står i vägen. Se till att samtliga fönster är fria, åtkomliga och går att öppna när vi kommer.</p>
+          </article>
+
           <article class="action-card wide">
             <h3>Ta med bokningen</h3>
             <p>Ladda ner kalenderfilen eller använd uppgifterna som förifyllning när du väljer en ny tid.</p>
@@ -223,6 +228,7 @@
       const rutButton = document.getElementById('rutButton');
       const rescheduleCard = document.getElementById('rescheduleCard');
       const recurrenceCard = document.getElementById('recurrenceCard');
+      const preparationCard = document.getElementById('preparationCard');
       const cancelCard = document.getElementById('cancelCard');
       const confirmButton = document.getElementById('confirmButton');
       const cancelButton = document.getElementById('cancelButton');
@@ -417,6 +423,7 @@
 
         rescheduleCard.hidden = !capabilities.canReschedule;
         recurrenceCard.hidden = !capabilities.canSetRecurrence;
+        preparationCard.hidden = !['pending', 'confirmed'].includes(booking.status);
         cancelCard.hidden = !capabilities.canCancel;
         calendarButton.hidden = !capabilities.canDownloadCalendar;
         rebookButton.hidden = capabilities.canRebook === false;

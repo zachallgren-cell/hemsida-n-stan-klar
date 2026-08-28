@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="admin-analytics.css?v=20260721">
   <meta name="robots" content="noindex, nofollow">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-60MEkeGV62JWAeKeAfFZMRrtOfTzSMmohNXYcL/kyps='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-o1Y4bqalxKeem2TvrLqyHkSD2mCAjWKHkhkaWqolmNs='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
   <link rel="shortcut icon" href="/favicon-48.png" />
@@ -302,14 +302,16 @@
     }
 
     .blocked-dates-list,
-    .discount-codes-list {
+    .discount-codes-list,
+    .invitation-list {
       display: grid;
       gap: 10px;
       margin-top: 18px;
     }
 
     .blocked-date-row,
-    .discount-code-row {
+    .discount-code-row,
+    .invitation-row {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 12px;
@@ -323,12 +325,15 @@
     .blocked-date-row strong,
     .blocked-date-row span,
     .discount-code-row strong,
-    .discount-code-row span {
+    .discount-code-row span,
+    .invitation-row strong,
+    .invitation-row span {
       display: block;
     }
 
     .blocked-date-row span,
-    .discount-code-row span {
+    .discount-code-row span,
+    .invitation-row span {
       color: var(--muted);
       line-height: 1.5;
     }
@@ -429,18 +434,21 @@
 
     #bookingsPanel,
     #blockedDatesPanel,
-    #discountCodesPanel {
+    #discountCodesPanel,
+    #invitationsPanel {
       grid-column: 1 / -1;
       width: 100%;
     }
 
     #blockedDatesPanel,
-    #discountCodesPanel {
+    #discountCodesPanel,
+    #invitationsPanel {
       padding: 32px;
     }
 
     #blockedDatesPanel .blocked-dates-list,
-    #discountCodesPanel .discount-codes-list {
+    #discountCodesPanel .discount-codes-list,
+    #invitationsPanel .invitation-list {
       max-width: 980px;
     }
 
@@ -658,10 +666,12 @@
       .badge-row { justify-content: flex-start; }
       .bookings-header { flex-direction: column; align-items: stretch; }
       .date-range-grid { grid-template-columns: 1fr; }
-      .blocked-date-row { grid-template-columns: 1fr; align-items: stretch; }
-      .discount-code-row { grid-template-columns: 1fr; align-items: stretch; }
+      .blocked-date-row,
+      .discount-code-row,
+      .invitation-row { grid-template-columns: 1fr; align-items: stretch; }
       .blocked-date-row .button,
-      .discount-code-row .button { width: 100%; }
+      .discount-code-row .button,
+      .invitation-row .button { width: 100%; }
     }
 
     /* Samma visuella system som den publika webbplatsen, utan att påverka adminlogiken. */
@@ -873,6 +883,7 @@
         <nav class="admin-tabs hidden" id="adminTabs" aria-label="Adminvyer">
           <button type="button" class="admin-tab is-active" data-admin-view="overview"><span aria-hidden="true">⌂</span>Översikt</button>
           <button type="button" class="admin-tab" data-admin-view="calendar"><span aria-hidden="true">▦</span>Kalender</button>
+          <button type="button" class="admin-tab" data-admin-view="invitations"><span aria-hidden="true">✉</span>Bjud in kund</button>
           <button type="button" class="admin-tab" data-admin-view="bookings"><span aria-hidden="true">≡</span>Bokningar</button>
           <button type="button" class="admin-tab" data-admin-view="customers"><span aria-hidden="true">◎</span>Kunder</button>
           <button type="button" class="admin-tab" data-admin-view="followUp"><span aria-hidden="true">✓</span>Uppföljning</button>
@@ -919,6 +930,7 @@
         <kbd>⌘ K</kbd>
       </label>
       <div class="workspace-actions">
+        <button type="button" class="button button-secondary" data-open-view="invitations">Bjud in kund</button>
         <a class="button button-primary" href="bokning.html">+ Ny bokning</a>
         <button type="button" class="icon-button" aria-label="Aviseringar"><span aria-hidden="true">○</span><span class="notification-dot"></span></button>
         <span class="admin-profile" title="Administratör">ZH</span>
@@ -1120,6 +1132,37 @@
         <div class="discount-codes-list surface" id="discountCodesList"></div>
       </section>
 
+      <section class="card panel hidden" id="invitationsPanel">
+        <header class="view-heading">
+          <div>
+            <p class="eyebrow">Privat bokningslänk</p>
+            <h1>Reservera datum åt en kund</h1>
+            <p>Fyll i kundens mejl och datum. Datumet paxas direkt och kunden får en personlig länk där resten av bokningen slutförs.</p>
+          </div>
+        </header>
+        <section class="surface settings-section">
+          <form class="admin-form" id="invitationForm" novalidate>
+            <div class="date-range-grid">
+              <label>
+                Kundens e-postadress
+                <input type="email" id="invitationEmail" autocomplete="email" maxlength="254" placeholder="kund@exempel.se" required>
+              </label>
+              <label>
+                Reserverat datum
+                <input type="date" id="invitationDate" required>
+              </label>
+            </div>
+            <p>Inbjudan fungerar även för vardagar. Datumet hålls reserverat tills kunden slutför bokningen, du avbryter inbjudan eller datumet passerar.</p>
+            <button type="submit" class="button button-primary" id="invitationButton">Reservera och skicka länk</button>
+          </form>
+          <p class="status-message" id="invitationMessage" role="status" aria-live="polite"></p>
+        </section>
+        <section class="surface settings-section">
+          <div class="section-heading-row"><div><h2>Skickade inbjudningar</h2><p>Aktiva inbjudningar reserverar en plats i kalendern.</p></div></div>
+          <div class="invitation-list" id="invitationList"></div>
+        </section>
+      </section>
+
       <section class="card panel hidden" id="bookingsPanel">
         <div class="view-heading bookings-header">
           <div>
@@ -1211,6 +1254,7 @@
     const COMPLETE_BOOKING_URL = `${SUPABASE_URL}/functions/v1/complete-booking`;
     const ADMIN_RUT_DETAILS_URL = `${SUPABASE_URL}/functions/v1/admin-rut-details`;
     const CLARITY_ANALYTICS_URL = `${SUPABASE_URL}/functions/v1/clarity-analytics`;
+    const BOOKING_INVITATION_URL = `${SUPABASE_URL}/functions/v1/booking-invitation`;
     const SWISH_NUMBER_DISPLAY = '123 677 43 84';
     const SWISH_RECIPIENT_NAME = 'Zac Hallgren';
     const authHashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
@@ -1243,6 +1287,7 @@
     const adminTabs = document.getElementById('adminTabs');
     const blockedDatesPanel = document.getElementById('blockedDatesPanel');
     const discountCodesPanel = document.getElementById('discountCodesPanel');
+    const invitationsPanel = document.getElementById('invitationsPanel');
     const bookingsPanel = document.getElementById('bookingsPanel');
     const analyticsPanel = document.getElementById('analyticsPanel');
     const loginForm = document.getElementById('loginForm');
@@ -1278,6 +1323,12 @@
     const discountCodeButton = document.getElementById('discountCodeButton');
     const discountCodeMessage = document.getElementById('discountCodeMessage');
     const discountCodesList = document.getElementById('discountCodesList');
+    const invitationForm = document.getElementById('invitationForm');
+    const invitationEmail = document.getElementById('invitationEmail');
+    const invitationDate = document.getElementById('invitationDate');
+    const invitationButton = document.getElementById('invitationButton');
+    const invitationMessage = document.getElementById('invitationMessage');
+    const invitationList = document.getElementById('invitationList');
     const bookingSearch = document.getElementById('bookingSearch');
     const bookingStatusFilter = document.getElementById('bookingStatusFilter');
     const bookingSort = document.getElementById('bookingSort');
@@ -1373,6 +1424,11 @@
       discountCodeMessage.className = `status-message ${type}`.trim();
     }
 
+    function setInvitationMessage(text, type = '') {
+      invitationMessage.textContent = text;
+      invitationMessage.className = `status-message ${type}`.trim();
+    }
+
     function renderAdminView() {
       const showOverview = activeAdminView === 'overview';
       const showCalendar = activeAdminView === 'calendar';
@@ -1382,6 +1438,7 @@
       const showPayments = activeAdminView === 'payments';
       const showBlockedDates = activeAdminView === 'blockedDates';
       const showDiscountCodes = activeAdminView === 'discountCodes';
+      const showInvitations = activeAdminView === 'invitations';
       const showAnalytics = activeAdminView === 'analytics';
       overviewPanel.classList.toggle('hidden', !showOverview);
       calendarPanel.classList.toggle('hidden', !showCalendar);
@@ -1391,6 +1448,7 @@
       paymentsPanel.classList.toggle('hidden', !showPayments);
       blockedDatesPanel.classList.toggle('hidden', !showBlockedDates);
       discountCodesPanel.classList.toggle('hidden', !showDiscountCodes);
+      invitationsPanel.classList.toggle('hidden', !showInvitations);
       analyticsPanel.classList.toggle('hidden', !showAnalytics);
       document.body.classList.remove('nav-open');
       mobileNavButton.setAttribute('aria-expanded', 'false');
@@ -1436,6 +1494,18 @@
       const date = new Date(`${dateString}T12:00:00Z`);
       date.setUTCDate(date.getUTCDate() + days);
       return date.toISOString().slice(0, 10);
+    }
+
+    function setInvitationDateLimits() {
+      const parts = Object.fromEntries(new Intl.DateTimeFormat('sv-SE', {
+        timeZone: 'Europe/Stockholm',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).formatToParts(new Date()).map((part) => [part.type, part.value]));
+      const today = `${parts.year}-${parts.month}-${parts.day}`;
+      invitationDate.min = addDaysToDateString(today, 2);
+      invitationDate.max = addDaysToDateString(today, 365);
     }
 
     function getDateRange(startDate, endDate) {
@@ -2225,6 +2295,67 @@
       renderDiscountCodes(data || []);
     }
 
+    async function callBookingInvitation(action, payload = {}) {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) throw new Error('Du måste vara inloggad som admin.');
+
+      const response = await fetch(BOOKING_INVITATION_URL, {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ action, ...payload })
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok || body.error) throw new Error(body.error || 'Inbjudningen kunde inte hanteras.');
+      return body;
+    }
+
+    function invitationStatusLabel(invitation) {
+      const labels = {
+        active: 'Reserverad – väntar på kund',
+        completed: 'Slutförd av kund',
+        cancelled: 'Avbruten',
+        expired: 'Utgången'
+      };
+      return labels[invitation.status] || invitation.status || 'Okänd status';
+    }
+
+    function renderInvitations(invitations) {
+      if (!invitations.length) {
+        invitationList.innerHTML = '<div class="empty-state">Inga bokningsinbjudningar har skickats ännu.</div>';
+        return;
+      }
+
+      invitationList.innerHTML = invitations.map((invitation) => `
+        <div class="invitation-row" data-invitation-id="${escapeHtml(invitation.id)}">
+          <div>
+            <strong>${escapeHtml(formatDate(invitation.booking_date))}</strong>
+            <span>${escapeHtml(invitation.email)}</span>
+            <span>${escapeHtml(invitationStatusLabel(invitation))} · Skapad ${escapeHtml(formatDateTime(invitation.created_at))}</span>
+          </div>
+          ${invitation.status === 'active'
+            ? '<button type="button" class="button button-danger action-cancel-invitation">Avbryt reservation</button>'
+            : invitation.booking_id
+              ? `<button type="button" class="button button-secondary" data-open-booking="${escapeHtml(invitation.booking_id)}">Öppna bokning</button>`
+              : ''}
+        </div>
+      `).join('');
+    }
+
+    async function fetchInvitations() {
+      invitationList.innerHTML = '<div class="empty-state">Hämtar inbjudningar...</div>';
+      try {
+        const body = await callBookingInvitation('list');
+        renderInvitations(Array.isArray(body.invitations) ? body.invitations : []);
+      } catch (error) {
+        invitationList.innerHTML = `<div class="empty-state">${escapeHtml(error instanceof Error ? error.message : 'Inbjudningarna kunde inte hämtas.')}</div>`;
+      }
+    }
+
     async function fetchBlockedDates() {
       blockedDatesList.innerHTML = '<div class="empty-state">Hämtar spärrade datum...</div>';
 
@@ -2734,6 +2865,7 @@
       if (viewTrigger instanceof HTMLElement) {
         activeAdminView = viewTrigger.dataset.openView || 'overview';
         renderAdminView();
+        if (activeAdminView === 'invitations') void fetchInvitations();
       }
     });
 
@@ -3020,6 +3152,50 @@
       }
     });
 
+    invitationForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      setInvitationMessage('');
+      const email = invitationEmail.value.trim();
+      const date = invitationDate.value;
+      if (!email || !date) {
+        setInvitationMessage('Fyll i både kundens e-postadress och datum.', 'error');
+        return;
+      }
+
+      invitationButton.disabled = true;
+      invitationButton.textContent = 'Reserverar och skickar...';
+      try {
+        await callBookingInvitation('create', { email, date });
+        invitationForm.reset();
+        setInvitationDateLimits();
+        setInvitationMessage(`Datumet ${formatDate(date)} är reserverat och länken har skickats till ${email}.`, 'success');
+        await fetchInvitations();
+      } catch (error) {
+        setInvitationMessage(error instanceof Error ? error.message : 'Inbjudningen kunde inte skickas.', 'error');
+      } finally {
+        invitationButton.disabled = false;
+        invitationButton.textContent = 'Reservera och skicka länk';
+      }
+    });
+
+    invitationList.addEventListener('click', async (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement) || !target.classList.contains('action-cancel-invitation')) return;
+      const row = target.closest('.invitation-row');
+      const invitationId = Number(row?.dataset.invitationId);
+      if (!invitationId || !window.confirm('Avbryt reservationen? Datumet blir bokningsbart igen om ingen annan bokning använder kapaciteten.')) return;
+
+      target.setAttribute('disabled', 'disabled');
+      try {
+        await callBookingInvitation('cancel', { invitationId });
+        setInvitationMessage('Reservationen är avbruten.', 'success');
+        await fetchInvitations();
+      } catch (error) {
+        setInvitationMessage(error instanceof Error ? error.message : 'Reservationen kunde inte avbrytas.', 'error');
+        target.removeAttribute('disabled');
+      }
+    });
+
     mfaEnrollButton.addEventListener('click', async () => {
       mfaEnrollButton.disabled = true;
       setMfaMessage('Skapar en säker registreringskod...');
@@ -3180,6 +3356,9 @@
       if (activeAdminView === 'discountCodes') {
         await fetchDiscountCodes();
       }
+      if (activeAdminView === 'invitations') {
+        await fetchInvitations();
+      }
       if (activeAdminView === 'analytics' && analyticsController) {
         await analyticsController.load();
       }
@@ -3194,6 +3373,11 @@
 
       if (activeAdminView === 'discountCodes') {
         await fetchDiscountCodes();
+        return;
+      }
+
+      if (activeAdminView === 'invitations') {
+        await fetchInvitations();
         return;
       }
 
@@ -3230,7 +3414,7 @@
       workspaceToolbar.classList.toggle('hidden', !isMfaVerified || mustSetPassword);
 
       if (!isMfaVerified || mustSetPassword) {
-        [overviewPanel, calendarPanel, bookingsPanel, customersPanel, followUpPanel, paymentsPanel, blockedDatesPanel, discountCodesPanel, analyticsPanel]
+        [overviewPanel, calendarPanel, bookingsPanel, customersPanel, followUpPanel, paymentsPanel, blockedDatesPanel, discountCodesPanel, invitationsPanel, analyticsPanel]
           .forEach((panel) => panel.classList.add('hidden'));
         closeBookingDrawer();
       }
@@ -3240,6 +3424,7 @@
         bookingsPanel.classList.add('hidden');
         blockedDatesPanel.classList.add('hidden');
         discountCodesPanel.classList.add('hidden');
+        invitationsPanel.classList.add('hidden');
         analyticsPanel.classList.add('hidden');
         newAdminPassword.focus();
       } else if (isMfaVerified) {
@@ -3251,6 +3436,7 @@
         bookingsPanel.classList.add('hidden');
         blockedDatesPanel.classList.add('hidden');
         discountCodesPanel.classList.add('hidden');
+        invitationsPanel.classList.add('hidden');
         analyticsPanel.classList.add('hidden');
         await prepareMfaPanel();
       } else {
@@ -3262,10 +3448,12 @@
         bookingsPanel.classList.add('hidden');
         blockedDatesPanel.classList.add('hidden');
         discountCodesPanel.classList.add('hidden');
+        invitationsPanel.classList.add('hidden');
         analyticsPanel.classList.add('hidden');
       }
     }
 
+    setInvitationDateLimits();
     await refreshSession();
   </script>
 </body>
