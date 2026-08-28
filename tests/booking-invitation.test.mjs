@@ -46,6 +46,9 @@ test('kundlänken låser mejl och datum men låter kunden välja tid och vanliga
 
   assert.match(html, /id="invitationBookingNotice"[^>]*hidden/);
   assert.match(client, /url\.searchParams\.delete\('invite'\)/);
+  assert.match(client, /url\.searchParams\.get\('reserved'\) === '1'/);
+  assert.match(client, /if \(!queryToken && !shouldResumeInvitation\) \{[\s\S]*safelyRemoveSession\(INVITATION_SESSION_KEY\)/);
+  assert.match(client, /url\.searchParams\.set\('reserved', '1'\)/);
   assert.match(client, /sessionStorage\.setItem\(INVITATION_SESSION_KEY, invitationToken\)/);
   assert.match(client, /byId\('email'\)\.readOnly = true/);
   assert.match(client, /selectedDate = activeInvitation\.date/);

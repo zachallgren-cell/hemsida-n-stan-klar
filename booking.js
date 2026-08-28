@@ -274,22 +274,39 @@
   async function loadBookingInvitation() {
     const url = new URL(window.location.href);
     const queryToken = String(url.searchParams.get('invite') || '').trim();
+    const shouldResumeInvitation = url.searchParams.get('reserved') === '1';
+
+    if (!queryToken && !shouldResumeInvitation) {
+      safelyRemoveSession(INVITATION_SESSION_KEY);
+      return false;
+    }
+
     let storedToken = '';
-    try {
-      storedToken = String(sessionStorage.getItem(INVITATION_SESSION_KEY) || '');
-    } catch {
-      storedToken = '';
+    if (shouldResumeInvitation) {
+      try {
+        storedToken = String(sessionStorage.getItem(INVITATION_SESSION_KEY) || '');
+      } catch {
+        storedToken = '';
+      }
     }
 
     invitationToken = queryToken || storedToken;
-    if (!invitationToken) return false;
-
     url.searchParams.delete('invite');
     window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
+
+    if (!invitationToken) {
+      url.searchParams.delete('reserved');
+      window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
+      safelyRemoveSession(INVITATION_SESSION_KEY);
+      invitationLoadError = 'Den sparade reservationen kunde inte öppnas. Använd den personliga länken i mejlet igen.';
+      return false;
+    }
 
     if (!/^[A-Za-z0-9_-]{43}$/.test(invitationToken)) {
       invitationToken = '';
       safelyRemoveSession(INVITATION_SESSION_KEY);
+      url.searchParams.delete('reserved');
+      window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
       invitationLoadError = 'Inbjudningslänken är ogiltig. Kontakta oss om du fortfarande vill använda det reserverade datumet.';
       return false;
     }
@@ -317,6 +334,8 @@
       } catch {
         // Länken fungerar fortfarande i den öppna fliken.
       }
+      url.searchParams.set('reserved', '1');
+      window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
       safelyRemoveSession(DRAFT_KEY);
       safelyRemoveSession(REBOOK_KEY);
       selectedDate = activeInvitation.date;
@@ -339,6 +358,8 @@
       invitationToken = '';
       activeInvitation = null;
       safelyRemoveSession(INVITATION_SESSION_KEY);
+      url.searchParams.delete('reserved');
+      window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
       invitationLoadError = error instanceof Error ? error.message : 'Inbjudningslänken kunde inte öppnas.';
       return false;
     }
