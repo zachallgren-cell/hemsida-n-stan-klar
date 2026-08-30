@@ -40,6 +40,21 @@ test('adminfunktionen kräver AAL2 och adminallowlist före skapande och listnin
   assert.doesNotMatch(edge, /token:\s*token[,\n]/);
 });
 
+test('admininbjudan använder samma kalender och bokningsbara datum som kundsidan', async () => {
+  const html = await readFile(new URL('admin.html', root), 'utf8');
+  const edge = await readFile(new URL('supabase/functions/booking-invitation/index.ts', root), 'utf8');
+
+  assert.match(html, /id="invitationCalendarGrid"/);
+  assert.match(html, /const BOOKED_SLOTS_URL = `\$\{SUPABASE_URL\}\/functions\/v1\/booked-slots`/);
+  assert.match(html, /fetch\(BOOKED_SLOTS_URL/);
+  assert.match(html, /function isInvitationWeekend\(dateString\)/);
+  assert.match(html, /function isInvitationDateSelectable\(dateString\)/);
+  assert.match(html, /invitationBlockedDates\.some/);
+  assert.match(html, /usedCapacity < getInvitationCapacity\(dateString\)/);
+  assert.doesNotMatch(html, /Inbjudan fungerar även för vardagar/);
+  assert.match(edge, /!\[0, 6\]\.includes\(parsed\.getUTCDay\(\)\)/);
+});
+
 test('kundlänken låser mejl och datum men låter kunden välja tid och vanliga uppgifter', async () => {
   const html = await readFile(new URL('bokning.html', root), 'utf8');
   const client = await readFile(new URL('booking.js', root), 'utf8');

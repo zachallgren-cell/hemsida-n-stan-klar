@@ -613,6 +613,25 @@ body.is-admin-ready #analyticsPanel {
 .form-footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .form-footer p { margin: 0; color: var(--admin-muted); font-size: .78rem; }
 .settings-section { margin-top: 16px; }
+.invitation-calendar-card { width: min(560px, 100%); padding: 18px; border: 1px solid var(--admin-line); border-radius: 14px; background: var(--admin-surface-subtle); }
+.invitation-calendar-header { display: grid; grid-template-columns: 48px minmax(0, 1fr) 48px; align-items: center; gap: 10px; margin-bottom: 12px; }
+.invitation-calendar-header h3 { margin: 0; color: var(--admin-ink); font-size: 1.2rem; text-align: center; text-transform: capitalize; }
+.invitation-calendar-nav { width: 48px; height: 48px; border: 1px solid var(--admin-line); border-radius: 12px; background: #fff; color: var(--admin-primary-dark); font: inherit; font-size: 1.2rem; font-weight: 900; cursor: pointer; }
+.invitation-calendar-nav:disabled { cursor: not-allowed; opacity: .38; }
+.invitation-calendar-status { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; padding: 10px 12px; border-radius: 11px; background: #edf5f8; color: var(--admin-muted); font-size: .88rem; }
+.invitation-calendar-status[data-state="error"] { background: var(--admin-danger-soft); color: var(--admin-danger); }
+.invitation-calendar-weekdays,
+.invitation-calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.invitation-calendar-weekdays { margin-bottom: 6px; color: var(--admin-muted); font-size: .75rem; font-weight: 900; text-align: center; }
+.invitation-calendar-day,
+.invitation-calendar-empty { min-width: 0; min-height: 48px; }
+.invitation-calendar-day { position: relative; border: 1px solid var(--admin-line); border-radius: 11px; background: #fff; color: var(--admin-ink); font: inherit; font-weight: 900; cursor: pointer; }
+.invitation-calendar-day:hover:not(:disabled) { border-color: var(--admin-primary); background: var(--admin-primary-soft); }
+.invitation-calendar-day.today::after { content: ""; position: absolute; left: 50%; bottom: 5px; width: 4px; height: 4px; border-radius: 50%; background: var(--admin-primary); transform: translateX(-50%); }
+.invitation-calendar-day.selected { border-color: var(--admin-primary-dark); background: var(--admin-primary-dark); color: #fff; }
+.invitation-calendar-day:disabled { cursor: not-allowed; background: #edf1f3; color: #8a9aa4; }
+.invitation-calendar-day.fully-booked { text-decoration: line-through; }
+.invitation-selected-date { margin-top: 14px; padding: 12px 14px; border: 1px solid #badbe9; border-radius: 12px; background: var(--admin-primary-soft); color: var(--admin-primary-dark); font-weight: 800; }
 .blocked-date-row,
 .discount-code-row { min-height: 58px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #e8eef2; background: transparent; }
 .blocked-date-row:last-child,
@@ -733,6 +752,11 @@ body.is-admin-ready .analytics-card { border-color: var(--admin-line); border-ra
   .calendar-filters label { justify-content: space-between; }
   .form-footer { align-items: stretch; flex-direction: column; }
   .date-range-grid { grid-template-columns: 1fr; }
+  .invitation-calendar-card { padding: 14px; }
+  .invitation-calendar-weekdays,
+  .invitation-calendar-grid { gap: 4px; }
+  .invitation-calendar-day,
+  .invitation-calendar-empty { min-height: 43px; }
   .blocked-date-row,
   .discount-code-row { grid-template-columns: 1fr; }
   .button-stack { align-items: stretch; flex-direction: column; }

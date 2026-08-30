@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="admin-analytics.css?v=20260721">
   <meta name="robots" content="noindex, nofollow">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-o1Y4bqalxKeem2TvrLqyHkSD2mCAjWKHkhkaWqolmNs='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-QbnXD0U34D+pJPK71Sq52fpaHPUhtY6DC41onxCpKFY='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
   <link rel="shortcut icon" href="/favicon-48.png" />
@@ -869,7 +869,7 @@
       }
     }
   </style>
-  <link rel="stylesheet" href="admin-v2.css?v=20260818">
+  <link rel="stylesheet" href="admin-v2.css?v=20260830">
 </head>
 <body>
   <a class="admin-skip-link" href="#main-content">Hoppa till admininnehållet</a>
@@ -1142,17 +1142,28 @@
         </header>
         <section class="surface settings-section">
           <form class="admin-form" id="invitationForm" novalidate>
-            <div class="date-range-grid">
-              <label>
-                Kundens e-postadress
-                <input type="email" id="invitationEmail" autocomplete="email" maxlength="254" placeholder="kund@exempel.se" required>
-              </label>
-              <label>
-                Reserverat datum
-                <input type="date" id="invitationDate" required>
-              </label>
+            <label>
+              Kundens e-postadress
+              <input type="email" id="invitationEmail" autocomplete="email" maxlength="254" placeholder="kund@exempel.se" required>
+            </label>
+            <input type="hidden" id="invitationDate" required>
+            <div class="invitation-calendar-card">
+              <div class="invitation-calendar-header">
+                <button type="button" class="invitation-calendar-nav" id="invitationCalendarPrevious" aria-label="Visa föregående månad" aria-controls="invitationCalendarGrid">←</button>
+                <h3 id="invitationCalendarTitle" aria-live="polite">Laddar kalender…</h3>
+                <button type="button" class="invitation-calendar-nav" id="invitationCalendarNext" aria-label="Visa nästa månad" aria-controls="invitationCalendarGrid">→</button>
+              </div>
+              <div class="invitation-calendar-status" id="invitationCalendarStatus" data-state="loading" role="status" aria-live="polite">
+                <span id="invitationCalendarStatusText">Hämtar lediga datum…</span>
+                <button type="button" class="text-button" id="invitationCalendarRetry" hidden>Försök igen</button>
+              </div>
+              <div class="invitation-calendar-weekdays" aria-hidden="true">
+                <span>Mån</span><span>Tis</span><span>Ons</span><span>Tor</span><span>Fre</span><span>Lör</span><span>Sön</span>
+              </div>
+              <div class="invitation-calendar-grid" id="invitationCalendarGrid" role="group" aria-labelledby="invitationCalendarTitle" aria-busy="true"></div>
+              <div class="invitation-selected-date" id="invitationSelectedDate" aria-live="polite">Välj en ledig dag i kalendern.</div>
             </div>
-            <p>Inbjudan fungerar även för vardagar. Datumet hålls reserverat tills kunden slutför bokningen, du avbryter inbjudan eller datumet passerar.</p>
+            <p>Samma lediga lördagar och söndagar visas här som på den vanliga bokningssidan. Datumet hålls reserverat tills kunden slutför bokningen, du avbryter inbjudan eller datumet passerar.</p>
             <button type="submit" class="button button-primary" id="invitationButton">Reservera och skicka länk</button>
           </form>
           <p class="status-message" id="invitationMessage" role="status" aria-live="polite"></p>
@@ -1255,6 +1266,8 @@
     const ADMIN_RUT_DETAILS_URL = `${SUPABASE_URL}/functions/v1/admin-rut-details`;
     const CLARITY_ANALYTICS_URL = `${SUPABASE_URL}/functions/v1/clarity-analytics`;
     const BOOKING_INVITATION_URL = `${SUPABASE_URL}/functions/v1/booking-invitation`;
+    const BOOKED_SLOTS_URL = `${SUPABASE_URL}/functions/v1/booked-slots`;
+    const INVITATION_MONTH_NAMES = ['januari', 'februari', 'mars', 'april', 'maj', 'juni', 'juli', 'augusti', 'september', 'oktober', 'november', 'december'];
     const SWISH_NUMBER_DISPLAY = '123 677 43 84';
     const SWISH_RECIPIENT_NAME = 'Zac Hallgren';
     const authHashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
@@ -1329,6 +1342,14 @@
     const invitationButton = document.getElementById('invitationButton');
     const invitationMessage = document.getElementById('invitationMessage');
     const invitationList = document.getElementById('invitationList');
+    const invitationCalendarTitle = document.getElementById('invitationCalendarTitle');
+    const invitationCalendarStatus = document.getElementById('invitationCalendarStatus');
+    const invitationCalendarStatusText = document.getElementById('invitationCalendarStatusText');
+    const invitationCalendarRetry = document.getElementById('invitationCalendarRetry');
+    const invitationCalendarPrevious = document.getElementById('invitationCalendarPrevious');
+    const invitationCalendarNext = document.getElementById('invitationCalendarNext');
+    const invitationCalendarGrid = document.getElementById('invitationCalendarGrid');
+    const invitationSelectedDate = document.getElementById('invitationSelectedDate');
     const bookingSearch = document.getElementById('bookingSearch');
     const bookingStatusFilter = document.getElementById('bookingStatusFilter');
     const bookingSort = document.getElementById('bookingSort');
@@ -1351,6 +1372,13 @@
     let activeAdminView = 'overview';
     let currentBookings = [];
     let currentBlockedDates = [];
+    let invitationBookings = [];
+    let invitationBlockedDates = [];
+    let invitationCapacityOverrides = [];
+    let invitationCalendarReady = false;
+    let invitationCalendarMonth = new Date();
+    let firstInvitationCalendarMonth = new Date();
+    let selectedInvitationDate = '';
     let activeBookingFilter = 'all';
     let activeFollowUpFilter = 'all';
     let activeCalendarView = 'week';
@@ -1496,16 +1524,178 @@
       return date.toISOString().slice(0, 10);
     }
 
-    function setInvitationDateLimits() {
-      const parts = Object.fromEntries(new Intl.DateTimeFormat('sv-SE', {
-        timeZone: 'Europe/Stockholm',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-      }).formatToParts(new Date()).map((part) => [part.type, part.value]));
-      const today = `${parts.year}-${parts.month}-${parts.day}`;
-      invitationDate.min = addDaysToDateString(today, 2);
-      invitationDate.max = addDaysToDateString(today, 365);
+    function getInvitationDateBounds() {
+      const today = stockholmToday();
+      return {
+        today,
+        minimum: addDaysToDateString(today, 2),
+        maximum: addDaysToDateString(today, 365)
+      };
+    }
+
+    function invitationDateToMonth(dateString) {
+      const date = new Date(`${dateString}T12:00:00`);
+      return new Date(date.getFullYear(), date.getMonth(), 1, 12);
+    }
+
+    function isInvitationWeekend(dateString) {
+      const date = new Date(`${dateString}T12:00:00Z`);
+      return !Number.isNaN(date.getTime()) && [0, 6].includes(date.getUTCDay());
+    }
+
+    function getInvitationCapacity(dateString) {
+      const override = invitationCapacityOverrides.find((item) => item.date === dateString);
+      return 1 + (override ? Math.min(3, Math.max(1, Number(override.extraBookings) || 1)) : 0);
+    }
+
+    function isInvitationDateSelectable(dateString) {
+      const { minimum, maximum } = getInvitationDateBounds();
+      if (!invitationCalendarReady || !isInvitationWeekend(dateString) || dateString < minimum || dateString > maximum) return false;
+      if (invitationBlockedDates.some((item) => item.date === dateString)) return false;
+      const usedCapacity = invitationBookings.filter((booking) => booking.date === dateString).length;
+      return usedCapacity < getInvitationCapacity(dateString);
+    }
+
+    function setInvitationCalendarState(state, message) {
+      invitationCalendarStatus.dataset.state = state;
+      invitationCalendarStatusText.textContent = message;
+      invitationCalendarRetry.hidden = state !== 'error';
+      invitationCalendarGrid.setAttribute('aria-busy', state === 'loading' ? 'true' : 'false');
+    }
+
+    function syncInvitationDate(dateString = '') {
+      selectedInvitationDate = dateString;
+      invitationDate.value = dateString;
+      invitationSelectedDate.textContent = dateString
+        ? `Valt datum: ${formatDate(dateString)}.`
+        : 'Välj en ledig dag i kalendern.';
+    }
+
+    function findFirstInvitationDate() {
+      const { minimum, maximum } = getInvitationDateBounds();
+      let dateString = minimum;
+      while (dateString <= maximum) {
+        if (isInvitationDateSelectable(dateString)) return dateString;
+        dateString = addDaysToDateString(dateString, 1);
+      }
+      return '';
+    }
+
+    function renderInvitationCalendar() {
+      invitationCalendarGrid.replaceChildren();
+      const year = invitationCalendarMonth.getFullYear();
+      const month = invitationCalendarMonth.getMonth();
+      const { today, minimum, maximum } = getInvitationDateBounds();
+      const lastCalendarMonth = invitationDateToMonth(maximum);
+      invitationCalendarTitle.textContent = `${INVITATION_MONTH_NAMES[month]} ${year}`;
+      invitationCalendarPrevious.disabled = !invitationCalendarReady || invitationCalendarMonth <= firstInvitationCalendarMonth;
+      invitationCalendarNext.disabled = !invitationCalendarReady || invitationCalendarMonth >= lastCalendarMonth;
+
+      const firstDay = new Date(year, month, 1, 12);
+      const daysInMonth = new Date(year, month + 1, 0, 12).getDate();
+      const offset = (firstDay.getDay() + 6) % 7;
+      for (let index = 0; index < offset; index += 1) {
+        const empty = document.createElement('span');
+        empty.className = 'invitation-calendar-empty';
+        empty.setAttribute('aria-hidden', 'true');
+        invitationCalendarGrid.appendChild(empty);
+      }
+
+      for (let day = 1; day <= daysInMonth; day += 1) {
+        const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'invitation-calendar-day';
+        button.textContent = String(day);
+
+        const blocked = invitationBlockedDates.some((item) => item.date === dateString);
+        const usedCapacity = invitationBookings.filter((booking) => booking.date === dateString).length;
+        const fullyBooked = usedCapacity >= getInvitationCapacity(dateString);
+        const weekend = isInvitationWeekend(dateString);
+        const outsideRange = dateString < minimum || dateString > maximum;
+        const selectable = isInvitationDateSelectable(dateString);
+
+        if (dateString === today) {
+          button.classList.add('today');
+          button.setAttribute('aria-current', 'date');
+        }
+        if (dateString === selectedInvitationDate) button.classList.add('selected');
+        if (blocked || fullyBooked) button.classList.add('fully-booked');
+        button.disabled = !selectable;
+        button.setAttribute('aria-pressed', dateString === selectedInvitationDate ? 'true' : 'false');
+
+        const state = !invitationCalendarReady
+          ? 'tillgänglighet ej kontrollerad'
+          : blocked ? 'ej bokbar'
+            : fullyBooked ? 'bokad'
+              : !weekend ? 'vardag'
+                : outsideRange ? 'inte valbar' : 'ledig';
+        button.setAttribute('aria-label', `${formatDate(dateString)}: ${state}`);
+
+        if (selectable) {
+          button.addEventListener('click', () => {
+            syncInvitationDate(dateString);
+            setInvitationMessage('');
+            renderInvitationCalendar();
+          });
+        }
+        invitationCalendarGrid.appendChild(button);
+      }
+    }
+
+    function normalizeInvitationAvailability(data) {
+      if (!data || !Array.isArray(data.bookings) || !Array.isArray(data.blockedDates) || !Array.isArray(data.capacityOverrides)) {
+        throw new Error('Kalendern gav ett oväntat svar.');
+      }
+      return {
+        bookings: data.bookings
+          .map((booking) => ({ date: String(booking?.date || ''), time: String(booking?.time || '').slice(0, 5) }))
+          .filter((booking) => /^\d{4}-\d{2}-\d{2}$/.test(booking.date)),
+        blockedDates: data.blockedDates
+          .map((item) => ({ date: String(item?.date || ''), reason: String(item?.reason || '').slice(0, 160) }))
+          .filter((item) => /^\d{4}-\d{2}-\d{2}$/.test(item.date)),
+        capacityOverrides: data.capacityOverrides.filter((item) => /^\d{4}-\d{2}-\d{2}$/.test(String(item?.date || '')))
+      };
+    }
+
+    async function fetchInvitationAvailability() {
+      invitationCalendarReady = false;
+      invitationBookings = [];
+      invitationBlockedDates = [];
+      invitationCapacityOverrides = [];
+      const { minimum } = getInvitationDateBounds();
+      firstInvitationCalendarMonth = invitationDateToMonth(minimum);
+      invitationCalendarMonth = new Date(firstInvitationCalendarMonth);
+      syncInvitationDate('');
+      setInvitationCalendarState('loading', 'Kontrollerar lediga dagar…');
+      renderInvitationCalendar();
+
+      try {
+        const response = await fetch(BOOKED_SLOTS_URL, {
+          headers: { apikey: SUPABASE_ANON_KEY },
+          cache: 'no-store'
+        });
+        if (!response.ok) throw new Error('Kalendern kunde inte hämtas.');
+        const availability = normalizeInvitationAvailability(await response.json());
+        invitationBookings = availability.bookings;
+        invitationBlockedDates = availability.blockedDates;
+        invitationCapacityOverrides = availability.capacityOverrides;
+        invitationCalendarReady = true;
+
+        const firstAvailableDate = findFirstInvitationDate();
+        if (firstAvailableDate) {
+          firstInvitationCalendarMonth = invitationDateToMonth(firstAvailableDate);
+          invitationCalendarMonth = new Date(firstInvitationCalendarMonth);
+          setInvitationCalendarState('ready', 'Kalendern är uppdaterad. Välj en ledig dag.');
+        } else {
+          setInvitationCalendarState('ready', 'Det finns inga lediga bokningsdagar just nu.');
+        }
+        renderInvitationCalendar();
+      } catch (error) {
+        console.error('Inbjudningskalendern kunde inte laddas:', error);
+        setInvitationCalendarState('error', 'Vi kan inte kontrollera lediga dagar just nu. Försök igen.');
+        renderInvitationCalendar();
+      }
     }
 
     function getDateRange(startDate, endDate) {
@@ -2356,6 +2546,10 @@
       }
     }
 
+    async function refreshInvitationView() {
+      await Promise.all([fetchInvitations(), fetchInvitationAvailability()]);
+    }
+
     async function fetchBlockedDates() {
       blockedDatesList.innerHTML = '<div class="empty-state">Hämtar spärrade datum...</div>';
 
@@ -2865,7 +3059,7 @@
       if (viewTrigger instanceof HTMLElement) {
         activeAdminView = viewTrigger.dataset.openView || 'overview';
         renderAdminView();
-        if (activeAdminView === 'invitations') void fetchInvitations();
+        if (activeAdminView === 'invitations') void refreshInvitationView();
       }
     });
 
@@ -3158,7 +3352,13 @@
       const email = invitationEmail.value.trim();
       const date = invitationDate.value;
       if (!email || !date) {
-        setInvitationMessage('Fyll i både kundens e-postadress och datum.', 'error');
+        setInvitationMessage('Fyll i kundens e-postadress och välj ett ledigt datum i kalendern.', 'error');
+        return;
+      }
+      if (!isInvitationDateSelectable(date)) {
+        syncInvitationDate('');
+        renderInvitationCalendar();
+        setInvitationMessage('Datumet är inte längre ledigt. Välj en annan dag i kalendern.', 'error');
         return;
       }
 
@@ -3167,9 +3367,9 @@
       try {
         await callBookingInvitation('create', { email, date });
         invitationForm.reset();
-        setInvitationDateLimits();
+        syncInvitationDate('');
         setInvitationMessage(`Datumet ${formatDate(date)} är reserverat och länken har skickats till ${email}.`, 'success');
-        await fetchInvitations();
+        await refreshInvitationView();
       } catch (error) {
         setInvitationMessage(error instanceof Error ? error.message : 'Inbjudningen kunde inte skickas.', 'error');
       } finally {
@@ -3189,12 +3389,28 @@
       try {
         await callBookingInvitation('cancel', { invitationId });
         setInvitationMessage('Reservationen är avbruten.', 'success');
-        await fetchInvitations();
+        await refreshInvitationView();
       } catch (error) {
         setInvitationMessage(error instanceof Error ? error.message : 'Reservationen kunde inte avbrytas.', 'error');
         target.removeAttribute('disabled');
       }
     });
+
+    invitationCalendarPrevious.addEventListener('click', () => {
+      if (!invitationCalendarReady || invitationCalendarMonth <= firstInvitationCalendarMonth) return;
+      invitationCalendarMonth = new Date(invitationCalendarMonth.getFullYear(), invitationCalendarMonth.getMonth() - 1, 1, 12);
+      renderInvitationCalendar();
+    });
+
+    invitationCalendarNext.addEventListener('click', () => {
+      const { maximum } = getInvitationDateBounds();
+      const lastCalendarMonth = invitationDateToMonth(maximum);
+      if (!invitationCalendarReady || invitationCalendarMonth >= lastCalendarMonth) return;
+      invitationCalendarMonth = new Date(invitationCalendarMonth.getFullYear(), invitationCalendarMonth.getMonth() + 1, 1, 12);
+      renderInvitationCalendar();
+    });
+
+    invitationCalendarRetry.addEventListener('click', fetchInvitationAvailability);
 
     mfaEnrollButton.addEventListener('click', async () => {
       mfaEnrollButton.disabled = true;
@@ -3357,7 +3573,7 @@
         await fetchDiscountCodes();
       }
       if (activeAdminView === 'invitations') {
-        await fetchInvitations();
+        await refreshInvitationView();
       }
       if (activeAdminView === 'analytics' && analyticsController) {
         await analyticsController.load();
@@ -3377,7 +3593,7 @@
       }
 
       if (activeAdminView === 'invitations') {
-        await fetchInvitations();
+        await refreshInvitationView();
         return;
       }
 
@@ -3453,7 +3669,8 @@
       }
     }
 
-    setInvitationDateLimits();
+    syncInvitationDate('');
+    renderInvitationCalendar();
     await refreshSession();
   </script>
 </body>

@@ -79,6 +79,7 @@ function isValidInvitationDate(value: string) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const parsed = new Date(`${value}T12:00:00Z`);
   if (Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== value) return false;
+  if (![0, 6].includes(parsed.getUTCDay())) return false;
   const today = getStockholmDateString();
   return value >= addDays(today, 2) && value <= addDays(today, 365);
 }
@@ -256,7 +257,7 @@ Deno.serve(async (req) => {
     const bookingDate = String(payload.date || '').trim();
     if (!isValidEmail(email)) return jsonResponse({ error: 'Ange en giltig e-postadress.' }, 400);
     if (!isValidInvitationDate(bookingDate)) {
-      return jsonResponse({ error: 'Välj ett giltigt datum mellan två dagar och tolv månader framåt.' }, 400);
+      return jsonResponse({ error: 'Välj en lördag eller söndag mellan två dagar och tolv månader framåt.' }, 400);
     }
 
     const blockedRes = await fetch(
