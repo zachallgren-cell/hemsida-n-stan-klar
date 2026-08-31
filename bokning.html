@@ -16,7 +16,7 @@
   <link rel="stylesheet" href="booking.css?v=20260828-2">
   <script src="cookie-consent.js?v=20260720" defer></script>
   <script src="site.js?v=20260721" defer></script>
-  <script src="booking.js?v=20260828-2" defer></script>
+  <script src="booking.js?v=20260831" defer></script>
 </head>
 <body class="booking-page">
   <a class="skip-link" href="#main-content">Hoppa till bokningen</a>
@@ -93,6 +93,14 @@
             <a href="kontakt.html">Kontakta oss</a>
           </aside>
 
+          <aside class="weekday-booking-notice season-booking-notice" id="seasonBookingNotice" aria-label="Fullbokat för säsongen" hidden>
+            <div>
+              <strong>Berga Fönsterputs är fullbokade resten av säsongen.</strong>
+              <span>Tack för ditt intresse – välkommen åter nästa säsong.</span>
+            </div>
+            <a href="kontakt.html">Kontakta oss</a>
+          </aside>
+
           <aside class="weekday-booking-notice" id="invitationBookingNotice" aria-label="Reserverat bokningsdatum" hidden>
             <div>
               <strong>Ditt datum är redan reserverat</strong>
@@ -100,7 +108,7 @@
             </div>
           </aside>
 
-          <div class="calendar-card">
+          <div class="calendar-card" id="calendarCard">
             <div class="calendar-header" id="calendarHeader">
               <button type="button" class="calendar-nav" id="prevMonth" aria-label="Visa föregående månad" aria-controls="calendarGrid">←</button>
               <h3 id="calendarTitle" aria-live="polite">Laddar kalender…</h3>
@@ -128,7 +136,7 @@
           </div>
 
           <div class="step-actions step-actions-end">
-            <button type="button" class="button button-primary" data-next-step>Fortsätt</button>
+            <button type="button" class="button button-primary" id="continueFromCalendarButton" data-next-step>Fortsätt</button>
           </div>
         </section>
 

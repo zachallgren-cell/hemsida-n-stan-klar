@@ -119,6 +119,7 @@ const ISLAND_START_PRICE = 799;
 const ISLAND_PRICE_PER_SEA_MILE = 125;
 const MAX_DIRECT_BOOKING_SEA_MILES = 15;
 const MAX_BOOKING_HORIZON_DAYS = 365;
+const REGULAR_BOOKING_SEASON_CLOSED = true;
 
 function parseCount(value: string | undefined, pattern = /\d+/) {
   const match = String(value || '').match(pattern);
@@ -601,6 +602,10 @@ Deno.serve(async (req) => {
       if (String(invitationRecord.email).toLowerCase() !== payload.email || invitationRecord.booking_date !== payload.date) {
         return jsonResponse({ error: 'Mejladressen eller datumet stämmer inte med bokningsinbjudan.' }, 409);
       }
+    }
+
+    if (!invitationRecord && REGULAR_BOOKING_SEASON_CLOSED) {
+      return jsonResponse({ error: 'Berga Fönsterputs är fullbokade resten av säsongen.' }, 409);
     }
 
     if (invitationRecord) {

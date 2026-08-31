@@ -473,6 +473,16 @@ body.booking-page :focus-visible {
   text-underline-offset: 3px;
 }
 
+.season-booking-notice {
+  border-color: #e6b7af;
+  color: var(--booking-error);
+  background: var(--booking-error-soft);
+}
+
+.season-booking-notice a {
+  color: var(--booking-error);
+}
+
 .calendar-header {
   display: grid;
   grid-template-columns: 48px 1fr 48px;

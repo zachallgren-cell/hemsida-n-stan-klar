@@ -8,6 +8,8 @@
   const BOOKED_SLOTS_FUNCTION_URL = `${SUPABASE_FUNCTIONS_URL}/booked-slots`;
   const BOOKING_INVITATION_URL = `${SUPABASE_FUNCTIONS_URL}/booking-invitation`;
   const AVAILABILITY_TIMEOUT_MS = 20_000;
+  const REGULAR_BOOKING_SEASON_CLOSED = true;
+  const SEASON_FULLY_BOOKED_MESSAGE = 'Berga Fönsterputs är fullbokade resten av säsongen.';
   const BOOKABLE_TIMES = ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
   const MONTH_NAMES = ['januari', 'februari', 'mars', 'april', 'maj', 'juni', 'juli', 'augusti', 'september', 'oktober', 'november', 'december'];
   const DRAFT_KEY = 'bergaBookingDraft';
@@ -56,10 +58,13 @@
   const timeSlots = byId('timeSlots');
   const dateTimeError = byId('dateTimeError');
   const weekdayBookingNotice = byId('weekdayBookingNotice');
+  const seasonBookingNotice = byId('seasonBookingNotice');
   const invitationBookingNotice = byId('invitationBookingNotice');
   const invitationBookingText = byId('invitationBookingText');
   const calendarHeader = byId('calendarHeader');
   const calendarWeekdays = byId('calendarWeekdays');
+  const calendarCard = byId('calendarCard');
+  const continueFromCalendarButton = byId('continueFromCalendarButton');
   const boatFields = byId('boatFields');
   const apartmentWindowOpeningGroup = byId('apartmentWindowOpeningGroup');
   const seaMilesInput = byId('seaMiles');
@@ -544,6 +549,7 @@
   }
 
   function isDateSelectable(date) {
+    if (REGULAR_BOOKING_SEASON_CLOSED && !activeInvitation) return false;
     if (activeInvitation?.date === date) {
       return calendarReady && date >= todayString && date <= lastBookableString && !getBlockedDate(date);
     }
@@ -587,7 +593,9 @@
   }
 
   function updateSelectedDateBox() {
-    if (!calendarReady) {
+    if (REGULAR_BOOKING_SEASON_CLOSED && !activeInvitation) {
+      selectedDateBox.textContent = SEASON_FULLY_BOOKED_MESSAGE;
+    } else if (!calendarReady) {
       selectedDateBox.textContent = 'Tillgängligheten måste kontrolleras innan du kan välja en tid.';
     } else if (!selectedDate) {
       selectedDateBox.textContent = 'Välj en ledig dag i kalendern.';
@@ -750,6 +758,16 @@
   }
 
   async function fetchAvailability() {
+    if (REGULAR_BOOKING_SEASON_CLOSED && !activeInvitation) {
+      calendarReady = false;
+      selectedDate = '';
+      selectedTime = '';
+      syncDateInputs();
+      setCalendarState('closed', SEASON_FULLY_BOOKED_MESSAGE);
+      updateSelectedDateBox();
+      return;
+    }
+
     calendarReady = false;
     bookingsCache = [];
     blockedDatesCache = [];
@@ -1093,7 +1111,8 @@
     const shouldTrack = options.track !== false;
     clearDateTimeError();
     let message = '';
-    if (!calendarReady) message = 'Vänta tills kalendern har laddats eller försök igen.';
+    if (REGULAR_BOOKING_SEASON_CLOSED && !activeInvitation) message = SEASON_FULLY_BOOKED_MESSAGE;
+    else if (!calendarReady) message = 'Vänta tills kalendern har laddats eller försök igen.';
     else if (!selectedDate) message = 'Välj en ledig dag i kalendern.';
     else if (!isDateSelectable(selectedDate)) message = 'Den valda dagen är inte längre ledig. Välj en annan dag.';
     else if (!selectedTime || !getBookableTimes(selectedDate).includes(selectedTime)) message = 'Välj en starttid för besöket.';
@@ -1878,6 +1897,16 @@
     updateLivePrice();
     showStep(1, false);
     if (invitationLoadError) setStatus(invitationLoadError);
+    if (REGULAR_BOOKING_SEASON_CLOSED && !hasInvitation) {
+      selectedDate = '';
+      selectedTime = '';
+      syncDateInputs();
+      weekdayBookingNotice.hidden = true;
+      seasonBookingNotice.hidden = false;
+      calendarCard.hidden = true;
+      continueFromCalendarButton.hidden = true;
+      setStatus(SEASON_FULLY_BOOKED_MESSAGE, 'error');
+    }
     fetchAvailability();
   }
 
