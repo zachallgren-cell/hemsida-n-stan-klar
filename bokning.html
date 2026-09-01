@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Se pris och boka fönsterputs | Berga Fönsterputs</title>
-  <meta name="description" content="Se ditt pris och boka fönsterputs hos Berga Fönsterputs. Välj tid, tjänst och RUT-avdrag i fyra enkla steg.">
+  <title>Paxa fönsterputs till våren 2027 | Berga Fönsterputs</title>
+  <meta name="description" content="Paxa kostnadsfritt och utan förbindelse en prioriterad plats för fönsterputs hos Berga Fönsterputs våren 2027.">
   <meta name="robots" content="noindex, nofollow">
   <meta name="referrer" content="no-referrer">
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png">
@@ -13,10 +13,11 @@
   <link rel="manifest" href="/site.webmanifest">
   <link rel="stylesheet" href="cookie-consent.css?v=20260720">
   <link rel="stylesheet" href="site.css">
-  <link rel="stylesheet" href="booking.css?v=20260828-2">
+  <link rel="stylesheet" href="booking.css?v=20260901-2">
   <script src="cookie-consent.js?v=20260720" defer></script>
-  <script src="site.js?v=20260721" defer></script>
-  <script src="booking.js?v=20260831" defer></script>
+  <script src="site.js?v=20260901" defer></script>
+  <script src="paxning.js?v=20260901" defer></script>
+  <script src="booking.js?v=20260901" defer></script>
 </head>
 <body class="booking-page">
   <a class="skip-link" href="#main-content">Hoppa till bokningen</a>
@@ -34,7 +35,7 @@
         <a href="index.html">Hem</a>
         <a href="var-tjanst.html">Våra tjänster</a>
         <a href="om-oss.html">Om oss</a>
-        <a class="booking-nav-cta" href="bokning.html" aria-current="page">Boka</a>
+        <a class="booking-nav-cta" href="#paxning" aria-current="page">Paxa våren 2027</a>
       </nav>
     </div>
   </header>
@@ -42,18 +43,102 @@
   <main id="main-content">
     <section class="booking-intro" aria-labelledby="bookingTitle">
       <div class="booking-shell">
-        <p class="booking-eyebrow">Se pris och boka online</p>
-        <h1 id="bookingTitle">Boka fönsterputs i fyra enkla steg</h1>
-        <p>Välj en ledig tid, se priset direkt och kontrollera allt innan du bekräftar. Du betalar efter utfört arbete.</p>
+        <p class="booking-eyebrow" id="bookingEyebrow">Våren 2027 – paxningen är öppen</p>
+        <h1 id="bookingTitle">Paxa din fönsterputs till våren</h1>
+        <p id="bookingIntroCopy">Vi är fullbokade för privatkunder resten av säsongen. Paxa en plats till våren 2027 redan nu och få förtur när vårens tider släpps.</p>
         <ul class="booking-trust-list" aria-label="Trygghet i bokningen">
-          <li>50 % RUT-avdrag</li>
-          <li>Tydligt pris före bokning</li>
-          <li>Betala efter utfört arbete</li>
+          <li>Kostnadsfritt</li>
+          <li>Inte bindande</li>
+          <li>Tar mindre än en minut</li>
         </ul>
       </div>
     </section>
 
-    <section class="booking-shell booking-flow" aria-label="Bokningsformulär">
+    <section class="booking-shell pax-flow" id="paxExperience" aria-labelledby="paxFormTitle">
+      <div class="pax-layout">
+        <div class="pax-form-card" id="paxning">
+          <div class="step-heading">
+            <p class="step-kicker">Prioriteringslista våren 2027</p>
+            <h2 id="paxFormTitle">Paxa en plats på mindre än en minut</h2>
+            <p>Du behöver inte välja exakt datum, räkna fönster eller bestämma ett slutpris nu.</p>
+          </div>
+
+          <form id="paxForm" novalidate data-clarity-mask="true">
+            <div class="booking-global-status" id="paxStatus" role="alert" aria-live="assertive" hidden></div>
+            <div class="field-grid">
+              <div class="field">
+                <label for="paxName">Namn *</label>
+                <input id="paxName" name="name" type="text" minlength="2" maxlength="100" autocomplete="name" required>
+              </div>
+              <div class="field">
+                <label for="paxPhone">Telefonnummer *</label>
+                <input id="paxPhone" name="phone" type="tel" maxlength="30" autocomplete="tel" inputmode="tel" placeholder="073-123 45 67" required>
+              </div>
+              <div class="field">
+                <label for="paxEmail">E-post *</label>
+                <input id="paxEmail" name="email" type="email" maxlength="254" autocomplete="email" required>
+              </div>
+              <div class="field">
+                <label for="paxLocation">Ort eller postnummer *</label>
+                <input id="paxLocation" name="location" type="text" minlength="2" maxlength="120" autocomplete="postal-code" placeholder="Till exempel Åkersberga eller 184 30" required>
+              </div>
+              <div class="field">
+                <label for="paxPeriod">Önskad period</label>
+                <select id="paxPeriod" name="requestedPeriod">
+                  <option value="flexible">Flexibel</option>
+                  <option value="march">Mars</option>
+                  <option value="april">April</option>
+                  <option value="may">Maj</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="paxService">Önskad tjänst</label>
+                <select id="paxService" name="serviceInterest">
+                  <option value="unsure">Osäker</option>
+                  <option value="exterior">Utvändigt</option>
+                  <option value="interior_exterior">In- och utvändigt</option>
+                </select>
+              </div>
+              <div class="field field-wide">
+                <label for="paxMessage">Meddelande <span>(frivilligt)</span></label>
+                <textarea id="paxMessage" name="message" maxlength="1500" rows="4" placeholder="Något du vill att vi känner till?"></textarea>
+              </div>
+            </div>
+
+            <div class="booking-trap" aria-hidden="true">
+              <label for="paxWebsite">Webbplats</label>
+              <input id="paxWebsite" name="website" type="text" tabindex="-1" autocomplete="off">
+            </div>
+            <input id="paxFormStartedAt" name="formStartedAt" type="hidden">
+            <input id="paxRequestId" name="requestId" type="hidden">
+
+            <div class="pax-submit-row">
+              <button type="submit" class="button button-primary" id="paxSubmitButton">Paxa min plats</button>
+              <p class="pax-assurance">Paxningen är kostnadsfri och inte bindande. Du förbinder dig inte till ett datum eller köp.</p>
+            </div>
+            <p class="pax-privacy">När du skickar formuläret använder vi uppgifterna för att hantera din paxning enligt vår <a href="integritet.html">integritetsinformation</a>.</p>
+          </form>
+
+          <section class="pax-confirmation" id="paxConfirmation" role="status" aria-live="polite" hidden>
+            <span class="pax-confirmation-mark" aria-hidden="true">✓</span>
+            <p class="step-kicker">Paxningen är mottagen</p>
+            <h2 id="paxConfirmationTitle" tabindex="-1">Din plats är paxad!</h2>
+            <p>Tack! Du står nu på vår prioriteringslista inför våren 2027. Vi kontaktar dig innan de vanliga tiderna släpps så att du får möjlighet att välja ett passande datum.</p>
+            <p><strong>Paxningen är inte bindande.</strong> Bokningen blir giltig först när datum och pris har bekräftats.</p>
+            <a class="button button-secondary" href="index.html">Tillbaka till startsidan</a>
+          </section>
+        </div>
+
+        <aside class="pax-business-card" aria-labelledby="paxBusinessTitle">
+          <span class="pax-business-label">Företagskund?</span>
+          <h2 id="paxBusinessTitle">Företag kan fortfarande boka</h2>
+          <p>Vi tar fortfarande emot bokningar från företag, butiker, kontor och bostadsrättsföreningar – både för enstaka och återkommande fönsterputsning.</p>
+          <a class="button button-secondary" href="kontakt.html?arende=foretag#foretagskontakt">Kontakta oss för företagsbokning</a>
+        </aside>
+      </div>
+    </section>
+
+    <section class="booking-shell booking-flow" id="regularBookingExperience" aria-label="Bokningsformulär för personlig inbjudan" hidden>
       <div class="booking-progress" aria-label="Bokningens framsteg">
         <div class="booking-progress-heading">
           <p id="stepCounter">Steg 1 av 4</p>

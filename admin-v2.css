@@ -650,6 +650,25 @@ body.is-admin-ready #analyticsPanel {
 .create-panel[open] summary { width: fit-content; margin-bottom: 16px; }
 .discount-codes-list { padding: 10px 18px; }
 .discount-codes-list .admin-table { min-width: 860px; }
+
+.spring-pax-heading { align-items: center; }
+.spring-pax-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+.spring-pax-summary .metric-card { padding: 15px 17px; }
+.spring-pax-surface { padding: 0; overflow: hidden; }
+.spring-pax-tools { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--admin-line); background: #fbfcfd; }
+.spring-pax-tools label:first-child { flex: 1 1 420px; }
+.spring-pax-tools input,
+.spring-pax-tools select { width: 100%; min-height: 38px; padding: 8px 10px; border: 1px solid var(--admin-line); border-radius: 8px; background: #fff; color: var(--admin-ink); font: inherit; font-size: .8rem; }
+.spring-pax-surface > .status-message { margin: 10px 14px 0; }
+.spring-pax-list { min-width: 0; overflow-x: auto; }
+.spring-pax-list .admin-table { min-width: 960px; }
+.spring-pax-list .admin-table tbody tr { cursor: default; }
+.spring-pax-list .admin-table th:nth-child(1) { width: 22%; }
+.spring-pax-list .admin-table th:nth-child(2) { width: 17%; }
+.spring-pax-list .admin-table th:nth-child(3) { width: 14%; }
+.spring-pax-list .admin-table th:nth-child(4) { width: 12%; }
+.spring-pax-list .admin-table th:nth-child(5) { width: 12%; }
+.spring-pax-list .admin-table th:nth-child(6) { width: 23%; }
 .discount-codes-list table .discount-code-row { display: table-row; min-height: 0; padding: 0; border: 0; }
 
 /* Drawer */
@@ -706,6 +725,8 @@ body.is-admin-ready .analytics-card { border-color: var(--admin-line); border-ra
 
 @media (max-width: 1180px) {
   .metric-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .spring-pax-summary { grid-template-columns: 1fr; }
+  .spring-pax-tools { align-items: stretch; flex-direction: column; }
   .dashboard-grid { grid-template-columns: 1fr; }
 }
 

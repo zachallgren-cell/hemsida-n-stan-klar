@@ -131,6 +131,15 @@ document.documentElement.classList.add('js');
       if (!link) return;
       const href = (link.getAttribute('href') || '').toLowerCase();
 
+      if (link.matches('[data-pax-cta]')) {
+        window.bergaTrack('spring_2027_pax_cta_click', {
+          cta_text: link.textContent,
+          cta_location: link.dataset.ctaLocation || 'unspecified',
+          destination: link.getAttribute('href') || '',
+          page_path: window.location.pathname
+        });
+      }
+
       if (link.matches('[data-booking-cta]') || href === 'bokning.html' || href.startsWith('bokning.html?')) {
         window.bergaTrack('booking_cta_click', {
           cta_text: link.textContent,

@@ -575,7 +575,10 @@ Deno.serve(async (req) => {
     let invitationRecord: {
       id: number;
       email: string;
-      booking_date: string;
+      booking_date: string | null;
+      invitation_type: 'reserved_date' | 'spring_priority';
+      window_start: string | null;
+      window_end: string | null;
       status: string;
       expires_at: string;
     } | null = null;
@@ -584,7 +587,7 @@ Deno.serve(async (req) => {
     if (invitationToken) {
       invitationTokenHash = await sha256Hex(invitationToken);
       const invitationRes = await fetchSupabaseRows(
-        `${supabaseUrl}/rest/v1/booking_invitations?select=id,email,booking_date,status,expires_at&token_hash=eq.${encodeURIComponent(invitationTokenHash)}&limit=1`,
+        `${supabaseUrl}/rest/v1/booking_invitations?select=id,email,booking_date,invitation_type,window_start,window_end,status,expires_at&token_hash=eq.${encodeURIComponent(invitationTokenHash)}&limit=1`,
         serviceRoleKey
       );
       if (!invitationRes.ok) {
@@ -599,8 +602,21 @@ Deno.serve(async (req) => {
         || new Date(invitationRecord.expires_at).getTime() <= Date.now()) {
         return jsonResponse({ error: 'Inbjudningslänken är ogiltig, använd eller har gått ut.' }, 409);
       }
-      if (String(invitationRecord.email).toLowerCase() !== payload.email || invitationRecord.booking_date !== payload.date) {
-        return jsonResponse({ error: 'Mejladressen eller datumet stämmer inte med bokningsinbjudan.' }, 409);
+      if (String(invitationRecord.email).toLowerCase() !== payload.email) {
+        return jsonResponse({ error: 'Mejladressen stämmer inte med bokningsinbjudan.' }, 409);
+      }
+
+      const invitationDateMatches = invitationRecord.invitation_type === 'spring_priority'
+        ? Boolean(
+          invitationRecord.window_start
+          && invitationRecord.window_end
+          && payload.date >= invitationRecord.window_start
+          && payload.date <= invitationRecord.window_end
+          && isBookableTime(payload.time, payload.date)
+        )
+        : invitationRecord.booking_date === payload.date;
+      if (!invitationDateMatches) {
+        return jsonResponse({ error: 'Datumet stämmer inte med bokningsinbjudan.' }, 409);
       }
     }
 
@@ -610,7 +626,12 @@ Deno.serve(async (req) => {
 
     if (invitationRecord) {
       const today = getStockholmDateString();
-      if (payload.date < today || payload.date > addDaysToDateString(today, MAX_BOOKING_HORIZON_DAYS)) {
+      const dateIsOutsideInvitation = invitationRecord.invitation_type === 'spring_priority'
+        ? payload.date < today
+          || payload.date < String(invitationRecord.window_start || '')
+          || payload.date > String(invitationRecord.window_end || '')
+        : payload.date < today || payload.date > addDaysToDateString(today, MAX_BOOKING_HORIZON_DAYS);
+      if (dateIsOutsideInvitation) {
         return jsonResponse({ error: 'Det reserverade datumet har passerat eller ligger utanför bokningsperioden.' }, 409);
       }
     } else if (!isBookableDate(payload.date)) {
@@ -685,7 +706,7 @@ Deno.serve(async (req) => {
 
     const existingBookings = await existingBookingRes.json();
     const activeInvitationRes = await fetchSupabaseRows(
-      `${supabaseUrl}/rest/v1/booking_invitations?select=id&booking_date=eq.${encodeURIComponent(payload.date)}&status=eq.active&expires_at=gt.${encodeURIComponent(new Date().toISOString())}&limit=4`,
+      `${supabaseUrl}/rest/v1/booking_invitations?select=id&invitation_type=eq.reserved_date&booking_date=eq.${encodeURIComponent(payload.date)}&status=eq.active&expires_at=gt.${encodeURIComponent(new Date().toISOString())}&limit=4`,
       serviceRoleKey
     );
     if (!activeInvitationRes.ok) {

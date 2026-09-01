@@ -74,6 +74,8 @@
   const applyDiscountButton = byId('applyDiscountButton');
   const discountCodeStatus = byId('discountCodeStatus');
   const submitBookingButton = byId('submitBookingButton');
+  const regularBookingExperience = byId('regularBookingExperience');
+  const paxExperience = byId('paxExperience');
 
   const livePriceValue = byId('livePriceValue');
   const livePriceLabel = byId('livePriceLabel');
@@ -164,8 +166,36 @@
     return !Number.isNaN(date.getTime()) && [0, 6].includes(date.getUTCDay());
   }
 
+  function isSpringPriorityInvitation() {
+    return activeInvitation?.invitationType === 'spring_priority';
+  }
+
+  function isDateWithinInvitationWindow(dateString) {
+    return isSpringPriorityInvitation()
+      && dateString >= activeInvitation.windowStart
+      && dateString <= activeInvitation.windowEnd;
+  }
+
+  function getEffectiveMinBookableString() {
+    return isSpringPriorityInvitation() ? activeInvitation.windowStart : minBookableString;
+  }
+
+  function getEffectiveLastBookableString() {
+    return isSpringPriorityInvitation() ? activeInvitation.windowEnd : lastBookableString;
+  }
+
+  function dateStringToCalendarMonth(dateString) {
+    const date = new Date(`${dateString}T12:00:00`);
+    return new Date(date.getFullYear(), date.getMonth(), 1, 12);
+  }
+
+  function getLastCalendarMonth() {
+    return dateStringToCalendarMonth(getEffectiveLastBookableString());
+  }
+
   function getBookableTimes(dateString) {
     if (activeInvitation?.date === dateString) return BOOKABLE_TIMES;
+    if (isDateWithinInvitationWindow(dateString) && isWeekendDate(dateString)) return BOOKABLE_TIMES;
     return isWeekendDate(dateString) ? BOOKABLE_TIMES : [];
   }
 
@@ -327,10 +357,19 @@
 
       activeInvitation = {
         date: String(body.date || ''),
+        invitationType: String(body.invitationType || 'reserved_date'),
+        windowStart: String(body.windowStart || ''),
+        windowEnd: String(body.windowEnd || ''),
         email: String(body.email || '').toLowerCase(),
         expiresAt: String(body.expiresAt || '')
       };
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(activeInvitation.date) || !activeInvitation.email) {
+      const hasValidReservedDate = activeInvitation.invitationType === 'reserved_date'
+        && /^\d{4}-\d{2}-\d{2}$/.test(activeInvitation.date);
+      const hasValidSpringWindow = activeInvitation.invitationType === 'spring_priority'
+        && /^\d{4}-\d{2}-\d{2}$/.test(activeInvitation.windowStart)
+        && /^\d{4}-\d{2}-\d{2}$/.test(activeInvitation.windowEnd)
+        && activeInvitation.windowStart <= activeInvitation.windowEnd;
+      if ((!hasValidReservedDate && !hasValidSpringWindow) || !activeInvitation.email) {
         throw new Error('Inbjudningen innehåller ogiltiga uppgifter.');
       }
 
@@ -343,7 +382,7 @@
       window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
       safelyRemoveSession(DRAFT_KEY);
       safelyRemoveSession(REBOOK_KEY);
-      selectedDate = activeInvitation.date;
+      selectedDate = isSpringPriorityInvitation() ? '' : activeInvitation.date;
       selectedTime = '';
       desiredInitialStep = 1;
       setInputValue('email', activeInvitation.email, 254);
@@ -351,12 +390,29 @@
       byId('emailInviteHelp').hidden = false;
       weekdayBookingNotice.hidden = true;
       invitationBookingNotice.hidden = false;
-      invitationBookingText.textContent = `${formatDateForDisplay(activeInvitation.date)} är reserverad åt dig. Välj en starttid och fyll sedan i resten.`;
-      calendarHeader.hidden = true;
-      calendarWeekdays.hidden = true;
-      calendarGrid.hidden = true;
-      byId('bookingTitle').textContent = 'Slutför din reserverade bokning';
-      byId('step1Title').textContent = 'Välj starttid för ditt reserverade datum';
+      invitationBookingNotice.querySelector('strong').textContent = isSpringPriorityInvitation()
+        ? 'Din förtur till vårens helger är öppen'
+        : 'Ditt datum är redan reserverat';
+      invitationBookingText.textContent = isSpringPriorityInvitation()
+        ? 'Välj en ledig lördag eller söndag mellan 1 mars och 15 juni 2027 och fyll sedan i resten.'
+        : `${formatDateForDisplay(activeInvitation.date)} är reserverad åt dig. Välj en starttid och fyll sedan i resten.`;
+      calendarHeader.hidden = !isSpringPriorityInvitation();
+      calendarWeekdays.hidden = !isSpringPriorityInvitation();
+      calendarGrid.hidden = !isSpringPriorityInvitation();
+      if (isSpringPriorityInvitation()) {
+        currentCalendarMonth = dateStringToCalendarMonth(activeInvitation.windowStart);
+        firstAvailableCalendarMonth = new Date(currentCalendarMonth);
+      }
+      byId('bookingTitle').textContent = isSpringPriorityInvitation()
+        ? 'Välj din helg våren 2027'
+        : 'Slutför din reserverade bokning';
+      byId('bookingEyebrow').textContent = 'Personlig bokningsinbjudan';
+      byId('bookingIntroCopy').textContent = isSpringPriorityInvitation()
+        ? 'Som paxad kund får du nu välja en ledig helg innan tiderna öppnas för alla.'
+        : 'Ditt datum är reserverat. Välj en starttid och fyll sedan i resten av bokningen.';
+      byId('step1Title').textContent = isSpringPriorityInvitation()
+        ? 'Välj en ledig helg och starttid'
+        : 'Välj starttid för ditt reserverade datum';
       document.body.classList.add('is-invited-booking');
       return true;
     } catch (error) {
@@ -541,7 +597,7 @@
   }
 
   function isDateWithinBookableRange(date) {
-    return date >= minBookableString && date <= lastBookableString;
+    return date >= getEffectiveMinBookableString() && date <= getEffectiveLastBookableString();
   }
 
   function isFullyBooked(date) {
@@ -553,14 +609,24 @@
     if (activeInvitation?.date === date) {
       return calendarReady && date >= todayString && date <= lastBookableString && !getBlockedDate(date);
     }
+    if (isSpringPriorityInvitation()) {
+      return calendarReady
+        && isWeekendDate(date)
+        && date >= todayString
+        && isDateWithinInvitationWindow(date)
+        && !isFullyBooked(date);
+    }
     return calendarReady && isWeekendDate(date) && isDateWithinBookableRange(date) && !isFullyBooked(date);
   }
 
   function findFirstAvailableDate() {
     if (activeInvitation?.date) return activeInvitation.date;
-    const cursor = new Date(minBookableDate);
+    const effectiveMinimum = getEffectiveMinBookableString();
+    const effectiveMaximum = getEffectiveLastBookableString();
+    const cursor = new Date(`${effectiveMinimum}T12:00:00`);
+    const maximumDate = new Date(`${effectiveMaximum}T12:00:00`);
 
-    while (cursor <= lastBookableDate) {
+    while (cursor <= maximumDate) {
       const date = formatDate(cursor.getFullYear(), cursor.getMonth(), cursor.getDate());
       if (isDateSelectable(date)) return date;
       cursor.setDate(cursor.getDate() + 1);
@@ -600,7 +666,7 @@
     } else if (!selectedDate) {
       selectedDateBox.textContent = 'Välj en ledig dag i kalendern.';
     } else if (!selectedTime) {
-      selectedDateBox.textContent = activeInvitation
+      selectedDateBox.textContent = activeInvitation?.date
         ? `Reserverat datum: ${formatDateForDisplay(selectedDate)}. Välj en starttid.`
         : `Valt datum: ${formatDateForDisplay(selectedDate)}. Välj en starttid.`;
     } else {
@@ -660,7 +726,7 @@
     const month = currentCalendarMonth.getMonth();
     calendarTitle.textContent = `${MONTH_NAMES[month]} ${year}`;
     prevMonthButton.disabled = !calendarReady || currentCalendarMonth <= firstAvailableCalendarMonth;
-    nextMonthButton.disabled = !calendarReady || currentCalendarMonth >= lastCalendarMonth;
+    nextMonthButton.disabled = !calendarReady || currentCalendarMonth >= getLastCalendarMonth();
 
     const firstDay = new Date(year, month, 1, 12);
     const daysInMonth = new Date(year, month + 1, 0, 12).getDate();
@@ -679,15 +745,14 @@
       button.className = 'calendar-day';
       button.textContent = String(day);
       const past = date < todayString;
-      const tooSoon = !past && date < minBookableString;
-      const tooLate = date > lastBookableString;
+      const tooSoon = !past && date < getEffectiveMinBookableString();
+      const tooLate = date > getEffectiveLastBookableString();
       const blocked = Boolean(getBlockedDate(date));
       const booked = getBookedTimes(date).length >= getCapacity(date);
       const weekend = isWeekendDate(date);
       const invitationDate = activeInvitation?.date === date;
-      const selectable = invitationDate
-        ? calendarReady && !past && !tooLate && !blocked
-        : calendarReady && weekend && !past && !tooSoon && !tooLate && !blocked && !booked;
+      const springWindowDate = isDateWithinInvitationWindow(date);
+      const selectable = isDateSelectable(date);
 
       if (date === todayString) {
         button.classList.add('today');
@@ -695,7 +760,7 @@
       }
       if (selectedDate === date) button.classList.add('selected');
       if (blocked || booked) button.classList.add('fully-booked');
-      if (past || tooLate || !calendarReady || (!weekend && !invitationDate)) button.classList.add('past');
+      if (past || tooLate || !calendarReady || (!weekend && !invitationDate) || (isSpringPriorityInvitation() && !springWindowDate)) button.classList.add('past');
       if (tooSoon && !invitationDate) button.classList.add('advance-notice');
       button.setAttribute('aria-pressed', selectedDate === date ? 'true' : 'false');
       button.disabled = !selectable;
@@ -704,6 +769,7 @@
         ? 'tillgänglighet ej kontrollerad'
         : blocked ? 'ej bokbar'
           : invitationDate ? 'reserverad åt dig'
+          : springWindowDate && weekend && !booked ? 'ledig för din förtursbokning'
           : booked ? 'bokad'
             : !weekend ? 'vardag, kontakta oss för bokning'
               : past || tooSoon || tooLate ? 'inte valbar' : 'ledig';
@@ -730,7 +796,7 @@
     const firstAvailableDate = findFirstAvailableDate();
     const firstAvailableDateObject = firstAvailableDate
       ? new Date(`${firstAvailableDate}T12:00:00`)
-      : minBookableDate;
+      : new Date(`${getEffectiveMinBookableString()}T12:00:00`);
     firstAvailableCalendarMonth = new Date(
       firstAvailableDateObject.getFullYear(),
       firstAvailableDateObject.getMonth(),
@@ -772,7 +838,9 @@
     bookingsCache = [];
     blockedDatesCache = [];
     capacityOverridesCache = [];
-    firstAvailableCalendarMonth = new Date(firstCalendarMonth);
+    firstAvailableCalendarMonth = isSpringPriorityInvitation()
+      ? dateStringToCalendarMonth(activeInvitation.windowStart)
+      : new Date(firstCalendarMonth);
     setCalendarState('loading', 'Kontrollerar lediga dagar…');
     renderCalendar();
     renderTimes();
@@ -794,8 +862,10 @@
       calendarReady = true;
       setCalendarState(
         'ready',
-        activeInvitation
-          ? 'Det reserverade datumet är kontrollerat. Välj en starttid.'
+        isSpringPriorityInvitation()
+          ? 'Kalendern är uppdaterad. Välj en ledig lördag eller söndag.'
+          : activeInvitation
+            ? 'Det reserverade datumet är kontrollerat. Välj en starttid.'
           : 'Kalendern är uppdaterad. Välj en ledig dag.'
       );
       applyAvailableInitialSelection();
@@ -1630,6 +1700,13 @@
     if (message.includes('datum') || message.includes('valda tiden') || message.includes('bokad') || message.includes('slot')) {
       if (activeInvitation) {
         showStep(1);
+        if (isSpringPriorityInvitation()) {
+          dateTimeError.textContent = 'Den valda helgen hann bli upptagen. Kalendern uppdateras så att du kan välja en annan ledig helg.';
+          dateTimeError.hidden = false;
+          setStatus(rawMessage || 'Den valda helgen kunde inte bokas. Välj en annan ledig helg.');
+          fetchAvailability();
+          return;
+        }
         dateTimeError.textContent = 'Det reserverade datumet kunde inte användas. Kontakta oss så hjälper vi dig med reservationen.';
         dateTimeError.hidden = false;
         setStatus(rawMessage || 'Det reserverade datumet kunde inte användas. Kontakta oss så hjälper vi dig.');
@@ -1762,7 +1839,7 @@
   });
 
   nextMonthButton.addEventListener('click', () => {
-    if (!calendarReady || currentCalendarMonth >= lastCalendarMonth) return;
+    if (!calendarReady || currentCalendarMonth >= getLastCalendarMonth()) return;
     currentCalendarMonth = new Date(currentCalendarMonth.getFullYear(), currentCalendarMonth.getMonth() + 1, 1, 12);
     renderCalendar();
   });
@@ -1887,26 +1964,22 @@
   async function initializeBooking() {
     const hasInvitation = await loadBookingInvitation();
     if (!hasInvitation) {
-      restoreDraft();
-      applyRebookPrefill();
-      applyQuerySelection();
+      regularBookingExperience.hidden = true;
+      paxExperience.hidden = false;
+      if (invitationLoadError) {
+        const paxStatus = byId('paxStatus');
+        paxStatus.textContent = `${invitationLoadError} Du kan fortfarande paxa en plats till våren 2027 nedan.`;
+        paxStatus.hidden = false;
+      }
+      return;
     }
+    regularBookingExperience.hidden = false;
+    paxExperience.hidden = true;
     formStartedAtInput.value = String(Date.now());
     updateApartmentWindowOpeningFields();
     updateBoatFields();
     updateLivePrice();
     showStep(1, false);
-    if (invitationLoadError) setStatus(invitationLoadError);
-    if (REGULAR_BOOKING_SEASON_CLOSED && !hasInvitation) {
-      selectedDate = '';
-      selectedTime = '';
-      syncDateInputs();
-      weekdayBookingNotice.hidden = true;
-      seasonBookingNotice.hidden = false;
-      calendarCard.hidden = true;
-      continueFromCalendarButton.hidden = true;
-      setStatus(SEASON_FULLY_BOOKED_MESSAGE, 'error');
-    }
     fetchAvailability();
   }
 

@@ -6,6 +6,9 @@ verify_jwt = false
 [functions.request-photo-quote]
 verify_jwt = false
 
+[functions.submit-spring-pax]
+verify_jwt = false
+
 [functions.booked-slots]
 verify_jwt = false
 

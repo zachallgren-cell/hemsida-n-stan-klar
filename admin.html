@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="admin-analytics.css?v=20260721">
   <meta name="robots" content="noindex, nofollow">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-QbnXD0U34D+pJPK71Sq52fpaHPUhtY6DC41onxCpKFY='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-9eq5YIctsIQVkhLVnFPApnZKvlEtZxVT+8VbH0ybTdc='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
   <link rel="shortcut icon" href="/favicon-48.png" />
@@ -435,6 +435,7 @@
     #bookingsPanel,
     #blockedDatesPanel,
     #discountCodesPanel,
+    #springPaxPanel,
     #invitationsPanel {
       grid-column: 1 / -1;
       width: 100%;
@@ -442,12 +443,14 @@
 
     #blockedDatesPanel,
     #discountCodesPanel,
+    #springPaxPanel,
     #invitationsPanel {
       padding: 32px;
     }
 
     #blockedDatesPanel .blocked-dates-list,
     #discountCodesPanel .discount-codes-list,
+    #springPaxPanel .spring-pax-list,
     #invitationsPanel .invitation-list {
       max-width: 980px;
     }
@@ -883,6 +886,7 @@
         <nav class="admin-tabs hidden" id="adminTabs" aria-label="Adminvyer">
           <button type="button" class="admin-tab is-active" data-admin-view="overview"><span aria-hidden="true">⌂</span>Översikt</button>
           <button type="button" class="admin-tab" data-admin-view="calendar"><span aria-hidden="true">▦</span>Kalender</button>
+          <button type="button" class="admin-tab" data-admin-view="springPax"><span aria-hidden="true">☘</span>Vårpaxningar</button>
           <button type="button" class="admin-tab" data-admin-view="invitations"><span aria-hidden="true">✉</span>Bjud in kund</button>
           <button type="button" class="admin-tab" data-admin-view="bookings"><span aria-hidden="true">≡</span>Bokningar</button>
           <button type="button" class="admin-tab" data-admin-view="customers"><span aria-hidden="true">◎</span>Kunder</button>
@@ -930,6 +934,7 @@
         <kbd>⌘ K</kbd>
       </label>
       <div class="workspace-actions">
+        <button type="button" class="button button-secondary" data-open-view="springPax">Vårpaxningar</button>
         <button type="button" class="button button-secondary" data-open-view="invitations">Bjud in kund</button>
         <a class="button button-primary" href="bokning.html">+ Ny bokning</a>
         <button type="button" class="icon-button" aria-label="Aviseringar"><span aria-hidden="true">○</span><span class="notification-dot"></span></button>
@@ -1132,6 +1137,40 @@
         <div class="discount-codes-list surface" id="discountCodesList"></div>
       </section>
 
+      <section class="card panel hidden" id="springPaxPanel">
+        <header class="view-heading spring-pax-heading">
+          <div>
+            <p class="eyebrow">Prioriteringslista våren 2027</p>
+            <h1>Vårpaxningar</h1>
+            <p>Här ser du vilka som har paxat. Öppna bokningen för en kund när du vill ge personen tillgång till alla lediga helger 1 mars–15 juni 2027.</p>
+          </div>
+          <button type="button" class="button button-secondary" id="springPaxRefresh">Uppdatera</button>
+        </header>
+        <div class="spring-pax-summary" id="springPaxSummary" aria-live="polite"></div>
+        <section class="surface spring-pax-surface">
+          <div class="spring-pax-tools">
+            <label>
+              <span class="sr-only">Sök bland vårpaxningar</span>
+              <input type="search" id="springPaxSearch" placeholder="Sök namn, mejl, telefon eller ort…" autocomplete="off">
+            </label>
+            <label>
+              <span class="sr-only">Filtrera vårpaxningar efter status</span>
+              <select id="springPaxFilter">
+                <option value="all">Alla statusar</option>
+                <option value="paxed">Paxad</option>
+                <option value="invited">Bokningslänk skickad</option>
+                <option value="booked">Bokad</option>
+                <option value="contacted">Kontaktad</option>
+                <option value="declined">Tackat nej</option>
+                <option value="archived">Arkiverad</option>
+              </select>
+            </label>
+          </div>
+          <p class="status-message" id="springPaxMessage" role="status" aria-live="polite"></p>
+          <div class="spring-pax-list" id="springPaxList"></div>
+        </section>
+      </section>
+
       <section class="card panel hidden" id="invitationsPanel">
         <header class="view-heading">
           <div>
@@ -1300,6 +1339,7 @@
     const adminTabs = document.getElementById('adminTabs');
     const blockedDatesPanel = document.getElementById('blockedDatesPanel');
     const discountCodesPanel = document.getElementById('discountCodesPanel');
+    const springPaxPanel = document.getElementById('springPaxPanel');
     const invitationsPanel = document.getElementById('invitationsPanel');
     const bookingsPanel = document.getElementById('bookingsPanel');
     const analyticsPanel = document.getElementById('analyticsPanel');
@@ -1336,6 +1376,12 @@
     const discountCodeButton = document.getElementById('discountCodeButton');
     const discountCodeMessage = document.getElementById('discountCodeMessage');
     const discountCodesList = document.getElementById('discountCodesList');
+    const springPaxRefresh = document.getElementById('springPaxRefresh');
+    const springPaxSearch = document.getElementById('springPaxSearch');
+    const springPaxFilter = document.getElementById('springPaxFilter');
+    const springPaxSummary = document.getElementById('springPaxSummary');
+    const springPaxMessage = document.getElementById('springPaxMessage');
+    const springPaxList = document.getElementById('springPaxList');
     const invitationForm = document.getElementById('invitationForm');
     const invitationEmail = document.getElementById('invitationEmail');
     const invitationDate = document.getElementById('invitationDate');
@@ -1372,6 +1418,7 @@
     let activeAdminView = 'overview';
     let currentBookings = [];
     let currentBlockedDates = [];
+    let currentSpringReservations = [];
     let invitationBookings = [];
     let invitationBlockedDates = [];
     let invitationCapacityOverrides = [];
@@ -1457,6 +1504,11 @@
       invitationMessage.className = `status-message ${type}`.trim();
     }
 
+    function setSpringPaxMessage(text, type = '') {
+      springPaxMessage.textContent = text;
+      springPaxMessage.className = `status-message ${type}`.trim();
+    }
+
     function renderAdminView() {
       const showOverview = activeAdminView === 'overview';
       const showCalendar = activeAdminView === 'calendar';
@@ -1466,6 +1518,7 @@
       const showPayments = activeAdminView === 'payments';
       const showBlockedDates = activeAdminView === 'blockedDates';
       const showDiscountCodes = activeAdminView === 'discountCodes';
+      const showSpringPax = activeAdminView === 'springPax';
       const showInvitations = activeAdminView === 'invitations';
       const showAnalytics = activeAdminView === 'analytics';
       overviewPanel.classList.toggle('hidden', !showOverview);
@@ -1476,6 +1529,7 @@
       paymentsPanel.classList.toggle('hidden', !showPayments);
       blockedDatesPanel.classList.toggle('hidden', !showBlockedDates);
       discountCodesPanel.classList.toggle('hidden', !showDiscountCodes);
+      springPaxPanel.classList.toggle('hidden', !showSpringPax);
       invitationsPanel.classList.toggle('hidden', !showInvitations);
       analyticsPanel.classList.toggle('hidden', !showAnalytics);
       document.body.classList.remove('nav-open');
@@ -2504,6 +2558,102 @@
       return body;
     }
 
+    function springPeriodLabel(value) {
+      return ({ march: 'Mars', april: 'April', may: 'Maj', flexible: 'Flexibel' })[value] || 'Flexibel';
+    }
+
+    function springServiceLabel(value) {
+      return ({ exterior: 'Utvändigt', interior_exterior: 'In- och utvändigt', unsure: 'Osäker' })[value] || 'Osäker';
+    }
+
+    function springStatusLabel(reservation) {
+      const invitation = reservation.invitation;
+      const hasActiveAccess = invitation?.status === 'active'
+        && new Date(invitation.expires_at).getTime() > Date.now();
+      if (hasActiveAccess) return 'Bokningslänk skickad';
+      if (invitation?.status === 'active') return 'Länk utgången';
+      return ({
+        paxed: 'Paxad',
+        contacted: 'Kontaktad',
+        invited: invitation?.status === 'expired' || invitation?.status === 'cancelled' ? 'Länk avslutad' : 'Bokningslänk skickad',
+        booked: 'Bokad',
+        declined: 'Tackat nej',
+        archived: 'Arkiverad'
+      })[reservation.status] || reservation.status || 'Okänd';
+    }
+
+    function springStatusBadgeClass(reservation) {
+      const invitation = reservation.invitation;
+      if (invitation?.status === 'active' && new Date(invitation.expires_at).getTime() > Date.now()) return 'confirmed';
+      if (invitation?.status === 'active') return 'expired';
+      return ({ paxed: 'pending', contacted: 'pending', invited: 'confirmed', booked: 'completed', declined: 'cancelled', archived: 'expired' })[reservation.status] || 'pending';
+    }
+
+    function renderSpringPaxReservations() {
+      const query = springPaxSearch.value.trim().toLocaleLowerCase('sv-SE');
+      const filter = springPaxFilter.value;
+      const rows = currentSpringReservations.filter((reservation) => {
+        if (filter !== 'all' && reservation.status !== filter) return false;
+        if (!query) return true;
+        return [reservation.name, reservation.email, reservation.phone, reservation.location]
+          .join(' ')
+          .toLocaleLowerCase('sv-SE')
+          .includes(query);
+      });
+
+      const activeLinks = currentSpringReservations.filter((reservation) => reservation.invitation?.status === 'active'
+        && new Date(reservation.invitation.expires_at).getTime() > Date.now()).length;
+      const booked = currentSpringReservations.filter((reservation) => reservation.status === 'booked').length;
+      springPaxSummary.innerHTML = [
+        ['Totalt paxade', currentSpringReservations.length, 'Alla mottagna intresseanmälningar'],
+        ['Bokningslänk skickad', activeLinks, 'Kan välja en ledig helg nu'],
+        ['Bokade', booked, 'Har slutfört sin bokning']
+      ].map(([label, value, detail]) => `<div class="metric-card"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><small>${escapeHtml(detail)}</small></div>`).join('');
+
+      if (!rows.length) {
+        springPaxList.innerHTML = '<div class="empty-state">Inga vårpaxningar matchar filtret.</div>';
+        return;
+      }
+
+      springPaxList.innerHTML = `<table class="admin-table"><thead><tr><th>Kund</th><th>Kontakt</th><th>Önskemål</th><th>Paxad</th><th>Status</th><th></th></tr></thead><tbody>${rows.map((reservation) => {
+        const invitation = reservation.invitation;
+        const hasActiveAccess = invitation?.status === 'active' && new Date(invitation.expires_at).getTime() > Date.now();
+        const canOpen = !hasActiveAccess && !['booked', 'declined', 'archived'].includes(reservation.status);
+        const action = reservation.status === 'booked' && invitation?.booking_id
+          ? `<button type="button" class="button button-secondary" data-open-booking="${escapeHtml(invitation.booking_id)}">Öppna bokning</button>`
+          : canOpen
+            ? `<button type="button" class="button button-primary action-open-spring-booking" data-reservation-id="${escapeHtml(reservation.id)}">Öppna bokning</button>`
+            : hasActiveAccess
+              ? '<button type="button" class="button button-secondary" disabled>Länk skickad</button>'
+              : '';
+        const sentDetail = hasActiveAccess && invitation?.sent_at
+          ? `<span>Skickad ${escapeHtml(formatDateTime(invitation.sent_at))}</span>`
+          : '';
+        return `<tr data-spring-reservation-id="${escapeHtml(reservation.id)}">
+          <td class="primary-cell"><strong>${escapeHtml(reservation.name)}</strong><span>${escapeHtml(reservation.location)}</span></td>
+          <td class="primary-cell"><strong>${escapeHtml(reservation.email)}</strong><span>${escapeHtml(reservation.phone)}</span></td>
+          <td class="primary-cell"><strong>${escapeHtml(springPeriodLabel(reservation.requested_period))}</strong><span>${escapeHtml(springServiceLabel(reservation.service_interest))}</span></td>
+          <td>${escapeHtml(formatDateTime(reservation.created_at))}</td>
+          <td><span class="badge ${springStatusBadgeClass(reservation)}">${escapeHtml(springStatusLabel(reservation))}</span>${sentDetail}</td>
+          <td class="action-cell">${action}</td>
+        </tr>`;
+      }).join('')}</tbody></table>`;
+    }
+
+    async function fetchSpringPaxReservations() {
+      springPaxList.innerHTML = '<div class="empty-state">Hämtar vårpaxningar…</div>';
+      setSpringPaxMessage('');
+      try {
+        const body = await callBookingInvitation('list-spring-reservations');
+        currentSpringReservations = Array.isArray(body.reservations) ? body.reservations : [];
+        renderSpringPaxReservations();
+      } catch (error) {
+        currentSpringReservations = [];
+        springPaxSummary.innerHTML = '';
+        springPaxList.innerHTML = `<div class="empty-state">${escapeHtml(error instanceof Error ? error.message : 'Vårpaxningarna kunde inte hämtas.')}</div>`;
+      }
+    }
+
     function invitationStatusLabel(invitation) {
       const labels = {
         active: 'Reserverad – väntar på kund',
@@ -3059,6 +3209,7 @@
       if (viewTrigger instanceof HTMLElement) {
         activeAdminView = viewTrigger.dataset.openView || 'overview';
         renderAdminView();
+        if (activeAdminView === 'springPax') void fetchSpringPaxReservations();
         if (activeAdminView === 'invitations') void refreshInvitationView();
       }
     });
@@ -3346,6 +3497,32 @@
       }
     });
 
+    springPaxRefresh.addEventListener('click', fetchSpringPaxReservations);
+    springPaxSearch.addEventListener('input', renderSpringPaxReservations);
+    springPaxFilter.addEventListener('change', renderSpringPaxReservations);
+
+    springPaxList.addEventListener('click', async (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement) || !target.classList.contains('action-open-spring-booking')) return;
+      const reservationId = String(target.dataset.reservationId || '');
+      const reservation = currentSpringReservations.find((item) => item.id === reservationId);
+      if (!reservationId || !reservation) return;
+      if (!window.confirm(`Skicka en personlig bokningslänk till ${reservation.name} (${reservation.email})? Kunden får välja en ledig helg 1 mars–15 juni 2027.`)) return;
+
+      target.setAttribute('disabled', 'disabled');
+      target.textContent = 'Skickar…';
+      setSpringPaxMessage('');
+      try {
+        await callBookingInvitation('create-spring-access', { reservationId });
+        await fetchSpringPaxReservations();
+        setSpringPaxMessage(`Bokningen är öppnad och länken har skickats till ${reservation.email}.`, 'success');
+      } catch (error) {
+        setSpringPaxMessage(error instanceof Error ? error.message : 'Bokningslänken kunde inte skickas.', 'error');
+        target.removeAttribute('disabled');
+        target.textContent = 'Öppna bokning';
+      }
+    });
+
     invitationForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       setInvitationMessage('');
@@ -3572,6 +3749,9 @@
       if (activeAdminView === 'discountCodes') {
         await fetchDiscountCodes();
       }
+      if (activeAdminView === 'springPax') {
+        await fetchSpringPaxReservations();
+      }
       if (activeAdminView === 'invitations') {
         await refreshInvitationView();
       }
@@ -3589,6 +3769,11 @@
 
       if (activeAdminView === 'discountCodes') {
         await fetchDiscountCodes();
+        return;
+      }
+
+      if (activeAdminView === 'springPax') {
+        await fetchSpringPaxReservations();
         return;
       }
 
@@ -3630,7 +3815,7 @@
       workspaceToolbar.classList.toggle('hidden', !isMfaVerified || mustSetPassword);
 
       if (!isMfaVerified || mustSetPassword) {
-        [overviewPanel, calendarPanel, bookingsPanel, customersPanel, followUpPanel, paymentsPanel, blockedDatesPanel, discountCodesPanel, invitationsPanel, analyticsPanel]
+        [overviewPanel, calendarPanel, bookingsPanel, customersPanel, followUpPanel, paymentsPanel, blockedDatesPanel, discountCodesPanel, springPaxPanel, invitationsPanel, analyticsPanel]
           .forEach((panel) => panel.classList.add('hidden'));
         closeBookingDrawer();
       }
@@ -3640,6 +3825,7 @@
         bookingsPanel.classList.add('hidden');
         blockedDatesPanel.classList.add('hidden');
         discountCodesPanel.classList.add('hidden');
+        springPaxPanel.classList.add('hidden');
         invitationsPanel.classList.add('hidden');
         analyticsPanel.classList.add('hidden');
         newAdminPassword.focus();
@@ -3652,6 +3838,7 @@
         bookingsPanel.classList.add('hidden');
         blockedDatesPanel.classList.add('hidden');
         discountCodesPanel.classList.add('hidden');
+        springPaxPanel.classList.add('hidden');
         invitationsPanel.classList.add('hidden');
         analyticsPanel.classList.add('hidden');
         await prepareMfaPanel();
@@ -3664,6 +3851,7 @@
         bookingsPanel.classList.add('hidden');
         blockedDatesPanel.classList.add('hidden');
         discountCodesPanel.classList.add('hidden');
+        springPaxPanel.classList.add('hidden');
         invitationsPanel.classList.add('hidden');
         analyticsPanel.classList.add('hidden');
       }

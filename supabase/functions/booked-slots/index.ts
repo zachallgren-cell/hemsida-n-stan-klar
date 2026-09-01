@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
     });
     const capacityOverridesRes = await fetch(`${supabaseUrl}/rest/v1/booking_capacity_overrides?select=booking_date,extra_bookings`, { headers: requestHeaders });
     const activeInvitationsRes = await fetch(
-      `${supabaseUrl}/rest/v1/booking_invitations?select=booking_date&status=eq.active&expires_at=gt.${encodeURIComponent(new Date().toISOString())}`,
+      `${supabaseUrl}/rest/v1/booking_invitations?select=booking_date&invitation_type=eq.reserved_date&booking_date=not.is.null&status=eq.active&expires_at=gt.${encodeURIComponent(new Date().toISOString())}`,
       { headers: requestHeaders }
     );
 

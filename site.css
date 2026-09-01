@@ -265,6 +265,13 @@ a {
   text-transform: uppercase;
 }
 
+.eyebrow-open {
+  padding: 7px 11px;
+  border: 1px solid rgba(8, 79, 116, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.62);
+}
+
 h1,
 h2,
 h3 {
@@ -338,6 +345,11 @@ h3 {
   background: var(--cta-hover);
 }
 
+.btn-primary-large {
+  min-height: 56px;
+  padding-inline: 25px;
+}
+
 .btn-secondary {
   border-color: #a9cedf;
   background: rgba(255, 255, 255, 0.72);
@@ -381,6 +393,18 @@ h3 {
   list-style: none;
 }
 
+.hero-assurance {
+  margin: 12px 0 0;
+  color: #345363;
+  font-size: 0.9rem;
+  font-weight: 780;
+}
+
+.hero-assurance span {
+  margin-inline: 5px;
+  color: var(--primary);
+}
+
 .trust-list li {
   position: relative;
   padding-left: 20px;
@@ -402,6 +426,42 @@ h3 {
 
 .section {
   padding: clamp(58px, 8vw, 94px) 0;
+}
+
+.business-booking-section {
+  padding: 24px 0;
+  border-bottom: 1px solid rgba(201, 224, 234, 0.68);
+  background: var(--background);
+}
+
+.business-booking-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 24px 26px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.business-booking-panel .section-kicker {
+  margin-bottom: 6px;
+}
+
+.business-booking-panel h2 {
+  margin-bottom: 7px;
+  font-size: clamp(1.35rem, 2.5vw, 1.8rem);
+}
+
+.business-booking-panel p:last-child {
+  max-width: 760px;
+  margin: 0;
+  color: var(--muted);
+}
+
+.business-booking-panel .btn {
+  flex: 0 0 auto;
 }
 
 .section + .section {
@@ -920,7 +980,7 @@ h3 {
   }
 
   .hero {
-    padding: 48px 0 54px;
+    padding: 34px 0 48px;
   }
 
   .hero-grid,
@@ -957,6 +1017,24 @@ h3 {
   .section-actions {
     display: grid;
     grid-template-columns: 1fr;
+  }
+
+  .hero-assurance {
+    text-align: center;
+  }
+
+  .business-booking-section {
+    padding: 16px 0;
+  }
+
+  .business-booking-panel {
+    display: grid;
+    gap: 18px;
+    padding: 21px;
+  }
+
+  .business-booking-panel .btn {
+    width: 100%;
   }
 
   .hero-actions .btn,

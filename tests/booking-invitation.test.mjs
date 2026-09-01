@@ -55,7 +55,7 @@ test('admininbjudan använder samma kalender och bokningsbara datum som kundsida
   assert.match(edge, /!\[0, 6\]\.includes\(parsed\.getUTCDay\(\)\)/);
 });
 
-test('kundlänken låser mejl och datum men låter kunden välja tid och vanliga uppgifter', async () => {
+test('kundlänken låser mejl och bevarar stöd för ett reserverat datum', async () => {
   const html = await readFile(new URL('bokning.html', root), 'utf8');
   const client = await readFile(new URL('booking.js', root), 'utf8');
 
@@ -66,7 +66,7 @@ test('kundlänken låser mejl och datum men låter kunden välja tid och vanliga
   assert.match(client, /url\.searchParams\.set\('reserved', '1'\)/);
   assert.match(client, /sessionStorage\.setItem\(INVITATION_SESSION_KEY, invitationToken\)/);
   assert.match(client, /byId\('email'\)\.readOnly = true/);
-  assert.match(client, /selectedDate = activeInvitation\.date/);
+  assert.match(client, /selectedDate = isSpringPriorityInvitation\(\) \? '' : activeInvitation\.date/);
   assert.match(client, /if \(activeInvitation\?\.date === dateString\) return BOOKABLE_TIMES/);
   assert.match(client, /invitationToken: booking\.invitationToken \|\| null/);
 });
@@ -75,13 +75,47 @@ test('vanlig tillgänglighet räknar aktiva reservationer och servern löser rä
   const slots = await readFile(new URL('supabase/functions/booked-slots/index.ts', root), 'utf8');
   const createBooking = await readFile(new URL('supabase/functions/create-booking/index.ts', root), 'utf8');
 
-  assert.match(slots, /booking_invitations\?select=booking_date&status=eq\.active/);
+  assert.match(slots, /booking_invitations\?select=booking_date&invitation_type=eq\.reserved_date&booking_date=not\.is\.null&status=eq\.active/);
   assert.match(slots, /\.\.\.activeInvitations\.map/);
   assert.match(createBooking, /await sha256Hex\(invitationToken\)/);
-  assert.match(createBooking, /booking_invitations\?select=id,email,booking_date,status,expires_at/);
+  assert.match(createBooking, /booking_invitations\?select=id,email,booking_date,invitation_type,window_start,window_end,status,expires_at/);
   assert.match(createBooking, /otherInvitationCount/);
   assert.match(createBooking, /'finalize_booking_invitation'/);
   assert.match(createBooking, /const requiresEmailConfirmation = !invitationRecord/);
+});
+
+test('vårpaxningar kan öppnas för alla lediga helger 1 mars till 15 juni 2027', async () => {
+  const migration = await readFile(new URL('supabase/migrations/20260901010000_add_spring_booking_access.sql', root), 'utf8');
+  const edge = await readFile(new URL('supabase/functions/booking-invitation/index.ts', root), 'utf8');
+  const client = await readFile(new URL('booking.js', root), 'utf8');
+  const createBooking = await readFile(new URL('supabase/functions/create-booking/index.ts', root), 'utf8');
+  const admin = await readFile(new URL('admin.html', root), 'utf8');
+
+  assert.match(migration, /invitation_type text not null default 'reserved_date'/);
+  assert.match(migration, /'spring_priority'/);
+  assert.match(migration, /window_start date/);
+  assert.match(migration, /window_end date/);
+  assert.match(migration, /new\.invitation_type <> 'reserved_date'/);
+  assert.match(migration, /extract\(isodow from target_booking\.booking_date\) in \(6, 7\)/);
+  assert.match(migration, /update public\.spring_2027_reservations[\s\S]*set status = 'booked'/);
+
+  assert.match(edge, /SPRING_BOOKING_WINDOW_START = '2027-03-01'/);
+  assert.match(edge, /SPRING_BOOKING_WINDOW_END = '2027-06-15'/);
+  assert.match(edge, /action === 'list-spring-reservations'/);
+  assert.match(edge, /action === 'create-spring-access'/);
+  assert.match(edge, /invitation_type: 'spring_priority'/);
+
+  assert.match(admin, /data-admin-view="springPax"/);
+  assert.match(admin, /id="springPaxList"/);
+  assert.match(admin, /class="button button-primary action-open-spring-booking"/);
+  assert.match(admin, /callBookingInvitation\('create-spring-access', \{ reservationId \}\)/);
+
+  assert.match(client, /function isSpringPriorityInvitation\(\)/);
+  assert.match(client, /isDateWithinInvitationWindow\(date\)/);
+  assert.match(client, /Välj en ledig lördag eller söndag mellan 1 mars och 15 juni 2027/);
+  assert.match(createBooking, /invitationRecord\.invitation_type === 'spring_priority'/);
+  assert.match(createBooking, /payload\.date >= invitationRecord\.window_start/);
+  assert.match(createBooking, /isBookableTime\(payload\.time, payload\.date\)/);
 });
 
 test('tacksidan skiljer reserverad inbjudan från vanlig mejlbekräftelse', async () => {

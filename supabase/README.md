@@ -68,6 +68,30 @@ eventets `settings.droneVideoUrl`; den ska vara ljudlös som standard.
 
 Webbplatsens aktiva betalningsflöde använder Swish Företag. Fortnox används inte för RUT och Stripe används inte för nya betalningar.
 
+## Vårpaxning 2027
+
+Den öppna privatbokningen är stängd resten av säsongen. Vanliga besökare på
+`bokning.html` ser därför det korta, icke-bindande paxningsformuläret. Personliga
+bokningsinbjudningar fortsätter att öppna det befintliga fyrstegsflödet.
+
+Paxningar tas emot av `submit-spring-pax`, valideras och hastighetsbegränsas och
+sparas i den RLS-skyddade tabellen `spring_2027_reservations` innan några mejl
+skickas. Ett misslyckat mejlutskick får därför inte en mottagen paxning att gå
+förlorad. I adminvyn **Vårpaxningar** kan en tvåstegsverifierad admin öppna
+bokningen för en paxad kund. Kunden får då en personlig engångslänk och kan
+välja en ledig lördag eller söndag mellan 1 mars och 15 juni 2027. En sådan
+förturslänk reserverar inte kapacitet förrän kunden slutför bokningen.
+
+Kör migrationerna före funktionsdeploy:
+
+```bash
+supabase db push
+supabase functions deploy submit-spring-pax --no-verify-jwt
+supabase functions deploy booking-invitation --no-verify-jwt
+supabase functions deploy create-booking --no-verify-jwt
+supabase functions deploy booked-slots --no-verify-jwt
+```
+
 ## Kundflöde
 
 1. Kunden bokar och väljer om RUT ska användas. `create-booking` räknar om priset på servern och skapar en reservation som måste bekräftas via mejl inom 24 timmar.
@@ -95,6 +119,8 @@ Fakturan skapas och skickas utanför webbplatsen. `invoice_reference` kopplar Sw
 - `manage-booking` – bekräftelse, säker RUT-åtkomst, ombokning, avbokning och frivillig återkommande inbjudan med hashad kundtoken.
 - `send-booking-reminders` – idempotenta 24-timmarspåminnelser och frivilliga inbjudningar efter 8 eller 12 veckor.
 - `request-photo-quote` – tar emot högst tre validerade bilder och vidarebefordrar dem som mejlbilagor utan permanent bildlagring.
+- `submit-spring-pax` – validerar och lagrar vårpaxningar samt skickar intern notis och kvitto till kunden.
+- `booking-invitation` – hanterar både reserverade datum och adminstyrd förtursåtkomst för vårpaxningar.
 
 `stripe-webhook` finns kvar i källhistoriken för äldre Stripe-betalningar men ingår inte i det nya flödet och ska inte deployas på nytt.
 
@@ -167,6 +193,8 @@ supabase functions deploy complete-booking
 supabase functions deploy manage-booking
 supabase functions deploy send-booking-reminders
 supabase functions deploy request-photo-quote
+supabase functions deploy submit-spring-pax --no-verify-jwt
+supabase functions deploy booking-invitation --no-verify-jwt
 supabase functions deploy clarity-analytics
 ```
 
