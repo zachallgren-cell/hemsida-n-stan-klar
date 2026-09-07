@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Personal | Berga Fönsterputs</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="/favicon-192.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="stylesheet" href="personal.css?v=20260903">
+</head>
+<body>
+  <header class="staff-header">
+    <a class="staff-brand" href="personal.html">
+      <img src="logo-compact.png" width="256" height="251" alt="Berga Fönsterputs">
+      <span>Berga Fönsterputs<small>Personal</small></span>
+    </a>
+    <button type="button" class="staff-link-button" id="staffLogout" hidden>Logga ut</button>
+  </header>
+
+  <main>
+    <section class="auth-card" id="staffLoginPanel">
+      <p class="eyebrow">Personalportal</p>
+      <h1>Logga in till dina jobb</h1>
+      <p>Här paxar du pass, följer checklistan, registrerar tid och ser din provision.</p>
+      <form id="staffLoginForm" novalidate>
+        <label>E-postadress<input type="email" id="staffEmail" autocomplete="email" required></label>
+        <label>Lösenord<input type="password" id="staffPassword" autocomplete="current-password" required></label>
+        <button type="submit" class="primary-button" id="staffLoginButton">Logga in</button>
+        <button type="button" class="staff-link-button" id="staffResetPassword">Glömt lösenord</button>
+      </form>
+      <p class="status-message" id="staffLoginMessage" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="auth-card" id="staffPasswordPanel" hidden>
+      <p class="eyebrow">Aktivera konto</p>
+      <h1>Skapa ditt lösenord</h1>
+      <p>Välj ett personligt lösenord. Kontot får bara användas av dig.</p>
+      <form id="staffPasswordForm" novalidate>
+        <label>Nytt lösenord<input type="password" id="staffNewPassword" autocomplete="new-password" minlength="12" required></label>
+        <label>Upprepa lösenord<input type="password" id="staffConfirmPassword" autocomplete="new-password" minlength="12" required></label>
+        <button type="submit" class="primary-button" id="staffPasswordButton">Spara och öppna personalportalen</button>
+      </form>
+      <p class="status-message" id="staffPasswordMessage" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="staff-app" id="staffApp" hidden>
+      <div class="staff-welcome">
+        <div><p class="eyebrow">Arbetsdag</p><h1 id="staffGreeting">Hej!</h1></div>
+        <button type="button" class="secondary-button" id="staffRefresh">Uppdatera</button>
+      </div>
+
+      <section class="staff-summary" aria-label="Min sammanfattning">
+        <article><span>Kommande pass</span><strong id="staffUpcomingCount">0</strong></article>
+        <article><span>Intjänad provision</span><strong id="staffEarnedCommission">0 kr</strong></article>
+        <article><span>Arbetad tid</span><strong id="staffWorkedTime">0 tim</strong></article>
+      </section>
+
+      <nav class="staff-tabs" aria-label="Personalvyer">
+        <button type="button" class="is-active" data-staff-view="today">I dag</button>
+        <button type="button" data-staff-view="available">Lediga pass</button>
+        <button type="button" data-staff-view="mine">Mina jobb</button>
+        <button type="button" data-staff-view="history">Historik</button>
+      </nav>
+
+      <p class="status-message" id="staffAppMessage" role="status" aria-live="polite"></p>
+      <div class="staff-job-list" id="staffJobList"></div>
+    </section>
+  </main>
+
+  <dialog class="job-dialog" id="staffJobDialog" aria-labelledby="staffJobTitle">
+    <div class="job-dialog-header">
+      <div><p class="eyebrow">Jobbdetaljer</p><h2 id="staffJobTitle">Jobb</h2></div>
+      <button type="button" class="dialog-close" id="staffJobClose" aria-label="Stäng">×</button>
+    </div>
+    <div id="staffJobDetail"></div>
+  </dialog>
+
+  <script src="vendor/supabase-js-2.110.1.umd.min.js" integrity="sha384-baNpjjkY1KK3WRj5l8Fkp2P/pd/wQ4dXsejAvxqNeBEugKB7WLjHXreLejokZekT" crossorigin="anonymous"></script>
+  <script src="personal.js?v=20260903" defer></script>
+</body>
+</html>

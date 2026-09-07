@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin | Berga Fönsterputs</title>
   <link rel="stylesheet" href="admin-analytics.css?v=20260721">
+  <link rel="stylesheet" href="admin-workforce.css?v=20260903">
   <meta name="robots" content="noindex, nofollow">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-9eq5YIctsIQVkhLVnFPApnZKvlEtZxVT+8VbH0ybTdc='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-w2n+kvcd5TavZ3MFAoTMvnPD1SkwuK43BTwAMcC30tI='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
   <link rel="shortcut icon" href="/favicon-48.png" />
@@ -886,6 +887,10 @@
         <nav class="admin-tabs hidden" id="adminTabs" aria-label="Adminvyer">
           <button type="button" class="admin-tab is-active" data-admin-view="overview"><span aria-hidden="true">⌂</span>Översikt</button>
           <button type="button" class="admin-tab" data-admin-view="calendar"><span aria-hidden="true">▦</span>Kalender</button>
+          <button type="button" class="admin-tab" data-admin-view="workforce"><span aria-hidden="true">◫</span>Bemanning</button>
+          <button type="button" class="admin-tab" data-admin-view="staff"><span aria-hidden="true">♙</span>Personal</button>
+          <button type="button" class="admin-tab" data-admin-view="checklists"><span aria-hidden="true">☑</span>Checklistor</button>
+          <button type="button" class="admin-tab" data-admin-view="staffFinance"><span aria-hidden="true">↗</span>Tider och ekonomi</button>
           <button type="button" class="admin-tab" data-admin-view="springPax"><span aria-hidden="true">☘</span>Vårpaxningar</button>
           <button type="button" class="admin-tab" data-admin-view="invitations"><span aria-hidden="true">✉</span>Bjud in kund</button>
           <button type="button" class="admin-tab" data-admin-view="bookings"><span aria-hidden="true">≡</span>Bokningar</button>
@@ -908,8 +913,8 @@
     <section class="hero">
       <div>
         <span class="pill">Admin för Berga Fönsterputs</span>
-        <h1>Hantera bokningar, Swish och RUT.</h1>
-        <p>Här kan ni se bokningar, skicka Swishuppgifter i klartmejlet, kontrollera betalningar och hämta RUT-underlaget när det är dags att ansöka.</p>
+        <h1>Hantera bokningar, personal och ekonomi.</h1>
+        <p>Planera jobben, bemanna personal, följ tider och provision samt hantera Swish och RUT i samma admin.</p>
       </div>
       <div class="hero-card">
         <h2>Det här kan ni göra här</h2>
@@ -1008,6 +1013,7 @@
           <button type="button" class="button button-secondary" data-refresh-view>Uppdatera</button>
         </header>
         <div class="metric-strip" id="dashboardMetrics" aria-label="Viktiga nyckeltal"></div>
+        <div class="metric-strip" id="workforceOverviewMetrics" aria-label="Personal och bemanning"></div>
         <div class="dashboard-grid">
           <section class="surface task-surface">
             <div class="section-heading-row"><div><p class="eyebrow">Arbetslista</p><h2>Att göra i dag</h2></div><button type="button" class="text-button" data-open-view="followUp">Visa alla</button></div>
@@ -1022,6 +1028,49 @@
           <div class="section-heading-row"><div><p class="eyebrow">Senaste sju dagarna</p><h2>Senaste kundaktivitet</h2></div></div>
           <div class="activity-list" id="recentActivity"></div>
         </section>
+      </section>
+
+      <section class="admin-view hidden" id="workforcePanel">
+        <header class="view-heading"><div><p class="eyebrow">Arbetsplanering</p><h1>Bemanning</h1><p>Skapa personalpass från bekräftade bokningar och låt medarbetare paxa dem, eller tilldela någon direkt.</p></div><button type="button" class="button button-secondary" data-workforce-refresh>Uppdatera</button></header>
+        <p class="workforce-status" id="workforceAdminMessage" role="status" aria-live="polite"></p>
+        <section class="surface settings-section"><div class="section-heading-row"><div><h2>Bokningar utan personalpass</h2><p>Pris, kundinformation och tid kopieras till en separat, begränsad jobbkopia.</p></div></div><div class="workforce-list" id="unplannedBookingsList"><div class="empty-state">Hämtar bokningar…</div></div></section>
+        <section class="surface settings-section"><div class="section-heading-row"><div><h2>Personalpass</h2><p>Se bemanning, provisionspott och öppna platser.</p></div></div><div class="workforce-list" id="staffJobsList"><div class="empty-state">Hämtar pass…</div></div></section>
+      </section>
+
+      <section class="admin-view hidden" id="staffPanel">
+        <header class="view-heading"><div><p class="eyebrow">Team</p><h1>Personal</h1><p>Bjud in med personligt konto. Inaktivering stoppar åtkomsten till personalportalen direkt.</p></div><button type="button" class="button button-secondary" data-workforce-refresh>Uppdatera</button></header>
+        <div class="workforce-intro-grid">
+          <section class="surface"><div class="section-heading-row"><div><h2>Bjud in personal</h2><p>En personlig aktiveringslänk skickas via Supabase Auth.</p></div></div><form class="workforce-form" id="staffInviteForm" novalidate>
+            <div class="workforce-form-grid"><label>Namn<input type="text" id="staffInviteName" maxlength="160" required></label><label>E-post<input type="email" id="staffInviteEmail" maxlength="254" required></label></div>
+            <div class="workforce-form-grid"><label>Telefon<input type="tel" id="staffInvitePhone" maxlength="40"></label><label>Roll<select id="staffInviteRole"><option value="worker">Medarbetare</option><option value="supervisor">Arbetsledare</option></select></label></div>
+            <label>Kompetenser, separerade med komma<input type="text" id="staffInviteSkills" placeholder="Båt, höga fönster, arbetsledare"></label>
+            <button type="submit" class="button button-primary" id="staffInviteButton">Skicka inbjudan</button>
+          </form><p class="workforce-status" id="staffAdminMessage" role="status" aria-live="polite"></p></section>
+          <section class="surface"><div class="section-heading-row"><div><h2>Teamet</h2><p>Aktiva, inbjudna och inaktiverade konton.</p></div></div><div id="staffMembersList"><div class="empty-state">Hämtar personal…</div></div></section>
+        </div>
+      </section>
+
+      <section class="admin-view hidden" id="checklistsPanel">
+        <header class="view-heading"><div><p class="eyebrow">Kvalitet</p><h1>Checklistor</h1><p>Bygg mallar som kopieras och fryses på varje jobb.</p></div><button type="button" class="button button-secondary" data-workforce-refresh>Uppdatera</button></header>
+        <div class="workforce-intro-grid">
+          <section class="surface"><div class="section-heading-row"><div><h2>Ny mall</h2><p>Skriv en obligatorisk punkt per rad.</p></div></div><form class="workforce-form" id="checklistTemplateForm" novalidate>
+            <label>Namn<input type="text" id="checklistTemplateName" maxlength="160" required></label>
+            <label>Beskrivning<input type="text" id="checklistTemplateDescription" maxlength="500"></label>
+            <label>Matchningsregel<input type="text" id="checklistTemplateRule" maxlength="160" placeholder="Exempel: båttransport"></label>
+            <label>Checklistpunkter<textarea id="checklistTemplateItems" required placeholder="Kontrollera befintliga skador&#10;Skydda golv och möbler&#10;Gör slutkontroll"></textarea></label>
+            <button type="submit" class="button button-primary" id="checklistTemplateButton">Skapa mall</button>
+          </form><p class="workforce-status" id="checklistAdminMessage" role="status" aria-live="polite"></p></section>
+          <section class="checklist-template-list" id="checklistTemplatesList"><div class="empty-state">Hämtar checklistor…</div></section>
+        </div>
+      </section>
+
+      <section class="admin-view hidden" id="staffFinancePanel">
+        <header class="view-heading"><div><p class="eyebrow">Lönsamhet</p><h1>Tider, provision och jobbekonomi</h1><p>Provisionen är 20 % av faktiskt pris exklusive moms, efter rabatt och före RUT. Täckningsbidraget visar intäkt minus provision och registrerade direkta kostnader.</p></div><button type="button" class="button button-secondary" data-workforce-refresh>Uppdatera</button></header>
+        <p class="workforce-status" id="staffFinanceMessage" role="status" aria-live="polite"></p>
+        <div class="metric-strip" id="staffFinanceMetrics"></div>
+        <section class="surface settings-section"><div class="section-heading-row"><div><h2>Jobbekonomi</h2><p>Registrera faktiska kostnader exklusive moms för att få ett användbart täckningsbidrag.</p></div></div><div class="job-economics-list" id="staffJobEconomicsList"><div class="empty-state">Hämtar ekonomi…</div></div></section>
+        <section class="surface settings-section"><div class="section-heading-row"><div><h2>Provision</h2><p>Intjänad provision godkänns innan den markeras som utbetald.</p></div></div><div id="staffCommissionsList"><div class="empty-state">Hämtar provision…</div></div></section>
+        <section class="surface settings-section"><div class="section-heading-row"><div><h2>Tidregistrering</h2><p>Serverregistrerade starter, pauser och avslut.</p></div></div><div id="staffTimeEntriesList"><div class="empty-state">Hämtar tider…</div></div></section>
       </section>
 
       <section class="admin-view hidden" id="calendarPanel">
@@ -1220,8 +1269,44 @@
             <h1>Bokningar</h1>
             <p>Överblicka många bokningar och öppna full information först när den behövs.</p>
           </div>
-          <button type="button" class="button button-secondary" id="refreshButton">Uppdatera</button>
+          <div class="bookings-heading-actions">
+            <button type="button" class="button button-primary" id="historicalBookingToggle" aria-expanded="false" aria-controls="historicalBookingPanel">+ Bokning i efterhand</button>
+            <button type="button" class="button button-secondary" id="refreshButton">Uppdatera</button>
+          </div>
         </div>
+        <section class="surface historical-booking-panel hidden" id="historicalBookingPanel">
+          <div class="section-heading-row">
+            <div>
+              <h2>Registrera bokning i efterhand</h2>
+              <p>För jobb som redan har bokats eller utförts utanför systemet. Inget bokningsmejl skickas automatiskt.</p>
+            </div>
+          </div>
+          <form class="admin-form historical-booking-form" id="historicalBookingForm" novalidate>
+            <div class="historical-booking-grid">
+              <label>Kundens namn<input type="text" id="historicalCustomerName" minlength="2" maxlength="100" autocomplete="name" required></label>
+              <label>E-post<input type="email" id="historicalEmail" maxlength="254" autocomplete="email" required></label>
+              <label>Telefon<input type="tel" id="historicalPhone" maxlength="30" autocomplete="tel" required></label>
+              <label>Postnummer<input type="text" id="historicalPostalCode" inputmode="numeric" maxlength="6" autocomplete="postal-code" placeholder="184 30"></label>
+              <label class="field-wide">Adress<input type="text" id="historicalAddress" minlength="3" maxlength="240" autocomplete="street-address" required></label>
+              <label>Datum<input type="date" id="historicalBookingDate" required></label>
+              <label>Tid<input type="time" id="historicalBookingTime" value="10:00" required></label>
+              <label>Bokningens läge<select id="historicalBookingState" required><option value="completed_unpaid">Utförd – obetald</option><option value="completed_paid">Utförd – redan betald</option><option value="confirmed">Bekräftad – inte utförd</option></select></label>
+              <label>RUT<select id="historicalRutChoice" required><option value="without_rut">Utan RUT</option><option value="with_rut">Med RUT</option></select></label>
+              <label>Bostadstyp<select id="historicalHousingType"><option value="">Ej angivet</option><option value="En våning">En våning</option><option value="Två våningar">Två våningar</option><option value="Lägenhet – fönstren öppnas inåt">Lägenhet – öppnas inåt</option><option value="Lägenhet – fönstren öppnas utåt">Lägenhet – öppnas utåt</option></select></label>
+              <label>Tjänst<select id="historicalServiceScope"><option value="">Ej angivet</option><option value="Endast utvändig">Endast utvändig</option><option value="Invändig + utvändig">Invändig + utvändig</option><option value="Fyrsidiga fönster">Fyrsidiga fönster</option></select></label>
+              <label>Antal fönster<input type="number" id="historicalWindowCount" min="1" max="250" step="1" inputmode="numeric"></label>
+              <label>Kundpris, kr<input type="number" id="historicalCustomerPrice" min="1" max="1000000" step="1" inputmode="numeric" required></label>
+              <label>Material, kr<input type="number" id="historicalMaterialCost" min="0" max="1000000" step="1" value="150" inputmode="numeric" required></label>
+              <label>Transport, kr<input type="number" id="historicalTransportCost" min="0" max="1000000" step="1" value="0" inputmode="numeric" required></label>
+              <label class="field-wide">Intern anteckning<textarea id="historicalInternalNote" maxlength="2000" placeholder="Till exempel portkod, överenskommelse eller varför bokningen registreras i efterhand."></textarea></label>
+            </div>
+            <div class="form-footer">
+              <p>Datumet får vara i dag eller tidigare. Bokningen markeras som adminregistrerad och kan sedan hanteras som vanligt.</p>
+              <button type="submit" class="button button-primary" id="historicalBookingButton">Skapa bokning</button>
+            </div>
+          </form>
+          <p class="status-message" id="historicalBookingMessage" role="status" aria-live="polite"></p>
+        </section>
         <div class="surface bookings-surface">
           <div class="saved-views" id="bookingSavedViews" aria-label="Sparade bokningsvyer">
             <button type="button" class="is-active" data-booking-filter="all">Alla</button>
@@ -1296,6 +1381,7 @@
 
   <script src="vendor/supabase-js-2.110.1.umd.min.js" integrity="sha384-baNpjjkY1KK3WRj5l8Fkp2P/pd/wQ4dXsejAvxqNeBEugKB7WLjHXreLejokZekT" crossorigin="anonymous"></script>
   <script src="admin-analytics.js?v=20260721"></script>
+  <script src="admin-workforce.js?v=20260903"></script>
   <script type="module">
     const { createClient } = window.supabase;
 
@@ -1306,6 +1392,7 @@
     const CLARITY_ANALYTICS_URL = `${SUPABASE_URL}/functions/v1/clarity-analytics`;
     const BOOKING_INVITATION_URL = `${SUPABASE_URL}/functions/v1/booking-invitation`;
     const BOOKED_SLOTS_URL = `${SUPABASE_URL}/functions/v1/booked-slots`;
+    const STAFF_OPERATIONS_URL = `${SUPABASE_URL}/functions/v1/staff-operations`;
     const INVITATION_MONTH_NAMES = ['januari', 'februari', 'mars', 'april', 'maj', 'juni', 'juli', 'augusti', 'september', 'oktober', 'november', 'december'];
     const SWISH_NUMBER_DISPLAY = '123 677 43 84';
     const SWISH_RECIPIENT_NAME = 'Zac Hallgren';
@@ -1324,6 +1411,10 @@
     const loginPanel = document.getElementById('loginPanel');
     const overviewPanel = document.getElementById('overviewPanel');
     const calendarPanel = document.getElementById('calendarPanel');
+    const workforcePanel = document.getElementById('workforcePanel');
+    const staffPanel = document.getElementById('staffPanel');
+    const checklistsPanel = document.getElementById('checklistsPanel');
+    const staffFinancePanel = document.getElementById('staffFinancePanel');
     const customersPanel = document.getElementById('customersPanel');
     const followUpPanel = document.getElementById('followUpPanel');
     const paymentsPanel = document.getElementById('paymentsPanel');
@@ -1358,6 +1449,27 @@
     const mfaMessage = document.getElementById('mfaMessage');
     const logoutButton = document.getElementById('logoutButton');
     const refreshButton = document.getElementById('refreshButton');
+    const historicalBookingToggle = document.getElementById('historicalBookingToggle');
+    const historicalBookingPanel = document.getElementById('historicalBookingPanel');
+    const historicalBookingForm = document.getElementById('historicalBookingForm');
+    const historicalCustomerName = document.getElementById('historicalCustomerName');
+    const historicalEmail = document.getElementById('historicalEmail');
+    const historicalPhone = document.getElementById('historicalPhone');
+    const historicalPostalCode = document.getElementById('historicalPostalCode');
+    const historicalAddress = document.getElementById('historicalAddress');
+    const historicalBookingDate = document.getElementById('historicalBookingDate');
+    const historicalBookingTime = document.getElementById('historicalBookingTime');
+    const historicalBookingState = document.getElementById('historicalBookingState');
+    const historicalRutChoice = document.getElementById('historicalRutChoice');
+    const historicalHousingType = document.getElementById('historicalHousingType');
+    const historicalServiceScope = document.getElementById('historicalServiceScope');
+    const historicalWindowCount = document.getElementById('historicalWindowCount');
+    const historicalCustomerPrice = document.getElementById('historicalCustomerPrice');
+    const historicalMaterialCost = document.getElementById('historicalMaterialCost');
+    const historicalTransportCost = document.getElementById('historicalTransportCost');
+    const historicalInternalNote = document.getElementById('historicalInternalNote');
+    const historicalBookingButton = document.getElementById('historicalBookingButton');
+    const historicalBookingMessage = document.getElementById('historicalBookingMessage');
     const bookingsList = document.getElementById('bookingsList');
     const blockedDateForm = document.getElementById('blockedDateForm');
     const blockedDateInput = document.getElementById('blockedDateInput');
@@ -1436,6 +1548,11 @@
       endpoint: CLARITY_ANALYTICS_URL,
       anonKey: SUPABASE_ANON_KEY
     }) || null;
+    const workforceController = window.bergaAdminWorkforce?.init?.({
+      supabase,
+      endpoint: STAFF_OPERATIONS_URL,
+      anonKey: SUPABASE_ANON_KEY
+    }) || null;
     let verifiedMfaFactorId = '';
     let pendingMfaFactorId = '';
 
@@ -1452,6 +1569,22 @@
     function setPasswordSetupMessage(text, type = '') {
       passwordSetupMessage.textContent = text;
       passwordSetupMessage.className = `status-message ${type}`.trim();
+    }
+
+    function setHistoricalBookingMessage(text, type = '') {
+      historicalBookingMessage.textContent = text;
+      historicalBookingMessage.className = `status-message ${type}`.trim();
+    }
+
+    function resetHistoricalBookingForm() {
+      historicalBookingForm.reset();
+      historicalBookingDate.max = stockholmToday();
+      historicalBookingDate.value = stockholmToday();
+      historicalBookingTime.value = '10:00';
+      historicalBookingState.value = 'completed_unpaid';
+      historicalRutChoice.value = 'without_rut';
+      historicalMaterialCost.value = '150';
+      historicalTransportCost.value = '0';
     }
 
     function clearMfaSetup() {
@@ -1512,6 +1645,10 @@
     function renderAdminView() {
       const showOverview = activeAdminView === 'overview';
       const showCalendar = activeAdminView === 'calendar';
+      const showWorkforce = activeAdminView === 'workforce';
+      const showStaff = activeAdminView === 'staff';
+      const showChecklists = activeAdminView === 'checklists';
+      const showStaffFinance = activeAdminView === 'staffFinance';
       const showBookings = activeAdminView === 'bookings';
       const showCustomers = activeAdminView === 'customers';
       const showFollowUp = activeAdminView === 'followUp';
@@ -1523,6 +1660,10 @@
       const showAnalytics = activeAdminView === 'analytics';
       overviewPanel.classList.toggle('hidden', !showOverview);
       calendarPanel.classList.toggle('hidden', !showCalendar);
+      workforcePanel.classList.toggle('hidden', !showWorkforce);
+      staffPanel.classList.toggle('hidden', !showStaff);
+      checklistsPanel.classList.toggle('hidden', !showChecklists);
+      staffFinancePanel.classList.toggle('hidden', !showStaffFinance);
       bookingsPanel.classList.toggle('hidden', !showBookings);
       customersPanel.classList.toggle('hidden', !showCustomers);
       followUpPanel.classList.toggle('hidden', !showFollowUp);
@@ -1545,6 +1686,7 @@
       if (showCustomers) renderCustomers();
       if (showFollowUp) renderFollowUp();
       if (showPayments) renderPayments();
+      if (workforceController) void workforceController.load(activeAdminView);
     }
 
     function escapeHtml(value) {
@@ -2032,7 +2174,7 @@
             <div class="completion-row">
               <button type="button" class="button button-secondary action-confirm" ${bookingCanBeAdminConfirmed ? '' : 'disabled'}>${bookingStatus === 'confirmed' ? 'Adminbekräftad' : bookingCanBeAdminConfirmed ? 'Bekräfta som admin' : 'Kundbekräftelse krävs'}</button>
               <button type="button" class="button button-secondary action-work-completed" ${workIsCompleted || !bookingCanBeWorked ? 'disabled' : ''}>${workIsCompleted ? 'Arbete utfört' : bookingCanBeWorked ? 'Markera arbete utfört' : 'Kundbekräftelse krävs'}</button>
-              <button type="button" class="button button-success action-complete" ${(!workIsCompleted && !bookingCanBeWorked) || booking.payment_email_sent ? 'disabled' : ''}>${booking.payment_email_sent ? 'Klartmejl skickat' : 'Klart + skicka Swish'}</button>
+              <button type="button" class="button button-success action-complete" ${(!workIsCompleted && !bookingCanBeWorked) || booking.payment_email_sent || paymentIsPaid ? 'disabled' : ''}>${paymentIsPaid ? 'Swish betald' : booking.payment_email_sent ? 'Klartmejl skickat' : 'Klart + skicka Swish'}</button>
               <button type="button" class="button button-secondary action-paid" ${paymentIsPaid || !workIsCompleted ? 'disabled' : ''}>${paymentIsPaid ? 'Swish betald' : workIsCompleted ? 'Markera Swish betald' : 'Slutför jobbet först'}</button>
               <button type="button" class="button button-danger action-delete">Ta bort</button>
             </div>
@@ -2102,7 +2244,7 @@
       if (status === 'awaiting_confirmation') return { label: 'Vänta på kund', tone: 'warning', action: '' };
       if (status === 'pending' && booking.email_confirmed_at) return { label: 'Bekräfta bokning', tone: 'primary', action: 'action-confirm' };
       if (!workCompleted && ['pending', 'confirmed'].includes(status)) return { label: 'Markera arbete utfört', tone: 'primary', action: 'action-work-completed' };
-      if (workCompleted && !booking.payment_email_sent) return { label: 'Skicka betalningsmejl', tone: 'primary', action: 'action-complete' };
+      if (workCompleted && !paymentPaid && !booking.payment_email_sent) return { label: 'Skicka betalningsmejl', tone: 'primary', action: 'action-complete' };
       if (workCompleted && !paymentPaid) return { label: 'Kontrollera betalning', tone: 'payment', action: 'action-paid' };
       if (paymentPaid && usesRut && booking.rut_submission_available && ['ready', 'rejected'].includes(rutStatus)) {
         return { label: 'Markera RUT ansökt', tone: 'rut', action: 'action-rut-applied' };
@@ -2208,7 +2350,7 @@
 
           <section class="drawer-section" data-drawer-section="history"><h4>Historik</h4><div class="activity-list"><div class="activity-item"><i class="activity-dot"></i><div class="activity-copy"><strong>Bokning skapad</strong><span>${escapeHtml(formatBookingStatus(booking.status))}</span></div><time>${escapeHtml(formatDateTime(booking.created_at))}</time></div>${workIsCompleted ? `<div class="activity-item"><i class="activity-dot"></i><div class="activity-copy"><strong>Arbete markerat som utfört</strong><span>Av administratör</span></div><time>${escapeHtml(formatDateTime(booking.completed_at))}</time></div>` : ''}${paymentIsPaid ? `<div class="activity-item"><i class="activity-dot"></i><div class="activity-copy"><strong>Betalning kontrollerad</strong><span>Swish markerad som betald</span></div><time>${escapeHtml(formatDateTime(booking.paid_at))}</time></div>` : ''}</div></section>
 
-          <details class="secondary-actions"><summary>Fler alternativ</summary><div class="completion-row"><button type="button" class="button button-secondary action-confirm" ${bookingCanBeAdminConfirmed ? '' : 'disabled'}>Bekräfta som admin</button><button type="button" class="button button-secondary action-work-completed" ${workIsCompleted || !bookingCanBeWorked ? 'disabled' : ''}>Markera arbete utfört</button><button type="button" class="button button-secondary action-complete" ${booking.payment_email_sent ? 'disabled' : ''}>Skicka betalningsmejl</button><button type="button" class="button button-secondary action-paid" ${paymentIsPaid || !workIsCompleted ? 'disabled' : ''}>Markera Swish betald</button>${usesRut ? `<button type="button" class="button button-danger action-purge-rut" ${!hasRutSubmission ? 'disabled' : ''}>Gallra personnummer</button>` : ''}<button type="button" class="button button-danger action-delete">Ta bort bokning</button></div></details>
+          <details class="secondary-actions"><summary>Fler alternativ</summary><div class="completion-row"><button type="button" class="button button-secondary action-confirm" ${bookingCanBeAdminConfirmed ? '' : 'disabled'}>Bekräfta som admin</button><button type="button" class="button button-secondary action-work-completed" ${workIsCompleted || !bookingCanBeWorked ? 'disabled' : ''}>Markera arbete utfört</button><button type="button" class="button button-secondary action-complete" ${booking.payment_email_sent || paymentIsPaid ? 'disabled' : ''}>Skicka betalningsmejl</button><button type="button" class="button button-secondary action-paid" ${paymentIsPaid || !workIsCompleted ? 'disabled' : ''}>Markera Swish betald</button>${usesRut ? `<button type="button" class="button button-danger action-purge-rut" ${!hasRutSubmission ? 'disabled' : ''}>Gallra personnummer</button>` : ''}<button type="button" class="button button-danger action-delete">Ta bort bokning</button></div></details>
           <p class="status-message" role="status" aria-live="polite"></p>
           <div class="primary-action-row">${primaryButton}</div>
         </article>`;
@@ -2734,6 +2876,76 @@
       renderFullyBookedDates(data || []);
     }
 
+    async function createHistoricalBooking() {
+      const bookingDate = historicalBookingDate.value;
+      const customerPrice = Number(historicalCustomerPrice.value);
+      const materialCost = Number(historicalMaterialCost.value);
+      const transportCost = Number(historicalTransportCost.value);
+      const postalCode = historicalPostalCode.value.replace(/\D/g, '');
+      const windowCount = historicalWindowCount.value
+        ? Number(historicalWindowCount.value)
+        : null;
+
+      if (!historicalBookingForm.reportValidity()) return;
+      if (!bookingDate || bookingDate > stockholmToday()) {
+        setHistoricalBookingMessage('Välj dagens datum eller ett tidigare datum.', 'error');
+        historicalBookingDate.focus();
+        return;
+      }
+      if (historicalPostalCode.value.trim() && !/^\d{5}$/.test(postalCode)) {
+        setHistoricalBookingMessage('Postnumret ska innehålla fem siffror.', 'error');
+        historicalPostalCode.focus();
+        return;
+      }
+      if (historicalRutChoice.value === 'with_rut' && customerPrice <= materialCost + transportCost) {
+        setHistoricalBookingMessage('För en RUT-bokning måste kundpriset vara högre än material och transport tillsammans.', 'error');
+        historicalCustomerPrice.focus();
+        return;
+      }
+
+      historicalBookingButton.disabled = true;
+      setHistoricalBookingMessage('Skapar bokningen...');
+
+      const { data, error } = await supabase.rpc('admin_create_historical_booking', {
+        p_customer_name: historicalCustomerName.value.trim(),
+        p_email: historicalEmail.value.trim().toLowerCase(),
+        p_phone: historicalPhone.value.trim(),
+        p_booking_date: bookingDate,
+        p_booking_time: historicalBookingTime.value,
+        p_address: historicalAddress.value.trim(),
+        p_postal_code: postalCode || null,
+        p_housing_type: historicalHousingType.value || null,
+        p_service_scope: historicalServiceScope.value || null,
+        p_window_count: windowCount,
+        p_customer_price: customerPrice,
+        p_material_cost: materialCost,
+        p_transport_cost: transportCost,
+        p_rut_choice: historicalRutChoice.value,
+        p_booking_state: historicalBookingState.value,
+        p_internal_note: historicalInternalNote.value.trim() || null
+      });
+
+      historicalBookingButton.disabled = false;
+      if (error) {
+        const message = /admin_create_historical_booking|schema cache/i.test(error.message)
+          ? 'Funktionen är inte installerad i Supabase ännu. Kör den senaste databasmigrationen och försök igen.'
+          : error.message;
+        setHistoricalBookingMessage(`Kunde inte skapa bokningen: ${message}`, 'error');
+        return;
+      }
+
+      const bookingId = data?.bookingId || data?.booking_id || data?.id;
+      resetHistoricalBookingForm();
+      activeBookingFilter = 'all';
+      bookingSavedViews.querySelectorAll('[data-booking-filter]').forEach((button) => {
+        button.classList.toggle('is-active', button.dataset.bookingFilter === 'all');
+      });
+      bookingSort.value = 'created-desc';
+      await fetchBookings();
+      setHistoricalBookingMessage('Bokningen är skapad och visas nu i listan.', 'success');
+      if (bookingId) openBookingDrawer(String(bookingId), historicalBookingToggle);
+    }
+
     async function fetchBookings() {
       bookingsList.innerHTML = '<div class="empty-state">Hämtar bokningar...</div>';
       const openBookingId = bookingDrawerBody.querySelector('.booking-card')?.dataset.bookingId || '';
@@ -2753,6 +2965,7 @@
       }
 
       renderBookings(data || []);
+      workforceController?.setBookings(data || []);
       if (openBookingId && !bookingDrawer.classList.contains('hidden')) {
         const updatedBooking = currentBookings.find((booking) => String(booking.id) === String(openBookingId));
         if (updatedBooking) {
@@ -3254,6 +3467,22 @@
       activeAdminView = 'bookings';
       renderAdminView();
       bookingSearch.focus();
+    });
+
+    historicalBookingToggle.addEventListener('click', () => {
+      const willOpen = historicalBookingPanel.classList.contains('hidden');
+      historicalBookingPanel.classList.toggle('hidden', !willOpen);
+      historicalBookingToggle.setAttribute('aria-expanded', String(willOpen));
+      if (willOpen) {
+        historicalBookingDate.max = stockholmToday();
+        if (!historicalBookingDate.value) historicalBookingDate.value = stockholmToday();
+        setHistoricalBookingMessage('');
+        historicalCustomerName.focus();
+      }
+    });
+    historicalBookingForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      await createHistoricalBooking();
     });
 
     bookingSearch.addEventListener('input', renderBookingTable);
@@ -3813,9 +4042,10 @@
       logoutButton.classList.toggle('hidden', !isLoggedIn);
       document.body.classList.toggle('is-admin-ready', isMfaVerified && !mustSetPassword);
       workspaceToolbar.classList.toggle('hidden', !isMfaVerified || mustSetPassword);
+      workforceController?.setAuthorized(isMfaVerified && !mustSetPassword);
 
       if (!isMfaVerified || mustSetPassword) {
-        [overviewPanel, calendarPanel, bookingsPanel, customersPanel, followUpPanel, paymentsPanel, blockedDatesPanel, discountCodesPanel, springPaxPanel, invitationsPanel, analyticsPanel]
+        [overviewPanel, calendarPanel, workforcePanel, staffPanel, checklistsPanel, staffFinancePanel, bookingsPanel, customersPanel, followUpPanel, paymentsPanel, blockedDatesPanel, discountCodesPanel, springPaxPanel, invitationsPanel, analyticsPanel]
           .forEach((panel) => panel.classList.add('hidden'));
         closeBookingDrawer();
       }
@@ -3857,6 +4087,7 @@
       }
     }
 
+    resetHistoricalBookingForm();
     syncInvitationDate('');
     renderInvitationCalendar();
     await refreshSession();

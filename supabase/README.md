@@ -1,5 +1,33 @@
 # Bokning, Swish och manuell RUT
 
+## Personal, bemanning och provision
+
+Personalmodulen är separerad från bokningarnas betalnings- och RUT-flöden. Admin
+skapar personalpass från bekräftade bokningar i `admin.html`. Medarbetare använder
+den mobilanpassade sidan `personal.html` för att paxa pass, följa checklistor,
+registrera tid och se sin provision.
+
+Migrationen `20260903000000_add_staff_operations.sql` skapar personalprofiler,
+jobbkopior, tilldelningar, checklistemallar, serverregistrerade tidsrader,
+provision, direkta kostnader och en append-only händelselogg. Personal får ingen
+direkt läsrätt till `bookings`; all personalåtkomst går genom begränsade RPC:er.
+
+Standardregeln är en total provisionspott på 20 procent av jobbets faktiska pris
+exklusive 25 procent moms, efter rabatt och före RUT. Vid flera medarbetare delas
+samma pott efter registrerade arbetssekunder. Godkända och utbetalda belopp fryses
+och räknas inte om automatiskt.
+
+Kör migrationen innan Edge Function deployas:
+
+```bash
+supabase db push
+supabase functions deploy staff-operations
+```
+
+`staff-operations` kräver en tvåstegsverifierad adminsession och används för att
+bjuda in, inaktivera och återaktivera personal. Inbjudningslänken öppnar
+`/personal.html`, där medarbetaren väljer ett personligt lösenord.
+
 ## BERGA PUTS-GP
 
 Tävlingsfunktionen ligger i `puts-gp/` och är avgränsad från bokningsflödet.
@@ -106,6 +134,15 @@ supabase functions deploy booked-slots --no-verify-jwt
 10. Den krypterade arbetskopian gallras manuellt när RUT-ärendet inte längre behöver den och automatiskt senast 180 dagar efter det senare av mottagandet och arbetsdagen, dock högst två år efter mottagandet.
 
 Fakturan skapas och skickas utanför webbplatsen. `invoice_reference` kopplar Swishbetalningen och RUT-underlaget till den manuella fakturan.
+
+## Bokning i efterhand
+
+En tvåstegsverifierad admin kan under **Bokningar** välja **Bokning i efterhand**
+för att registrera ett jobb med dagens datum eller ett tidigare datum. Bokningen
+kan läggas in som bekräftad, utförd men obetald eller utförd och redan betald.
+Flödet skickar inget automatiskt boknings- eller betalningsmejl. Den skyddade
+databasfunktionen `admin_create_historical_booking` validerar uppgifterna,
+beräknar prisdelarna och skriver en post i adminloggen.
 
 ## Aktiva Edge Functions
 

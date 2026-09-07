@@ -41,3 +41,6 @@ verify_jwt = false
 
 [functions.puts-gp-admin]
 verify_jwt = false
+
+[functions.staff-operations]
+verify_jwt = true

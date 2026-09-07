@@ -1,0 +1,66 @@
+.workforce-intro-grid { display: grid; grid-template-columns: minmax(300px, .7fr) minmax(0, 1.3fr); gap: 16px; align-items: start; }
+.workforce-form { display: grid; gap: 12px; }
+.workforce-form label, .job-cost-form label, .workforce-booking-row label { display: grid; gap: 5px; color: var(--admin-muted); font-size: .72rem; font-weight: 800; }
+.workforce-form input, .workforce-form select, .workforce-form textarea, .job-cost-form input, .workforce-booking-row input, .workforce-booking-row select, .assignment-staff-select { width: 100%; min-height: 40px; padding: 8px 10px; border: 1px solid var(--admin-line); border-radius: 8px; background: #fff; color: var(--admin-ink); font: inherit; font-size: .8rem; }
+.workforce-form textarea { min-height: 118px; resize: vertical; }
+.workforce-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.workforce-status { min-height: 1.3em; margin: 12px 0; color: var(--admin-muted); font-size: .8rem; }
+.workforce-status[data-state="error"] { color: var(--admin-danger); }
+.workforce-status[data-state="success"] { color: var(--admin-success); }
+.workforce-table { min-width: 860px; }
+.workforce-table tbody tr { cursor: default; }
+.table-note { display: block; margin-top: 4px; color: var(--admin-muted); font-size: .65rem; }
+
+.workforce-list { display: grid; gap: 10px; }
+.workforce-booking-row { display: grid; grid-template-columns: minmax(220px, 1.4fr) 92px 78px minmax(150px, .8fr) auto; gap: 10px; align-items: end; padding: 13px; border: 1px solid var(--admin-line); border-radius: 11px; background: var(--admin-surface-subtle); }
+.workforce-booking-row > div strong, .workforce-job-heading strong { display: block; color: var(--admin-ink); font-size: .85rem; }
+.workforce-booking-row > div span, .workforce-job-heading span { display: block; margin-top: 3px; color: var(--admin-muted); font-size: .72rem; }
+.workforce-job-card, .checklist-template-card, .job-economy-card { padding: 16px; border: 1px solid var(--admin-line); border-radius: 12px; background: #fff; }
+.workforce-job-heading, .job-economy-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.workforce-job-facts { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+.workforce-job-facts span { padding: 5px 8px; border-radius: 7px; background: var(--admin-surface-subtle); color: var(--admin-muted); font-size: .69rem; font-weight: 800; }
+.assigned-people { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.assigned-person { display: inline-flex; align-items: center; gap: 6px; padding: 6px 8px; border: 1px solid #c7e0ec; border-radius: 999px; background: var(--admin-primary-soft); color: var(--admin-primary-dark); font-size: .7rem; font-weight: 800; }
+.assigned-person button { width: 20px; height: 20px; display: inline-grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: rgba(255,255,255,.8); color: var(--admin-danger); cursor: pointer; }
+.muted-copy { color: var(--admin-muted); font-size: .75rem; }
+.workforce-job-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-top: 13px; }
+.assignment-staff-select { width: min(240px, 100%); }
+
+.checklist-template-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.checklist-template-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: start; }
+.checklist-template-card > div strong { display: block; }
+.checklist-template-card > div span { display: block; margin-top: 4px; color: var(--admin-muted); font-size: .75rem; }
+.checklist-template-card ol { grid-column: 1 / -1; margin: 3px 0; padding-left: 22px; color: #355366; font-size: .76rem; line-height: 1.65; }
+.checklist-template-card .button { width: fit-content; }
+
+.job-economics-list { display: grid; gap: 12px; }
+.job-economy-heading > div strong { display: block; }
+.job-economy-heading > div span { display: block; margin-top: 3px; color: var(--admin-muted); font-size: .72rem; }
+.positive-money { color: var(--admin-success); }
+.negative-money { color: var(--admin-danger); }
+.job-economy-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 7px; margin-top: 13px; }
+.job-economy-grid span { min-width: 0; padding: 9px; border-radius: 8px; background: var(--admin-surface-subtle); color: var(--admin-muted); font-size: .64rem; font-weight: 780; }
+.job-economy-grid strong { display: block; margin-top: 4px; overflow: hidden; color: var(--admin-ink); font-size: .8rem; text-overflow: ellipsis; }
+.job-economy-card details { margin-top: 12px; }
+.job-economy-card summary { width: fit-content; color: var(--admin-primary-dark); font-size: .75rem; font-weight: 850; cursor: pointer; }
+.job-cost-form { display: grid; grid-template-columns: repeat(4, minmax(110px, 1fr)) auto; gap: 9px; align-items: end; margin-top: 12px; padding: 12px; border-radius: 10px; background: var(--admin-surface-subtle); }
+
+@media (max-width: 1180px) {
+  .workforce-intro-grid { grid-template-columns: 1fr; }
+  .workforce-booking-row { grid-template-columns: minmax(0, 1fr) 90px 78px; }
+  .workforce-booking-row > label:nth-of-type(3) { grid-column: 1 / 3; }
+  .job-economy-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .job-cost-form { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
+}
+
+@media (max-width: 680px) {
+  .workforce-form-grid, .checklist-template-list { grid-template-columns: 1fr; }
+  .workforce-booking-row { grid-template-columns: 1fr 1fr; }
+  .workforce-booking-row > div { grid-column: 1 / -1; }
+  .workforce-booking-row > label:nth-of-type(3), .workforce-booking-row .button { grid-column: 1 / -1; }
+  .workforce-job-heading, .job-economy-heading { flex-direction: column; }
+  .workforce-job-actions { align-items: stretch; flex-direction: column; }
+  .assignment-staff-select, .workforce-job-actions .button { width: 100%; }
+  .job-economy-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .job-cost-form { grid-template-columns: 1fr; }
+}
