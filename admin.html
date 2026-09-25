@@ -6,9 +6,10 @@
   <title>Admin | Berga Fönsterputs</title>
   <link rel="stylesheet" href="admin-analytics.css?v=20260721">
   <link rel="stylesheet" href="admin-workforce.css?v=20260903">
+  <link rel="stylesheet" href="admin-price-calculator.css?v=20260925">
   <meta name="robots" content="noindex, nofollow">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-w2n+kvcd5TavZ3MFAoTMvnPD1SkwuK43BTwAMcC30tI='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-rf2SjWzyxQQ8GTTvpp7wVhVR9j3lEVWRIvVm5uf40dc='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
   <link rel="shortcut icon" href="/favicon-48.png" />
@@ -897,6 +898,7 @@
           <button type="button" class="admin-tab" data-admin-view="customers"><span aria-hidden="true">◎</span>Kunder</button>
           <button type="button" class="admin-tab" data-admin-view="followUp"><span aria-hidden="true">✓</span>Uppföljning</button>
           <button type="button" class="admin-tab" data-admin-view="payments"><span aria-hidden="true">kr</span>Betalningar och RUT</button>
+          <button type="button" class="admin-tab" data-admin-view="priceCalculator"><span aria-hidden="true">∑</span>Priskalkylator</button>
           <button type="button" class="admin-tab" data-admin-view="discountCodes"><span aria-hidden="true">%</span>Rabattkoder</button>
           <button type="button" class="admin-tab" data-admin-view="blockedDates"><span aria-hidden="true">⚙</span>Inställningar</button>
           <button type="button" class="admin-tab admin-tab-secondary" data-admin-view="analytics"><span aria-hidden="true">↗</span>Analys</button>
@@ -1121,6 +1123,93 @@
         <header class="view-heading"><div><p class="eyebrow">Ekonomi</p><h1>Betalningar och RUT</h1><p>Kontrollera Swish och hantera RUT utan att exponera känsliga uppgifter i listan.</p></div></header>
         <div class="metric-strip" id="paymentMetrics"></div>
         <div class="surface"><div class="data-table-wrap" id="paymentsList"></div></div>
+      </section>
+
+      <section class="admin-view hidden" id="priceCalculatorPanel">
+        <header class="view-heading">
+          <div><p class="eyebrow">Försäljning</p><h1>Priskalkylator</h1><p>Räkna fram samma pris som i kundbokningen. Kalkylen sparas inte och påverkar inga bokningar.</p></div>
+          <button type="button" class="button button-secondary" id="priceCalculatorReset">Nollställ</button>
+        </header>
+        <div class="price-calculator-layout">
+          <form class="surface price-calculator-form" id="priceCalculatorForm" novalidate>
+            <div class="price-calculator-section-heading">
+              <span>1</span>
+              <div><h2>Jobbets förutsättningar</h2><p>Välj bostad, omfattning och antal fönster.</p></div>
+            </div>
+            <div class="price-calculator-fields">
+              <label>
+                Bostad
+                <select id="calculatorHousingType">
+                  <option value="one-floor">Enplansvilla</option>
+                  <option value="multi-floor">Flerplansvilla</option>
+                  <option value="apartment-inward">Lägenhet – fönstren öppnas inåt</option>
+                  <option value="apartment-outward">Lägenhet – fönstren öppnas utåt</option>
+                </select>
+              </label>
+              <label>
+                RUT-avdrag
+                <select id="calculatorRutChoice">
+                  <option value="with-rut">Ja, använd RUT</option>
+                  <option value="without-rut">Nej, visa pris utan RUT</option>
+                </select>
+              </label>
+              <label>
+                Fönster utan spröjs
+                <input type="number" id="calculatorRegularWindows" value="10" min="0" max="250" step="1" inputmode="numeric">
+              </label>
+              <label>
+                Fönster med spröjs
+                <input type="number" id="calculatorMuntinsWindows" value="0" min="0" max="250" step="1" inputmode="numeric">
+              </label>
+              <label class="price-calculator-field-wide">
+                Putsning
+                <select id="calculatorServiceScope">
+                  <option value="exterior">Endast utvändig</option>
+                  <option value="interior-exterior">Invändig + utvändig</option>
+                  <option value="four-sided">Fyrsidiga fönster</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="price-calculator-section-heading price-calculator-transport-heading">
+              <span>2</span>
+              <div><h2>Transport</h2><p>Transportkostnaden omfattas inte av RUT.</p></div>
+            </div>
+            <div class="price-calculator-fields">
+              <label>
+                Transport
+                <select id="calculatorTransportType">
+                  <option value="mainland">Fastland</option>
+                  <option value="boat">Båttransport</option>
+                </select>
+              </label>
+              <label id="calculatorSeaMilesField" hidden>
+                Sjömil från Svinnige marina
+                <input type="number" id="calculatorSeaMiles" value="0" min="0" step="1" inputmode="numeric">
+              </label>
+            </div>
+            <p class="price-calculator-hint">Upp till 10 fönster ingår i grundpriset. Prisnivåerna motsvarar kundbokningens aktuella prislista.</p>
+            <p class="status-message price-calculator-message" id="priceCalculatorMessage" role="status" aria-live="polite"></p>
+          </form>
+
+          <aside class="surface price-calculator-result" aria-labelledby="priceCalculatorResultTitle">
+            <p class="eyebrow">Uppskattat totalpris</p>
+            <strong class="price-calculator-total" id="priceCalculatorTotal">949 kr</strong>
+            <p class="price-calculator-total-label" id="priceCalculatorResultTitle">Pris efter RUT-avdrag</p>
+            <p class="price-calculator-summary" id="priceCalculatorSummary">Enplansvilla · 10 fönster · endast utvändig puts</p>
+            <dl class="price-calculator-breakdown">
+              <div><dt>Arbetskostnad före RUT</dt><dd id="calculatorLaborBeforeRut">1 598 kr</dd></div>
+              <div><dt>Material, ej RUT</dt><dd id="calculatorMaterialCost">150 kr</dd></div>
+              <div><dt>Transport, ej RUT</dt><dd id="calculatorTransportCost">0 kr</dd></div>
+              <div><dt>Pris före RUT</dt><dd id="calculatorPriceBeforeRut">1 748 kr</dd></div>
+              <div class="price-calculator-deduction"><dt>RUT-avdrag</dt><dd id="calculatorRutDeduction">−799 kr</dd></div>
+            </dl>
+            <div class="price-calculator-actions">
+              <button type="button" class="button price-calculator-copy" id="priceCalculatorCopy">Kopiera kalkyl</button>
+            </div>
+            <p class="price-calculator-copy-status" id="priceCalculatorCopyStatus" role="status" aria-live="polite"></p>
+          </aside>
+        </div>
       </section>
 
       <section class="card panel hidden" id="blockedDatesPanel">
@@ -1382,6 +1471,7 @@
   <script src="vendor/supabase-js-2.110.1.umd.min.js" integrity="sha384-baNpjjkY1KK3WRj5l8Fkp2P/pd/wQ4dXsejAvxqNeBEugKB7WLjHXreLejokZekT" crossorigin="anonymous"></script>
   <script src="admin-analytics.js?v=20260721"></script>
   <script src="admin-workforce.js?v=20260903"></script>
+  <script src="admin-price-calculator.js?v=20260925"></script>
   <script type="module">
     const { createClient } = window.supabase;
 
@@ -1418,6 +1508,7 @@
     const customersPanel = document.getElementById('customersPanel');
     const followUpPanel = document.getElementById('followUpPanel');
     const paymentsPanel = document.getElementById('paymentsPanel');
+    const priceCalculatorPanel = document.getElementById('priceCalculatorPanel');
     const workspaceToolbar = document.getElementById('workspaceToolbar');
     const globalSearch = document.getElementById('globalSearch');
     const mobileNavButton = document.getElementById('mobileNavButton');
@@ -1653,6 +1744,7 @@
       const showCustomers = activeAdminView === 'customers';
       const showFollowUp = activeAdminView === 'followUp';
       const showPayments = activeAdminView === 'payments';
+      const showPriceCalculator = activeAdminView === 'priceCalculator';
       const showBlockedDates = activeAdminView === 'blockedDates';
       const showDiscountCodes = activeAdminView === 'discountCodes';
       const showSpringPax = activeAdminView === 'springPax';
@@ -1668,6 +1760,7 @@
       customersPanel.classList.toggle('hidden', !showCustomers);
       followUpPanel.classList.toggle('hidden', !showFollowUp);
       paymentsPanel.classList.toggle('hidden', !showPayments);
+      priceCalculatorPanel.classList.toggle('hidden', !showPriceCalculator);
       blockedDatesPanel.classList.toggle('hidden', !showBlockedDates);
       discountCodesPanel.classList.toggle('hidden', !showDiscountCodes);
       springPaxPanel.classList.toggle('hidden', !showSpringPax);
@@ -4045,7 +4138,7 @@
       workforceController?.setAuthorized(isMfaVerified && !mustSetPassword);
 
       if (!isMfaVerified || mustSetPassword) {
-        [overviewPanel, calendarPanel, workforcePanel, staffPanel, checklistsPanel, staffFinancePanel, bookingsPanel, customersPanel, followUpPanel, paymentsPanel, blockedDatesPanel, discountCodesPanel, springPaxPanel, invitationsPanel, analyticsPanel]
+        [overviewPanel, calendarPanel, workforcePanel, staffPanel, checklistsPanel, staffFinancePanel, bookingsPanel, customersPanel, followUpPanel, paymentsPanel, priceCalculatorPanel, blockedDatesPanel, discountCodesPanel, springPaxPanel, invitationsPanel, analyticsPanel]
           .forEach((panel) => panel.classList.add('hidden'));
         closeBookingDrawer();
       }
