@@ -335,3 +335,16 @@ TEST – teknisk kontroll respektive TEST – lokal kontroll; inga mejl skickas.
 En tidigare öppen localhost-flik visade Failed to fetch. Det felet kunde inte
 återskapas i en ny flik. Klientscript och gemensam modul versionsmärks nu, och
 nätverksfel visas på svenska med information om att svaren finns kvar.
+
+### Adminens ansökningslista
+
+Adminens huvudmodul importerar nu ansökningsmodulen som ett uttryckligt beroende.
+Tidigare kunde huvudmodulen initieras innan det separata modulskriptet hade laddat
+sin import, och den valfria initieringen lämnade då ansökningslistan frånkopplad.
+Nätverksfel under hämtning ger ett synligt meddelande. Menyknappar fungerar också
+när man klickar på deras ikon.
+
+Verifierat 4 oktober 2026: en återställd transaktion i produktionsdatabasen testade
+att anon nekas tabellåtkomst, en vanlig inloggad användare ser noll ansökningar
+med RLS och en befintlig administratör med AAL2 ser de tre sparade ansökningarna.
+Transaktionen gjorde inga bestående ändringar. 59 automatiska tester passerar.

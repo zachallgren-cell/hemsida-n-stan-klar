@@ -131,3 +131,24 @@ test('network failures use a Swedish message and keep the form visible',async ()
   assert.match(elements.jobStatus.textContent,/Dina svar finns kvar/);
   assert.equal(elements.jobSubmit.disabled,false);
 });
+
+test('admin waits for application module before initialization and accepts clicks on tab icons',async () => {
+  const html=await readFile(new URL('../admin.html',import.meta.url),'utf8');
+  const inline=html.match(/<script type="module">([\s\S]*?)<\/script>/)[1];
+  assert.match(inline,/import '\.\/admin-applications\.js\?v=20261004-4';/);
+  assert.match(inline,/const applicationsController = window\.bergaAdminApplications\.init\(\{ supabase \}\)/);
+  assert.doesNotMatch(html,/<script type="module" src="admin-applications/);
+  assert.match(inline,/event\.target\.closest\('\.admin-tab'\)/);
+});
+
+test('admin reports connection failures instead of leaving an empty list',async () => {
+  const {runInNewContext} = await import('node:vm');
+  const source=(await readFile(new URL('../admin-applications.js',import.meta.url),'utf8')).replace(/^import[^\n]+\n/,'');
+  const elements=Object.fromEntries(['applicationsPanel','applicationsList','applicationsMessage','applicationsRefresh'].map(id => [id,{textContent:'',innerHTML:'',addEventListener(){},replaceChildren(){this.innerHTML='';},classList:{add(){}}}]));
+  const client={from(){return {select(){return {order:async () => {throw new TypeError('Failed to fetch');}};}};}};
+  const window={};const {APPLICATION_STATUSES}=await import('../job-application-shared.mjs');
+  runInNewContext(source,{window,document:{getElementById:id => elements[id]},APPLICATION_LABELS,APPLICATION_STATUSES,Date,FormData});
+  const admin=window.bergaAdminApplications.init({supabase:client});
+  admin.setAuthorized(true);await admin.load('applications');
+  assert.match(elements.applicationsMessage.textContent,/Kunde inte ansluta/);
+});

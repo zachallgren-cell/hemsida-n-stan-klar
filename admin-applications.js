@@ -12,7 +12,13 @@ window.bergaAdminApplications = {
       if (!authorized || view !== 'applications') return;
       const current = ++generation;
       report('Hämtar ansökningar…');
-      const {data,error} = await supabase.from('job_applications').select('*').order('created_at',{ascending:false});
+      let data, error;
+      try {
+        ({data,error} = await supabase.from('job_applications').select('*').order('created_at',{ascending:false}));
+      } catch {
+        if (authorized && current === generation) report('Kunde inte ansluta för att hämta ansökningarna. Kontrollera internetanslutningen och tryck Uppdatera.');
+        return;
+      }
       if (!authorized || current !== generation) return;
       if (error) { report('Ansökningarna kunde inte hämtas. Kontrollera adminbehörighet och att databasmigrationen är installerad.'); return; }
       report(data.length ? `${data.length} ansökningar` : 'Inga ansökningar ännu.');
