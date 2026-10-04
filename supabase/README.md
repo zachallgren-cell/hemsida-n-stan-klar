@@ -325,3 +325,13 @@ i projektet `xeyippgcoqfskcmqzazx`. Den deployade funktionen svarar med 405 på 
 och anonym läsning av `job_applications` nekas med 401 / permission denied.
 Användaren testar inskick och adminuppföljning efter installationen.
 Integritetsavsnittets markerade kompletteringar återstår.
+
+### Verifierat inskick efter publicering
+
+Den 4 oktober 2026 skickades två tydligt TEST-märkta ansökningar med fiktiva
+kontaktuppgifter från den publicerade sidan och en ny localhost-flik. Båda visade
+tackbekräftelse och ansöknings-ID från Supabase. Testposterna heter
+TEST – teknisk kontroll respektive TEST – lokal kontroll; inga mejl skickas.
+En tidigare öppen localhost-flik visade Failed to fetch. Det felet kunde inte
+återskapas i en ny flik. Klientscript och gemensam modul versionsmärks nu, och
+nätverksfel visas på svenska med information om att svaren finns kvar.

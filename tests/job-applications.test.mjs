@@ -111,8 +111,23 @@ test('admin renders all saved test answers safely, and clears them on logout',as
 test('browser modules use shared code outside folders excluded by GitHub Pages',async () => {
   for (const file of ['jobba-hos-oss.js','admin-applications.js']) {
     const source=await readFile(new URL(`../${file}`,import.meta.url),'utf8');
-    assert.match(source,/from '\.\/job-application-shared\.mjs'/);
+    assert.match(source,/from '\.\/job-application-shared\.mjs\?v=20261004-3'/);
     assert.doesNotMatch(source,/from '[^']*\/_shared\//);
   }
   await readFile(new URL('../job-application-shared.mjs',import.meta.url),'utf8');
+});
+
+test('network failures use a Swedish message and keep the form visible',async () => {
+  const {runInNewContext} = await import('node:vm');
+  const source=(await readFile(new URL('../jobba-hos-oss.js',import.meta.url),'utf8')).replace(/^import[^\n]+\n/,'');
+  let submit;
+  const elements=Object.fromEntries(['jobForm','jobSubmit','jobStatus','jobConfirmation','jobReceipt','jobConfirmationTitle'].map(id => [id,{hidden:id !== 'jobForm',textContent:'',disabled:false,setAttribute(){},removeAttribute(){},focus(){},reportValidity:() => true,addEventListener(type,fn){if(type==='submit') submit=fn;}}]));
+  class TestFormData {constructor(){return Object.entries(answers)[Symbol.iterator]();}}
+  runInNewContext(source,{document:{getElementById:id => elements[id]},crypto,Date,FormData:TestFormData,validateApplication,AbortSignal,fetch:async () => {throw new TypeError('Failed to fetch');}});
+  await submit({preventDefault(){}});
+  assert.equal(elements.jobForm.hidden,false);
+  assert.equal(elements.jobConfirmation.hidden,true);
+  assert.match(elements.jobStatus.textContent,/Kunde inte få bekräftelse från servern/);
+  assert.match(elements.jobStatus.textContent,/Dina svar finns kvar/);
+  assert.equal(elements.jobSubmit.disabled,false);
 });

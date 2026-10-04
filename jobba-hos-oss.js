@@ -1,4 +1,4 @@
-import { validateApplication } from './job-application-shared.mjs';
+import { validateApplication } from './job-application-shared.mjs?v=20261004-3';
 const form = document.getElementById('jobForm');
 const button = document.getElementById('jobSubmit');
 const status = document.getElementById('jobStatus');
@@ -28,7 +28,7 @@ form.addEventListener('submit', async (event) => {
     document.getElementById('jobReceipt').textContent = `Ansöknings-ID: ${body.applicationId}`;
     document.getElementById('jobConfirmationTitle').focus();
   } catch(error) {
-    status.textContent = error.name === 'TimeoutError' ? 'Servern svarade inte i tid. Dina svar finns kvar. Försök igen.' : (error.message || 'Ansökan kunde inte skickas. Dina svar finns kvar. Försök igen.');
+    status.textContent = error.name === 'TypeError' ? 'Kunde inte få bekräftelse från servern. Dina svar finns kvar. Kontrollera internetanslutningen och försök igen.' : error.name === 'TimeoutError' ? 'Servern svarade inte i tid. Dina svar finns kvar. Försök igen.' : (error.message || 'Ansökan kunde inte skickas. Dina svar finns kvar. Försök igen.');
     status.hidden = false;
     status.focus();
     if (Date.now() - Number(formStartedAt) > 86400000) formStartedAt = String(Date.now() - 2000);
