@@ -1,4 +1,4 @@
-import { validateApplication } from '../_shared/job-application.mjs';
+import { validateApplication } from '../../../job-application-shared.mjs';
 import {
   InvalidJsonBodyError,
   readJsonWithLimit,

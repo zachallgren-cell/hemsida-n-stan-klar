@@ -1,4 +1,4 @@
-import { validateApplication } from './supabase/functions/_shared/job-application.mjs';
+import { validateApplication } from './job-application-shared.mjs';
 const form = document.getElementById('jobForm');
 const button = document.getElementById('jobSubmit');
 const status = document.getElementById('jobStatus');

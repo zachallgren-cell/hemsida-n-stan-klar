@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {validateApplication, APPLICATION_LABELS} from '../supabase/functions/_shared/job-application.mjs';
+import {validateApplication, APPLICATION_LABELS} from '../job-application-shared.mjs';
 const answers = {name:'TEST – Sökande',email:'test@example.invalid',phone:'0701234567',location:'TEST Åkersberga',adult:'Nej',license:'Nej',weekends:'Nej',minimumHours:'Nej',transport:'TEST Buss',motivation:'TEST Jag vill lära mig.'};
 let handler;
 globalThis.Deno = { env:{get:key => ({SUPABASE_URL:'https://test.invalid',SUPABASE_SERVICE_ROLE_KEY:'test-service-key'})[key]}, serve:fn => {handler=fn;} };
@@ -95,7 +95,7 @@ test('admin renders all saved test answers safely, and clears them on logout',as
   const elements=Object.fromEntries(['applicationsPanel','applicationsList','applicationsMessage','applicationsRefresh'].map(id => [id,{textContent:'',innerHTML:'',addEventListener(){},replaceChildren(){this.innerHTML='';},classList:{add(){}}}]));
   const unsafe={...validateApplication(answers),name:'TEST <script>alert(1)</script>'};
   let reads=0;const client={from(table){assert.equal(table,'job_applications');return {select(){return {order:async () => {reads++;return {data:[{id:'test-id',answers:unsafe,status:'Ny ansökan',created_at:'2026-10-04T12:00:00Z',responsible:'',next_step:'',follow_up_date:null}],error:null};}};}};}};
-  const window={};const {APPLICATION_STATUSES}=await import('../supabase/functions/_shared/job-application.mjs');
+  const window={};const {APPLICATION_STATUSES}=await import('../job-application-shared.mjs');
   runInNewContext(source,{window,document:{getElementById:id => elements[id]},APPLICATION_LABELS,APPLICATION_STATUSES,Date,FormData});
   const admin=window.bergaAdminApplications.init({supabase:client});
   await admin.load('applications');assert.equal(reads,0);
@@ -106,4 +106,13 @@ test('admin renders all saved test answers safely, and clears them on logout',as
   assert.match(html,/Ny ansökan/);assert.match(html,/test-id/);
   admin.setAuthorized(false);assert.equal(elements.applicationsList.innerHTML,'');
   await admin.load('applications');assert.equal(reads,1);
+});
+
+test('browser modules use shared code outside folders excluded by GitHub Pages',async () => {
+  for (const file of ['jobba-hos-oss.js','admin-applications.js']) {
+    const source=await readFile(new URL(`../${file}`,import.meta.url),'utf8');
+    assert.match(source,/from '\.\/job-application-shared\.mjs'/);
+    assert.doesNotMatch(source,/from '[^']*\/_shared\//);
+  }
+  await readFile(new URL('../job-application-shared.mjs',import.meta.url),'utf8');
 });

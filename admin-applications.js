@@ -1,4 +1,4 @@
-import { APPLICATION_LABELS, APPLICATION_STATUSES } from './supabase/functions/_shared/job-application.mjs';
+import { APPLICATION_LABELS, APPLICATION_STATUSES } from './job-application-shared.mjs';
 window.bergaAdminApplications = {
   init({ supabase }) {
     const panel = document.getElementById('applicationsPanel');
