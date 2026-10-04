@@ -44,3 +44,6 @@ verify_jwt = false
 
 [functions.staff-operations]
 verify_jwt = true
+
+[functions.submit-job-application]
+verify_jwt = false

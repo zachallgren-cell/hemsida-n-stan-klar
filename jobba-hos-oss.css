@@ -1,0 +1,18 @@
+.job-story { display:grid; grid-template-columns:1.25fr 1fr; gap:32px; align-items:start; }
+.job-story li { margin-bottom:10px; }
+.job-facts { background:var(--primary-soft); }
+.job-application { max-width:860px; }
+.job-form { margin-top:28px; }
+.job-grid { display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+.job-wide { grid-column:1 / -1; }
+.job-field { display:flex; flex-direction:column; gap:8px; min-width:0; }
+.job-field label { font-weight:650; }
+.job-field input,.job-field select,.job-field textarea { width:100%; min-height:48px; padding:12px; border:1px solid var(--border); border-radius:var(--radius-sm); background:white; color:var(--text); font:inherit; }
+.job-field textarea { resize:vertical; }
+.job-field small,.job-privacy { color:var(--muted); }
+.job-privacy { margin:28px 0 20px; font-size:.92rem; }
+.job-honeypot { position:absolute; left:-10000px; width:1px; height:1px; overflow:hidden; }
+#jobStatus { color:#9d2424; }
+.job-form button:disabled { opacity:.65; cursor:wait; }
+.job-form[hidden],#jobConfirmation[hidden] { display:none; }
+@media(max-width:720px) { .job-story,.job-grid { grid-template-columns:1fr; } .job-form { padding:20px; } }

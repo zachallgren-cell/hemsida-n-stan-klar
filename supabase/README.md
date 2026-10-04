@@ -276,3 +276,52 @@ Innan **Markera RUT ansökt** fungerar måste:
 - ett krypterat RUT-underlag finnas
 
 Historiska Stripe- och Fortnoxkolumner lämnas kvar tills eventuell gammal bokföringshistorik har kontrollerats.
+
+## Jobba hos oss (lokalt utkast, 4 oktober 2026)
+
+Rekryteringssidan finns på `jobba-hos-oss.html`. Den använder samma Supabase-projekt
+som bokningen. Inga mejl skickas från ansökningsflödet.
+
+Före publicering:
+
+1. Komplettera integritetsavsnittet `integritet.html#rekrytering` med beslutad rättslig
+   grund, lagringstid (även för reserver) och en rutin för gallring. Markeringen i
+   utkastet ska ersättas med den bekräftade informationen.
+2. Installera `migrations/20261004000000_add_job_applications.sql` i en testmiljö med
+   projektets befintliga migrationer och admin-/MFA-konfiguration. Tabellen har
+   RLS och bara befintliga administratörer med AAL2 får läsa och ändra uppföljning.
+   Sökandes ursprungliga svar kan inte ändras av webbläsaren.
+3. Deploya `submit-job-application` till testmiljön. Funktionen kräver befintliga
+   `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` och `consume_booking_rate_limit`.
+   Ingen ny tjänst eller mejlkonfiguration behövs. Ange testmiljöns URL och publika
+   nyckel i klienten vid test (ändra tillbaka vid godkänd publicering).
+4. Skicka en tydligt TEST-märkt ansökan. Kontrollera att alla 16 svar, ID, datum och
+   status Ny ansökan sparas och visas under Ansökningar i admin. Prova att spara
+   status, nästa steg, ansvarig och datum och sedan ladda om.
+5. Verifiera mot den riktiga testdatabasen att anon, en vanlig inloggad användare
+   och admin utan AAL2 inte kan läsa eller uppdatera ansökningar. Prova även att
+   ändra `answers` som admin: kolumnbehörigheterna ska blockera det.
+6. Efter godkännande: installera migration och Edge Function i produktionsprojektet
+   innan de statiska sidorna publiceras. Installera inte databasändringar eller
+   publicera webbplatsen utan användarens godkännande.
+
+Verifierat här: `npm test` (55 godkända tester), `npm run lint`, mobil (390 px)
+med en kolumn och dator (1280 px) med två kolumner, etiketter, obligatoriska fält,
+ingen horisontell överrullning. Nya tester kör den riktiga serverhandlern med
+simulerad lagring och testar klientens fel-/bekräftelseflöde samt adminrendering
+med TEST-data. SQL-behörigheter kontrolleras statiskt. Ingen riktig ansökan eller
+mejl skickades. Docker körs inte på datorn, så verklig databaslagring, RLS och
+adminuppdatering mot en Supabase-instans är ännu inte verifierade.
+
+Dubblettskyddet använder ett unikt request_id som behålls över återförsök. Tackvyn
+visas bara efter ett positivt serversvar med ett sparat ansöknings-ID. Honeypot,
+formulärets ålder, storleksgräns och befintlig rate-limit används på servern.
+
+### Produktionsinstallation 4 oktober 2026
+
+Efter användarens godkännande installerades migrationen
+`20261004000000_add_job_applications.sql` och funktionen `submit-job-application`
+i projektet `xeyippgcoqfskcmqzazx`. Den deployade funktionen svarar med 405 på GET,
+och anonym läsning av `job_applications` nekas med 401 / permission denied.
+Användaren testar inskick och adminuppföljning efter installationen.
+Integritetsavsnittets markerade kompletteringar återstår.

@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="admin-price-calculator.css?v=20260925">
   <meta name="robots" content="noindex, nofollow">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-rf2SjWzyxQQ8GTTvpp7wVhVR9j3lEVWRIvVm5uf40dc='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-OASZGIrCylmjauH9vhj+xtVWwKSMqEks69TE7yTKxiM='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
   <link rel="shortcut icon" href="/favicon-48.png" />
@@ -874,6 +874,7 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="jobba-hos-oss.css">
   <link rel="stylesheet" href="admin-v2.css?v=20260830">
 </head>
 <body>
@@ -892,6 +893,7 @@
           <button type="button" class="admin-tab" data-admin-view="staff"><span aria-hidden="true">♙</span>Personal</button>
           <button type="button" class="admin-tab" data-admin-view="checklists"><span aria-hidden="true">☑</span>Checklistor</button>
           <button type="button" class="admin-tab" data-admin-view="staffFinance"><span aria-hidden="true">↗</span>Tider och ekonomi</button>
+          <button type="button" class="admin-tab" data-admin-view="applications"><span aria-hidden="true">♙</span>Ansökningar</button>
           <button type="button" class="admin-tab" data-admin-view="springPax"><span aria-hidden="true">☘</span>Vårpaxningar</button>
           <button type="button" class="admin-tab" data-admin-view="invitations"><span aria-hidden="true">✉</span>Bjud in kund</button>
           <button type="button" class="admin-tab" data-admin-view="bookings"><span aria-hidden="true">≡</span>Bokningar</button>
@@ -1275,6 +1277,7 @@
         <div class="discount-codes-list surface" id="discountCodesList"></div>
       </section>
 
+      <section class="card panel hidden" id="applicationsPanel"><h2>Jobbansökningar</h2><button type="button" id="applicationsRefresh">Uppdatera</button><p id="applicationsMessage" role="status"></p><div id="applicationsList"></div></section>
       <section class="card panel hidden" id="springPaxPanel">
         <header class="view-heading spring-pax-heading">
           <div>
@@ -1470,6 +1473,7 @@
 
   <script src="vendor/supabase-js-2.110.1.umd.min.js" integrity="sha384-baNpjjkY1KK3WRj5l8Fkp2P/pd/wQ4dXsejAvxqNeBEugKB7WLjHXreLejokZekT" crossorigin="anonymous"></script>
   <script src="admin-analytics.js?v=20260721"></script>
+  <script type="module" src="admin-applications.js"></script>
   <script src="admin-workforce.js?v=20260903"></script>
   <script src="admin-price-calculator.js?v=20260925"></script>
   <script type="module">
@@ -1644,6 +1648,7 @@
       endpoint: STAFF_OPERATIONS_URL,
       anonKey: SUPABASE_ANON_KEY
     }) || null;
+    const applicationsController = window.bergaAdminApplications?.init({ supabase });
     let verifiedMfaFactorId = '';
     let pendingMfaFactorId = '';
 
@@ -1734,6 +1739,8 @@
     }
 
     function renderAdminView() {
+      document.getElementById('applicationsPanel').classList.toggle('hidden', activeAdminView !== 'applications');
+      void applicationsController?.load(activeAdminView);
       const showOverview = activeAdminView === 'overview';
       const showCalendar = activeAdminView === 'calendar';
       const showWorkforce = activeAdminView === 'workforce';
@@ -4136,6 +4143,7 @@
       document.body.classList.toggle('is-admin-ready', isMfaVerified && !mustSetPassword);
       workspaceToolbar.classList.toggle('hidden', !isMfaVerified || mustSetPassword);
       workforceController?.setAuthorized(isMfaVerified && !mustSetPassword);
+      applicationsController?.setAuthorized(isMfaVerified && !mustSetPassword);
 
       if (!isMfaVerified || mustSetPassword) {
         [overviewPanel, calendarPanel, workforcePanel, staffPanel, checklistsPanel, staffFinancePanel, bookingsPanel, customersPanel, followUpPanel, paymentsPanel, priceCalculatorPanel, blockedDatesPanel, discountCodesPanel, springPaxPanel, invitationsPanel, analyticsPanel]
