@@ -10,9 +10,9 @@ Redigerbart original: JSONB med `schemaVersion: 1`, `title`, `category`, `owner`
 
 ## Installation och publicering av systemet
 
-Koden och migrationen är förberedda i projektet. Den nya migrationen har testats i lokal PostgreSQL/PGlite, men har **inte körts i produktionsdatabasen**. Webbplatsändringarna har inte driftsatts.
+Koden är pushad till `main`. Migrationen installerades i produktionsprojektet `xeyippgcoqfskcmqzazx` den 20 oktober 2026, med Supabase-version `20261020181205`. RLS, privata bilagor och nekad obehörig åtkomst verifierades efter installationen. Inga testartiklar sparades i produktion. Migrationsfilens namn följer den registrerade versionen för att undvika dubbelkörning. Webbplatsens automatiska driftsättning efter push har inte verifierats här.
 
-1. Granska och tillämpa endast `supabase/migrations/20261020172122_bergahandboken.sql` i ordinarie migrationsflöde. Förutsätter befintlig personalmigration och privata behörighetsfunktioner. Kör inte alla väntande migrationer utan separat granskning.
+1. Vid installation i en ny miljö: granska och tillämpa endast `supabase/migrations/20261020181205_bergahandboken.sql` i ordinarie migrationsflöde. Förutsätter befintlig personalmigration och privata behörighetsfunktioner. Kör inte alla väntande migrationer utan separat granskning.
 2. Driftsätt `handbok.html`, `handbook.mjs`, `handbook-core.mjs`, `handbook.css` och de uppdaterade admin-/personalfilerna tillsammans.
 3. Kontrollera med ett riktigt aktivt personalkonto och en admin med AAL2: skapa utkast, publicera, ändra utkast, öppna läsvyn igen och testa en bilaga. Testa faktiska videolänkar med personalens konton och nätverk.
 4. Kontrollera Supabase Storage- och databasinställningar samt backup innan verkliga filer laddas upp. Behållaren är privat och begränsad till 50 MiB per fil och till listade filtyper. SVG/HTML/exekverbara filer tillåts inte.

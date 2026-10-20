@@ -31,7 +31,7 @@ test('database authorization, publication snapshots, conflicts, restoration, ass
  create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('test.uid',true),'')::uuid$$;
  create function private.is_booking_admin_aal2() returns boolean language sql stable as $$select auth.uid()='${admin}'::uuid and current_setting('test.aal',true)='aal2'$$;
  create function private.is_active_staff() returns boolean language sql stable as $$select auth.uid()='${staff}'::uuid$$;`);
- await db.exec(await readFile(new URL('../supabase/migrations/20261020172122_bergahandboken.sql',import.meta.url),'utf8'));
+ await db.exec(await readFile(new URL('../supabase/migrations/20261020181205_bergahandboken.sql',import.meta.url),'utf8'));
  async function as(uid,aal,fn,role='authenticated'){await db.exec('begin');try{await db.query("select set_config('test.uid',$1,true),set_config('test.aal',$2,true)",[uid,aal]);await db.exec(`set local role ${role}`);const result=await fn();await db.exec('commit');return result;}catch(err){await db.exec('rollback');throw err;}}
  const read=edit=>db.query('select handbook_read($1) as result',[edit]).then(r=>r.rows[0].result);
  const save=(rev,document=doc,action='save',restore=null)=>db.query('select handbook_save($1,$2,$3,$4,$5) as result',[id,rev,JSON.stringify(document),action,restore]).then(r=>r.rows[0].result);
