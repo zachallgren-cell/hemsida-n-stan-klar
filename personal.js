@@ -158,7 +158,7 @@
     if (!items?.length) return '<div class="empty-state">Ingen checklista är kopplad till jobbet.</div>';
     return `<div class="checklist">${items.map((item) => `<label class="checklist-item">
       <input type="checkbox" data-checklist-id="${escapeHtml(item.id)}" ${item.completed ? 'checked' : ''} ${editable ? '' : 'disabled'}>
-      <span>${escapeHtml(item.label)}${item.required ? ' *' : ''}${item.helpText ? `<small>${escapeHtml(item.helpText)}</small>` : ''}</span>
+      <span>${escapeHtml(item.label)}${item.required ? ' *' : ''}${item.helpText ? (/^handbok\.html\?article=[0-9a-f-]{36}$/i.test(item.helpText) ? `<small><a href="${escapeHtml(item.helpText)}" target="_blank" rel="noopener">Läs instruktionen i Bergahandboken</a></small>` : `<small>${escapeHtml(item.helpText)}</small>`) : ''}</span>
     </label>`).join('')}</div>`;
   }
 

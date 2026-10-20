@@ -389,7 +389,11 @@
           p_name: byId('checklistTemplateName').value.trim(),
           p_description: byId('checklistTemplateDescription').value.trim(),
           p_match_rule: byId('checklistTemplateRule').value.trim(),
-          p_items: lines.map((label) => ({ label, required: true }))
+          p_items: lines.map((line) => {
+            const [label, articleId] = line.split(' | ').map((part) => part.trim());
+            if (articleId && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(articleId)) throw new Error('Ange ett giltigt artikel-ID efter |.');
+            return { label, required: true, helpText: articleId ? 'handbok.html?article=' + articleId : '' };
+          })
         });
         event.target.reset();
         setMessage('checklistAdminMessage', 'Checklistemallen är skapad.', 'success');

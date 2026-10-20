@@ -1,0 +1,76 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile,mkdtemp,writeFile,rm} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {execFileSync} from 'node:child_process';
+import {PGlite} from '@electric-sql/pglite';
+import {videoEmbed,blockHtml,searchable} from '../handbook-core.mjs';
+const admin='10000000-0000-4000-8000-000000000001',staff='10000000-0000-4000-8000-000000000002',other='10000000-0000-4000-8000-000000000003',id='20000000-0000-4000-8000-000000000001';
+const doc={schemaVersion:1,title:'Utrustning',category:'Kom igång',owner:'Berga',order:0,blocks:[{type:'text',text:'Publicerat original'},{type:'file',path:id+'/original.pdf'}]};
+test('YouTube/Vimeo embed safely; other URLs remain links',()=>{
+ assert.equal(videoEmbed('https://youtu.be/abcdefghijk'),'https://www.youtube-nocookie.com/embed/abcdefghijk');
+ assert.equal(videoEmbed('https://www.youtube.com/watch?v=abcdefghijk&t=2'),'https://www.youtube-nocookie.com/embed/abcdefghijk');
+ assert.equal(videoEmbed('https://vimeo.com/12345/abcdef'),'https://player.vimeo.com/video/12345?h=abcdef');
+ assert.equal(videoEmbed('https://player.vimeo.com/video/12345?h=abcdef'),'https://player.vimeo.com/video/12345?h=abcdef');
+ assert.equal(videoEmbed('https://youtube.com.evil.test/watch?v=abcdefghijk'),'');
+ assert.doesNotMatch(blockHtml({type:'link',url:'javascript:alert(1)',text:'Länk'}),/href=/);
+ assert.doesNotMatch(blockHtml({type:'text',text:'<script>alert(1)</script>'}),/<script>/);
+ assert.match(blockHtml({type:'video',url:'https://example.org/movie',text:'Film'}),/href=/);
+ assert.doesNotMatch(blockHtml({type:'video',url:'https://example.org/movie'}),/<iframe/);
+ assert.match(searchable(doc),/publicerat original/);
+});
+test('database authorization, publication snapshots, conflicts, restoration, assets and persistence',async()=>{
+ const db=new PGlite();
+ await db.exec(`create role anon; create role authenticated; create role service_role; create schema auth; create schema private; create schema storage;
+ create table auth.users(id uuid primary key); insert into auth.users values ('${admin}'),('${staff}'),('${other}');
+ create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
+ create table storage.objects(id uuid default gen_random_uuid(),bucket_id text,name text); alter table storage.objects enable row level security;
+ grant usage on schema public,auth,private,storage to authenticated,anon;
+ grant select,insert,delete on storage.objects to authenticated;
+ create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('test.uid',true),'')::uuid$$;
+ create function private.is_booking_admin_aal2() returns boolean language sql stable as $$select auth.uid()='${admin}'::uuid and current_setting('test.aal',true)='aal2'$$;
+ create function private.is_active_staff() returns boolean language sql stable as $$select auth.uid()='${staff}'::uuid$$;`);
+ await db.exec(await readFile(new URL('../supabase/migrations/20261020172122_bergahandboken.sql',import.meta.url),'utf8'));
+ async function as(uid,aal,fn,role='authenticated'){await db.exec('begin');try{await db.query("select set_config('test.uid',$1,true),set_config('test.aal',$2,true)",[uid,aal]);await db.exec(`set local role ${role}`);const result=await fn();await db.exec('commit');return result;}catch(err){await db.exec('rollback');throw err;}}
+ const read=edit=>db.query('select handbook_read($1) as result',[edit]).then(r=>r.rows[0].result);
+ const save=(rev,document=doc,action='save',restore=null)=>db.query('select handbook_save($1,$2,$3,$4,$5) as result',[id,rev,JSON.stringify(document),action,restore]).then(r=>r.rows[0].result);
+ await assert.rejects(as(other,'aal1',()=>read(false)),/Active staff/);
+ await assert.rejects(as(staff,'aal1',()=>read(true)),/Admin AAL2/);
+ await assert.rejects(as(staff,'aal1',()=>save(0)),/Admin AAL2/);
+ await assert.rejects(as(admin,'aal1',()=>save(0)),/Admin AAL2/);
+ await assert.rejects(as('', '',()=>read(false),'anon'),/permission denied/);
+ await assert.rejects(as(admin,'aal2',()=>save(null)),/expected revision required/);
+ await as(admin,'aal2',()=>save(0));
+ assert.deepEqual(await as(staff,'aal1',()=>read(false)),[]);
+ await as(admin,'aal2',()=>save(1,doc,'publish'));
+ const draft={...doc,blocks:[{type:'text',text:'Hemligt utkast'},{type:'file',path:id+'/draft.pdf'}]};
+ await as(admin,'aal2',()=>save(2,draft));
+ let visible=await as(staff,'aal1',()=>read(false));assert.equal(visible[0].document.blocks[0].text,'Publicerat original');assert.equal(visible[0].revision,2);assert.equal(visible[0].draft,undefined);
+ await assert.rejects(as(admin,'aal2',()=>save(2,draft)),/ändrats av någon annan/);
+ await assert.rejects(as(staff,'aal1',()=>db.query('select * from handbook_articles')),/permission denied/);
+ await assert.rejects(as(staff,'aal1',()=>db.query('select handbook_history($1)',[id])),/Admin AAL2/);
+ await as(admin,'aal2',()=>db.query("insert into storage.objects(bucket_id,name) values ('handbook',$1),('handbook',$2)",[id+'/original.pdf',id+'/draft.pdf']));
+ const assets=await as(staff,'aal1',()=>db.query('select name from storage.objects'));assert.deepEqual(assets.rows,[{name:id+'/original.pdf'}]);
+ await assert.rejects(as(staff,'aal1',()=>db.query("insert into storage.objects(bucket_id,name) values ('handbook','evil')")),/row-level security/);
+ await as(admin,'aal2',()=>save(3,draft,'restore',1));
+ let restored=await as(admin,'aal2',()=>read(true));assert.equal(restored[0].revision,4);assert.equal(restored[0].draft.blocks[0].text,'Publicerat original');
+ const hist=await as(admin,'aal2',()=>db.query('select handbook_history($1) as history',[id]));assert.equal(hist.rows[0].history.length,4);assert.equal(hist.rows[0].history[1].snapshot.blocks[0].text,'Hemligt utkast');
+ await as(admin,'aal2',()=>save(4,doc,'archive'));assert.deepEqual(await as(staff,'aal1',()=>read(false)),[]);
+ await as(admin,'aal2',()=>save(5,doc,'unarchive'));assert.equal((await as(staff,'aal1',()=>read(false))).length,1);
+ const dump=await db.dumpDataDir();await db.close();const reopened=new PGlite({loadDataDir:dump});const persisted=await reopened.query('select revision from handbook_articles');assert.equal(persisted.rows[0].revision,6);
+ const temp=await mkdtemp(join(tmpdir(),'handbook-restore-'));
+ try {
+  const articles=(await reopened.query('select * from handbook_articles')).rows;
+  const versions=(await reopened.query('select * from handbook_versions')).rows;
+  await writeFile(join(temp,'backup.json'),JSON.stringify({format:'berga-handbook',schemaVersion:1,articles,history:[versions]}));
+  execFileSync(process.execPath,['scripts/handbook-restore-sql.mjs',join(temp,'backup.json'),join(temp,'restore.sql')]);
+  const restoreSql=await readFile(join(temp,'restore.sql'),'utf8');
+  await assert.rejects(reopened.exec(restoreSql),/empty handbook tables/);await reopened.exec('rollback');
+  await reopened.exec('delete from handbook_versions; delete from handbook_articles;');
+  await reopened.exec(restoreSql);
+  assert.equal((await reopened.query('select revision from handbook_articles')).rows[0].revision,6);
+  assert.equal((await reopened.query('select count(*) as count from handbook_versions')).rows[0].count,6);
+ } finally {await rm(temp,{recursive:true,force:true});await reopened.close();}
+
+});

@@ -4,3 +4,8 @@ supabase/.temp/
 .env
 .env.*
 !.env.example
+
+node_modules/
+
+# Private handbook exports (originals, draft history and attachments)
+handbook-backup-*/

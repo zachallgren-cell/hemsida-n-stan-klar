@@ -6,10 +6,11 @@
   <title>Admin | Berga Fönsterputs</title>
   <link rel="stylesheet" href="admin-analytics.css?v=20260721">
   <link rel="stylesheet" href="admin-workforce.css?v=20260903">
+  <link rel="stylesheet" href="handbook.css?v=20261020">
   <link rel="stylesheet" href="admin-price-calculator.css?v=20260925">
   <meta name="robots" content="noindex, nofollow">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-72EC8VExoEaw91Oh+NRg/YPb01PBTdeM0XmFUxpR5+4='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-bOfAp8B3bUacEyXnW9mCkY2qrVTDCVXnUXuSzXyBwSs='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data: blob:; media-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co; frame-src https://www.youtube-nocookie.com https://player.vimeo.com; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
   <link rel="shortcut icon" href="/favicon-48.png" />
@@ -893,6 +894,7 @@
           <button type="button" class="admin-tab" data-admin-view="staff"><span aria-hidden="true">♙</span>Personal</button>
           <button type="button" class="admin-tab" data-admin-view="checklists"><span aria-hidden="true">☑</span>Checklistor</button>
           <button type="button" class="admin-tab" data-admin-view="staffFinance"><span aria-hidden="true">↗</span>Tider och ekonomi</button>
+          <button type="button" class="admin-tab" data-admin-view="handbook"><span aria-hidden="true">▤</span>Bergahandboken</button>
           <button type="button" class="admin-tab" data-admin-view="applications"><span aria-hidden="true">♙</span>Ansökningar</button>
           <button type="button" class="admin-tab" data-admin-view="springPax"><span aria-hidden="true">☘</span>Vårpaxningar</button>
           <button type="button" class="admin-tab" data-admin-view="invitations"><span aria-hidden="true">✉</span>Bjud in kund</button>
@@ -1034,6 +1036,13 @@
         </section>
       </section>
 
+      <section class="admin-view hidden" id="handbookPanel" aria-labelledby="handbookTitle">
+        <header class="view-heading"><div><p class="eyebrow">Kunskap och rutiner</p><h1 id="handbookTitle">Bergahandboken</h1><p>Skapa och uppdatera artiklar för teamet. Spara som utkast, förhandsgranska och publicera när innehållet är klart.</p></div><a href="handbok.html" target="_blank" rel="noopener">Öppna läsvyn</a></header>
+        <div class="hb-shell hb-admin"><section id="intro" hidden><p class="eyebrow">Vi lär oss tillsammans</p><h1>Välkommen till Bergahandboken</h1><p>Här hittar du stöd inför, under och efter jobbet. Du behöver inte kunna allt från början – vi lär oss och utvecklar Berga tillsammans.</p></section><p id="status" role="status" aria-live="polite">Kontrollerar din inloggning…</p>
+<section id="app" hidden><div class="hb-toolbar"><label>Sök i handboken<input type="search" id="search" placeholder="Hitta en rutin…"></label><label>Kategori<select id="category"><option value="">Alla kategorier</option></select></label><button id="print">Exportera publicerat till PDF</button><button id="backup" hidden>Exportera original och historik (JSON)</button></div><p id="printHelp" hidden>Välj Spara som PDF i utskriftsdialogen. Endast publicerat innehåll exporteras.</p><div id="adminTools" hidden><button id="new">Ny artikel</button><label><input type="checkbox" id="showArchived"> Visa arkiverade</label><p>Utkast och historik visas bara för administratörer med tvåstegsverifiering.</p></div><div class="hb-layout"><nav id="articles" aria-label="Handbokens artiklar"></nav><div><div id="reader"><p>Välj en artikel för att börja läsa.</p></div><div id="editor" hidden></div></div></div></section>
+<section id="login" hidden><p>Logga in med ditt befintliga personalkonto. Administratörer loggar in och tvåstegsverifierar sig i adminsystemet.</p><a class="primary-button" href="personal.html">Logga in som personal</a> <a href="admin.html">Öppna admin</a></section><section id="printDocument"></section></div>
+      </section>
+
       <section class="admin-view hidden" id="workforcePanel">
         <header class="view-heading"><div><p class="eyebrow">Arbetsplanering</p><h1>Bemanning</h1><p>Skapa personalpass från bekräftade bokningar och låt medarbetare paxa dem, eller tilldela någon direkt.</p></div><button type="button" class="button button-secondary" data-workforce-refresh>Uppdatera</button></header>
         <p class="workforce-status" id="workforceAdminMessage" role="status" aria-live="polite"></p>
@@ -1057,7 +1066,7 @@
       <section class="admin-view hidden" id="checklistsPanel">
         <header class="view-heading"><div><p class="eyebrow">Kvalitet</p><h1>Checklistor</h1><p>Bygg mallar som kopieras och fryses på varje jobb.</p></div><button type="button" class="button button-secondary" data-workforce-refresh>Uppdatera</button></header>
         <div class="workforce-intro-grid">
-          <section class="surface"><div class="section-heading-row"><div><h2>Ny mall</h2><p>Skriv en obligatorisk punkt per rad.</p></div></div><form class="workforce-form" id="checklistTemplateForm" novalidate>
+          <section class="surface"><div class="section-heading-row"><div><h2>Ny mall</h2><p>Skriv en obligatorisk punkt per rad. Länka en instruktion med: Kontrollera utrustning | artikel-ID från handbokens webbadress.</p></div></div><form class="workforce-form" id="checklistTemplateForm" novalidate>
             <label>Namn<input type="text" id="checklistTemplateName" maxlength="160" required></label>
             <label>Beskrivning<input type="text" id="checklistTemplateDescription" maxlength="500"></label>
             <label>Matchningsregel<input type="text" id="checklistTemplateRule" maxlength="160" placeholder="Exempel: båttransport"></label>
@@ -1477,6 +1486,7 @@
   <script src="admin-price-calculator.js?v=20260925"></script>
   <script type="module">
     import './admin-applications.js?v=20261004-4';
+    import { initHandbook } from './handbook.mjs?v=20261020';
     const { createClient } = window.supabase;
 
     const SUPABASE_URL = 'https://xeyippgcoqfskcmqzazx.supabase.co';
@@ -1649,6 +1659,8 @@
       anonKey: SUPABASE_ANON_KEY
     }) || null;
     const applicationsController = window.bergaAdminApplications.init({ supabase });
+    const handbookPanel = document.getElementById('handbookPanel');
+    const handbookController = initHandbook({root:handbookPanel,client:supabase,embedded:true});
     let verifiedMfaFactorId = '';
     let pendingMfaFactorId = '';
 
@@ -1739,6 +1751,8 @@
     }
 
     function renderAdminView() {
+      handbookPanel.classList.toggle('hidden', activeAdminView !== 'handbook');
+      handbookController.load(activeAdminView);
       document.getElementById('applicationsPanel').classList.toggle('hidden', activeAdminView !== 'applications');
       void applicationsController?.load(activeAdminView);
       const showOverview = activeAdminView === 'overview';
@@ -4144,9 +4158,10 @@
       workspaceToolbar.classList.toggle('hidden', !isMfaVerified || mustSetPassword);
       workforceController?.setAuthorized(isMfaVerified && !mustSetPassword);
       applicationsController?.setAuthorized(isMfaVerified && !mustSetPassword);
+      handbookController.setAuthorized(isMfaVerified && !mustSetPassword);
 
       if (!isMfaVerified || mustSetPassword) {
-        [overviewPanel, calendarPanel, workforcePanel, staffPanel, checklistsPanel, staffFinancePanel, bookingsPanel, customersPanel, followUpPanel, paymentsPanel, priceCalculatorPanel, blockedDatesPanel, discountCodesPanel, springPaxPanel, invitationsPanel, analyticsPanel]
+        [handbookPanel, overviewPanel, calendarPanel, workforcePanel, staffPanel, checklistsPanel, staffFinancePanel, bookingsPanel, customersPanel, followUpPanel, paymentsPanel, priceCalculatorPanel, blockedDatesPanel, discountCodesPanel, springPaxPanel, invitationsPanel, analyticsPanel]
           .forEach((panel) => panel.classList.add('hidden'));
         closeBookingDrawer();
       }
