@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="admin-price-calculator.css?v=20260925">
   <meta name="robots" content="noindex, nofollow">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-bOfAp8B3bUacEyXnW9mCkY2qrVTDCVXnUXuSzXyBwSs='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data: blob:; media-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co; frame-src https://www.youtube-nocookie.com https://player.vimeo.com; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-X2jWCWtj/wlcqw3zgetdIbKYrxNHFLi6x5Xg382TXC4='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data: blob:; media-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co; frame-src https://www.youtube-nocookie.com https://player.vimeo.com; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
   <link rel="shortcut icon" href="/favicon-48.png" />
@@ -876,7 +876,7 @@
     }
   </style>
   <link rel="stylesheet" href="jobba-hos-oss.css">
-  <link rel="stylesheet" href="admin-v2.css?v=20260830">
+  <link rel="stylesheet" href="admin-v2.css?v=20261022-cleanup">
 </head>
 <body>
   <a class="admin-skip-link" href="#main-content">Hoppa till admininnehållet</a>
@@ -888,24 +888,36 @@
           <span>Berga Fönsterputs<small>Administration</small></span>
         </a>
         <nav class="admin-tabs hidden" id="adminTabs" aria-label="Adminvyer">
-          <button type="button" class="admin-tab is-active" data-admin-view="overview"><span aria-hidden="true">⌂</span>Översikt</button>
-          <button type="button" class="admin-tab" data-admin-view="calendar"><span aria-hidden="true">▦</span>Kalender</button>
-          <button type="button" class="admin-tab" data-admin-view="workforce"><span aria-hidden="true">◫</span>Bemanning</button>
-          <button type="button" class="admin-tab" data-admin-view="staff"><span aria-hidden="true">♙</span>Personal</button>
-          <button type="button" class="admin-tab" data-admin-view="checklists"><span aria-hidden="true">☑</span>Checklistor</button>
-          <button type="button" class="admin-tab" data-admin-view="staffFinance"><span aria-hidden="true">↗</span>Tider och ekonomi</button>
-          <button type="button" class="admin-tab" data-admin-view="handbook"><span aria-hidden="true">▤</span>Bergahandboken</button>
-          <button type="button" class="admin-tab" data-admin-view="applications"><span aria-hidden="true">♙</span>Ansökningar</button>
-          <button type="button" class="admin-tab" data-admin-view="springPax"><span aria-hidden="true">☘</span>Vårpaxningar</button>
-          <button type="button" class="admin-tab" data-admin-view="invitations"><span aria-hidden="true">✉</span>Bjud in kund</button>
-          <button type="button" class="admin-tab" data-admin-view="bookings"><span aria-hidden="true">≡</span>Bokningar</button>
-          <button type="button" class="admin-tab" data-admin-view="customers"><span aria-hidden="true">◎</span>Kunder</button>
-          <button type="button" class="admin-tab" data-admin-view="followUp"><span aria-hidden="true">✓</span>Uppföljning</button>
-          <button type="button" class="admin-tab" data-admin-view="payments"><span aria-hidden="true">kr</span>Betalningar och RUT</button>
-          <button type="button" class="admin-tab" data-admin-view="priceCalculator"><span aria-hidden="true">∑</span>Priskalkylator</button>
-          <button type="button" class="admin-tab" data-admin-view="discountCodes"><span aria-hidden="true">%</span>Rabattkoder</button>
-          <button type="button" class="admin-tab" data-admin-view="blockedDates"><span aria-hidden="true">⚙</span>Inställningar</button>
-          <button type="button" class="admin-tab admin-tab-secondary" data-admin-view="analytics"><span aria-hidden="true">↗</span>Analys</button>
+          <div class="admin-nav-group" role="group" aria-labelledby="adminNavGroup0">
+            <p class="admin-nav-label" id="adminNavGroup0">Arbetsdag</p>
+            <button type="button" class="admin-tab is-active" data-admin-view="overview"><span aria-hidden="true">⌂</span>Översikt</button>
+            <button type="button" class="admin-tab" data-admin-view="bookings"><span aria-hidden="true">≡</span>Bokningar</button>
+            <button type="button" class="admin-tab" data-admin-view="calendar"><span aria-hidden="true">▦</span>Kalender</button>
+            <button type="button" class="admin-tab" data-admin-view="workforce"><span aria-hidden="true">◫</span>Bemanning</button>
+            <button type="button" class="admin-tab" data-admin-view="followUp"><span aria-hidden="true">✓</span>Uppföljning</button>
+          </div>
+          <div class="admin-nav-group" role="group" aria-labelledby="adminNavGroup1">
+            <p class="admin-nav-label" id="adminNavGroup1">Kunder och försäljning</p>
+            <button type="button" class="admin-tab" data-admin-view="customers"><span aria-hidden="true">◎</span>Kunder</button>
+            <button type="button" class="admin-tab" data-admin-view="springPax"><span aria-hidden="true">☘</span>Vårpaxningar</button>
+            <button type="button" class="admin-tab" data-admin-view="invitations"><span aria-hidden="true">✉</span>Bjud in kund</button>
+            <button type="button" class="admin-tab" data-admin-view="priceCalculator"><span aria-hidden="true">∑</span>Priskalkylator</button>
+            <button type="button" class="admin-tab" data-admin-view="discountCodes"><span aria-hidden="true">%</span>Rabattkoder</button>
+          </div>
+          <div class="admin-nav-group" role="group" aria-labelledby="adminNavGroup2">
+            <p class="admin-nav-label" id="adminNavGroup2">Team och kunskap</p>
+            <button type="button" class="admin-tab" data-admin-view="staff"><span aria-hidden="true">♙</span>Personal</button>
+            <button type="button" class="admin-tab" data-admin-view="applications"><span aria-hidden="true">♙</span>Ansökningar</button>
+            <button type="button" class="admin-tab" data-admin-view="checklists"><span aria-hidden="true">☑</span>Checklistor</button>
+            <button type="button" class="admin-tab" data-admin-view="handbook"><span aria-hidden="true">▤</span>Bergahandboken</button>
+          </div>
+          <div class="admin-nav-group" role="group" aria-labelledby="adminNavGroup3">
+            <p class="admin-nav-label" id="adminNavGroup3">Ekonomi och inställningar</p>
+            <button type="button" class="admin-tab" data-admin-view="payments"><span aria-hidden="true">kr</span>Betalningar och RUT</button>
+            <button type="button" class="admin-tab" data-admin-view="staffFinance"><span aria-hidden="true">↗</span>Tider och ekonomi</button>
+            <button type="button" class="admin-tab" data-admin-view="analytics"><span aria-hidden="true">↗</span>Analys</button>
+            <button type="button" class="admin-tab" data-admin-view="blockedDates"><span aria-hidden="true">⚙</span>Tillgänglighet</button>
+          </div>
         </nav>
         <div class="topbar-links">
           <a href="index.html">Visa webbplatsen</a>
@@ -918,21 +930,9 @@
   <main class="container" id="main-content">
     <section class="hero">
       <div>
-        <span class="pill">Admin för Berga Fönsterputs</span>
-        <h1>Hantera bokningar, personal och ekonomi.</h1>
-        <p>Planera jobben, bemanna personal, följ tider och provision samt hantera Swish och RUT i samma admin.</p>
-      </div>
-      <div class="hero-card">
-        <h2>Det här kan ni göra här</h2>
-        <ul>
-          <li>Se alla bokningar på ett ställe</li>
-          <li>Skapa, pausa och följa upp rabattkoder</li>
-          <li>Lägga in semesterdagar som ej bokbara</li>
-          <li>Markera bokning som bekräftad</li>
-          <li>Markera jobb som klart och skicka Swishuppgifter</li>
-          <li>Markera bokning som betald efter kontroll i Swish Företag</li>
-          <li>Visa och gallra krypterade RUT-uppgifter</li>
-        </ul>
+        <span class="pill">Berga administration</span>
+        <h1>Din arbetsdag börjar här.</h1>
+        <p>Logga in för att hantera bokningar, personal och ekonomi.</p>
       </div>
     </section>
 
@@ -945,18 +945,15 @@
         <kbd>⌘ K</kbd>
       </label>
       <div class="workspace-actions">
-        <button type="button" class="button button-secondary" data-open-view="springPax">Vårpaxningar</button>
         <button type="button" class="button button-secondary" data-open-view="invitations">Bjud in kund</button>
-        <a class="button button-primary" href="bokning.html">+ Ny bokning</a>
-        <button type="button" class="icon-button" aria-label="Aviseringar"><span aria-hidden="true">○</span><span class="notification-dot"></span></button>
-        <span class="admin-profile" title="Administratör">ZH</span>
+        <a class="button button-primary" href="bokning.html" aria-label="Ny bokning">+ Ny bokning</a>
       </div>
     </div>
 
     <section class="grid">
       <aside class="card panel" id="loginPanel">
         <h2>Logga in</h2>
-        <p>Använd ett Supabase-konto för admin. Efter inloggning kan ni hantera bokningar direkt här.</p>
+        <p>Använd ditt personliga adminkonto. Du verifierar sedan inloggningen med din authenticator-app.</p>
         <form class="login-form" id="loginForm" novalidate>
           <label>
             E-post
@@ -1013,7 +1010,7 @@
         <header class="view-heading">
           <div>
             <p class="eyebrow" id="overviewDate">I dag</p>
-            <h1>God morgon</h1>
+            <h1>Översikt</h1>
             <p>Här är det viktigaste som behöver din uppmärksamhet.</p>
           </div>
           <button type="button" class="button button-secondary" data-refresh-view>Uppdatera</button>
@@ -1792,6 +1789,8 @@
 
       adminTabs.querySelectorAll('.admin-tab').forEach((button) => {
         button.classList.toggle('is-active', button.dataset.adminView === activeAdminView);
+        if (button.dataset.adminView === activeAdminView) button.setAttribute('aria-current', 'page');
+        else button.removeAttribute('aria-current');
       });
 
       if (showOverview) renderDashboard(currentBookings);

@@ -114,16 +114,6 @@ summary:focus-visible {
   cursor: pointer;
 }
 
-.notification-dot {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 7px;
-  height: 7px;
-  border: 2px solid #fff;
-  border-radius: 50%;
-  background: #e79a26;
-}
 
 .eyebrow {
   margin: 0 0 5px;
@@ -208,6 +198,13 @@ body:not(.is-admin-ready) #loginPanel,
 body:not(.is-admin-ready) #passwordSetupPanel,
 body:not(.is-admin-ready) #mfaPanel { padding: 24px; border-radius: var(--admin-radius); box-shadow: var(--admin-shadow); }
 
+/* Keep sign-in focused on the current authentication step. */
+body:not(.is-admin-ready) > main.container { max-width: 440px; padding-top: 48px; }
+body:not(.is-admin-ready) .hero { display: block; padding: 0 0 24px; }
+body:not(.is-admin-ready) .hero h1 { margin: 12px 0; font-size: 2rem; }
+body:not(.is-admin-ready) .hero p { margin: 0; font-size: .95rem; }
+body:not(.is-admin-ready) .grid { display: block; }
+
 /* Authenticated shell */
 
 body.is-admin-ready {
@@ -233,8 +230,8 @@ body.is-admin-ready .topbar {
   flex-direction: column;
   align-items: stretch;
   justify-content: flex-start;
-  gap: 18px;
-  padding: 22px 14px 16px;
+  gap: 12px;
+  padding: 18px 12px 12px;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -265,7 +262,9 @@ body.is-admin-ready .admin-tabs {
   width: 100%;
   display: flex;
   flex: 1 1 auto;
+  min-height: 0;
   flex-direction: column;
+  flex-wrap: nowrap;
   align-items: stretch;
   gap: 3px;
   padding: 0;
@@ -276,18 +275,19 @@ body.is-admin-ready .admin-tabs {
 
 body.is-admin-ready .admin-tab {
   width: 100%;
-  min-height: 43px;
+  min-height: 36px;
+  flex: 0 0 auto;
   display: grid;
   grid-template-columns: 25px 1fr;
   align-items: center;
   gap: 8px;
-  padding: 9px 11px;
+  padding: 6px 10px;
   border: 0;
-  border-radius: 9px;
+  border-radius: 7px;
   background: transparent;
   color: #ccdae3;
   text-align: left;
-  font-size: .86rem;
+  font-size: .82rem;
   font-weight: 720;
 }
 
@@ -305,7 +305,18 @@ body.is-admin-ready .admin-tab span {
 body.is-admin-ready .admin-tab:hover { color: #fff; background: rgba(255, 255, 255, .07); }
 body.is-admin-ready .admin-tab.is-active { color: #fff; background: #17638b; }
 body.is-admin-ready .admin-tab.is-active span { background: rgba(255, 255, 255, .16); }
-body.is-admin-ready .admin-tab-secondary { margin-top: auto; }
+body.is-admin-ready .admin-nav-group { flex: 0 0 auto; width: 100%; min-width: 0; }
+body.is-admin-ready .admin-nav-group + .admin-nav-group { margin-top: 12px; }
+body.is-admin-ready .admin-nav-label {
+  margin: 0 10px 5px;
+  color: #9bb5c6;
+  font-size: .64rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+body.is-admin-ready .admin-tab span { background: transparent; }
+body.is-admin-ready .admin-tab:focus-visible { outline-color: #a9dcf5; outline-offset: -2px; }
 
 body.is-admin-ready .topbar-links {
   width: 100%;
@@ -377,8 +388,7 @@ body.is-admin-ready .workspace-toolbar {
 .global-search:focus-within { border-color: #8cc1d8; box-shadow: 0 0 0 3px rgba(13, 111, 159, .1); }
 .global-search input { width: 100%; min-height: 38px; padding: 0; border: 0; outline: 0; background: transparent; color: var(--admin-ink); font: inherit; font-size: .9rem; }
 .global-search kbd { padding: 3px 6px; border: 1px solid var(--admin-line); border-radius: 5px; background: var(--admin-surface-subtle); color: var(--admin-muted); font-size: .68rem; }
-.workspace-actions { display: flex; align-items: center; gap: 8px; }
-.admin-profile { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; background: var(--admin-primary-soft); color: var(--admin-primary-dark); font-size: .75rem; font-weight: 900; }
+.workspace-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
 .mobile-nav-button { display: none; }
 
 body.is-admin-ready .grid {
@@ -760,9 +770,9 @@ body.is-admin-ready .analytics-card { border-color: var(--admin-line); border-ra
   body:not(.is-admin-ready) > main.container { padding-top: 32px; }
   body.is-admin-ready > main.container { padding-inline: 14px; }
   body.is-admin-ready .workspace-toolbar { margin-inline: -14px; padding-inline: 14px; gap: 8px; }
+  .workspace-actions .button-secondary { display: none; }
   .workspace-actions .button { width: 40px; overflow: hidden; padding-inline: 0; font-size: 0; white-space: nowrap; }
   .workspace-actions .button::after { content: '+'; color: #fff; font-size: 1.15rem; }
-  .admin-profile { display: none; }
   .global-search { min-width: 0; }
   .view-heading { align-items: flex-start; flex-direction: column; }
   .bookings-heading-actions { width: 100%; justify-content: stretch; }
