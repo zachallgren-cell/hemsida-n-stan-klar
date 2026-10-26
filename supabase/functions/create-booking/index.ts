@@ -1,3 +1,4 @@
+import { emailDocument } from '../_shared/email-presentation.ts';
 import {
   InvalidJsonBodyError,
   readJsonWithLimit,
@@ -981,7 +982,7 @@ Deno.serve(async (req) => {
             <p style="margin: 0 0 14px; color: #536574; font-size: 14px; line-height: 1.7;">Bekräfta bokningen inom 24 timmar. Först då reserveras dagen i kalendern. På samma säkra sida kan du sedan hantera bokningen, ladda ner en kalenderfil och, om du valt RUT, öppna RUT-formuläret.</p>
             <table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse: collapse; width: 100%;">
               <tr>
-                <td align="center" style="background: #247a43; border-radius: 999px;">
+                <td align="center" style="background:#0b6fa4; border-radius: 999px;">
                   <a href="${safeManageUrl}" style="display: block; padding: 14px 20px; color: #ffffff; font-size: 13px; font-weight: 800; letter-spacing: .04em; text-decoration: none;">BEKRÄFTA BOKNINGEN</a>
                 </td>
               </tr>
@@ -998,7 +999,7 @@ Deno.serve(async (req) => {
             <p style="margin: 0 0 14px; color: #536574; font-size: 14px; line-height: 1.7;">Din personliga inbjudan är slutförd och dagen är reserverad i kalendern. På bokningssidan kan du hantera bokningen, ladda ner en kalenderfil och öppna RUT-formuläret om du valt RUT.</p>
             <table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse: collapse; width: 100%;">
               <tr>
-                <td align="center" style="background: #247a43; border-radius: 999px;">
+                <td align="center" style="background:#0b6fa4; border-radius: 999px;">
                   <a href="${safeManageUrl}" style="display: block; padding: 14px 20px; color: #ffffff; font-size: 13px; font-weight: 800; letter-spacing: .04em; text-decoration: none;">ÖPPNA BOKNINGEN</a>
                 </td>
               </tr>
@@ -1019,7 +1020,7 @@ Deno.serve(async (req) => {
             ? `<p style="margin: 0 0 14px; color: #536574; font-size: 14px; line-height: 1.7;">För att vi ska kunna hantera RUT-avdraget behöver du fylla i uppgifterna i vårt säkra formulär.</p>
               <table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse: collapse; width: 100%;">
                 <tr>
-                  <td align="center" style="background: #247a43; border-radius: 999px;">
+                  <td align="center" style="background:#0b6fa4; border-radius: 999px;">
                     <a href="${safeRutFormUrl}" style="display: block; padding: 14px 20px; color: #ffffff; font-size: 13px; font-weight: 800; letter-spacing: .04em; text-decoration: none;">FYLL I RUT-FORMULÄR</a>
                   </td>
                 </tr>
@@ -1094,9 +1095,9 @@ Deno.serve(async (req) => {
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; background: #f3f6f8;">
           <tr>
             <td align="center" style="padding: 32px 16px;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width: 100%; max-width: 820px; border-collapse: collapse;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width: 100%; max-width: 640px; border-collapse: collapse;">
                 <tr>
-                  <td style="background: #0f2638; border-radius: 18px 18px 0 0; padding: 28px 24px 20px; text-align: center;">
+                  <td style="background:#084f74; border-radius: 18px 18px 0 0; padding: 28px 24px 20px; text-align: center;">
                     <table role="presentation" cellpadding="0" cellspacing="0" align="center" style="margin: 0 auto 18px; border-collapse: collapse;">
                       <tr>
                         <td align="center" style="background: #ffffff; border-radius: 16px; padding: 10px 12px;">
@@ -1115,7 +1116,7 @@ Deno.serve(async (req) => {
                 </tr>
                 <tr>
                   <td style="background: #ffffff; padding: 38px 42px 14px;">
-                    <h1 style="margin: 0 0 12px; color: #0f2638; font-size: 34px; line-height: 1.16; font-weight: 800;">Tack för din bokning!</h1>
+                    <h1 style="margin: 0 0 12px; color: #0f2638; font-size:30px; line-height: 1.16; font-weight: 800;">Tack för din bokning!</h1>
                     <p style="margin: 0 0 8px; color: #173042; font-size: 17px; line-height: 1.6;">Hej ${escapeHtml(payload.name || '')},</p>
                     <p style="margin: 0; color: #536574; font-size: 15px; line-height: 1.7;">Vi har tagit emot din bokning och ser fram emot att hjälpa dig.</p>
                   </td>
@@ -1199,7 +1200,7 @@ Deno.serve(async (req) => {
                               <td align="right" style="padding: 9px 0; color: #287a45; font-size: 15px; font-weight: 700;">${safeDiscountDisplay}</td>
                             </tr>` : ''}
                           </table>
-                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top: 12px; border-collapse: collapse; background: #247a43; border-radius: 12px;">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top: 12px; border-collapse: collapse; background:#0b6fa4; border-radius: 12px;">
                             <tr>
                               <td style="padding: 18px 18px; color: #ffffff; font-size: 15px; font-weight: 700;">${customerPriceLabel}</td>
                               <td align="right" style="padding: 18px 18px; color: #ffffff; font-size: 26px; line-height: 1.1; font-weight: 800;">${customerPriceDisplay}</td>
@@ -1214,7 +1215,7 @@ Deno.serve(async (req) => {
                   <td style="background: #ffffff; padding: 18px 42px 8px;">
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
                       <tr>
-                        <td style="padding: 20px; background: #0f2638; border-radius: 14px;">
+                        <td style="padding: 20px; background:#084f74; border-radius: 14px;">
                           <h2 style="margin: 0 0 12px; color: #ffffff; font-size: 18px;">Betalning</h2>
                           <p style="margin: 0 0 14px; color: #d8e1e8; font-size: 14px; line-height: 1.7;">När jobbet är klart skickar vi belopp, Swish-nummer och referens i klartmejlet.</p>
                           <table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
@@ -1241,7 +1242,7 @@ Deno.serve(async (req) => {
                   </td>
                 </tr>
                 <tr>
-                  <td style="background: #0f2638; border-radius: 0 0 18px 18px; padding: 24px 20px; text-align: center;">
+                  <td style="background:#084f74; border-radius: 0 0 18px 18px; padding: 24px 20px; text-align: center;">
                     <p style="margin: 0 0 6px; color: #ffffff; font-size: 16px; font-weight: 800;">Tack för att du väljer Berga Fönsterputs!</p>
                     <p style="margin: 0; color: #d8e1e8; font-size: 13px; line-height: 1.6;">Lokalt företag – personligt bemötande – skinande resultat</p>
                   </td>
@@ -1257,7 +1258,7 @@ Deno.serve(async (req) => {
       from: fromEmail,
       to: [notificationEmail],
       subject: `${requiresEmailConfirmation ? 'Obekräftad bokning' : 'Reserverad bokning klar'} ${payload.date} ${payload.time} - ${payload.name}`,
-      html: emailHtml
+      html: emailDocument(emailHtml, true)
     };
 
     if (isValidEmail(payload.email)) {
@@ -1280,7 +1281,7 @@ Deno.serve(async (req) => {
             from: fromEmail,
             to: [payload.email.trim()],
             subject: `${requiresEmailConfirmation ? 'Bekräfta din bokning' : 'Din bokning är reserverad'} hos Berga Fönsterputs ${payload.date}`,
-            html: customerEmailHtml,
+            html: emailDocument(customerEmailHtml),
             reply_to: contactEmail
           })
         });

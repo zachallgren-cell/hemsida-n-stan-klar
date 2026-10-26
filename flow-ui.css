@@ -48,7 +48,7 @@
   align-items: center;
   gap: 12px;
   color: var(--primary-dark);
-  font-weight: 850;
+  font-weight: 700;
   line-height: 1.15;
   text-decoration: none;
 }
@@ -82,7 +82,7 @@
   background: var(--surface);
   color: var(--primary-dark);
   font-size: 0.94rem;
-  font-weight: 800;
+  font-weight: 700;
   text-decoration: none;
 }
 
@@ -109,7 +109,7 @@
   background: rgba(255, 255, 255, 0.72);
   color: var(--primary-dark);
   font-size: 0.78rem;
-  font-weight: 850;
+  font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -234,7 +234,7 @@
   margin-bottom: 5px;
   color: var(--muted);
   font-size: 0.76rem;
-  font-weight: 850;
+  font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -243,7 +243,7 @@
 .flow-page .summary-package span {
   overflow-wrap: anywhere;
   color: var(--text);
-  font-weight: 750;
+  font-weight: 700;
 }
 
 .flow-page .price {
@@ -252,7 +252,7 @@
   border-top: 1px solid var(--border);
   color: var(--primary-dark);
   font-size: clamp(1.9rem, 6vw, 2.45rem);
-  font-weight: 900;
+  font-weight: 800;
   line-height: 1.1;
 }
 
@@ -301,7 +301,7 @@
   flex: 0 0 auto;
   margin: 0;
   color: var(--text);
-  font-weight: 800;
+  font-weight: 700;
   text-align: right;
 }
 
@@ -345,7 +345,7 @@
   background: var(--primary-soft);
   color: var(--primary-dark);
   font-size: 0.84rem;
-  font-weight: 800;
+  font-weight: 700;
   position: relative;
 }
 
@@ -354,7 +354,7 @@
   position: absolute;
   left: 11px;
   color: var(--success);
-  font-weight: 900;
+  font-weight: 800;
 }
 
 .flow-page .option-stack {
@@ -383,7 +383,7 @@
   background: #e1f4ea;
   color: var(--success);
   font-size: 0.76rem;
-  font-weight: 850;
+  font-weight: 700;
   letter-spacing: 0.04em;
 }
 
@@ -401,7 +401,7 @@
   background: var(--cta);
   color: var(--text);
   box-shadow: none;
-  font-weight: 850;
+  font-weight: 700;
   text-align: center;
   text-decoration: none;
   cursor: pointer;
@@ -552,7 +552,7 @@
   background: var(--flow-warning-soft);
   color: var(--flow-warning);
   font-size: 0.76rem;
-  font-weight: 850;
+  font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -621,7 +621,7 @@
   margin-bottom: 4px;
   color: var(--muted);
   font-size: 0.75rem;
-  font-weight: 850;
+  font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -687,7 +687,7 @@
 .flow-page label {
   color: var(--text);
   font-size: 0.86rem;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .flow-page input,
@@ -759,7 +759,7 @@
   border-radius: 50%;
   background: var(--primary-dark);
   color: var(--surface);
-  font-weight: 900;
+  font-weight: 800;
 }
 
 /* RUT-formulär */
@@ -805,7 +805,7 @@
   background: #fbfdfe;
   color: var(--primary-dark);
   font-size: 0.84rem;
-  font-weight: 800;
+  font-weight: 700;
   position: relative;
 }
 

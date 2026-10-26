@@ -13,7 +13,7 @@
   --radius-sm: 12px;
   --radius-md: 18px;
   --radius-lg: 26px;
-  --shadow: 0 14px 34px rgba(8, 79, 116, 0.1);
+  --shadow: 0 8px 24px rgba(8, 79, 116, 0.07);
   --max-width: 1160px;
 }
 
@@ -80,7 +80,7 @@ a {
   border-radius: var(--radius-sm);
   background: var(--surface);
   color: var(--primary-dark);
-  font-weight: 800;
+  font-weight: 700;
   transform: translateY(-160%);
 }
 
@@ -115,7 +115,7 @@ a {
   align-items: center;
   gap: 12px;
   min-width: 0;
-  font-weight: 850;
+  font-weight: 700;
   color: var(--primary-dark);
 }
 
@@ -153,7 +153,7 @@ a {
   border-radius: 999px;
   color: #345363;
   font-size: 0.94rem;
-  font-weight: 750;
+  font-weight: 700;
 }
 
 .site-nav a:hover,
@@ -260,7 +260,7 @@ a {
   margin: 0 0 16px;
   color: var(--primary-dark);
   font-size: 0.79rem;
-  font-weight: 850;
+  font-weight: 700;
   letter-spacing: 0.09em;
   text-transform: uppercase;
 }
@@ -325,7 +325,7 @@ h3 {
   padding: 13px 20px;
   border: 1px solid transparent;
   border-radius: 999px;
-  font-weight: 850;
+  font-weight: 700;
   line-height: 1.15;
   text-align: center;
   transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
@@ -363,7 +363,7 @@ h3 {
 
 .text-link {
   color: var(--primary-dark);
-  font-weight: 800;
+  font-weight: 700;
   text-decoration: underline;
   text-decoration-color: #9bc9de;
   text-underline-offset: 4px;
@@ -397,7 +397,7 @@ h3 {
   margin: 12px 0 0;
   color: #345363;
   font-size: 0.9rem;
-  font-weight: 780;
+  font-weight: 700;
 }
 
 .hero-assurance span {
@@ -410,7 +410,7 @@ h3 {
   padding-left: 20px;
   color: #294c5d;
   font-size: 0.92rem;
-  font-weight: 760;
+  font-weight: 700;
 }
 
 .trust-list li::before {
@@ -502,7 +502,7 @@ h3 {
   margin: 0 0 10px;
   color: var(--primary-dark);
   font-size: 0.78rem;
-  font-weight: 850;
+  font-weight: 700;
   letter-spacing: 0.09em;
   text-transform: uppercase;
 }
@@ -556,7 +556,7 @@ h3 {
   border-radius: 50%;
   background: var(--primary);
   color: #ffffff;
-  font-weight: 850;
+  font-weight: 700;
 }
 
 .service-card {
@@ -572,7 +572,7 @@ h3 {
   background: var(--primary-soft);
   color: var(--primary-dark);
   font-size: 0.78rem;
-  font-weight: 820;
+  font-weight: 700;
 }
 
 .service-card .text-link {
@@ -608,7 +608,7 @@ h3 {
 .benefit-item {
   position: relative;
   padding-left: 22px;
-  font-weight: 760;
+  font-weight: 700;
 }
 
 .benefit-item::before {
@@ -745,7 +745,7 @@ h3 {
   background: var(--primary-soft);
   color: var(--primary-dark);
   font-size: 0.84rem;
-  font-weight: 760;
+  font-weight: 700;
 }
 
 .price-highlight {
@@ -760,7 +760,7 @@ h3 {
   margin: 8px 0;
   color: #ffffff;
   font-size: clamp(2.2rem, 6vw, 3.6rem);
-  font-weight: 900;
+  font-weight: 800;
   line-height: 1;
 }
 
@@ -802,7 +802,7 @@ h3 {
 
 .price-table td:last-child {
   color: var(--primary-dark);
-  font-weight: 850;
+  font-weight: 700;
   white-space: nowrap;
 }
 
@@ -833,7 +833,7 @@ h3 {
   border-radius: 999px;
   background: var(--surface);
   color: var(--primary-dark);
-  font-weight: 760;
+  font-weight: 700;
 }
 
 .site-footer {
@@ -851,7 +851,7 @@ h3 {
 .footer-brand {
   color: #ffffff;
   font-size: 1.08rem;
-  font-weight: 850;
+  font-weight: 700;
 }
 
 .site-footer p {
@@ -863,7 +863,7 @@ h3 {
   margin: 0 0 12px;
   color: #ffffff;
   font-size: 0.84rem;
-  font-weight: 850;
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -1120,7 +1120,7 @@ h3 {
     border-radius: 16px;
     background: var(--cta);
     color: var(--text);
-    font-weight: 900;
+    font-weight: 800;
     box-shadow: 0 14px 34px rgba(4, 25, 36, 0.22);
   }
 
@@ -1153,4 +1153,17 @@ h3 {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Shared finishing details for public pages and customer forms. */
+button, input, select, textarea { accent-color: var(--primary); }
+input:not([type="checkbox"]):not([type="radio"]), select, textarea { font-size: 1rem; }
+input::placeholder, textarea::placeholder { color: #6a7d89; opacity: 1; }
+button:disabled, input:disabled, select:disabled, textarea:disabled { cursor: not-allowed; }
+.btn:disabled, .btn[aria-disabled="true"] { opacity: .55; transform: none; box-shadow: none; }
+h1, h2, h3 { text-wrap: balance; }
+p, li { overflow-wrap: break-word; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }

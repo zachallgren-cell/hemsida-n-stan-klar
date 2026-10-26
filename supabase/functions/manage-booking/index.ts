@@ -1,3 +1,4 @@
+import { emailDocument } from '../_shared/email-presentation.ts';
 const ALLOWED_ORIGIN = 'https://bergafonsterputs.se';
 const MAX_BODY_BYTES = 8_192;
 const BOOKABLE_TIMES = new Set([
@@ -654,8 +655,8 @@ function customerEmailHtml(
 ) {
   return `
     <div style="margin:0;padding:28px 12px;background:#f2f6f8;font-family:Arial,Helvetica,sans-serif;color:#102d3e;">
-      <div style="max-width:680px;margin:0 auto;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 12px 34px rgba(15,38,56,.10);">
-        <div style="padding:24px;background:#102d3e;color:#fff;text-align:center;">
+      <div style="max-width:640px;margin:0 auto;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 12px 34px rgba(15,38,56,.10);">
+        <div style="padding:24px;background:#084f74;color:#fff;text-align:center;">
           <div style="font-size:20px;font-weight:800;">Berga Fönsterputs</div>
         </div>
         <div style="padding:30px;">
@@ -804,7 +805,7 @@ async function sendCustomerChangeEmail(
     to: [limitedText(row.email, 254)],
     reply_to: config.contactEmail,
     subject: content.subject,
-    html: customerEmailHtml(content.title, content.intro, row, manageUrl, action === 'reschedule'),
+    html: emailDocument(customerEmailHtml(content.title, content.intro, row, manageUrl, action === 'reschedule')),
     text: customerEmailText(content.title, content.intro, row, manageUrl, action === 'reschedule'),
     ...(calendar ? {
       attachments: [{
@@ -823,14 +824,14 @@ async function sendAdminConfirmationEmail(config: EmailConfig, row: BookingRow, 
     to: [config.notificationEmail],
     reply_to: isValidEmail(row.email) ? limitedText(row.email, 254) : config.contactEmail,
     subject: `Bekräftad bokning ${limitedText(row.booking_date, 10)} ${limitedText(row.booking_time, 5)}`,
-    html: `
+    html: emailDocument(`
       <div style="font-family:Arial,sans-serif;color:#102d3e;line-height:1.6;">
         <h1 style="font-size:22px;">Bokningen är bekräftad</h1>
         <p><strong>Boknings-ID:</strong> ${escapeHtml(row.id)}</p>
         <p><strong>Kund:</strong> ${escapeHtml(row.customer_name)}<br>
         <strong>Datum:</strong> ${escapeHtml(row.booking_date)} ${escapeHtml(row.booking_time)}<br>
         <strong>Adress:</strong> ${escapeHtml(row.address)}</p>
-      </div>`,
+      </div>`, true),
     text: [
       'Bokningen är bekräftad',
       `Boknings-ID: ${limitedText(row.id, 80)}`,

@@ -14,7 +14,8 @@
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
   <link rel="stylesheet" href="site.css" />
-  <link rel="stylesheet" href="flow-ui.css?v=20260720" />
+  <link rel="stylesheet" href="flow-ui.css?v=20261026" />
+  <link rel="stylesheet" href="customer-portal.css?v=20261026">
 </head>
 <body class="flow-page rut-flow">
   <a class="skip-link" href="#main-content">Hoppa till innehållet</a>
@@ -30,23 +31,16 @@
 
       <div class="flow-hero">
         <p class="flow-eyebrow">Säkert RUT-underlag</p>
-        <h1>Lämna personnummer tryggt</h1>
-        <p>Personnumret skickas krypterat till en separat, skyddad RUT-inkorg och används bara för RUT-hanteringen av din bokning.</p>
+        <h1>RUT-uppgifter</h1>
+        <p>Lämna personnumret för den som ska använda RUT-avdraget.</p>
       </div>
     </div>
   </header>
 
   <main class="container flow-main" id="main-content">
     <section class="panel" aria-labelledby="rut-form-title">
-      <h2 class="section-title" id="rut-form-title">Dina RUT-uppgifter</h2>
-      <p class="section-subtitle">Den säkra åtkomsten är kopplad till din bokning. Fyll i personnumret nedan.</p>
-      <div class="security-note">Personnumret skickas aldrig via e-post. Det krypteras innan lagring, kan endast öppnas av behörig admin och gallras när RUT-ärendet är färdigt. <a href="integritet.html#rut">Läs hur RUT-uppgifterna hanteras.</a></div>
-      <ul class="rut-trust-list" aria-label="Så skyddas uppgifterna">
-        <li>Krypterad överföring</li>
-        <li>Endast för din RUT-ansökan</li>
-        <li>Säker engångsåtkomst</li>
-      </ul>
-
+      <h2 class="section-title" id="rut-form-title">Lämna ditt personnummer</h2>
+      <p class="section-subtitle">Det används bara för RUT-hanteringen av din bokning.</p>
       <form id="rutForm" data-clarity-mask="true">
         <input type="hidden" id="formStartedAt">
         <input type="hidden" id="bookingId">
@@ -60,17 +54,23 @@
         <div>
           <label for="socialSecurityNumber">Personnummer</label>
           <input type="text" id="socialSecurityNumber" inputmode="numeric" autocomplete="off" placeholder="ÅÅÅÅMMDD-XXXX" minlength="12" maxlength="13" required>
-          <p class="field-note">Ange personnumret för den person som ska använda RUT-avdraget.</p>
+          <p class="field-note">Ange 12 siffror. Bindestrecket läggs till automatiskt.</p>
         </div>
 
         <div class="consent-box">
           <input type="checkbox" id="consent" required>
-          <label for="consent">Jag bekräftar att jag har läst <a href="integritet.html#rut" target="_blank" rel="noopener noreferrer">integritetsinformationen för RUT</a> och lämnar personnumret för RUT-hanteringen av min bokning.</label>
+          <label for="consent">Jag har läst <a href="integritet.html#rut" target="_blank" rel="noopener noreferrer">integritetsinformationen</a> och lämnar personnumret för min boknings RUT-avdrag.</label>
         </div>
 
         <button type="submit" class="submit-btn" id="submitButton">Skicka RUT-underlag</button>
         <div class="status-message" id="rutStatus" role="status" aria-live="polite" aria-atomic="true"></div>
       </form>
+      <p class="rut-reassurance">Personnumret skickas aldrig via mejl.</p>
+      <details class="portal-help">
+        <summary>Så skyddas dina uppgifter</summary>
+        <p>Personnumret överförs krypterat och krypteras innan lagring. Det kan endast öppnas av behörig admin och gallras när RUT-ärendet är färdigt.</p>
+        <a href="integritet.html#rut">Läs hur RUT-uppgifterna hanteras</a>
+      </details>
     </section>
   </main>
 

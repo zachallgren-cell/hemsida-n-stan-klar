@@ -1,3 +1,4 @@
+import { emailDocument } from '../_shared/email-presentation.ts';
 import {
   InvalidJsonBodyError,
   readJsonWithLimit,
@@ -185,7 +186,7 @@ async function sendEmail(
       'Content-Type': 'application/json',
       'Idempotency-Key': idempotencyKey
     },
-    body: JSON.stringify(payload)
+    body: JSON.stringify({ ...payload, html: emailDocument(String(payload.html ?? ''), true) })
   });
 }
 

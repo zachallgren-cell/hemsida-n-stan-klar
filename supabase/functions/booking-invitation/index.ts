@@ -1,3 +1,4 @@
+import { emailDocument } from '../_shared/email-presentation.ts';
 import {
   InvalidJsonBodyError,
   readJsonWithLimit,
@@ -359,17 +360,17 @@ Deno.serve(async (req) => {
           to: [email],
           subject: 'Nu kan du boka din helg våren 2027 – Berga Fönsterputs',
           reply_to: contactEmail,
-          html: `
+          html: emailDocument(`
             <div style="margin:0;padding:28px 16px;background:#f3f6f8;font-family:Arial,sans-serif;color:#173042;">
               <div style="max-width:620px;margin:0 auto;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 14px 34px rgba(15,38,56,.12);">
-                <div style="padding:24px;background:#0f2638;color:#fff;text-align:center;">
+                <div style="padding:24px;background:#084f74;color:#fff;text-align:center;">
                   <h1 style="margin:0;font-size:25px;">Välj din helg våren 2027</h1>
                 </div>
                 <div style="padding:30px;">
                   <p style="margin:0 0 14px;font-size:16px;line-height:1.7;">Hej ${safeName}!</p>
                   <p style="margin:0 0 18px;font-size:16px;line-height:1.7;">Du som har paxat en plats får nu välja en ledig lördag eller söndag mellan 1 mars och 15 juni 2027.</p>
                   <p style="margin:0 0 24px;color:#536574;line-height:1.7;">Öppna din personliga länk, välj en ledig helg och fyll i resten av bokningsuppgifterna. Länken kan användas en gång.</p>
-                  <p style="margin:0 0 24px;text-align:center;"><a href="${safeInvitationUrl}" style="display:inline-block;padding:14px 24px;border-radius:999px;background:#247a43;color:#fff;font-weight:700;text-decoration:none;">VÄLJ HELG OCH BOKA</a></p>
+                  <p style="margin:0 0 24px;text-align:center;"><a href="${safeInvitationUrl}" style="display:inline-block;padding:14px 24px;border-radius:999px;background:#0b6fa4;color:#fff;font-weight:700;text-decoration:none;">VÄLJ HELG OCH BOKA</a></p>
                   <div style="margin:22px 0 0;padding:18px;background:#fff4df;border:1px solid #e6a23c;border-radius:12px;color:#3f321f;line-height:1.7;">
                     <strong style="color:#173042;">Viktigt inför besöket</strong>
                     <p style="margin:7px 0 0;">Töm alla fönsterbrädor helt och flytta undan sådant som står i vägen, så att alla fönster är fria, åtkomliga och går att öppna när vi kommer.</p>
@@ -377,7 +378,7 @@ Deno.serve(async (req) => {
                   <p style="margin:18px 0 0;color:#6a7885;font-size:13px;line-height:1.6;">Länken är personlig. Vid frågor kan du svara på det här mejlet.</p>
                 </div>
               </div>
-            </div>`
+            </div>`)
         })
       });
 
@@ -533,16 +534,16 @@ Deno.serve(async (req) => {
         to: [email],
         subject: `Ditt reserverade datum hos Berga Fönsterputs – ${bookingDate}`,
         reply_to: contactEmail,
-        html: `
+        html: emailDocument(`
           <div style="margin:0;padding:28px 16px;background:#f3f6f8;font-family:Arial,sans-serif;color:#173042;">
             <div style="max-width:620px;margin:0 auto;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 14px 34px rgba(15,38,56,.12);">
-              <div style="padding:24px;background:#0f2638;color:#fff;text-align:center;">
+              <div style="padding:24px;background:#084f74;color:#fff;text-align:center;">
                 <h1 style="margin:0;font-size:25px;">Ett datum är reserverat åt dig</h1>
               </div>
               <div style="padding:30px;">
                 <p style="margin:0 0 14px;font-size:16px;line-height:1.7;">Berga Fönsterputs har reserverat <strong>${safeDate}</strong> för dig.</p>
                 <p style="margin:0 0 22px;color:#536574;line-height:1.7;">Öppna den personliga länken, välj starttid och fyll i resten av bokningsuppgifterna. Datumet hålls åt dig tills bokningen är slutförd eller datumet passerar.</p>
-                <p style="margin:0 0 22px;text-align:center;"><a href="${safeInvitationUrl}" style="display:inline-block;padding:14px 24px;border-radius:999px;background:#247a43;color:#fff;font-weight:700;text-decoration:none;">SLUTFÖR BOKNINGEN</a></p>
+                <p style="margin:0 0 22px;text-align:center;"><a href="${safeInvitationUrl}" style="display:inline-block;padding:14px 24px;border-radius:999px;background:#0b6fa4;color:#fff;font-weight:700;text-decoration:none;">SLUTFÖR BOKNINGEN</a></p>
                 <div style="margin:22px 0 0;padding:18px;background:#fff4df;border:1px solid #e6a23c;border-radius:12px;color:#3f321f;line-height:1.7;">
                   <strong style="color:#173042;">Viktigt inför besöket</strong>
                   <p style="margin:7px 0 0;">Töm alla fönsterbrädor helt och flytta undan sådant som står i vägen, så att alla fönster är fria, åtkomliga och går att öppna när vi kommer.</p>
@@ -550,7 +551,7 @@ Deno.serve(async (req) => {
                 <p style="margin:18px 0 0;color:#6a7885;font-size:13px;line-height:1.6;">Länken är personlig. Vid frågor kan du svara på det här mejlet.</p>
               </div>
             </div>
-          </div>`
+          </div>`)
       })
     });
 

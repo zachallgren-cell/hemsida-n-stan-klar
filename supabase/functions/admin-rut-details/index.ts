@@ -1,3 +1,4 @@
+import { emailDocument } from '../_shared/email-presentation.ts';
 import {
   InvalidJsonBodyError,
   readJsonWithLimit,
@@ -465,17 +466,17 @@ async function sendReplacementRutLink(
       from: fromEmail,
       to: [String(booking.email || '').trim()],
       subject: 'Ny säker länk för ditt RUT-underlag',
-      html: `
+      html: emailDocument(`
         <div style="margin:0;padding:32px 16px;background:#f3f6f8;font-family:Arial,Helvetica,sans-serif;color:#0f2638;">
           <div style="max-width:640px;margin:0 auto;padding:28px;background:#ffffff;border-radius:18px;">
             <h1 style="margin:0 0 14px;font-size:26px;">Ny säker RUT-länk</h1>
             <p style="line-height:1.7;">${safeName ? `Hej ${safeName},` : 'Hej,'}</p>
             <p style="line-height:1.7;">Här är en ny engångslänk för att lämna personnumret till din bokning hos Berga Fönsterputs. Personnumret skickas inte med e-post.</p>
-            <p style="margin:24px 0;text-align:center;"><a href="${safeRutUrl}" style="display:inline-block;padding:14px 22px;border-radius:999px;background:#247a43;color:#ffffff;font-weight:700;text-decoration:none;">Öppna säkert RUT-formulär</a></p>
+            <p style="margin:24px 0;text-align:center;"><a href="${safeRutUrl}" style="display:inline-block;padding:14px 22px;border-radius:999px;background:#0b6fa4;color:#ffffff;font-weight:700;text-decoration:none;">Öppna säkert RUT-formulär</a></p>
             <p style="line-height:1.7;color:#536574;">Länken kan användas en gång och gäller i 30 dagar. Om du inte har begärt en ny länk kan du bortse från mejlet.</p>
           </div>
         </div>
-      `,
+      `),
       text: `${greeting}\n\nHär är en ny engångslänk för att lämna personnumret till din bokning hos Berga Fönsterputs. Personnumret skickas inte med e-post.\n\n${rutUrl.toString()}\n\nLänken kan användas en gång och gäller i 30 dagar.`
     })
   });

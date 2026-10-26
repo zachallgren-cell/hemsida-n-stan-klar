@@ -1,3 +1,4 @@
+import { emailDocument } from '../_shared/email-presentation.ts';
 const ALLOWED_ORIGIN = 'https://bergafonsterputs.se';
 const MAX_PHOTO_COUNT = 3;
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
@@ -311,7 +312,7 @@ async function sendEmail(
       'Content-Type': 'application/json',
       'Idempotency-Key': idempotencyKey
     },
-    body: JSON.stringify(payload)
+    body: JSON.stringify({ ...payload, html: emailDocument(String(payload.html ?? ''), true) })
   });
 }
 

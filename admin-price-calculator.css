@@ -26,7 +26,7 @@
   background: var(--admin-primary-soft);
   color: var(--admin-primary-dark);
   font-size: .76rem;
-  font-weight: 900;
+  font-weight: 800;
 }
 
 .price-calculator-section-heading h2 {
@@ -64,7 +64,7 @@
   min-width: 0;
   color: var(--admin-muted);
   font-size: .72rem;
-  font-weight: 820;
+  font-weight: 700;
 }
 
 .price-calculator-fields input,
@@ -132,7 +132,7 @@
   margin: 7px 0 0;
   color: #d7edf5;
   font-size: .88rem;
-  font-weight: 780;
+  font-weight: 700;
 }
 
 .price-calculator-summary {
@@ -166,7 +166,7 @@
 .price-calculator-breakdown dd {
   margin: 0;
   font-size: .8rem;
-  font-weight: 850;
+  font-weight: 700;
 }
 
 .price-calculator-breakdown .price-calculator-deduction {

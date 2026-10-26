@@ -38,7 +38,7 @@
 .analytics-issue[data-status="confirmed"] { border-left-color: #a33131; }
 .analytics-issue[data-status="hypothesis"] { border-left-color: #c07613; }
 .analytics-issue dl { display: grid; grid-template-columns: minmax(120px, .35fr) 1fr; gap: 5px 12px; margin: 10px 0 0; }
-.analytics-issue dt { font-weight: 800; }
+.analytics-issue dt { font-weight: 700; }
 .analytics-issue dd { margin: 0; }
 .analytics-limitations { color: #516875; }
 

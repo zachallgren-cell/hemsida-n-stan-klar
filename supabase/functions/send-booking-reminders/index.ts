@@ -1,3 +1,4 @@
+import { emailDocument } from '../_shared/email-presentation.ts';
 const CLAIM_LIMIT = 25;
 const MAX_TOTAL_BATCH = CLAIM_LIMIT * 2;
 
@@ -171,8 +172,8 @@ function emailShell(preheader: string, title: string, content: string, contactEm
         <td align="center">
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #dfeaec;">
             <tr>
-              <td style="background:#123f55;padding:24px 28px;color:#ffffff;">
-                <div style="font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#bfe6d0;font-weight:700;">Berga Fönsterputs</div>
+              <td style="background:#084f74;padding:24px 28px;color:#ffffff;">
+                <div style="font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#d9edf7;font-weight:700;">Berga Fönsterputs</div>
                 <h1 style="margin:8px 0 0;font-size:26px;line-height:1.25;">${escapeHtml(title)}</h1>
               </td>
             </tr>
@@ -180,9 +181,9 @@ function emailShell(preheader: string, title: string, content: string, contactEm
               <td style="padding:28px;font-size:16px;line-height:1.65;">${content}</td>
             </tr>
             <tr>
-              <td style="padding:20px 28px;background:#edf5f2;color:#45606e;font-size:13px;line-height:1.5;">
+              <td style="padding:20px 28px;background:#eaf6fb;color:#45606e;font-size:13px;line-height:1.5;">
                 Frågor? Svara på mejlet eller kontakta
-                <a href="mailto:${safeContactEmail}" style="color:#17663d;">${safeContactEmail}</a>.
+                <a href="mailto:${safeContactEmail}" style="color:#084f74;">${safeContactEmail}</a>.
               </td>
             </tr>
           </table>
@@ -430,7 +431,7 @@ async function sendEmail(
       from: config.fromEmail,
       to: [message.email],
       subject: message.subject,
-      html: message.html,
+      html: emailDocument(message.html),
       text: message.text,
       reply_to: config.contactEmail
     })

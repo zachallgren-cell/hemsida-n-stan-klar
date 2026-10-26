@@ -1,3 +1,4 @@
+import { emailDocument } from '../_shared/email-presentation.ts';
 import {
   InvalidJsonBodyError,
   readJsonWithLimit,
@@ -599,9 +600,9 @@ Deno.serve(async (req) => {
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; background: #f3f6f8;">
           <tr>
             <td align="center" style="padding: 32px 16px;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width: 100%; max-width: 820px; border-collapse: collapse;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width: 100%; max-width: 640px; border-collapse: collapse;">
                 <tr>
-                  <td style="background: #0f2638; border-radius: 18px 18px 0 0; padding: 28px 24px 20px; text-align: center;">
+                  <td style="background:#084f74; border-radius: 18px 18px 0 0; padding: 28px 24px 20px; text-align: center;">
                     <table role="presentation" cellpadding="0" cellspacing="0" align="center" style="margin: 0 auto 18px; border-collapse: collapse;">
                       <tr>
                         <td align="center" style="background: #ffffff; border-radius: 16px; padding: 10px 12px;">
@@ -620,7 +621,7 @@ Deno.serve(async (req) => {
                 </tr>
                 <tr>
                   <td style="background: #ffffff; padding: 38px 42px 14px;">
-                    <h1 style="margin: 0 0 12px; color: #0f2638; font-size: 34px; line-height: 1.16; font-weight: 800;">Tack! Fönsterputsningen är klar</h1>
+                    <h1 style="margin: 0 0 12px; color: #0f2638; font-size:30px; line-height: 1.16; font-weight: 800;">Tack! Fönsterputsningen är klar</h1>
                     <p style="margin: 0 0 8px; color: #173042; font-size: 17px; line-height: 1.6;">Hej ${escapeHtml(booking.customer_name || '')},</p>
                     <p style="margin: 0; color: #536574; font-size: 15px; line-height: 1.7;">Vi har nu slutfört arbetet och hoppas att du är riktigt nöjd med resultatet.</p>
                   </td>
@@ -629,7 +630,7 @@ Deno.serve(async (req) => {
                   <td style="background: #ffffff; padding: 18px 42px 8px;">
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
                       <tr>
-                        <td style="padding: 22px; background: #0f2638; border-radius: 14px;">
+                        <td style="padding: 22px; background:#084f74; border-radius: 14px;">
                           <h2 style="margin: 0 0 10px; color: #ffffff; font-size: 20px;">Betala med Swish</h2>
                           <p style="margin: 0 0 16px; color: #d8e1e8; font-size: 14px; line-height: 1.7;">Fönsterputsningen är klar och betalningsuppgifterna finns direkt i detta mejl.</p>
                           ${swishPaymentSection}
@@ -647,7 +648,7 @@ Deno.serve(async (req) => {
                           <h2 style="margin: 0 0 14px; color: #0f2638; font-size: 18px; line-height: 1.3;">Betalningsöversikt</h2>
                           ${priceRows ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">${priceRows}</table>` : ''}
                           ${priceAfterRutDisplay ? `
-                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top: 12px; border-collapse: collapse; background: #247a43; border-radius: 12px;">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top: 12px; border-collapse: collapse; background:#0b6fa4; border-radius: 12px;">
                             <tr>
                               <td style="padding: 18px 18px; color: #ffffff; font-size: 15px; font-weight: 700;">${isAlreadyPaid ? 'Betalt' : 'Att betala'}</td>
                               <td align="right" style="padding: 18px 18px; color: #ffffff; font-size: 26px; line-height: 1.1; font-weight: 800;">${priceAfterRutDisplay}</td>
@@ -692,7 +693,7 @@ Deno.serve(async (req) => {
                   </td>
                 </tr>
                 <tr>
-                  <td style="background: #0f2638; border-radius: 0 0 18px 18px; padding: 24px 20px; text-align: center;">
+                  <td style="background:#084f74; border-radius: 0 0 18px 18px; padding: 24px 20px; text-align: center;">
                     <p style="margin: 0 0 6px; color: #ffffff; font-size: 16px; font-weight: 800;">Tack för att du väljer Berga Fönsterputs!</p>
                     <p style="margin: 0; color: #d8e1e8; font-size: 13px; line-height: 1.6;">Lokalt företag – personligt bemötande – skinande resultat</p>
                   </td>
@@ -741,7 +742,7 @@ Deno.serve(async (req) => {
         from: fromEmail,
         to: [booking.email.trim()],
         subject: `Fönsterputsningen är klar - ${booking.customer_name || 'Berga Fönsterputs'}`,
-        html: emailHtml,
+        html: emailDocument(emailHtml),
         text: emailText,
         reply_to: contactEmail
       })

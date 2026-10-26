@@ -13,7 +13,8 @@
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png">
   <link rel="apple-touch-icon" sizes="192x192" href="/favicon-192.png">
   <link rel="stylesheet" href="site.css">
-  <link rel="stylesheet" href="flow-ui.css?v=20260720">
+  <link rel="stylesheet" href="flow-ui.css?v=20261026">
+  <link rel="stylesheet" href="customer-portal.css?v=20261026">
 </head>
 <body class="flow-page manage-flow">
   <a class="skip-link" href="#main-content">Hoppa till innehållet</a>
@@ -27,9 +28,9 @@
         <a class="flow-home-link" href="index.html">Till startsidan</a>
       </div>
       <div class="flow-hero">
-        <p class="flow-eyebrow">Din personliga bokningslänk</p>
-        <h1>Hantera din bokning</h1>
-        <p>Bekräfta din tid, fyll i RUT-uppgifter vid behov eller hantera bokningen senare.</p>
+        <p class="flow-eyebrow">Din bokning</p>
+        <h1>Din bokning hos Berga</h1>
+        <p>Här hittar du din tid och allt du behöver inför besöket.</p>
       </div>
     </div>
   </header>
@@ -56,21 +57,22 @@
           <div class="status-pill" id="statusPill">Kontrollerar</div>
           <h2 id="statusTitle">Bokningsstatus</h2>
           <p id="statusDescription"></p>
+          <p class="booking-customer" id="detailName">–</p>
         </div>
         <div class="date-badge">
           <strong id="dateBadge">–</strong>
           <span id="timeBadge">–</span>
+          <dl class="booking-price"><div><dt>Pris</dt><dd id="detailPrice">–</dd></div></dl>
         </div>
       </div>
 
       <div class="content">
         <div class="notice" id="actionNotice" role="status" aria-live="polite" hidden></div>
 
-        <h2 class="section-heading">Bokningsdetaljer</h2>
+        <details class="booking-details">
+          <summary>Visa bokningsdetaljer</summary>
         <dl class="details-grid">
           <div class="detail"><dt>Boknings-ID</dt><dd id="detailId">–</dd></div>
-          <div class="detail"><dt>Pris</dt><dd id="detailPrice">–</dd></div>
-          <div class="detail"><dt>Namn</dt><dd id="detailName">–</dd></div>
           <div class="detail"><dt>Kontakt</dt><dd id="detailContact">–</dd></div>
           <div class="detail wide"><dt>Adress</dt><dd id="detailAddress">–</dd></div>
           <div class="detail"><dt>Bostad</dt><dd id="detailHousing">–</dd></div>
@@ -80,8 +82,9 @@
           <div class="detail"><dt>RUT-val</dt><dd id="detailRut">–</dd></div>
           <div class="detail"><dt>Återkommande</dt><dd id="detailRecurrence">–</dd></div>
         </dl>
+        </details>
 
-        <h2 class="section-heading action-heading">Vad vill du göra?</h2>
+        <h2 class="section-heading action-heading">Hantera bokningen</h2>
         <div class="action-grid">
           <article class="action-card primary wide" id="confirmCard" hidden>
             <h3 id="confirmCardTitle">Bekräfta bokningen</h3>
@@ -91,13 +94,13 @@
 
           <article class="action-card primary wide" id="rutCard" hidden>
             <h3 id="rutCardTitle">Fyll i RUT-uppgifter</h3>
-            <p id="rutCardText">Lämna personnumret i vårt säkra engångsformulär. Uppgiften skickas aldrig via e-post.</p>
-            <button class="btn" type="button" id="rutButton">Gå till säkert RUT-formulär</button>
+            <p id="rutCardText">Lämna personnumret för RUT-avdraget i vårt säkra formulär.</p>
+            <button class="btn" type="button" id="rutButton">Lämna RUT-uppgifter</button>
           </article>
 
           <article class="action-card" id="rescheduleCard" hidden>
             <h3>Boka om</h3>
-            <p>Välj ett nytt ledigt datum och en tid. Du får en uppdaterad kalenderfil via e-post.</p>
+            <p>Välj nytt datum och tid. Du får en bekräftelse via mejl.</p>
             <form id="rescheduleForm">
               <div class="form-row">
                 <div class="field">
@@ -122,8 +125,8 @@
             </form>
           </article>
 
-          <article class="action-card" id="recurrenceCard" hidden>
-            <h3>Återkommande putsning</h3>
+          <details class="action-card" id="recurrenceCard" hidden>
+            <summary>Återkommande putsning</summary>
             <p>Du får en ny bokningsinbjudan efter vald period. Ingen ny tid bokas automatiskt.</p>
             <form id="recurrenceForm">
               <div class="field">
@@ -136,33 +139,33 @@
               </div>
               <div class="button-row"><button class="btn" type="submit">Spara intervall</button></div>
             </form>
-          </article>
+          </details>
 
           <article class="action-card wide" id="preparationCard" hidden>
             <h3>Viktigt inför besöket</h3>
             <p><strong>Töm alla fönsterbrädor helt.</strong> Flytta undan möbler, växter, gardiner och andra saker som står i vägen. Se till att samtliga fönster är fria, åtkomliga och går att öppna när vi kommer.</p>
           </article>
 
-          <article class="action-card wide">
-            <h3>Ta med bokningen</h3>
+          <details class="action-card wide">
+            <summary>Kalender och ny bokning</summary>
             <p>Ladda ner kalenderfilen eller använd uppgifterna som förifyllning när du väljer en ny tid.</p>
             <div class="button-row">
               <button class="btn secondary" type="button" id="calendarButton">Ladda ner kalenderfil</button>
               <button class="btn secondary" type="button" id="rebookButton">Boka samma igen</button>
             </div>
-          </article>
+          </details>
 
-          <article class="action-card wide" id="cancelCard" hidden>
-            <h3>Behöver du avboka?</h3>
+          <details class="action-card wide" id="cancelCard" hidden>
+            <summary>Avboka bokningen</summary>
             <p>Avbokningen genomförs direkt. Om tiden redan är bekräftad får du ett avbokningsmejl och en annullerad kalenderfil.</p>
             <button class="btn danger" type="button" id="cancelButton">Avboka min bokning</button>
-          </article>
+          </details>
         </div>
 
-        <div class="security-note">
-          <span class="security-icon" aria-hidden="true">✓</span>
-          <span>Länktoken har tagits bort från adressfältet och skickas endast direkt till vår bokningstjänst. Sidan använder inga analys- eller cookie-script.</span>
-        </div>
+        <details class="portal-help">
+          <summary>Om din personliga bokningslänk</summary>
+          <p>Länken är personlig. Dela den inte med andra. Sidan använder inga analys- eller cookie-script.</p>
+        </details>
       </div>
     </section>
   </main>
@@ -415,7 +418,7 @@
           rutButton.hidden = true;
         } else if (showRutCard && capabilities.canSubmitRut) {
           rutCardTitle.textContent = 'Fyll i RUT-uppgifter';
-          rutCardText.textContent = 'Lämna personnumret i vårt säkra engångsformulär. Uppgiften skickas aldrig via e-post.';
+          rutCardText.textContent = 'Lämna personnumret för RUT-avdraget i vårt säkra formulär.';
           rutButton.hidden = false;
         } else {
           rutButton.hidden = true;
