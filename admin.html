@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="admin-price-calculator.css?v=20260925">
   <meta name="robots" content="noindex, nofollow">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-X2jWCWtj/wlcqw3zgetdIbKYrxNHFLi6x5Xg382TXC4='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data: blob:; media-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co; frame-src https://www.youtube-nocookie.com https://player.vimeo.com; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-l1jGQ+defMcgi5gsxbq6MkUxxXrjNoJo6/vhYoYt/lY='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data: blob:; media-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co; frame-src 'self' about: https://www.youtube-nocookie.com https://player.vimeo.com; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
   <link rel="shortcut icon" href="/favicon-48.png" />
@@ -876,6 +876,7 @@
     }
   </style>
   <link rel="stylesheet" href="jobba-hos-oss.css">
+  <link rel="stylesheet" href="admin-applications.css?v=20261027-interviews">
   <link rel="stylesheet" href="admin-v2.css?v=20261022-cleanup">
 </head>
 <body>
@@ -1283,7 +1284,11 @@
         <div class="discount-codes-list surface" id="discountCodesList"></div>
       </section>
 
-      <section class="card panel admin-view hidden" id="applicationsPanel"><h2>Jobbansökningar</h2><button type="button" id="applicationsRefresh">Uppdatera</button><p id="applicationsMessage" role="status"></p><div id="applicationsList"></div></section>
+      <section class="card panel admin-view hidden" id="applicationsPanel" aria-labelledby="applicationsTitle">
+        <div class="view-heading"><div><p>REK-03 · Rekrytering</p><h2 id="applicationsTitle">Jobbansökningar</h2></div><button type="button" id="applicationsRefresh">Uppdatera kandidater</button></div>
+        <div class="recruitment-toolbar"><div class="recruitment-toolbar-field"><label for="applicationsSearch">Sök på namn</label><input id="applicationsSearch" type="search" autocomplete="off"></div><div class="recruitment-toolbar-field"><label for="applicationsFilter">Filtrera på status</label><select id="applicationsFilter"></select></div></div>
+        <p id="applicationsMessage" role="status"></p><div id="applicationsList"></div>
+      </section>
       <section class="card panel hidden" id="springPaxPanel">
         <header class="view-heading spring-pax-heading">
           <div>
@@ -1477,12 +1482,13 @@
     <div class="drawer-body" id="bookingDrawerBody"></div>
   </aside>
 
+<dialog id="applicationDialog" class="recruitment-dialog" aria-labelledby="applicationDetailTitle"><div id="applicationDetail"></div></dialog>
   <script src="vendor/supabase-js-2.110.1.umd.min.js" integrity="sha384-baNpjjkY1KK3WRj5l8Fkp2P/pd/wQ4dXsejAvxqNeBEugKB7WLjHXreLejokZekT" crossorigin="anonymous"></script>
   <script src="admin-analytics.js?v=20260721"></script>
   <script src="admin-workforce.js?v=20260903"></script>
   <script src="admin-price-calculator.js?v=20260925"></script>
   <script type="module">
-    import './admin-applications.js?v=20261004-4';
+    import './admin-applications.js?v=20261027-interviews';
     import { initHandbook } from './handbook.mjs?v=20261020';
     const { createClient } = window.supabase;
 

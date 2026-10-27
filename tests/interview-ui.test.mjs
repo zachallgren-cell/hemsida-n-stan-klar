@@ -1,0 +1,44 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {JSDOM} from 'jsdom';
+import {INTERVIEW_STYLES,validateInterview,interviewEmail,interviewDate,escapeHtml} from '../interview-shared.mjs';
+const tick=()=>new Promise(resolve=>setTimeout(resolve,0));
+test('admin freezes uncertain sends, preserves retry ID and previews escaped mail',async()=>{
+ const dom=new JSDOM('<section id="root"></section>',{url:'https://example.invalid',runScripts:'outside-only'});
+ let fail=true;const calls=[];
+ const supabase={from(){const q={select(){return q},eq(){return q},async order(){return {data:[],error:null}}};return q},functions:{async invoke(name,{body}) {calls.push(body);return fail?{error:new Error('TEST network')}:{data:{success:true}};}}};
+ Object.assign(dom.window,{INTERVIEW_STYLES,validateInterview,interviewEmail,interviewDate,e:escapeHtml});
+ dom.window.eval((await readFile(new URL('../admin-interviews.mjs',import.meta.url),'utf8')).replace(/^import.*\n/,'').replace('export function','function'));
+ const root=dom.window.document.getElementById('root');
+ dom.window.mountInterviews({root,row:{id:'TEST',answers:{name:'TEST <script>',email:'test@example.invalid'}},supabase,isCurrent:()=>true,onBusy:()=>{}});
+ await tick();const form=root.querySelector('form');
+ for(const [key,value] of Object.entries({date:new Date(Date.now()+7*86400000).toISOString().slice(0,10),time:'14:30',location:'TEST kontor'})) form.elements.namedItem(key).value=value;
+ root.querySelector('[data-interview-preview]').click();
+ assert.match(root.querySelector('iframe').srcdoc,/TEST &lt;script&gt;/);
+ assert.equal(calls.length,0);
+ form.dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));await tick();
+ assert.equal(calls.length,1);assert.equal(form.querySelector('fieldset').disabled,true);
+ fail=false;form.dispatchEvent(new dom.window.Event('submit',{bubbles:true,cancelable:true}));await tick();
+ assert.equal(calls.length,2);assert.equal(calls[0].request_id,calls[1].request_id);assert.deepEqual(calls[0],calls[1]);
+ dom.window.close();
+});
+test('candidate page reads without replying, confirms explicit choice, and retains retry after failure',async()=>{
+ const html=await readFile(new URL('../intervju.html',import.meta.url),'utf8');
+ const dom=new JSDOM(html,{url:'https://example.invalid/intervju.html#token='+ 'a'.repeat(64)+'&choice=yes',runScripts:'outside-only'});
+ const calls=[];let fail=true;
+ Object.assign(dom.window,{interviewDate,AbortSignal,fetch:async(url,options)=>{
+  const body=JSON.parse(options.body);calls.push(body);
+  if(body.action==='respond' && fail)throw new Error('TEST network');
+  return {ok:true,json:async()=>({invitation:{starts_at:'2027-03-01T13:30:00Z',duration_minutes:30,location:'TEST <script>',response:body.action==='respond'?body.response:null}})};
+ }});
+ dom.window.eval((await readFile(new URL('../intervju.mjs',import.meta.url),'utf8')).replace(/^import.*\n/,''));
+ await tick();assert.equal(calls.length,1);assert.equal(calls[0].action,'view');assert.equal(dom.window.location.hash,'');
+ const form=dom.window.document.getElementById('interviewReply');
+ assert.equal(form.elements.response.value,'yes');
+ assert.equal(dom.window.document.getElementById('interviewWhere').textContent,'TEST <script>');
+ form.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await tick();assert.equal(form.hidden,false);assert.equal(form.querySelector('button').disabled,false);
+ fail=false;form.elements.response.value='no';form.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await tick();
+ assert.equal(calls.at(-1).response,'no');assert.equal(form.hidden,true);assert.match(dom.window.document.getElementById('interviewStatus').textContent,/tiden inte passar/);
+ dom.window.close();
+});

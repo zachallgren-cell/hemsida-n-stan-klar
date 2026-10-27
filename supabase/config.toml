@@ -47,3 +47,7 @@ verify_jwt = true
 
 [functions.submit-job-application]
 verify_jwt = false
+
+# Public replies use hashed bearer tokens; sending verifies admin Auth and RLS.
+[functions.interview-invitation]
+verify_jwt = false
