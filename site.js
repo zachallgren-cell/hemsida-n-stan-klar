@@ -42,41 +42,64 @@ document.documentElement.classList.add('js');
     return tracked;
   };
 
+  // Attribution belongs to this tab only; never persist it before analytics consent.
+  const VISIT_TIMEOUT = 30 * 60 * 1000;
+  const cleanTag = value => {
+    const text = String(value || '').trim();
+    return text.length <= 120 && /^[\p{L}\p{N} _.,~+\-]+$/u.test(text)
+      && !/\d{7}/.test(text) ? text : '';
+  };
+  const ownHost = host => /^(www\.)?bergafonsterputs\.se$/i.test(host);
+  function readAttribution(touch = false) {
+    try {
+      if (!consentAccepted()) { window.sessionStorage.removeItem(ATTRIBUTION_KEY); window.sessionStorage.removeItem('bergaReferralLandingTracked'); return {}; }
+      const stored = JSON.parse(window.sessionStorage.getItem(ATTRIBUTION_KEY) || '{}');
+      if (stored.version !== 2 || !stored.lastActivity || Date.now() - stored.lastActivity >= VISIT_TIMEOUT) {
+        window.sessionStorage.removeItem(ATTRIBUTION_KEY); window.sessionStorage.removeItem('bergaReferralLandingTracked'); return {};
+      }
+      if (touch) {
+        stored.lastActivity = Date.now();
+        window.sessionStorage.setItem(ATTRIBUTION_KEY, JSON.stringify(stored));
+      }
+      return stored;
+    } catch { return {}; }
+  }
+  window.bergaAttribution = { get: () => readAttribution(true) };
   function captureCampaignAttribution() {
     try {
-      if (!consentAccepted()) {
-        window.sessionStorage.removeItem(ATTRIBUTION_KEY);
-        return;
+      if (!consentAccepted()) { window.sessionStorage.removeItem(ATTRIBUTION_KEY); window.sessionStorage.removeItem('bergaReferralLandingTracked'); return; }
+      const previous = readAttribution();
+      let referrerHost = '', internal = false;
+      if (document.referrer) {
+        const referrer = new URL(document.referrer);
+        internal = ownHost(referrer.hostname) || referrer.hostname === window.location.hostname;
+        if (!internal && /^https?:$/.test(referrer.protocol)) referrerHost = referrer.hostname.toLowerCase();
       }
-
       const params = new URLSearchParams(window.location.search);
       const attribution = {
-        utmSource: cleanEventValue(params.get('utm_source'), 160),
-        utmMedium: cleanEventValue(params.get('utm_medium'), 160),
-        utmCampaign: cleanEventValue(params.get('utm_campaign'), 160),
-        utmContent: cleanEventValue(params.get('utm_content'), 160),
-        utmTerm: cleanEventValue(params.get('utm_term'), 160),
+        utmSource: cleanTag(params.get('utm_source')),
+        utmMedium: cleanTag(params.get('utm_medium')),
+        utmCampaign: cleanTag(params.get('utm_campaign')),
+        utmContent: cleanTag(params.get('utm_content')),
+        utmTerm: cleanTag(params.get('utm_term')),
         referral: params.has('ref') ? 'referral' : '',
-        landingPage: cleanEventValue(window.location.pathname, 160)
+        referrerHost,
+        landingPage: '' // No path, query string, customer token or click ID is stored.
       };
-
-      const hasCampaignData = attribution.utmSource
-        || attribution.utmMedium
-        || attribution.utmCampaign
-        || attribution.utmContent
-        || attribution.utmTerm
-        || attribution.referral;
-
-      if (hasCampaignData) {
-        window.sessionStorage.setItem(ATTRIBUTION_KEY, JSON.stringify(attribution));
-        if (attribution.referral && !window.sessionStorage.getItem('bergaReferralLandingTracked')) {
-          window.sessionStorage.setItem('bergaReferralLandingTracked', '1');
-          window.bergaTrack('referral_landing_view');
-        }
+      const identifiable = attribution.utmSource || attribution.referrerHost || attribution.referral;
+      const partial = Object.values(attribution).some(Boolean);
+      const next = !internal && (identifiable || (!Object.keys(previous).length && partial)) ? attribution : previous;
+      if (Object.keys(next).length) window.sessionStorage.setItem(ATTRIBUTION_KEY,
+        JSON.stringify({ ...next, version: 2, lastActivity: Date.now() }));
+      if (!internal && attribution.referral && !window.sessionStorage.getItem('bergaReferralLandingTracked')) {
+        window.sessionStorage.setItem('bergaReferralLandingTracked', '1');
+        window.bergaTrack('referral_landing_view');
       }
-    } catch {
-      // Kampanjmätning får aldrig hindra navigation eller bokning.
-    }
+    } catch { /* Attribution must never prevent navigation or booking. */ }
+  }
+  // Renew activity only through interaction, never through an automatic timer.
+  for (const event of ['pointerdown', 'keydown', 'change']) {
+    document.addEventListener(event, () => readAttribution(true), { passive: true });
   }
 
   function initMenu() {
@@ -173,6 +196,7 @@ document.documentElement.classList.add('js');
       else {
         try {
           window.sessionStorage.removeItem(ATTRIBUTION_KEY);
+          window.sessionStorage.removeItem('bergaReferralLandingTracked');
         } catch {
           // Lagringsfel ska inte påverka webbplatsen.
         }

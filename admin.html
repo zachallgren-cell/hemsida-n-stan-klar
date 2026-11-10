@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="admin-price-calculator.css?v=20260925">
   <meta name="robots" content="noindex, nofollow">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-l1jGQ+defMcgi5gsxbq6MkUxxXrjNoJo6/vhYoYt/lY='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data: blob:; media-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co; frame-src 'self' about: https://www.youtube-nocookie.com https://player.vimeo.com; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-e4/BpV8YA2IbcZ19h182RFv7PfzxQ1tUfRXD9Vsrw88='; connect-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co wss://xeyippgcoqfskcmqzazx.supabase.co; img-src 'self' data: blob:; media-src 'self' https://xeyippgcoqfskcmqzazx.supabase.co; frame-src 'self' about: https://www.youtube-nocookie.com https://player.vimeo.com; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
   <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
   <link rel="shortcut icon" href="/favicon-48.png" />
@@ -878,6 +878,7 @@
   <link rel="stylesheet" href="jobba-hos-oss.css">
   <link rel="stylesheet" href="admin-applications.css?v=20261027-interviews">
   <link rel="stylesheet" href="admin-v2.css?v=20261022-cleanup">
+  <link rel="stylesheet" href="marketing.css?v=20261110-mkt03">
 </head>
 <body>
   <a class="admin-skip-link" href="#main-content">Hoppa till admininnehållet</a>
@@ -1468,6 +1469,7 @@
           <section class="analytics-card"><h3>Enheter</h3><div id="analyticsDevices"></div></section>
         </div>
         <section class="analytics-card"><h3>Viktigaste beteendesignaler</h3><div class="analytics-issues" id="analyticsIssues"></div></section>
+        <section class="analytics-card" data-marketing-panel></section>
         <section class="analytics-card analytics-limitations"><h3>API-begränsningar</h3><ul id="analyticsLimitations"></ul></section>
       </section>
     </section>
@@ -1484,6 +1486,7 @@
 
 <dialog id="applicationDialog" class="recruitment-dialog" aria-labelledby="applicationDetailTitle"><div id="applicationDetail"></div></dialog>
   <script src="vendor/supabase-js-2.110.1.umd.min.js" integrity="sha384-baNpjjkY1KK3WRj5l8Fkp2P/pd/wQ4dXsejAvxqNeBEugKB7WLjHXreLejokZekT" crossorigin="anonymous"></script>
+  <script src="marketing-admin.js?v=20261110-mkt03"></script>
   <script src="admin-analytics.js?v=20260721"></script>
   <script src="admin-workforce.js?v=20260903"></script>
   <script src="admin-price-calculator.js?v=20260925"></script>
@@ -1651,6 +1654,7 @@
     let activeCalendarView = 'week';
     let calendarAnchor = new Date();
     let lastDrawerTrigger = null;
+    window.bergaMarketingAdmin.init({supabase});
     const analyticsController = window.bergaAdminAnalytics?.init?.({
       supabase,
       endpoint: CLARITY_ANALYTICS_URL,
@@ -2430,6 +2434,7 @@
             <div class="detail"><strong>Intern information</strong><span>${escapeHtml(booking.internal_note || booking.message || 'Ingen anteckning')}</span></div>
           </div></section>
 
+          <section class="drawer-section" data-marketing-booking></section>
           <section class="drawer-section" data-drawer-section="job"><h4>Jobbuppgifter</h4><div class="booking-grid">
             <div class="detail"><strong>Paket</strong><span>${escapeHtml(packageParts.join(' · ') || 'Ej angivet')}</span></div>
             <div class="detail"><strong>Övrig information</strong><span>${escapeHtml(booking.message || 'Ingen extra information')}</span></div>
@@ -2482,6 +2487,7 @@
       hideAllRutNumbers();
       bookingDrawerTitle.textContent = booking.customer_name || 'Bokning';
       bookingDrawerBody.innerHTML = buildBookingDetail(booking);
+      void window.bergaMarketingAdmin.mountBooking({element:bookingDrawerBody.querySelector('[data-marketing-booking]'),booking});
       bookingDrawer.classList.remove('hidden');
       bookingDrawerBackdrop.classList.remove('hidden');
       bookingDrawer.setAttribute('aria-hidden', 'false');
@@ -3090,6 +3096,7 @@
         if (updatedBooking) {
           bookingDrawerTitle.textContent = updatedBooking.customer_name || 'Bokning';
           bookingDrawerBody.innerHTML = buildBookingDetail(updatedBooking);
+          void window.bergaMarketingAdmin.mountBooking({element:bookingDrawerBody.querySelector('[data-marketing-booking]'),booking:updatedBooking});
         } else {
           closeBookingDrawer();
         }

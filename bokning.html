@@ -15,9 +15,9 @@
   <link rel="stylesheet" href="site.css">
   <link rel="stylesheet" href="booking.css?v=20260901-2">
   <script src="cookie-consent.js?v=20260720" defer></script>
-  <script src="site.js?v=20260901" defer></script>
-  <script src="paxning.js?v=20260901" defer></script>
-  <script src="booking.js?v=20260901" defer></script>
+  <script src="site.js?v=20261110-mkt03" defer></script>
+  <script src="paxning.js?v=20261110-mkt03" defer></script>
+  <script src="booking.js?v=20261110-mkt03" defer></script>
 </head>
 <body class="booking-page">
   <a class="skip-link" href="#main-content">Hoppa till bokningen</a>
@@ -99,7 +99,8 @@
                   <option value="interior_exterior">In- och utvändigt</option>
                 </select>
               </div>
-              <div class="field field-wide">
+              <div class="field field-wide"><label for="paxCustomerSourceAnswer">Hur hittade du Berga Fönsterputs? <span>(valfritt)</span></label><select id="paxCustomerSourceAnswer" name="customerSourceAnswer"><option value="">Välj om du vill</option><option value="google">Google</option><option value="instagram">Instagram</option><option value="facebook">Facebook</option><option value="tiktok">TikTok</option><option value="recommendation">Rekommendation från någon</option><option value="in_person">Såg er på plats, på bilen eller på ett event</option><option value="other">Annat</option><option value="dont_remember">Minns inte</option></select></div>
+<div class="field field-wide">
                 <label for="paxMessage">Meddelande <span>(frivilligt)</span></label>
                 <textarea id="paxMessage" name="message" maxlength="1500" rows="4" placeholder="Något du vill att vi känner till?"></textarea>
               </div>
@@ -463,6 +464,7 @@
                 <p class="field-help" id="recurrenceWeeksHelp">Ingen ny tid bokas automatiskt. Du väljer själv om du vill boka igen.</p>
                 <p class="field-error" id="recurrenceWeeksError" role="alert" hidden></p>
               </div>
+              <div class="field field-wide"><label for="customerSourceAnswer">Hur hittade du Berga Fönsterputs? <span>(valfritt)</span></label><select id="customerSourceAnswer" name="customerSourceAnswer"><option value="">Välj om du vill</option><option value="google">Google</option><option value="instagram">Instagram</option><option value="facebook">Facebook</option><option value="tiktok">TikTok</option><option value="recommendation">Rekommendation från någon</option><option value="in_person">Såg er på plats, på bilen eller på ett event</option><option value="other">Annat</option><option value="dont_remember">Minns inte</option></select></div>
               <div class="field field-wide" id="messageField">
                 <label for="message">Något mer vi behöver veta? <span>(frivilligt)</span></label>
                 <textarea id="message" name="message" rows="4" maxlength="2000" placeholder="Till exempel parkering, portkod eller svåråtkomliga fönster" aria-describedby="messageError"></textarea>

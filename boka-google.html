@@ -686,7 +686,7 @@
   </style>
   <link rel="stylesheet" href="site.css">
   <link rel="stylesheet" href="legacy-page.css">
-  <script src="site.js?v=20260721" defer></script>
+  <script src="site.js?v=20261110-mkt03" defer></script>
 </head>
 <body class="booking-landing-page legacy-page has-mobile-booking-cta">
   <a class="skip-link" href="#main-content">Hoppa till innehållet</a>
@@ -1270,45 +1270,13 @@
       }
     }
 
-    function captureCampaignAttribution() {
-      try {
-        if (!consentAccepted()) {
-          sessionStorage.removeItem('bergaCampaignAttribution');
-          return;
-        }
-
-        const params = new URLSearchParams(window.location.search);
-        const values = {
-          utmSource: (params.get('utm_source') || '').slice(0, 160),
-          utmMedium: (params.get('utm_medium') || '').slice(0, 160),
-          utmCampaign: (params.get('utm_campaign') || '').slice(0, 160),
-          utmContent: (params.get('utm_content') || '').slice(0, 160),
-          utmTerm: (params.get('utm_term') || '').slice(0, 160),
-          landingPage: window.location.pathname.slice(0, 160)
-        };
-        if (values.utmSource || values.utmMedium || values.utmCampaign || values.utmContent || values.utmTerm) {
-          sessionStorage.setItem('bergaCampaignAttribution', JSON.stringify(values));
-        }
-      } catch {
-        // Campaign measurement must never block booking.
-      }
-    }
-
     function trackConsentEvent(name) {
       if (!consentAccepted() || typeof window.gtag !== 'function') return;
       window.gtag('event', name, { page_type: 'google_landing' });
     }
 
-    window.addEventListener('berga:consent-change', (event) => {
-      if (event.detail?.value === 'accepted') captureCampaignAttribution();
-      else {
-        try { sessionStorage.removeItem('bergaCampaignAttribution'); } catch { /* no-op */ }
-      }
-    });
-
     continueBookingButton.addEventListener('click', goToBookingPage);
     retryCalendarButton.addEventListener('click', fetchBookings);
-    captureCampaignAttribution();
 
     fetchBookings();
   </script>
