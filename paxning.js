@@ -3,7 +3,6 @@
 
   const SUPABASE_ANON_KEY = 'sb_publishable_MUKxAwv0vNXDrcgumq81fQ_Uvx4eOuq';
   const PAX_FUNCTION_URL = 'https://xeyippgcoqfskcmqzazx.functions.supabase.co/submit-spring-pax';
-  const ATTRIBUTION_KEY = 'bergaCampaignAttribution';
   const form = document.getElementById('paxForm');
   if (!form) return;
 
@@ -33,20 +32,13 @@
   }
 
   function getAttribution() {
-    try {
-      const stored = JSON.parse(window.sessionStorage.getItem(ATTRIBUTION_KEY) || '{}');
-      return {
-        utmSource: String(stored.utmSource || '').slice(0, 160),
-        utmMedium: String(stored.utmMedium || '').slice(0, 160),
-        utmCampaign: String(stored.utmCampaign || '').slice(0, 160),
-        utmContent: String(stored.utmContent || '').slice(0, 160),
-        utmTerm: String(stored.utmTerm || '').slice(0, 160),
-        attributionRef: stored.referral === 'referral' ? 'referral' : '',
-        landingPage: String(stored.landingPage || '').slice(0, 160)
-      };
-    } catch {
-      return {};
-    }
+    const attribution = window.bergaAttribution?.get() || {};
+    let trackingConsent = false;
+    try { trackingConsent = window.localStorage.getItem('berga_cookie_consent') === 'accepted'; } catch {}
+    return {
+      ...Object.fromEntries(['utmSource','utmMedium','utmCampaign','utmContent','utmTerm','referrerHost'].map(key => [key, attribution[key] || null])),
+      trackingConsent, attributionRef: attribution.referral || null
+    };
   }
 
   function setStatus(message, state = 'error') {
@@ -76,6 +68,7 @@
 
     const data = new FormData(form);
     const payload = {
+      customerSourceAnswer: String(data.get('customerSourceAnswer') || '') || null,
       requestId: requestId.value,
       formStartedAt: formStartedAt.value,
       website: String(data.get('website') || ''),

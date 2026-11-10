@@ -26,6 +26,9 @@ type PaxPayload = {
   requestedPeriod?: string;
   serviceInterest?: string;
   message?: string;
+  customerSourceAnswer?: string;
+  trackingConsent?: boolean;
+  referrerHost?: string;
   utmSource?: string;
   utmMedium?: string;
   utmCampaign?: string;
@@ -136,10 +139,28 @@ function escapeHtml(value: string) {
 }
 
 function normalizeAttribution(value: unknown) {
-  const normalized = cleanText(value).slice(0, 160);
-  return normalized && /^[A-Za-z0-9ÅÄÖåäö._~:/?&=%+\-]{1,160}$/u.test(normalized)
-    ? normalized
-    : null;
+  const normalized = typeof value === 'string' ? value.trim() : '';
+  return normalized.length <= 120 && /^[\p{L}\p{N} _.,~+\-]+$/u.test(normalized)
+    && !/\d{7}/.test(normalized) ? normalized : null;
+}
+function marketingFields(payload: PaxPayload) {
+  const answers = new Set(['google','instagram','facebook','tiktok','recommendation','in_person','other','dont_remember']);
+  const allowed = payload.trackingConsent === true;
+  const host = typeof payload.referrerHost === 'string' ? payload.referrerHost.toLowerCase() : '';
+  const safeHost = host.length <= 253 && /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(host)
+    && !/^(www\.)?bergafonsterputs\.se$/.test(host) ? host : null;
+  return {
+    customer_source_answer: answers.has(payload.customerSourceAnswer || '') ? payload.customerSourceAnswer : null,
+    tracking_consent: allowed,
+    referrer_host: allowed ? safeHost : null,
+    utm_source: allowed ? normalizeAttribution(payload.utmSource) : null,
+    utm_medium: allowed ? normalizeAttribution(payload.utmMedium) : null,
+    utm_campaign: allowed ? normalizeAttribution(payload.utmCampaign) : null,
+    utm_content: allowed ? normalizeAttribution(payload.utmContent) : null,
+    utm_term: allowed ? normalizeAttribution(payload.utmTerm) : null,
+    attribution_ref: allowed && payload.attributionRef === 'referral' ? 'referral' : null,
+    landing_page: null
+  };
 }
 
 async function sha256Hex(value: string) {
@@ -260,13 +281,7 @@ Deno.serve(async (req) => {
       requested_period: requestedPeriod,
       service_interest: serviceInterest,
       message: message || null,
-      utm_source: normalizeAttribution(payload.utmSource),
-      utm_medium: normalizeAttribution(payload.utmMedium),
-      utm_campaign: normalizeAttribution(payload.utmCampaign),
-      utm_content: normalizeAttribution(payload.utmContent),
-      utm_term: normalizeAttribution(payload.utmTerm),
-      attribution_ref: payload.attributionRef === 'referral' ? 'referral' : null,
-      landing_page: normalizeAttribution(payload.landingPage)
+      ...marketingFields(payload)
     };
 
     const insertResponse = await fetch(

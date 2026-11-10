@@ -448,6 +448,7 @@
       postalCode: byId('postalCode').value,
       location: byId('location').value,
       recurrenceWeeks: byId('recurrenceWeeks').value,
+      customerSourceAnswer: byId('customerSourceAnswer')?.value || null,
       message: byId('message').value,
       consentAccepted: byId('consent').checked,
       rebookedFromBookingId
@@ -486,6 +487,7 @@
     setInputValue('location', draft.location, 240);
     setSelectValue('recurrenceWeeks', draft.recurrenceWeeks);
     setInputValue('message', draft.message, 2000);
+    setSelectValue('customerSourceAnswer', draft.customerSourceAnswer);
     byId('consent').checked = Boolean(draft.consentAccepted);
     const sourceId = String(draft.rebookedFromBookingId || '');
     rebookedFromBookingId = /^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$/.test(sourceId) ? sourceId : '';
@@ -1414,6 +1416,8 @@
       'Ny bokningsinbjudan',
       byId('recurrenceWeeks').value ? `Efter ${byId('recurrenceWeeks').value} veckor` : 'Nej, engångsbesök'
     );
+    const sourceAnswer = byId('customerSourceAnswer');
+    if (sourceAnswer?.value) appendSummaryRow(summaryContact, 'Hur du hittade oss', sourceAnswer.options[sourceAnswer.selectedIndex].textContent);
     if (byId('message').value.trim()) appendSummaryRow(summaryContact, 'Övrigt', byId('message').value.trim());
 
     const total = document.createElement('strong');
@@ -1536,24 +1540,10 @@
     saveDraft();
   }
 
-  function getCampaignAttribution() {
-    try {
-      if (localStorage.getItem('berga_cookie_consent') !== 'accepted') return {};
-      const stored = JSON.parse(sessionStorage.getItem('bergaCampaignAttribution') || '{}');
-      if (!stored || typeof stored !== 'object') return {};
-      return {
-        utmSource: String(stored.utmSource || '').slice(0, 160),
-        utmMedium: String(stored.utmMedium || '').slice(0, 160),
-        utmCampaign: String(stored.utmCampaign || '').slice(0, 160),
-        utmContent: String(stored.utmContent || '').slice(0, 160),
-        utmTerm: String(stored.utmTerm || '').slice(0, 160),
-        referral: stored.referral === 'referral' ? 'referral' : '',
-        landingPage: String(stored.landingPage || '').slice(0, 160)
-      };
-    } catch {
-      return {};
-    }
+  function localStorageConsentAccepted() {
+    try { return window.localStorage.getItem('berga_cookie_consent') === 'accepted'; } catch { return false; }
   }
+  function getCampaignAttribution() { return window.bergaAttribution?.get() || {}; }
 
   function buildBooking() {
     const estimate = calculateEstimatedPrice();
@@ -1579,6 +1569,7 @@
       rebookedFromBookingId,
       invitationToken: activeInvitation ? invitationToken : '',
       attribution: getCampaignAttribution(),
+      customerSourceAnswer: byId('customerSourceAnswer')?.value || null,
       message: byId('message').value.trim(),
       price: discountedPrice.customerPrice,
       discountCode: appliedDiscount?.code || '',
@@ -1618,6 +1609,9 @@
       recurrenceWeeks: booking.recurrenceWeeks || null,
       rebookedFromBookingId: booking.rebookedFromBookingId || null,
       invitationToken: booking.invitationToken || null,
+      customerSourceAnswer: booking.customerSourceAnswer,
+      trackingConsent: localStorageConsentAccepted(),
+      referrerHost: booking.attribution.referrerHost || null,
       utmSource: booking.attribution.utmSource || null,
       utmMedium: booking.attribution.utmMedium || null,
       utmCampaign: booking.attribution.utmCampaign || null,
